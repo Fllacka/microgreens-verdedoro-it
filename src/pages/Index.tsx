@@ -41,24 +41,28 @@ const Index = () => {
 
   const steps = [
     {
-      number: "01",
+      number: "1",
+      title: "Ordina",
+      description: "Scegli i microgreens perfetti per le tue esigenze dal nostro catalogo o richiedi una consulenza",
+      icon: Leaf
+    },
+    {
+      number: "2", 
       title: "Semina",
-      description: "Selezioniamo i migliori semi biologici per ogni varietà di microgreen"
+      description: "Prepariamo la semina secondo le tue necessità, utilizzando solo semi biologici certificati",
+      icon: Heart
     },
     {
-      number: "02", 
-      title: "Coltivazione",
-      description: "Crescita controllata in ambiente ottimale con acqua pura"
-    },
-    {
-      number: "03",
+      number: "3",
       title: "Raccolta",
-      description: "Taglio al momento perfetto per massimizzare sapore e nutrienti"
+      description: "Raccogliamo al momento giusto per garantire massima freschezza e concentrazione nutrizionale",
+      icon: Truck
     },
     {
-      number: "04",
+      number: "4",
       title: "Consegna",
-      description: "Confezionamento e spedizione immediate per garantire freschezza"
+      description: "Ricevi i tuoi microgreens freschi entro 24 ore dalla raccolta, direttamente a casa o in azienda",
+      icon: Shield
     }
   ];
 
@@ -96,88 +100,110 @@ const Index = () => {
       >
         <div className="absolute inset-0 bg-gradient-hero" />
         
-        <div className="relative z-10 container-width text-center text-white">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="font-display text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
-              Verde D'Oro
-              <span className="block text-oro-primary font-display italic">Microgreens</span>
+        <div className="relative z-10 container-width text-left text-white">
+          <div className="max-w-2xl">
+            <div className="inline-block bg-oro-primary text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium mb-6">
+              Microgreens di Reggio Emilia
+            </div>
+            <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">
+              Verde <span className="text-oro-primary">D'Oro</span>
             </h1>
-            <p className="font-body text-xl md:text-2xl mb-8 text-white/90 animate-slide-in-left">
-              L'eccellenza italiana nel mondo dei microgreens. 
-              <br className="hidden md:block" />
-              Da Reggio Emilia, nutrizione e sapore concentrati.
+            <p className="font-body text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
+              Microgreens coltivati con passione a Reggio Emilia, dall'orto al piatto in giornata per una cucina che fa la differenza.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button variant="oro" size="lg" className="text-lg px-8 py-4" asChild>
                 <Link to="/microgreens">
-                  Scopri i Nostri Microgreens
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  Scopri i microgreens
                 </Link>
               </Button>
               <Button variant="hero" size="lg" className="text-lg px-8 py-4" asChild>
-                <Link to="/chi-siamo">La Nostra Storia</Link>
+                <Link to="/microgreens-su-misura">Microgreens su misura</Link>
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Cosa sono i microgreens Section */}
       <section className="section-padding bg-background">
         <div className="container-width">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-              Perché Scegliere i Nostri Microgreens
-            </h2>
-            <p className="font-body text-xl text-muted-foreground max-w-3xl mx-auto">
-              Ogni microgreen Verde D'Oro è coltivato con passione e dedizione, 
-              seguendo metodi naturali e sostenibili per offrire il meglio della natura.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center hover-lift border-border/50">
-                <CardContent className="p-8">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-verde mb-6">
-                    <benefit.icon className="h-8 w-8 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-primary mb-4">
-                    {benefit.title}
-                  </h3>
-                  <p className="font-body text-muted-foreground">
-                    {benefit.description}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <img 
+                src={varietiesImage} 
+                alt="Albero con microgreens che crescono" 
+                className="w-full h-80 object-cover rounded-lg shadow-elegant"
+              />
+            </div>
+            <div className="order-1 lg:order-2">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+                Cosa sono i microgreens?
+              </h2>
+              <p className="font-body text-muted-foreground mb-6 leading-relaxed">
+                I microgreens sono germogli giovani di ortaggi e piante aromatiche raccolti dopo 7-14 
+                giorni dalla germinazione. Concentrano in poche foglie una quantità straordinaria di 
+                vitamine, minerali e antiossidanti - fino a 40 volte in più rispetto alle verdure mature.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <h3 className="font-display font-semibold text-primary mb-3">Sapore Intenso</h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Concentrazione di sapori unici e distintivi per piatti gourmet.
                   </p>
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-primary mb-3">Valore Nutritivo</h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Fino a 40 volte più nutrienti rispetto alle verdure mature in fase di crescita.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-primary mb-3">Supporto di Stagione</h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Coltivazione costante tutto l'anno senza dipendere dalle stagioni.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-display font-semibold text-primary mb-3">Cucina Sostenibile</h3>
+                  <p className="font-body text-sm text-muted-foreground">
+                    Prodotto locale a km 0 che riduce l'impatto ambientale.
+                  </p>
+                </div>
+              </div>
+
+              <Button variant="verde" className="inline-flex items-center">
+                <Link to="/cosa-sono-i-microgreens">Scopri di più</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Process Section */}
+      {/* Come Funziona Section */}
       <section className="section-padding bg-gradient-subtle">
         <div className="container-width">
           <div className="text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-              Come Coltiviamo l'Eccellenza
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+              Come Funziona?
             </h2>
-            <p className="font-body text-xl text-muted-foreground max-w-3xl mx-auto">
-              Il nostro processo in quattro fasi garantisce microgreens di altissima qualità, 
-              dalla semina alla vostra tavola.
+            <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+              Da coltivazione della massima qualità per portare Qualità, eccellenza, identità: 
+              i valori che caratterizzano la nostra azienda e i nostri prodotti.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
               <div key={index} className="relative text-center">
-                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-oro mb-6 text-2xl font-display font-bold text-accent-foreground">
-                  {step.number}
+                <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-verde mb-6">
+                  <step.icon className="h-10 w-10 text-primary-foreground" />
                 </div>
-                <h3 className="font-display text-2xl font-semibold text-primary mb-4">
-                  {step.title}
+                <h3 className="font-display text-xl font-semibold text-primary mb-4">
+                  {step.number}. {step.title}
                 </h3>
-                <p className="font-body text-muted-foreground">
+                <p className="font-body text-muted-foreground text-sm">
                   {step.description}
                 </p>
                 
@@ -192,83 +218,141 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Ordini e Consegne Section */}
       <section className="section-padding bg-background">
+        <div className="container-width text-center">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+            Ordini e consegne
+          </h2>
+          <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
+            Direttamente consegnare a Reggio Emilia e provincia per tutti i ordini ricevuti. Consegna 
+            entro 24 ore dalla raccolta a CO2!
+          </p>
+          <Button variant="verde" size="lg" asChild>
+            <Link to="/contatti">Ordina i microgreens</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="section-padding bg-gradient-subtle">
         <div className="container-width">
           <div className="text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-              I Nostri Microgreens Più Apprezzati
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+              I Nostri Microgreens in Evidenza
             </h2>
-            <p className="font-body text-xl text-muted-foreground max-w-3xl mx-auto">
-              Scopri le varietà più amate dai nostri clienti, 
-              ognuna con il suo sapore unico e benefici nutrizionali.
+            <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto">
+              Scopri i microgreens più richiesti. Trova la varietà che fa per te adatta 
+              al tuo utilizzo in cucina per dare un tocco speciale ai tuoi piatti.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {featuredProducts.map((product, index) => (
-              <Card key={index} className="overflow-hidden hover-lift border-border/50">
+              <Card key={index} className="overflow-hidden hover-lift border-border/50 bg-background">
                 <div 
                   className="h-48 bg-cover bg-center relative"
                   style={{ backgroundImage: `url(${product.image})` }}
                 >
                   <div className="absolute inset-0 bg-gradient-hero/20" />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-oro-primary text-accent-foreground px-3 py-1 rounded-full text-sm font-body font-medium">
-                      {product.category}
-                    </span>
-                  </div>
                 </div>
                 <CardContent className="p-6">
                   <h3 className="font-display text-xl font-semibold text-primary mb-2">
                     {product.name}
                   </h3>
-                  <p className="font-body text-muted-foreground mb-4">
+                  <p className="font-body text-muted-foreground mb-4 text-sm">
                     {product.description}
                   </p>
-                  <Button variant="verde" size="sm" className="w-full">
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Aggiungi al Carrello
-                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
 
           <div className="text-center">
-            <Button variant="oro" size="lg" asChild>
+            <Button variant="verde" size="lg" asChild>
               <Link to="/microgreens">
-                Vedi Tutti i Microgreens
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Visualizza tutti i prodotti
               </Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="section-padding bg-gradient-hero text-white">
-        <div className="container-width text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
-              Pronto a Scoprire il Sapore Autentico?
-            </h2>
-            <p className="font-body text-xl text-white/90 mb-8">
-              Contattaci per un preventivo personalizzato o per saperne di più sui nostri microgreens. 
-              La qualità italiana ti aspetta.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="oro" size="lg" className="text-lg px-8 py-4" asChild>
-                <Link to="/contatti">
-                  Richiedi Preventivo
-                </Link>
-              </Button>
-              <Button variant="hero" size="lg" className="text-lg px-8 py-4 border-white/20 text-white hover:bg-white/10" asChild>
+      {/* Microgreens su Misura Section */}
+      <section className="section-padding bg-gradient-verde text-white">
+        <div className="container-width">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="inline-block bg-oro-primary text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium mb-6">
+                Verde D'Oro
+              </div>
+              <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
+                Microgreens su Misura
+              </h2>
+              <p className="font-body text-white/90 mb-6 leading-relaxed">
+                Sei un ristoratore, uno chef o hai esigenze particolari? Progettiamo insieme 
+                la soluzione perfetta per te. Varietà specifiche, dimensioni personalizzate, 
+                consegne programmate: tutto ciò che ti serve per distinguerti.
+              </p>
+              <p className="font-body text-white/80 mb-8 text-sm">
+                Fornitura regolare attraverso contratti personalizzati per ristoranti, hotel, 
+                catering e eventi. Consulenza gratuita per integrare i nostri microgreens 
+                nel tuo menu e valorizzare i tuoi piatti.
+              </p>
+              <Button variant="oro" size="lg" asChild>
                 <Link to="/microgreens-su-misura">
-                  Microgreens su Misura
+                  Richiedi un preventivo
                 </Link>
               </Button>
             </div>
+            <div className="lg:order-2">
+              <div className="bg-white/10 p-8 rounded-lg backdrop-blur-sm">
+                <img 
+                  src={chefImage} 
+                  alt="Chef con microgreens" 
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="section-padding bg-gradient-subtle">
+        <div className="container-width text-center">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+            Esplora il Nostro Blog
+          </h2>
+          <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
+            Consigli, ricette e l'incredibile mondo dei microgreens e scoprirne più che 
+            mai sulle curiosità nutrizionali e tutto culinarie.
+          </p>
+          
+          <Card className="max-w-md mx-auto overflow-hidden hover-lift border-border/50">
+            <div 
+              className="h-48 bg-cover bg-center relative"
+              style={{ backgroundImage: `url(${varietiesImage})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-hero/20" />
+            </div>
+            <CardContent className="p-6 text-left">
+              <h3 className="font-display text-xl font-semibold text-primary mb-2">
+                La sostenibilità dei microgreens: dalla terra all'alta cucina
+              </h3>
+              <p className="font-body text-muted-foreground text-sm mb-4">
+                Scopri come i microgreens rappresentano una scelta sostenibile...
+              </p>
+              <span className="text-xs text-muted-foreground">15 gen 2024</span>
+            </CardContent>
+          </Card>
+
+          <div className="mt-8">
+            <Button variant="verde" size="lg" asChild>
+              <Link to="/blog">
+                Leggi tutti gli articoli
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
