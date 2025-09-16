@@ -4,33 +4,25 @@ import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import { Leaf, Heart, Users, Award, ArrowRight } from "lucide-react";
 import chefImage from "@/assets/chef-microgreens.jpg";
-
 const ChiSiamo = () => {
-  const values = [
-    {
-      icon: Leaf,
-      title: "Sostenibilità",
-      description: "Coltiviamo nel rispetto dell'ambiente, utilizzando metodi naturali e sostenibili per preservare la terra per le future generazioni."
-    },
-    {
-      icon: Heart,
-      title: "Passione",
-      description: "Ogni microgreen è coltivato con amore e dedizione, dalla semina alla raccolta, per garantire il massimo della qualità e del sapore."
-    },
-    {
-      icon: Users,
-      title: "Famiglia",
-      description: "Siamo un'azienda familiare che crede nei valori tradizionali dell'agricoltura italiana, trasmessi di generazione in generazione."
-    },
-    {
-      icon: Award,
-      title: "Eccellenza",
-      description: "La nostra missione è portare sulle vostre tavole solo il meglio, con standard qualitativi che non accettano compromessi."
-    }
-  ];
-
-  return (
-    <Layout>
+  const values = [{
+    icon: Leaf,
+    title: "Sostenibilità",
+    description: "Coltiviamo nel rispetto dell'ambiente, utilizzando metodi naturali e sostenibili per preservare la terra per le future generazioni."
+  }, {
+    icon: Heart,
+    title: "Passione",
+    description: "Ogni microgreen è coltivato con amore e dedizione, dalla semina alla raccolta, per garantire il massimo della qualità e del sapore."
+  }, {
+    icon: Users,
+    title: "Famiglia",
+    description: "Siamo un'azienda familiare che crede nei valori tradizionali dell'agricoltura italiana, trasmessi di generazione in generazione."
+  }, {
+    icon: Award,
+    title: "Eccellenza",
+    description: "La nostra missione è portare sulle vostre tavole solo il meglio, con standard qualitativi che non accettano compromessi."
+  }];
+  return <Layout>
       {/* Hero Section */}
       <section className="section-padding bg-gradient-subtle">
         <div className="container-width">
@@ -52,10 +44,9 @@ const ChiSiamo = () => {
               </Button>
             </div>
             <div className="relative">
-              <div 
-                className="h-96 rounded-2xl bg-cover bg-center shadow-soft"
-                style={{ backgroundImage: `url(${chefImage})` }}
-              >
+              <div className="h-96 rounded-2xl bg-cover bg-center shadow-soft" style={{
+              backgroundImage: `url(${chefImage})`
+            }}>
                 <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
               </div>
             </div>
@@ -79,8 +70,7 @@ const ChiSiamo = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <Card key={index} className="text-center hover-lift border-border/50">
+            {values.map((value, index) => <Card key={index} className="text-center hover-lift border-border/50">
                 <CardContent className="p-8">
                   <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-oro mb-6">
                     <value.icon className="h-8 w-8 text-accent-foreground" />
@@ -92,8 +82,7 @@ const ChiSiamo = () => {
                     {value.description}
                   </p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -185,21 +174,14 @@ const ChiSiamo = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="oro" size="lg" asChild>
-              <Link to="/microgreens">Esplora i Prodotti</Link>
+              <Link to="/microgreens">Esplora i Nostri Microgreens</Link>
             </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary"
-              asChild
-            >
-              <Link to="/contatti">Contattaci</Link>
+            <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+              
             </Button>
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default ChiSiamo;
