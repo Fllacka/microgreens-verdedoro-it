@@ -2,102 +2,72 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
-import { 
-  Leaf, 
-  Heart, 
-  Truck, 
-  Shield, 
-  Star,
-  ArrowRight,
-  CheckCircle
-} from "lucide-react";
+import { Leaf, Heart, Truck, Shield, Star, ArrowRight, CheckCircle } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
-
 const Index = () => {
-  const benefits = [
-    {
-      icon: Heart,
-      title: "Ricchi di Nutrienti",
-      description: "Fino a 40 volte più nutrienti delle verdure mature"
-    },
-    {
-      icon: Leaf,
-      title: "100% Naturali",
-      description: "Coltivati senza pesticidi, freschi e sostenibili"
-    },
-    {
-      icon: Truck,
-      title: "Consegna Fresca",
-      description: "Raccolti al momento giusto e consegnati entro 24h"
-    },
-    {
-      icon: Shield,
-      title: "Qualità Garantita",
-      description: "Controlli rigorosi dalla semina alla tavola"
-    }
-  ];
-
-  const steps = [
-    {
-      number: "1",
-      title: "Ordina",
-      description: "Scegli i microgreens perfetti per le tue esigenze dal nostro catalogo o richiedi una consulenza",
-      icon: Leaf
-    },
-    {
-      number: "2", 
-      title: "Semina",
-      description: "Prepariamo la semina secondo le tue necessità, utilizzando solo semi biologici certificati",
-      icon: Heart
-    },
-    {
-      number: "3",
-      title: "Raccolta",
-      description: "Raccogliamo al momento giusto per garantire massima freschezza e concentrazione nutrizionale",
-      icon: Truck
-    },
-    {
-      number: "4",
-      title: "Consegna",
-      description: "Ricevi i tuoi microgreens freschi entro 24 ore dalla raccolta, direttamente a casa o in azienda",
-      icon: Shield
-    }
-  ];
-
-  const featuredProducts = [
-    {
-      name: "Rucola",
-      description: "Sapore piccante e intenso",
-      image: varietiesImage,
-      category: "Brassicaceae"
-    },
-    {
-      name: "Basilico",
-      description: "Aroma mediterraneo concentrato", 
-      image: chefImage,
-      category: "Erbe Aromatiche"
-    },
-    {
-      name: "Ravanello",
-      description: "Croccante e leggermente piccante",
-      image: varietiesImage, 
-      category: "Brassicaceae"
-    }
-  ];
-
-  return (
-    <Layout>
+  const benefits = [{
+    icon: Heart,
+    title: "Ricchi di Nutrienti",
+    description: "Fino a 40 volte più nutrienti delle verdure mature"
+  }, {
+    icon: Leaf,
+    title: "100% Naturali",
+    description: "Coltivati senza pesticidi, freschi e sostenibili"
+  }, {
+    icon: Truck,
+    title: "Consegna Fresca",
+    description: "Raccolti al momento giusto e consegnati entro 24h"
+  }, {
+    icon: Shield,
+    title: "Qualità Garantita",
+    description: "Controlli rigorosi dalla semina alla tavola"
+  }];
+  const steps = [{
+    number: "1",
+    title: "Ordina",
+    description: "Scegli i microgreens perfetti per le tue esigenze dal nostro catalogo o richiedi una consulenza",
+    icon: Leaf
+  }, {
+    number: "2",
+    title: "Semina",
+    description: "Prepariamo la semina secondo le tue necessità, utilizzando solo semi biologici certificati",
+    icon: Heart
+  }, {
+    number: "3",
+    title: "Raccolta",
+    description: "Raccogliamo al momento giusto per garantire massima freschezza e concentrazione nutrizionale",
+    icon: Truck
+  }, {
+    number: "4",
+    title: "Consegna",
+    description: "Ricevi i tuoi microgreens freschi entro 24 ore dalla raccolta, direttamente a casa o in azienda",
+    icon: Shield
+  }];
+  const featuredProducts = [{
+    name: "Rucola",
+    description: "Sapore piccante e intenso",
+    image: varietiesImage,
+    category: "Brassicaceae"
+  }, {
+    name: "Basilico",
+    description: "Aroma mediterraneo concentrato",
+    image: chefImage,
+    category: "Erbe Aromatiche"
+  }, {
+    name: "Ravanello",
+    description: "Croccante e leggermente piccante",
+    image: varietiesImage,
+    category: "Brassicaceae"
+  }];
+  return <Layout>
       {/* Hero Section */}
-      <section 
-        className="relative min-h-screen flex items-center justify-center overflow-hidden"
-        style={{
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{
+      backgroundImage: `url(${heroImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
         <div className="absolute inset-0 bg-gradient-hero" />
         
         <div className="relative z-10 container-width text-left text-white">
@@ -130,11 +100,7 @@ const Index = () => {
         <div className="container-width">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <img 
-                src={varietiesImage} 
-                alt="Albero con microgreens che crescono" 
-                className="w-full h-80 object-cover rounded-lg shadow-elegant"
-              />
+              <img src={varietiesImage} alt="Albero con microgreens che crescono" className="w-full h-80 object-cover rounded-lg shadow-elegant" />
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
@@ -197,8 +163,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => (
-              <div key={index} className="relative text-center">
+            {steps.map((step, index) => <div key={index} className="relative text-center">
                 <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-verde mb-6">
                   <step.icon className="h-10 w-10 text-primary-foreground" />
                 </div>
@@ -209,13 +174,10 @@ const Index = () => {
                   {step.description}
                 </p>
                 
-                {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-10 -right-4 w-8">
+                {index < steps.length - 1 && <div className="hidden lg:block absolute top-10 -right-4 w-8">
                     <ArrowRight className="h-6 w-6 text-oro-primary" />
-                  </div>
-                )}
-              </div>
-            ))}
+                  </div>}
+              </div>)}
           </div>
         </div>
       </section>
@@ -250,12 +212,10 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {featuredProducts.map((product, index) => (
-              <Card key={index} className="overflow-hidden hover-lift border-border/50 bg-background">
-                <div 
-                  className="h-48 bg-cover bg-center relative"
-                  style={{ backgroundImage: `url(${product.image})` }}
-                >
+            {featuredProducts.map((product, index) => <Card key={index} className="overflow-hidden hover-lift border-border/50 bg-background">
+                <div className="h-48 bg-cover bg-center relative" style={{
+              backgroundImage: `url(${product.image})`
+            }}>
                   <div className="absolute inset-0 bg-gradient-hero/20" />
                 </div>
                 <CardContent className="p-6">
@@ -266,8 +226,7 @@ const Index = () => {
                     {product.description}
                   </p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
           <div className="text-center">
@@ -285,18 +244,16 @@ const Index = () => {
         <div className="container-width">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-block bg-oro-primary text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium mb-6">
-                Verde D'Oro
-              </div>
+              
               <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
                 Microgreens su Misura
               </h2>
-              <p className="font-body text-white/90 mb-6 leading-relaxed">
+              <p className="font-body mb-6 leading-relaxed text-white">
                 Sei un ristoratore, uno chef o hai esigenze particolari? Progettiamo insieme 
                 la soluzione perfetta per te. Varietà specifiche, dimensioni personalizzate, 
                 consegne programmate: tutto ciò che ti serve per distinguerti.
               </p>
-              <p className="font-body text-white/80 mb-8 text-sm">
+              <p className="font-body mb-8 text-base text-slate-50">
                 Fornitura regolare attraverso contratti personalizzati per ristoranti, hotel, 
                 catering e eventi. Consulenza gratuita per integrare i nostri microgreens 
                 nel tuo menu e valorizzare i tuoi piatti.
@@ -309,11 +266,7 @@ const Index = () => {
             </div>
             <div className="lg:order-2">
               <div className="bg-white/10 p-8 rounded-lg backdrop-blur-sm">
-                <img 
-                  src={chefImage} 
-                  alt="Chef con microgreens" 
-                  className="w-full h-64 object-cover rounded-lg"
-                />
+                <img src={chefImage} alt="Chef con microgreens" className="w-full h-64 object-cover rounded-lg" />
               </div>
             </div>
           </div>
@@ -332,10 +285,9 @@ const Index = () => {
           </p>
           
           <Card className="max-w-md mx-auto overflow-hidden hover-lift border-border/50">
-            <div 
-              className="h-48 bg-cover bg-center relative"
-              style={{ backgroundImage: `url(${varietiesImage})` }}
-            >
+            <div className="h-48 bg-cover bg-center relative" style={{
+            backgroundImage: `url(${varietiesImage})`
+          }}>
               <div className="absolute inset-0 bg-gradient-hero/20" />
             </div>
             <CardContent className="p-6 text-left">
@@ -358,8 +310,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Index;
