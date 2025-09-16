@@ -173,9 +173,11 @@ const Index = () => {
                 </div>
               </div>
 
-              <Button variant="verde" className="inline-flex items-center">
-                <Link to="/cosa-sono-i-microgreens">Scopri di più</Link>
-              </Button>
+              <div className="text-center">
+                <Button variant="verde" className="inline-flex items-center">
+                  <Link to="/cosa-sono-i-microgreens">Scopri di più</Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
