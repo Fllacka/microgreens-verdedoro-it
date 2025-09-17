@@ -4,24 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-
-  const navigationItems = [
-    { name: "Home", href: "/" },
-    { name: "Chi Siamo", href: "/chi-siamo" },
-    { name: "Microgreens", href: "/microgreens" },
-    { name: "Su Misura", href: "/microgreens-su-misura" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contatti", href: "/contatti" },
-  ];
-
+  const navigationItems = [{
+    name: "Home",
+    href: "/"
+  }, {
+    name: "Chi Siamo",
+    href: "/chi-siamo"
+  }, {
+    name: "Microgreens",
+    href: "/microgreens"
+  }, {
+    name: "Su Misura",
+    href: "/microgreens-su-misura"
+  }, {
+    name: "Blog",
+    href: "/blog"
+  }, {
+    name: "Contatti",
+    href: "/contatti"
+  }];
   const isActive = (path: string) => location.pathname === path;
-
-  return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  return <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container-width">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
@@ -39,27 +45,15 @@ const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={cn(
-                  "relative font-body font-medium transition-colors hover:text-primary",
-                  "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100",
-                  isActive(item.href)
-                    ? "text-primary after:scale-x-100"
-                    : "text-muted-foreground"
-                )}
-              >
+            {navigationItems.map(item => <Link key={item.name} to={item.href} className={cn("relative font-body font-medium transition-colors hover:text-primary", "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100", isActive(item.href) ? "text-primary after:scale-x-100" : "text-muted-foreground")}>
                 {item.name}
-              </Link>
-            ))}
+              </Link>)}
           </div>
 
           {/* Desktop CTA */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             <Button variant="oro" size="sm" asChild>
-              <Link to="/contatti">Richiedi Preventivo</Link>
+              
             </Button>
           </div>
 
@@ -80,32 +74,15 @@ const Navigation = () => {
                     Verde D'Oro
                   </span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsOpen(false)}
-                  aria-label="Close menu"
-                >
+                <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close menu">
                   <X className="h-5 w-5" />
                 </Button>
               </div>
               
               <div className="flex flex-col space-y-4">
-                {navigationItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className={cn(
-                      "block px-4 py-3 rounded-lg font-body font-medium transition-colors",
-                      isActive(item.href)
-                        ? "bg-secondary text-primary"
-                        : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
-                    )}
-                  >
+                {navigationItems.map(item => <Link key={item.name} to={item.href} onClick={() => setIsOpen(false)} className={cn("block px-4 py-3 rounded-lg font-body font-medium transition-colors", isActive(item.href) ? "bg-secondary text-primary" : "text-muted-foreground hover:text-primary hover:bg-secondary/50")}>
                     {item.name}
-                  </Link>
-                ))}
+                  </Link>)}
                 
                 <div className="pt-4 border-t border-border">
                   <Button variant="oro" className="w-full" asChild>
@@ -119,8 +96,6 @@ const Navigation = () => {
           </Sheet>
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 };
-
 export default Navigation;
