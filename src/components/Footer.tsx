@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Leaf, Phone, Mail, MapPin, Instagram, Facebook } from "lucide-react";
+import { Leaf, Phone, Mail, MapPin, Instagram, Facebook, Youtube } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -35,6 +36,16 @@ const Footer = () => {
               <Button variant="ghost" size="icon" asChild>
                 <a href="#" aria-label="Facebook">
                   <Facebook className="h-5 w-5" />
+                </a>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <a href="#" aria-label="Pinterest">
+                  <ExternalLink className="h-5 w-5" />
+                </a>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <a href="#" aria-label="YouTube">
+                  <Youtube className="h-5 w-5" />
                 </a>
               </Button>
             </div>
