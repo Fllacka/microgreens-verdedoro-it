@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
-import { Leaf, Heart, Truck, Shield, Star, ArrowRight, CheckCircle } from "lucide-react";
+import { Leaf, Heart, Truck, Shield, Star, ArrowRight, CheckCircle, ShoppingCart } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -48,16 +49,22 @@ const Index = () => {
   const featuredProducts = [{
     name: "Rucola",
     description: "Sapore piccante e intenso",
+    benefits: ["Ricca di vitamina K", "Antiossidanti naturali", "Sapore deciso"],
+    uses: ["Insalate", "Pizza", "Carpacci"],
     image: varietiesImage,
     category: "Brassicaceae"
   }, {
     name: "Basilico",
     description: "Aroma mediterraneo concentrato",
+    benefits: ["Oli essenziali", "Proprietà digestive", "Aroma intenso"],
+    uses: ["Pasta", "Bruschette", "Caprese"],
     image: chefImage,
     category: "Erbe Aromatiche"
   }, {
     name: "Ravanello",
     description: "Croccante e leggermente piccante",
+    benefits: ["Vitamina C", "Fibre", "Minerali"],
+    uses: ["Sushi", "Tartare", "Antipasti"],
     image: varietiesImage,
     category: "Brassicaceae"
   }];
@@ -219,12 +226,45 @@ const Index = () => {
                   <div className="absolute inset-0 bg-gradient-hero/20" />
                 </div>
                 <CardContent className="p-6">
-                  <h3 className="font-display text-xl font-semibold text-primary mb-2">
-                    {product.name}
-                  </h3>
-                  <p className="font-body text-muted-foreground mb-4 text-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-display text-xl font-semibold text-primary">
+                      {product.name}
+                    </h3>
+                    
+                  </div>
+                  
+                  <p className="font-body text-muted-foreground mb-4">
                     {product.description}
                   </p>
+                  
+                  {/* Benefits */}
+                  <div className="mb-4">
+                    <h4 className="font-body font-medium text-foreground text-sm mb-2">
+                      Benefici:
+                    </h4>
+                    <div className="flex flex-wrap gap-1">
+                      {product.benefits.map((benefit, i) => <Badge key={i} variant="outline" className="text-xs">
+                          {benefit}
+                        </Badge>)}
+                    </div>
+                  </div>
+                  
+                  {/* Uses */}
+                  <div className="mb-6">
+                    <h4 className="font-body font-medium text-foreground text-sm mb-2">
+                      Ideale per:
+                    </h4>
+                    <div className="flex flex-wrap gap-1">
+                      {product.uses.map((use, i) => <Badge key={i} variant="secondary" className="text-xs">
+                          {use}
+                        </Badge>)}
+                    </div>
+                  </div>
+                  
+                  <Button variant="verde" className="w-full">
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Aggiungi al Carrello
+                  </Button>
                 </CardContent>
               </Card>)}
           </div>
