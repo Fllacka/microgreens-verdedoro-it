@@ -43,28 +43,30 @@ const Navigation = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-8">
-            {navigationItems.map(item => <Link key={item.name} to={item.href} className={cn("relative font-body font-medium transition-colors hover:text-primary", "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100", isActive(item.href) ? "text-primary after:scale-x-100" : "text-muted-foreground")}>
-                {item.name}
-              </Link>)}
-          </div>
+          {/* Right side navigation */}
+          <div className="flex items-center space-x-8">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex md:items-center md:space-x-8">
+              {navigationItems.map(item => <Link key={item.name} to={item.href} className={cn("relative font-body font-medium transition-colors hover:text-primary", "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100", isActive(item.href) ? "text-primary after:scale-x-100" : "text-muted-foreground")}>
+                  {item.name}
+                </Link>)}
+            </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
-            <Button variant="oro" size="sm" asChild>
-              
-            </Button>
-          </div>
-
-          {/* Mobile Navigation */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" aria-label="Toggle menu">
-                <Menu className="h-5 w-5" />
+            {/* Desktop CTA */}
+            <div className="hidden md:flex md:items-center">
+              <Button variant="oro" size="sm" asChild>
+                
               </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-80">
+            </div>
+
+            {/* Mobile Navigation */}
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" aria-label="Toggle menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-verde">
@@ -94,6 +96,7 @@ const Navigation = () => {
               </div>
             </SheetContent>
           </Sheet>
+          </div>
         </div>
       </div>
     </nav>;
