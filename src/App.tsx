@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ChiSiamo from "./pages/ChiSiamo";
 import Microgreens from "./pages/Microgreens";
+import MicrogreensCustom from "./pages/MicrogreensCustom";
 import Contatti from "./pages/Contatti";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/chi-siamo" element={<ChiSiamo />} />
           <Route path="/microgreens" element={<Microgreens />} />
+          <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
           <Route path="/contatti" element={<Contatti />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
