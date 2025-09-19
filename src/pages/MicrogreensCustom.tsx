@@ -77,13 +77,13 @@ const MicrogreensCustom = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+      {/* Hero Section */}
+      <section className="section-padding bg-gradient-subtle">
+        <div className="container-width text-center">
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
             Microgreens su Misura
           </h1>
-          <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
+          <div className="max-w-4xl mx-auto space-y-6 font-body text-lg text-muted-foreground leading-relaxed">
             <p>
               La nostra selezione standard di microgreens rappresenta solo l'inizio delle possibilità. Oltre alle varietà che coltiviamo regolarmente, offriamo un servizio di coltivazione su misura pensato per chef, ristoranti e appassionati di cucina che cercano ingredienti unici e specifici. Che si tratti di una varietà particolare per un piatto signature, di un blend esclusivo per il vostro menu, o di micro ortaggi rari difficili da reperire.
             </p>
@@ -92,15 +92,26 @@ const MicrogreensCustom = () => {
             </p>
           </div>
         </div>
+      </section>
 
-        {/* Varieties Grid */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Varietà Disponibili su Ordinazione</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Varieties Grid */}
+      <section className="section-padding bg-background">
+        <div className="container-width">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+              Varietà Disponibili su Ordinazione
+            </h2>
+            <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto">
+              Esplora il nostro catalogo completo di oltre 50 varietà di microgreens, 
+              organizzate per famiglie botaniche e caratteristiche specifiche.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {varieties.map((category, index) => (
-              <Card key={index} className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-white bg-gradient-verde px-4 py-3 rounded-lg text-center">
+              <Card key={index} className="h-full hover-lift border-border/50">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-display font-semibold text-white bg-gradient-verde px-4 py-3 rounded-lg text-center shadow-soft">
                     {category.category}
                   </CardTitle>
                 </CardHeader>
@@ -108,8 +119,8 @@ const MicrogreensCustom = () => {
                   <ul className="space-y-3">
                     {category.items.map((item, itemIndex) => (
                       <li key={itemIndex} className="flex items-start">
-                        <div className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                        <div className="w-2 h-2 bg-verde-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="font-body text-sm text-muted-foreground leading-relaxed">{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -118,29 +129,48 @@ const MicrogreensCustom = () => {
             ))}
           </div>
         </div>
+      </section>
 
-        {/* How It Works Section */}
-        <div className="max-w-4xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Come Funziona il Nostro Servizio su Misura</h2>
-          <div className="bg-card rounded-lg p-8 border">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Il processo è semplice e collaborativo: una volta ricevuta la vostra richiesta, il nostro team si attiva immediatamente per reperire i semi della varietà desiderata attraverso la nostra rete di fornitori specializzati. Vi comunichiamo quando i semi sono pronti e, da quel momento, pianifichiamo insieme i tempi di semina per garantire la disponibilità quando ne avete bisogno, rispettando sempre i nostri standard di qualità.
-            </p>
+      {/* How It Works Section */}
+      <section className="section-padding bg-gradient-subtle">
+        <div className="container-width">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+                Come Funziona il Nostro Servizio su Misura
+              </h2>
+              <p className="font-body text-lg text-muted-foreground">
+                Un processo semplice e collaborativo per trasformare le tue idee in realtà
+              </p>
+            </div>
+            
+            <Card className="bg-background/50 backdrop-blur-sm border-border/50 shadow-elegant">
+              <CardContent className="p-8">
+                <p className="font-body text-lg text-muted-foreground leading-relaxed text-center">
+                  Il processo è semplice e collaborativo: una volta ricevuta la vostra richiesta, il nostro team si attiva immediatamente per reperire i semi della varietà desiderata attraverso la nostra rete di fornitori specializzati. Vi comunichiamo quando i semi sono pronti e, da quel momento, pianifichiamo insieme i tempi di semina per garantire la disponibilità quando ne avete bisogno, rispettando sempre i nostri standard di qualità.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
+      </section>
 
-        {/* CTA Section */}
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Inizia il Tuo Progetto su Misura</h2>
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Raccontaci la varietà che cerchi, le quantità necessarie e i tempi di consegna. Trasformiamo insieme la tua idea in microgreens unici, coltivati su misura per le tue esigenze.
+      {/* CTA Section */}
+      <section className="section-padding bg-gradient-verde text-white">
+        <div className="container-width text-center">
+          <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
+            Inizia il Tuo Progetto su Misura
+          </h2>
+          <p className="font-body text-lg mb-8 leading-relaxed max-w-3xl mx-auto text-white/90">
+            Raccontaci la varietà che cerchi, le quantità necessarie e i tempi di consegna. 
+            Trasformiamo insieme la tua idea in microgreens unici, coltivati su misura per le tue esigenze.
           </p>
-          <Button size="lg" className="bg-gradient-verde hover:bg-gradient-verde/90 text-white px-8 py-3">
+          <Button variant="oro" size="lg" className="px-8 py-4 text-lg">
             <Mail className="w-5 h-5 mr-2" />
             Richiedi la Tua Varietà di Microgreens
           </Button>
         </div>
-      </div>
+      </section>
     </Layout>
   );
 };
