@@ -8,6 +8,7 @@ import ChiSiamo from "./pages/ChiSiamo";
 import Microgreens from "./pages/Microgreens";
 import MicrogreensCustom from "./pages/MicrogreensCustom";
 import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 import Contatti from "./pages/Contatti";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/microgreens" element={<Microgreens />} />
           <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogArticle />} />
           <Route path="/contatti" element={<Contatti />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
