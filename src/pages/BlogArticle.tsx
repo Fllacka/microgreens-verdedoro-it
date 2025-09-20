@@ -58,7 +58,7 @@ const BlogArticle = () => {
     <Layout>
       <article className="min-h-screen bg-background">
         {/* Article Header */}
-        <section className="section-padding bg-gradient-subtle">
+        <section className="pt-16 md:pt-24 pb-8 md:pb-12 bg-gradient-subtle">
           <div className="container-width">
             <div className="max-w-4xl mx-auto">
               {/* Breadcrumb */}
@@ -119,23 +119,26 @@ const BlogArticle = () => {
         </section>
 
         {/* Hero Image */}
-        <section className="mb-12">
+        <section className="pb-8 md:pb-12 bg-gradient-to-b from-muted/30 via-background to-background">
           <div className="container-width">
             <div className="max-w-4xl mx-auto">
-              <img 
-                src={nutritionHeroImage} 
-                alt="Microgreens con infografica nutrizionale" 
-                className="w-full h-64 md:h-96 object-cover rounded-lg shadow-elegant"
-                loading="lazy"
-                width={1600}
-                height={900}
-              />
+              <div className="relative overflow-hidden rounded-lg shadow-elegant">
+                <img 
+                  src={nutritionHeroImage} 
+                  alt="Microgreens con infografica nutrizionale" 
+                  className="w-full h-64 md:h-96 object-cover transition-transform duration-700 hover:scale-105"
+                  loading="lazy"
+                  width={1600}
+                  height={900}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent"></div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Article Content */}
-        <section className="section-padding">
+        <section className="pt-8 md:pt-16 pb-16 md:pb-24 bg-background">
           <div className="container-width">
             <div className="max-w-4xl mx-auto">
               <div className="prose prose-lg max-w-none">
