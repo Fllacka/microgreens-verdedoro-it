@@ -7,61 +7,47 @@ import { Link } from "react-router-dom";
 import nutritionHeroImage from "@/assets/microgreens-nutrition-hero.jpg";
 import closeUpImage from "@/assets/microgreens-close-up.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
-
 const BlogArticle = () => {
-  const nutritionalData = [
-    {
-      nutrient: "Vitamina C",
-      comparison: "6 volte maggiore",
-      microgreen: "Cavolo Rosso",
-      description: "Essenziale per il sistema immunitario"
-    },
-    {
-      nutrient: "Vitamina E",
-      comparison: "40 volte maggiore", 
-      microgreen: "Girasole",
-      description: "Potente antiossidante naturale"
-    },
-    {
-      nutrient: "Beta-carotene",
-      comparison: "25 volte maggiore",
-      microgreen: "Cilantro",
-      description: "Precursore della vitamina A"
-    },
-    {
-      nutrient: "Vitamina K",
-      comparison: "4 volte maggiore",
-      microgreen: "Rucola",
-      description: "Importante per la coagulazione"
-    }
-  ];
-
-  const benefits = [
-    {
-      title: "Concentrazione Nutrizionale",
-      description: "I microgreens vengono raccolti nel momento di massima concentrazione di nutrienti, quando la pianta ha utilizzato tutti i suoi depositi energetici per la crescita iniziale.",
-      icon: "🌱"
-    },
-    {
-      title: "Biodisponibilità",
-      description: "I nutrienti nei microgreens sono in forme più facilmente assorbibili dall'organismo rispetto alle verdure mature.",
-      icon: "⚡"
-    },
-    {
-      title: "Varietà Nutrizionale",
-      description: "Ogni varietà di microgreen offre un profilo nutrizionale unico, permettendo una dieta più diversificata e completa.",
-      icon: "🎨"
-    }
-  ];
-
-  return (
-    <Layout>
+  const nutritionalData = [{
+    nutrient: "Vitamina C",
+    comparison: "6 volte maggiore",
+    microgreen: "Cavolo Rosso",
+    description: "Essenziale per il sistema immunitario"
+  }, {
+    nutrient: "Vitamina E",
+    comparison: "40 volte maggiore",
+    microgreen: "Girasole",
+    description: "Potente antiossidante naturale"
+  }, {
+    nutrient: "Beta-carotene",
+    comparison: "25 volte maggiore",
+    microgreen: "Cilantro",
+    description: "Precursore della vitamina A"
+  }, {
+    nutrient: "Vitamina K",
+    comparison: "4 volte maggiore",
+    microgreen: "Rucola",
+    description: "Importante per la coagulazione"
+  }];
+  const benefits = [{
+    title: "Concentrazione Nutrizionale",
+    description: "I microgreens vengono raccolti nel momento di massima concentrazione di nutrienti, quando la pianta ha utilizzato tutti i suoi depositi energetici per la crescita iniziale.",
+    icon: "🌱"
+  }, {
+    title: "Biodisponibilità",
+    description: "I nutrienti nei microgreens sono in forme più facilmente assorbibili dall'organismo rispetto alle verdure mature.",
+    icon: "⚡"
+  }, {
+    title: "Varietà Nutrizionale",
+    description: "Ogni varietà di microgreen offre un profilo nutrizionale unico, permettendo una dieta più diversificata e completa.",
+    icon: "🎨"
+  }];
+  return <Layout>
       <article className="min-h-screen">
         {/* Hero Section with Full-Width Background */}
-        <section 
-          className="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${nutritionHeroImage})` }}
-        >
+        <section className="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: `url(${nutritionHeroImage})`
+      }}>
           {/* Overlay with brand colors */}
           <div className="absolute inset-0 bg-gradient-hero"></div>
           
@@ -92,10 +78,7 @@ const BlogArticle = () => {
                     <Clock className="w-4 h-4" />
                     5 min di lettura
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-4 h-4" />
-                    1.2k visualizzazioni
-                  </span>
+                  
                 </div>
               </div>
 
@@ -145,29 +128,10 @@ const BlogArticle = () => {
 
               {/* Nutritional Comparison Section */}
               <div className="mb-16">
-                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
-                  Il Confronto Nutrizionale
-                </h2>
+                
                 
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  {nutritionalData.map((item, index) => (
-                    <Card key={index} className="border-border/50 bg-card hover-lift p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-display text-xl font-semibold text-foreground">
-                          {item.nutrient}
-                        </h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {item.microgreen}
-                        </Badge>
-                      </div>
-                      <div className="text-2xl font-bold text-primary mb-2">
-                        {item.comparison}
-                      </div>
-                      <p className="font-body text-sm text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </Card>
-                  ))}
+                  {nutritionalData.map((item, index) => {})}
                 </div>
               </div>
 
@@ -191,14 +155,7 @@ const BlogArticle = () => {
                     </p>
                   </div>
                   <div>
-                    <img 
-                      src={closeUpImage} 
-                      alt="Microgreens al microscopio mostrando la struttura cellulare ricca di nutrienti" 
-                      className="w-full h-80 object-cover rounded-lg shadow-soft"
-                      loading="lazy"
-                      width={800}
-                      height={600}
-                    />
+                    <img src={closeUpImage} alt="Microgreens al microscopio mostrando la struttura cellulare ricca di nutrienti" className="w-full h-80 object-cover rounded-lg shadow-soft" loading="lazy" width={800} height={600} />
                   </div>
                 </div>
               </div>
@@ -210,8 +167,7 @@ const BlogArticle = () => {
                 </h2>
                 
                 <div className="grid md:grid-cols-3 gap-8">
-                  {benefits.map((benefit, index) => (
-                    <Card key={index} className="border-border/50 bg-card text-center hover-lift p-8">
+                  {benefits.map((benefit, index) => <Card key={index} className="border-border/50 bg-card text-center hover-lift p-8">
                       <div className="text-4xl mb-4">{benefit.icon}</div>
                       <h3 className="font-display text-xl font-semibold text-foreground mb-4">
                         {benefit.title}
@@ -219,8 +175,7 @@ const BlogArticle = () => {
                       <p className="font-body text-muted-foreground leading-relaxed">
                         {benefit.description}
                       </p>
-                    </Card>
-                  ))}
+                    </Card>)}
                 </div>
               </div>
 
@@ -276,10 +231,9 @@ const BlogArticle = () => {
               </h2>
               <div className="grid md:grid-cols-3 gap-8">
                 <Card className="overflow-hidden hover-lift border-border/50 bg-card group">
-                  <div 
-                    className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${varietiesImage})` }}
-                  />
+                  <div className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{
+                  backgroundImage: `url(${varietiesImage})`
+                }} />
                   <div className="p-6">
                     <Badge variant="outline" className="text-xs mb-3">
                       Ricette
@@ -297,10 +251,9 @@ const BlogArticle = () => {
                 </Card>
                 
                 <Card className="overflow-hidden hover-lift border-border/50 bg-card group">
-                  <div 
-                    className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${varietiesImage})` }}
-                  />
+                  <div className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{
+                  backgroundImage: `url(${varietiesImage})`
+                }} />
                   <div className="p-6">
                     <Badge variant="outline" className="text-xs mb-3">
                       Guide
@@ -318,10 +271,9 @@ const BlogArticle = () => {
                 </Card>
 
                 <Card className="overflow-hidden hover-lift border-border/50 bg-card group">
-                  <div 
-                    className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url(${varietiesImage})` }}
-                  />
+                  <div className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{
+                  backgroundImage: `url(${varietiesImage})`
+                }} />
                   <div className="p-6">
                     <Badge variant="outline" className="text-xs mb-3">
                       Coltivazione
@@ -342,8 +294,6 @@ const BlogArticle = () => {
           </div>
         </section>
       </article>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default BlogArticle;
