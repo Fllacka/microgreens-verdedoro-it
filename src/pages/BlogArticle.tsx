@@ -56,14 +56,21 @@ const BlogArticle = () => {
 
   return (
     <Layout>
-      <article className="min-h-screen bg-background">
-        {/* Article Header */}
-        <section className="pt-16 md:pt-24 pb-8 md:pb-12 bg-gradient-subtle">
-          <div className="container-width">
-            <div className="max-w-4xl mx-auto">
+      <article className="min-h-screen">
+        {/* Hero Section with Full-Width Background */}
+        <section 
+          className="relative min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${nutritionHeroImage})` }}
+        >
+          {/* Overlay with brand colors */}
+          <div className="absolute inset-0 bg-gradient-hero"></div>
+          
+          {/* Content Container */}
+          <div className="relative z-10 container-width">
+            <div className="max-w-4xl mx-auto text-center text-white">
               {/* Breadcrumb */}
               <div className="mb-8">
-                <Button variant="outline" size="sm" asChild className="mb-4">
+                <Button variant="outline" size="sm" asChild className="mb-4 bg-white/10 border-white/20 text-white hover:bg-white/20">
                   <Link to="/blog" className="inline-flex items-center">
                     <ArrowLeft className="mr-2 w-4 h-4" />
                     Torna al Blog
@@ -72,11 +79,11 @@ const BlogArticle = () => {
               </div>
 
               {/* Article Meta */}
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <Badge variant="outline" className="text-xs">
+              <div className="flex flex-wrap items-center justify-center gap-4 mb-6">
+                <Badge variant="outline" className="text-xs bg-white/10 border-white/20 text-white">
                   Nutrizione
                 </Badge>
-                <div className="flex items-center text-sm text-muted-foreground gap-4">
+                <div className="flex items-center text-sm text-white/80 gap-4">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     15 Marzo 2024
@@ -93,23 +100,23 @@ const BlogArticle = () => {
               </div>
 
               {/* Title */}
-              <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight">
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 I Valori Nutrizionali Straordinari dei Microgreens
               </h1>
 
               {/* Subtitle */}
-              <p className="font-body text-xl text-muted-foreground mb-8 leading-relaxed">
+              <p className="font-body text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
                 Scopri perché questi piccoli germogli contengono fino a 40 volte più nutrienti 
                 delle verdure mature e come possono rivoluzionare la tua alimentazione quotidiana.
               </p>
 
               {/* Social Actions */}
-              <div className="flex items-center gap-4 mb-8">
-                <Button variant="outline" size="sm" className="inline-flex items-center">
+              <div className="flex items-center justify-center gap-4">
+                <Button variant="outline" size="sm" className="inline-flex items-center bg-white/10 border-white/20 text-white hover:bg-white/20">
                   <Heart className="mr-2 w-4 h-4" />
                   Mi piace
                 </Button>
-                <Button variant="outline" size="sm" className="inline-flex items-center">
+                <Button variant="outline" size="sm" className="inline-flex items-center bg-white/10 border-white/20 text-white hover:bg-white/20">
                   <Share2 className="mr-2 w-4 h-4" />
                   Condividi
                 </Button>
@@ -118,189 +125,162 @@ const BlogArticle = () => {
           </div>
         </section>
 
-        {/* Hero Image */}
-        <section className="pb-8 md:pb-12 bg-gradient-to-b from-muted/30 via-background to-background">
-          <div className="container-width">
-            <div className="max-w-4xl mx-auto">
-              <div className="relative overflow-hidden rounded-lg shadow-elegant">
-                <img 
-                  src={nutritionHeroImage} 
-                  alt="Microgreens con infografica nutrizionale" 
-                  className="w-full h-64 md:h-96 object-cover transition-transform duration-700 hover:scale-105"
-                  loading="lazy"
-                  width={1600}
-                  height={900}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 via-transparent to-transparent"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Article Content */}
-        <section className="pt-8 md:pt-16 pb-16 md:pb-24 bg-background">
+        <section className="py-16 md:py-24 bg-background">
           <div className="container-width">
-            <div className="max-w-4xl mx-auto">
-              <div className="prose prose-lg max-w-none">
-                {/* Introduction */}
-                <div className="mb-12">
-                  <p className="font-body text-lg text-muted-foreground leading-relaxed mb-6">
-                    Negli ultimi anni, i microgreens hanno conquistato l'attenzione di nutrizionisti, 
-                    chef e appassionati di alimentazione sana in tutto il mondo. Ma cosa rende questi 
-                    piccoli germogli così speciali dal punto di vista nutrizionale?
-                  </p>
-                  <p className="font-body text-lg text-muted-foreground leading-relaxed">
-                    La risposta risiede nel momento unico della loro raccolta: quando la pianta è 
-                    nel pieno della sua crescita iniziale e concentra tutti i suoi nutrienti in 
-                    poche foglie delicate ma incredibilmente ricche.
-                  </p>
-                </div>
-
-                {/* Nutritional Comparison Section */}
-                <div className="mb-12">
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-8">
-                    Il Confronto Nutrizionale
-                  </h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-8 mb-8">
-                    {nutritionalData.map((item, index) => (
-                      <Card key={index} className="border-border/50 bg-card hover-lift">
-                        <CardContent className="p-6">
-                          <div className="flex justify-between items-start mb-4">
-                            <h3 className="font-display text-xl font-semibold text-foreground">
-                              {item.nutrient}
-                            </h3>
-                            <Badge variant="secondary" className="text-xs">
-                              {item.microgreen}
-                            </Badge>
-                          </div>
-                          <div className="text-2xl font-bold text-primary mb-2">
-                            {item.comparison}
-                          </div>
-                          <p className="font-body text-sm text-muted-foreground">
-                            {item.description}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Text + Image Section */}
-                <div className="mb-12">
-                  <div className="grid lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                      <h2 className="font-display text-3xl font-bold text-foreground mb-6">
-                        La Scienza dietro i Microgreens
-                      </h2>
-                      <p className="font-body text-muted-foreground leading-relaxed mb-6">
-                        Uno studio condotto dall'Università del Maryland ha analizzato 25 varietà 
-                        di microgreens, confrontando il loro contenuto nutrizionale con quello delle 
-                        corrispondenti verdure mature. I risultati sono stati sorprendenti.
-                      </p>
-                      <p className="font-body text-muted-foreground leading-relaxed">
-                        I microgreens di cavolo rosso, ad esempio, contenevano 40 volte più vitamina E 
-                        e 6 volte più vitamina C rispetto al cavolo maturo. Questi dati confermano 
-                        che i microgreens non sono solo una tendenza culinaria, ma un vero e proprio 
-                        superfood concentrato.
-                      </p>
-                    </div>
-                    <div>
-                      <img 
-                        src={closeUpImage} 
-                        alt="Microgreens al microscopio mostrando la struttura cellulare ricca di nutrienti" 
-                        className="w-full h-80 object-cover rounded-lg shadow-elegant"
-                        loading="lazy"
-                        width={800}
-                        height={600}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Benefits Section */}
-                <div className="mb-12">
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-8 text-center">
-                    I Benefici Unici dei Microgreens
-                  </h2>
-                  
-                  <div className="grid md:grid-cols-3 gap-8">
-                    {benefits.map((benefit, index) => (
-                      <Card key={index} className="border-border/50 bg-card text-center hover-lift">
-                        <CardContent className="p-8">
-                          <div className="text-4xl mb-4">{benefit.icon}</div>
-                          <h3 className="font-display text-xl font-semibold text-foreground mb-4">
-                            {benefit.title}
-                          </h3>
-                          <p className="font-body text-muted-foreground leading-relaxed">
-                            {benefit.description}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Conclusion */}
-                <div className="mb-12">
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-6">
-                    Una Rivoluzione Nutrizionale
-                  </h2>
-                  <p className="font-body text-lg text-muted-foreground leading-relaxed mb-6">
-                    I microgreens rappresentano una vera rivoluzione nel mondo dell'alimentazione. 
-                    Non solo offrono sapori intensi e unici, ma concentrano in pochi grammi una 
-                    quantità di nutrienti che richiederebbe porzioni molto più grandi di verdure tradizionali.
-                  </p>
-                  <p className="font-body text-lg text-muted-foreground leading-relaxed">
-                    Incorporare i microgreens nella tua dieta quotidiana significa fare una scelta 
-                    consapevole verso un'alimentazione più ricca, più sana e più sostenibile. 
-                    Il futuro del cibo è piccolo, ma incredibilmente potente.
-                  </p>
-                </div>
-
-                {/* Call to Action */}
-                <Card className="bg-gradient-subtle border-border/50 text-center">
-                  <CardContent className="p-8">
-                    <h3 className="font-display text-2xl font-bold text-foreground mb-4">
-                      Prova i Nostri Microgreens
-                    </h3>
-                    <p className="font-body text-muted-foreground mb-6">
-                      Scopri tutta la potenza nutrizionale dei microgreens Verde D'Oro, 
-                      coltivati con passione a Reggio Emilia.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <Button variant="verde" size="lg" asChild>
-                        <Link to="/microgreens">
-                          Esplora i Prodotti
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="lg" asChild>
-                        <Link to="/microgreens-su-misura">
-                          Microgreens su Misura
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+            <div className="max-w-3xl mx-auto">
+              {/* Introduction */}
+              <div className="mb-12">
+                <p className="font-body text-lg text-muted-foreground leading-relaxed mb-6">
+                  Negli ultimi anni, i microgreens hanno conquistato l'attenzione di nutrizionisti, 
+                  chef e appassionati di alimentazione sana in tutto il mondo. Ma cosa rende questi 
+                  piccoli germogli così speciali dal punto di vista nutrizionale?
+                </p>
+                <p className="font-body text-lg text-muted-foreground leading-relaxed">
+                  La risposta risiede nel momento unico della loro raccolta: quando la pianta è 
+                  nel pieno della sua crescita iniziale e concentra tutti i suoi nutrienti in 
+                  poche foglie delicate ma incredibilmente ricche.
+                </p>
               </div>
+
+              {/* Nutritional Comparison Section */}
+              <div className="mb-16">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
+                  Il Confronto Nutrizionale
+                </h2>
+                
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {nutritionalData.map((item, index) => (
+                    <Card key={index} className="border-border/50 bg-card hover-lift p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="font-display text-xl font-semibold text-foreground">
+                          {item.nutrient}
+                        </h3>
+                        <Badge variant="secondary" className="text-xs">
+                          {item.microgreen}
+                        </Badge>
+                      </div>
+                      <div className="text-2xl font-bold text-primary mb-2">
+                        {item.comparison}
+                      </div>
+                      <p className="font-body text-sm text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text + Image Section */}
+              <div className="mb-16">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                  <div>
+                    <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
+                      La Scienza dietro i Microgreens
+                    </h2>
+                    <p className="font-body text-muted-foreground leading-relaxed mb-6">
+                      Uno studio condotto dall'Università del Maryland ha analizzato 25 varietà 
+                      di microgreens, confrontando il loro contenuto nutrizionale con quello delle 
+                      corrispondenti verdure mature. I risultati sono stati sorprendenti.
+                    </p>
+                    <p className="font-body text-muted-foreground leading-relaxed">
+                      I microgreens di cavolo rosso, ad esempio, contenevano 40 volte più vitamina E 
+                      e 6 volte più vitamina C rispetto al cavolo maturo. Questi dati confermano 
+                      che i microgreens non sono solo una tendenza culinaria, ma un vero e proprio 
+                      superfood concentrato.
+                    </p>
+                  </div>
+                  <div>
+                    <img 
+                      src={closeUpImage} 
+                      alt="Microgreens al microscopio mostrando la struttura cellulare ricca di nutrienti" 
+                      className="w-full h-80 object-cover rounded-lg shadow-soft"
+                      loading="lazy"
+                      width={800}
+                      height={600}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Benefits Section */}
+              <div className="mb-16">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
+                  I Benefici Unici dei Microgreens
+                </h2>
+                
+                <div className="grid md:grid-cols-3 gap-8">
+                  {benefits.map((benefit, index) => (
+                    <Card key={index} className="border-border/50 bg-card text-center hover-lift p-8">
+                      <div className="text-4xl mb-4">{benefit.icon}</div>
+                      <h3 className="font-display text-xl font-semibold text-foreground mb-4">
+                        {benefit.title}
+                      </h3>
+                      <p className="font-body text-muted-foreground leading-relaxed">
+                        {benefit.description}
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Conclusion */}
+              <div className="mb-12">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
+                  Una Rivoluzione Nutrizionale
+                </h2>
+                <p className="font-body text-lg text-muted-foreground leading-relaxed mb-6">
+                  I microgreens rappresentano una vera rivoluzione nel mondo dell'alimentazione. 
+                  Non solo offrono sapori intensi e unici, ma concentrano in pochi grammi una 
+                  quantità di nutrienti che richiederebbe porzioni molto più grandi di verdure tradizionali.
+                </p>
+                <p className="font-body text-lg text-muted-foreground leading-relaxed">
+                  Incorporare i microgreens nella tua dieta quotidiana significa fare una scelta 
+                  consapevole verso un'alimentazione più ricca, più sana e più sostenibile. 
+                  Il futuro del cibo è piccolo, ma incredibilmente potente.
+                </p>
+              </div>
+
+              {/* Call to Action */}
+              <Card className="bg-gradient-subtle border-border/50 text-center p-8 mb-16">
+                <h3 className="font-display text-2xl font-bold text-foreground mb-4">
+                  Prova i Nostri Microgreens
+                </h3>
+                <p className="font-body text-muted-foreground mb-6">
+                  Scopri tutta la potenza nutrizionale dei microgreens Verde D'Oro, 
+                  coltivati con passione a Reggio Emilia.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button variant="verde" size="lg" asChild>
+                    <Link to="/microgreens">
+                      Esplora i Prodotti
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="lg" asChild>
+                    <Link to="/microgreens-su-misura">
+                      Microgreens su Misura
+                    </Link>
+                  </Button>
+                </div>
+              </Card>
             </div>
           </div>
         </section>
 
         {/* Related Articles */}
-        <section className="section-padding bg-gradient-subtle">
+        <section className="py-16 md:py-24 bg-gradient-subtle">
           <div className="container-width">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-8 text-center">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-12 text-center">
                 Articoli Correlati
               </h2>
-              <div className="grid md:grid-cols-2 gap-8">
-                <Card className="overflow-hidden hover-lift border-border/50 bg-card">
+              <div className="grid md:grid-cols-3 gap-8">
+                <Card className="overflow-hidden hover-lift border-border/50 bg-card group">
                   <div 
-                    className="h-48 bg-cover bg-center"
+                    className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{ backgroundImage: `url(${varietiesImage})` }}
                   />
-                  <CardContent className="p-6">
+                  <div className="p-6">
                     <Badge variant="outline" className="text-xs mb-3">
                       Ricette
                     </Badge>
@@ -313,15 +293,15 @@ const BlogArticle = () => {
                     <Button variant="outline" size="sm">
                       Leggi articolo
                     </Button>
-                  </CardContent>
+                  </div>
                 </Card>
                 
-                <Card className="overflow-hidden hover-lift border-border/50 bg-card">
+                <Card className="overflow-hidden hover-lift border-border/50 bg-card group">
                   <div 
-                    className="h-48 bg-cover bg-center"
+                    className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{ backgroundImage: `url(${varietiesImage})` }}
                   />
-                  <CardContent className="p-6">
+                  <div className="p-6">
                     <Badge variant="outline" className="text-xs mb-3">
                       Guide
                     </Badge>
@@ -334,7 +314,28 @@ const BlogArticle = () => {
                     <Button variant="outline" size="sm">
                       Leggi articolo
                     </Button>
-                  </CardContent>
+                  </div>
+                </Card>
+
+                <Card className="overflow-hidden hover-lift border-border/50 bg-card group">
+                  <div 
+                    className="h-48 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                    style={{ backgroundImage: `url(${varietiesImage})` }}
+                  />
+                  <div className="p-6">
+                    <Badge variant="outline" className="text-xs mb-3">
+                      Coltivazione
+                    </Badge>
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-3">
+                      Coltivare Microgreens in Casa
+                    </h3>
+                    <p className="font-body text-muted-foreground text-sm mb-4">
+                      Guida completa per iniziare la coltivazione domestica...
+                    </p>
+                    <Button variant="outline" size="sm">
+                      Leggi articolo
+                    </Button>
+                  </div>
                 </Card>
               </div>
             </div>
