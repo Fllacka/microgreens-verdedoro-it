@@ -2,10 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Leaf, Phone, Mail, MapPin, Instagram, Facebook, Youtube } from "lucide-react";
 import { ExternalLink } from "lucide-react";
-
 const Footer = () => {
-  return (
-    <footer className="bg-gradient-subtle border-t border-border">
+  return <footer className="bg-gradient-subtle border-t border-border">
       <div className="container-width section-padding">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand & Description */}
@@ -57,22 +55,26 @@ const Footer = () => {
               Link Utili
             </h4>
             <ul className="space-y-3">
-              {[
-                { name: "Chi Siamo", href: "/chi-siamo" },
-                { name: "I Nostri Microgreens", href: "/microgreens" },
-                { name: "Microgreens su Misura", href: "/microgreens-su-misura" },
-                { name: "Blog & Ricette", href: "/blog" },
-                { name: "Cosa sono i Microgreens", href: "/cosa-sono-i-microgreens" },
-              ].map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-muted-foreground font-body hover:text-primary transition-colors"
-                  >
+              {[{
+              name: "Chi Siamo",
+              href: "/chi-siamo"
+            }, {
+              name: "I Nostri Microgreens",
+              href: "/microgreens"
+            }, {
+              name: "Microgreens su Misura",
+              href: "/microgreens-su-misura"
+            }, {
+              name: "Blog & Ricette",
+              href: "/blog"
+            }, {
+              name: "Cosa sono i Microgreens",
+              href: "/cosa-sono-i-microgreens"
+            }].map(link => <li key={link.name}>
+                  <Link to={link.href} className="text-muted-foreground font-body hover:text-primary transition-colors">
                     {link.name}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -90,19 +92,13 @@ const Footer = () => {
               </li>
               <li className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-                <a
-                  href="tel:+390000000000"
-                  className="text-muted-foreground font-body text-sm hover:text-primary transition-colors"
-                >
+                <a href="tel:+390000000000" className="text-muted-foreground font-body text-sm hover:text-primary transition-colors">
                   +39 000 000 0000
                 </a>
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                <a
-                  href="mailto:info@verdedoro.it"
-                  className="text-muted-foreground font-body text-sm hover:text-primary transition-colors"
-                >
+                <a href="mailto:info@verdedoro.it" className="text-muted-foreground font-body text-sm hover:text-primary transition-colors">
                   info@verdedoro.it
                 </a>
               </li>
@@ -110,7 +106,7 @@ const Footer = () => {
 
             <div className="mt-6">
               <Button variant="oro" size="sm" className="w-full" asChild>
-                <Link to="/contatti">Richiedi Preventivo</Link>
+                
               </Button>
             </div>
           </div>
@@ -123,24 +119,16 @@ const Footer = () => {
               © 2024 Verde D'Oro Microgreens. Tutti i diritti riservati.
             </p>
             <div className="flex space-x-6">
-              <Link
-                to="/privacy"
-                className="text-sm text-muted-foreground font-body hover:text-primary transition-colors"
-              >
+              <Link to="/privacy" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link
-                to="/terms"
-                className="text-sm text-muted-foreground font-body hover:text-primary transition-colors"
-              >
+              <Link to="/terms" className="text-sm text-muted-foreground font-body hover:text-primary transition-colors">
                 Termini di Servizio
               </Link>
             </div>
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
