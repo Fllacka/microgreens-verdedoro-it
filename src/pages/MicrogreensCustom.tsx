@@ -2,6 +2,8 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail } from "lucide-react";
+import heroImage from "@/assets/microgreens-varieties.jpg";
+import chefImage from "@/assets/chef-custom-microgreens.jpg";
 
 const MicrogreensCustom = () => {
   const varieties = [
@@ -78,32 +80,49 @@ const MicrogreensCustom = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="section-padding bg-gradient-subtle">
-        <div className="container-width text-center">
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
+      <section className="relative h-96 md:h-[500px] flex items-center justify-center">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroImage})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-hero-transparent" />
+        <div className="relative z-10 text-center text-white">
+          <h1 className="font-display text-4xl md:text-6xl font-bold mb-4">
             Microgreens su Misura
           </h1>
-          <div className="max-w-4xl mx-auto space-y-6 font-body text-lg text-muted-foreground leading-relaxed">
-            <p>
-              La nostra selezione standard di microgreens rappresenta solo l'inizio delle possibilità. Oltre alle varietà che coltiviamo regolarmente, offriamo un servizio di coltivazione su misura pensato per chef, ristoranti e appassionati di cucina che cercano ingredienti unici e specifici. Che si tratti di una varietà particolare per un piatto signature, di un blend esclusivo per il vostro menu, o di micro ortaggi rari difficili da reperire.
-            </p>
-            <p>
-              Il nostro catalogo completo comprende oltre 50 varietà di microgreens coltivabili su richiesta, suddivise per famiglie botaniche: erbe aromatiche, legumi speciali, brassicaceae rare, cereali antichi e fiori commestibili. Consultate l'elenco completo delle varietà disponibili su ordinazione e, nel caso la vostra ricerca specifica non fosse presente, contattateci lo stesso - faremo il possibile per trovarla.
-            </p>
+        </div>
+      </section>
+
+      {/* Content Block 1 */}
+      <section className="section-padding bg-background">
+        <div className="container-width">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <div 
+                className="h-96 rounded-2xl bg-cover bg-center shadow-soft"
+                style={{ backgroundImage: `url(${chefImage})` }}
+              >
+                <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
+              </div>
+            </div>
+            <div>
+              <p className="font-body text-xl text-muted-foreground leading-relaxed">
+                La nostra selezione standard di microgreens rappresenta solo l'inizio delle possibilità. Oltre alle varietà che coltiviamo regolarmente, offriamo un servizio di coltivazione su misura pensato per chef, ristoranti e appassionati di cucina che cercano ingredienti unici e specifici. Che si tratti di una varietà particolare per un piatto signature, di un blend esclusivo per il vostro menu, o di micro ortaggi rari difficili da reperire.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Varieties Grid */}
-      <section className="section-padding bg-background">
+      {/* Content Block 2 - Varieties */}
+      <section className="section-padding bg-gradient-subtle">
         <div className="container-width">
           <div className="text-center mb-16">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
               Varietà Disponibili su Ordinazione
             </h2>
             <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto">
-              Esplora il nostro catalogo completo di oltre 50 varietà di microgreens, 
-              organizzate per famiglie botaniche e caratteristiche specifiche.
+              Il nostro catalogo completo comprende oltre 50 varietà di microgreens coltivabili su richiesta, suddivise per famiglie botaniche: erbe aromatiche, legumi speciali, brassicaceae rare, cereali antichi e fiori commestibili. Consultate l'elenco completo delle varietà disponibili su ordinazione e, nel caso la vostra ricerca specifica non fosse presente, contattateci lo stesso - faremo il possibile per trovarla.
             </p>
           </div>
           
@@ -131,39 +150,14 @@ const MicrogreensCustom = () => {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="section-padding bg-gradient-subtle">
-        <div className="container-width">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
-                Come Funziona il Nostro Servizio su Misura
-              </h2>
-              <p className="font-body text-lg text-muted-foreground">
-                Un processo semplice e collaborativo per trasformare le tue idee in realtà
-              </p>
-            </div>
-            
-            <Card className="bg-background/50 backdrop-blur-sm border-border/50 shadow-elegant">
-              <CardContent className="p-8">
-                <p className="font-body text-lg text-muted-foreground leading-relaxed text-center">
-                  Il processo è semplice e collaborativo: una volta ricevuta la vostra richiesta, il nostro team si attiva immediatamente per reperire i semi della varietà desiderata attraverso la nostra rete di fornitori specializzati. Vi comunichiamo quando i semi sono pronti e, da quel momento, pianifichiamo insieme i tempi di semina per garantire la disponibilità quando ne avete bisogno, rispettando sempre i nostri standard di qualità.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="section-padding bg-gradient-verde text-white">
         <div className="container-width text-center">
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
             Inizia il Tuo Progetto su Misura
           </h2>
-          <p className="font-body text-lg mb-8 leading-relaxed max-w-3xl mx-auto text-white/90">
-            Raccontaci la varietà che cerchi, le quantità necessarie e i tempi di consegna. 
-            Trasformiamo insieme la tua idea in microgreens unici, coltivati su misura per le tue esigenze.
+          <p className="font-body text-lg mb-8 leading-relaxed max-w-2xl mx-auto text-white/90">
+            Raccontaci la varietà che cerchi e trasformiamo insieme la tua idea in microgreens unici.
           </p>
           <Button variant="oro" size="lg" className="px-8 py-4 text-lg">
             <Mail className="w-5 h-5 mr-2" />

@@ -131,7 +131,14 @@ const BlogArticle = () => {
                 
                 
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  {nutritionalData.map((item, index) => {})}
+                  {nutritionalData.map((item, index) => (
+                    <div key={index} className="bg-card p-6 rounded-lg">
+                      <h4 className="font-display text-lg font-semibold text-primary mb-2">{item.nutrient}</h4>
+                      <p className="text-accent font-semibold mb-2">{item.comparison}</p>
+                      <p className="text-sm text-muted-foreground mb-1">in {item.microgreen}</p>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 

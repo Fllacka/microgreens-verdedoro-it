@@ -54,6 +54,7 @@
     --gradient-verde: linear-gradient(135deg, hsl(var(--verde-primary)), hsl(var(--verde-light)));
     --gradient-oro: linear-gradient(135deg, hsl(var(--oro-primary)), hsl(var(--oro-light)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--verde-primary) / 0.75), hsl(var(--verde-light) / 0.7));
+    --gradient-hero-transparent: linear-gradient(135deg, hsl(var(--verde-primary) / 0.75), hsl(var(--verde-light) / 0.7));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--terra-warm)));
     
     /* Shadows */
@@ -126,6 +127,10 @@
   
   .bg-gradient-hero {
     background: var(--gradient-hero);
+  }
+  
+  .bg-gradient-hero-transparent {
+    background: var(--gradient-hero-transparent);
   }
   
   .bg-gradient-subtle {
