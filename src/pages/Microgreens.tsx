@@ -104,9 +104,9 @@ const Microgreens = () => {
                   {/* Gradient overlay for better text readability */}
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
                   
-                  {/* Category badge - top-left, semi-transparent */}
+                  {/* Category badge - top-left, semi-transparent white */}
                   <div className="absolute top-3 left-3 z-10">
-                    <Badge className="bg-white/80 text-foreground border-0 backdrop-blur-sm text-xs">
+                    <Badge className="bg-white/90 text-gray-700 border-0 backdrop-blur-sm text-xs font-medium">
                       {product.category}
                     </Badge>
                   </div>
@@ -122,7 +122,7 @@ const Microgreens = () => {
                   )}
                 </div>
                 
-                <CardContent className="p-5">
+                <CardContent className="p-5 flex flex-col h-full">
                   {/* Product name - larger and bolder */}
                   <h3 className="font-display text-2xl font-bold text-primary mb-3 leading-tight">
                     {product.name}
@@ -150,7 +150,7 @@ const Microgreens = () => {
                   </div>
                   
                   {/* Uses - small outlined tags in single row, max 3 */}
-                  <div className="mb-6">
+                  <div className="mb-6 flex-grow">
                     <div className="flex flex-wrap gap-1">
                       {product.uses.slice(0, 3).map((use, i) => (
                         <Badge key={i} variant="outline" className="text-xs px-2 py-0.5 border-muted-foreground/30 text-muted-foreground">
@@ -160,10 +160,10 @@ const Microgreens = () => {
                     </div>
                   </div>
                   
-                  {/* CTA Button - gold outline, reduced padding, hover animation */}
+                  {/* CTA Button - gold outline, positioned at bottom */}
                   <Button 
                     variant="outline" 
-                    className="cta-button w-full border-oro-primary text-oro-primary hover:bg-oro-primary hover:text-white px-4 py-2 transition-all duration-300"
+                    className="cta-button w-full border-oro-primary text-oro-primary hover:bg-oro-primary hover:text-white px-4 py-2 transition-all duration-300 mt-auto"
                     onClick={(e) => {
                       e.stopPropagation();
                       console.log('Add to cart:', product.name);
