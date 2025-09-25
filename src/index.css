@@ -151,6 +151,23 @@
     @apply transition-smooth hover:translate-y-[-4px] hover:shadow-soft;
   }
   
+  /* Product Card Enhancements */
+  .product-card {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+  }
+  
+  .cta-button:hover .lucide-shopping-cart {
+    @apply animate-pulse;
+  }
+  
+  /* Text truncation utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
   /* Content Sections */
   .section-padding {
     @apply py-16 md:py-24;

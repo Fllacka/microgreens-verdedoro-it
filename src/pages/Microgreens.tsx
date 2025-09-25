@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
-import { ShoppingCart, Leaf, Star, Filter } from "lucide-react";
+import { ShoppingCart, Leaf, Star, Filter, Heart, Zap, Shield } from "lucide-react";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 const Microgreens = () => {
@@ -91,67 +91,90 @@ const Microgreens = () => {
       <section className="section-padding bg-background">
         <div className="container-width">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product, index) => <Card key={index} className="overflow-hidden hover-lift border-border/50 relative">
-                {product.popular && <div className="absolute top-4 right-4 z-10">
-                    <Badge className="bg-oro-primary text-accent-foreground">
-                      <Star className="h-3 w-3 mr-1" />
-                      Popolare
-                    </Badge>
-                  </div>}
-                
+            {filteredProducts.map((product, index) => (
+              <Card 
+                key={index} 
+                className="product-card overflow-hidden border-border/50 relative cursor-pointer group"
+                onClick={() => console.log('Navigate to product:', product.name)}
+              >
+                {/* Product Image */}
                 <div className="h-48 bg-cover bg-center relative" style={{
-              backgroundImage: `url(${product.image})`
-            }}>
-                  <div className="absolute inset-0 bg-gradient-hero/20" />
-                  <div className="absolute bottom-4 left-4">
-                    <Badge variant="secondary" className="bg-background/90">
+                  backgroundImage: `url(${product.image})`
+                }}>
+                  {/* Gradient overlay for better text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+                  
+                  {/* Category badge - top-left, semi-transparent */}
+                  <div className="absolute top-3 left-3 z-10">
+                    <Badge className="bg-white/80 text-foreground border-0 backdrop-blur-sm text-xs">
                       {product.category}
                     </Badge>
                   </div>
+                  
+                  {/* Popular badge - outline style with gold */}
+                  {product.popular && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <Badge variant="outline" className="border-oro-primary text-oro-primary bg-white/90 backdrop-blur-sm">
+                        <Star className="h-3 w-3 mr-1" />
+                        Popolare
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-display text-xl font-semibold text-primary">
-                      {product.name}
-                    </h3>
-                    
-                  </div>
+                <CardContent className="p-5">
+                  {/* Product name - larger and bolder */}
+                  <h3 className="font-display text-2xl font-bold text-primary mb-3 leading-tight">
+                    {product.name}
+                  </h3>
                   
-                  <p className="font-body text-muted-foreground mb-4">
+                  {/* Description - limited to 2 lines with ellipsis */}
+                  <p className="font-body text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-2">
                     {product.description}
                   </p>
                   
-                  {/* Benefits */}
+                  {/* Benefits - horizontal pills with icons, max 3 */}
                   <div className="mb-4">
-                    <h4 className="font-body font-medium text-foreground text-sm mb-2">
-                      Benefici:
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {product.benefits.map((benefit, i) => <Badge key={i} variant="outline" className="text-xs">
-                          {benefit}
-                        </Badge>)}
+                    <div className="flex flex-wrap gap-2">
+                      {product.benefits.slice(0, 3).map((benefit, i) => {
+                        const icons = [Heart, Zap, Shield];
+                        const IconComponent = icons[i % icons.length];
+                        return (
+                          <Badge key={i} variant="secondary" className="bg-verde-primary/10 text-verde-primary border-verde-primary/20 text-xs px-3 py-1">
+                            <IconComponent className="h-3 w-3 mr-1" />
+                            {benefit}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   </div>
                   
-                  {/* Uses */}
+                  {/* Uses - small outlined tags in single row, max 3 */}
                   <div className="mb-6">
-                    <h4 className="font-body font-medium text-foreground text-sm mb-2">
-                      Ideale per:
-                    </h4>
                     <div className="flex flex-wrap gap-1">
-                      {product.uses.map((use, i) => <Badge key={i} variant="secondary" className="text-xs">
+                      {product.uses.slice(0, 3).map((use, i) => (
+                        <Badge key={i} variant="outline" className="text-xs px-2 py-0.5 border-muted-foreground/30 text-muted-foreground">
                           {use}
-                        </Badge>)}
+                        </Badge>
+                      ))}
                     </div>
                   </div>
                   
-                  <Button variant="verde" className="w-full">
-                    <ShoppingCart className="mr-2 h-4 w-4" />
+                  {/* CTA Button - gold outline, reduced padding, hover animation */}
+                  <Button 
+                    variant="outline" 
+                    className="cta-button w-full border-oro-primary text-oro-primary hover:bg-oro-primary hover:text-white px-4 py-2 transition-all duration-300"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Add to cart:', product.name);
+                    }}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
                     Aggiungi al Carrello
                   </Button>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
         </div>
       </section>
