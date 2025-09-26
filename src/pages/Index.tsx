@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
+import ProductCard from "@/components/ProductCard";
 import { Leaf, Heart, Truck, Shield, Star, ArrowRight, CheckCircle, ShoppingCart } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
@@ -219,54 +220,19 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {featuredProducts.map((product, index) => <Card key={index} className="overflow-hidden hover-lift border-border/50 bg-background">
-                <div className="h-48 bg-cover bg-center relative" style={{
-              backgroundImage: `url(${product.image})`
-            }}>
-                  <div className="absolute inset-0 bg-gradient-hero/20" />
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-display text-xl font-semibold text-primary">
-                      {product.name}
-                    </h3>
-                    
-                  </div>
-                  
-                  <p className="font-body text-muted-foreground mb-4">
-                    {product.description}
-                  </p>
-                  
-                  {/* Benefits */}
-                  <div className="mb-4">
-                    <h4 className="font-body font-medium text-foreground text-sm mb-2">
-                      Benefici:
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {product.benefits.map((benefit, i) => <Badge key={i} variant="outline" className="text-xs">
-                          {benefit}
-                        </Badge>)}
-                    </div>
-                  </div>
-                  
-                  {/* Uses */}
-                  <div className="mb-6">
-                    <h4 className="font-body font-medium text-foreground text-sm mb-2">
-                      Ideale per:
-                    </h4>
-                    <div className="flex flex-wrap gap-1">
-                      {product.uses.map((use, i) => <Badge key={i} variant="secondary" className="text-xs">
-                          {use}
-                        </Badge>)}
-                    </div>
-                  </div>
-                  
-                  <Button variant="verde" className="w-full">
-                    <ShoppingCart className="mr-2 h-4 w-4" />
-                    Aggiungi al Carrello
-                  </Button>
-                </CardContent>
-              </Card>)}
+            {featuredProducts.map((product, index) => (
+              <ProductCard
+                key={index}
+                name={product.name}
+                category={product.category}
+                description={product.description}
+                benefits={product.benefits}
+                uses={product.uses}
+                image={product.image}
+                onCardClick={() => console.log('Navigate to product:', product.name)}
+                onAddToCart={() => console.log('Add to cart:', product.name)}
+              />
+            ))}
           </div>
 
           <div className="text-center">
