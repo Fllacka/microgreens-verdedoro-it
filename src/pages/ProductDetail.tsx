@@ -230,66 +230,52 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* Product Information Tabs */}
+      {/* Product Overview Section */}
       <section className="container mx-auto px-4 py-12">
-        <Tabs defaultValue="descrizione" className="w-full">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-3 mb-8">
-            <TabsTrigger value="descrizione">Descrizione</TabsTrigger>
-            <TabsTrigger value="benefici">Benefici</TabsTrigger>
-            <TabsTrigger value="usi">Usi Culinari</TabsTrigger>
-          </TabsList>
+        {/* Title and Description */}
+        <div className="mb-12">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+            Panoramica del prodotto
+          </h2>
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-4xl">
+            {product.fullDescription}
+          </p>
+        </div>
 
-          <TabsContent value="descrizione" className="space-y-4">
-            <div className="prose prose-lg max-w-none">
-              <p className="text-muted-foreground leading-relaxed">
-                {product.fullDescription}
+        {/* Two Column Layout: Benefits and Culinary Uses */}
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+          {/* Benefits Column */}
+          <div>
+            <h3 className="font-display text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+              <Leaf className="h-6 w-6 text-verde-primary" />
+              Benefici
+            </h3>
+            <div className="space-y-4">
+              {product.benefits.map((benefit, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-start gap-3 p-4 border-l-4 border-verde-primary bg-verde-primary/5 rounded-r-lg"
+                >
+                  <Leaf className="h-5 w-5 text-verde-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-foreground">{benefit}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Culinary Uses Column */}
+          <div>
+            <h3 className="font-display text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+              <ShoppingCart className="h-6 w-6 text-verde-primary" />
+              Usi Culinari
+            </h3>
+            <div className="p-6 bg-muted rounded-lg">
+              <p className="text-foreground leading-relaxed">
+                {product.culinaryUses}
               </p>
             </div>
-          </TabsContent>
-
-          <TabsContent value="benefici">
-            <div className="grid md:grid-cols-2 gap-6">
-              {product.detailedBenefits.map((benefit, index) => {
-                const IconComponent = benefit.icon;
-                return (
-                  <Card key={index} className="border-verde-primary/20 hover:shadow-verde transition-shadow duration-300">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-lg bg-verde-primary/10">
-                          <IconComponent className="h-6 w-6 text-verde-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
-                          <p className="text-muted-foreground text-sm">{benefit.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="usi">
-            <Card className="border-oro-primary/20">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-xl">Suggerimenti per l'uso</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {product.culinaryUses}
-                  </p>
-                  <div className="flex flex-wrap gap-2 pt-4">
-                    {product.uses.map((use, index) => (
-                      <Badge key={index} variant="outline" className="border-oro-primary/30 text-oro-primary">
-                        {use}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </section>
 
       {/* Related Products */}
