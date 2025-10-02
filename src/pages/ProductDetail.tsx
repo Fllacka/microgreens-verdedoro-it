@@ -1,0 +1,322 @@
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import Layout from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import ProductCard from "@/components/ProductCard";
+import { ShoppingCart, Minus, Plus, Heart, Zap, Shield, Star, Leaf, Droplet, Sun } from "lucide-react";
+import { Helmet } from "react-helmet";
+
+// Microgreens data
+const microgreensData = {
+  "ravanello-rosso": {
+    name: "Ravanello Rosso",
+    category: "Brassicaceae",
+    shortDescription: "Sapore piccante e croccante, perfetto per dare carattere ai tuoi piatti con un tocco vivace e colorato.",
+    fullDescription: "I microgreens di ravanello rosso sono tra i più apprezzati per il loro sapore deciso e la loro versatilità in cucina. Coltivati con semi biologici certificati nella nostra sede di Reggio Emilia, questi giovani germogli vengono raccolti al momento ottimale di maturazione per garantire il massimo delle proprietà nutritive e del sapore.",
+    image: "/src/assets/microgreens-varieties.jpg",
+    benefits: ["Ricco di vitamina C", "Antiossidante naturale", "Supporto immunitario"],
+    detailedBenefits: [
+      { icon: Heart, title: "Salute cardiovascolare", description: "Ricco di antiossidanti che supportano la salute del cuore" },
+      { icon: Zap, title: "Energia naturale", description: "Alto contenuto di vitamine del gruppo B per energia costante" },
+      { icon: Shield, title: "Sistema immunitario", description: "Vitamina C e composti solforati rafforzano le difese" },
+      { icon: Leaf, title: "Detox naturale", description: "Proprietà depurative per il fegato e l'organismo" }
+    ],
+    uses: ["Insalate fresche", "Toast e bruschette", "Piatti orientali"],
+    culinaryUses: "Ideale per insalate fresche dove il suo sapore piccante emerge perfettamente. Ottimo su toast con avocado, in panini gourmet, o come guarnizione per piatti di pesce crudo. In cucina orientale, si abbina perfettamente a sushi, poke bowl e ramen.",
+    popular: true,
+    rating: 4.8,
+    inStock: true
+  },
+  "pisello": {
+    name: "Pisello",
+    category: "Fabaceae",
+    shortDescription: "Dolce e delicato, con un sapore fresco di pisello appena colto. Perfetto per piatti leggeri e raffinati.",
+    fullDescription: "I microgreens di pisello offrono un sapore delicato e dolce che ricorda i piselli freschi di primavera. Questi germogli sono particolarmente apprezzati per la loro texture croccante e il colore verde brillante che illumina qualsiasi piatto.",
+    image: "/src/assets/microgreens-close-up.jpg",
+    benefits: ["Alto contenuto proteico", "Ricco di fibre", "Vitamine A e C"],
+    detailedBenefits: [
+      { icon: Zap, title: "Proteine vegetali", description: "Eccellente fonte di proteine per diete plant-based" },
+      { icon: Heart, title: "Salute digestiva", description: "Alto contenuto di fibre per il benessere intestinale" },
+      { icon: Shield, title: "Vitamine essenziali", description: "Ricco di vitamine A, C e K per il benessere generale" },
+      { icon: Leaf, title: "Antiossidanti", description: "Polifenoli e flavonoidi per contrastare i radicali liberi" }
+    ],
+    uses: ["Risotti cremosi", "Pasta fresca", "Insalate delicate"],
+    culinaryUses: "Perfetto per risotti primaverili, pasta con ricotta e limone, o come base per insalate delicate. Si sposa bene con formaggi freschi, pesce bianco e piatti a base di uova come frittate e omelette.",
+    popular: false,
+    rating: 4.6,
+    inStock: true
+  },
+  "basilico": {
+    name: "Basilico",
+    category: "Erbe Aromatiche",
+    shortDescription: "Aroma intenso e profumato, concentra tutto il sapore del basilico in foglie giovani e tenere.",
+    fullDescription: "I microgreens di basilico offrono un'intensità aromatica superiore al basilico maturo, con un profumo più concentrato e un sapore più delicato. Ideali per chi vuole portare l'eccellenza della cucina italiana nel piatto.",
+    image: "/src/assets/hero-microgreens.jpg",
+    benefits: ["Proprietà antibatteriche", "Anti-infiammatorio", "Ricco di vitamina K"],
+    detailedBenefits: [
+      { icon: Shield, title: "Antibatterico naturale", description: "Oli essenziali con proprietà antimicrobiche" },
+      { icon: Heart, title: "Anti-infiammatorio", description: "Composti che riducono l'infiammazione" },
+      { icon: Zap, title: "Vitamina K", description: "Essenziale per la coagulazione e la salute delle ossa" },
+      { icon: Leaf, title: "Digestione", description: "Favorisce la digestione e riduce il gonfiore" }
+    ],
+    uses: ["Caprese gourmet", "Pasta al pomodoro", "Pizza napoletana"],
+    culinaryUses: "Ideale per insalate caprese, bruschette, pasta al pomodoro fresco e pizza. Ottimo anche in pesto fresco, su carpacci di pesce, o come guarnizione finale per zuppe e minestre.",
+    popular: true,
+    rating: 4.9,
+    inStock: true
+  }
+};
+
+const ProductDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [quantity, setQuantity] = useState(1);
+
+  const product = id ? microgreensData[id as keyof typeof microgreensData] : null;
+
+  if (!product) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-3xl font-bold mb-4">Prodotto non trovato</h1>
+          <Button onClick={() => navigate("/microgreens")}>Torna ai prodotti</Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  const relatedProducts = Object.entries(microgreensData)
+    .filter(([key]) => key !== id)
+    .slice(0, 3)
+    .map(([key, data]) => ({ id: key, ...data }));
+
+  const handleAddToCart = () => {
+    console.log(`Added ${quantity} ${product.name} to cart`);
+  };
+
+  const incrementQuantity = () => setQuantity(q => q + 1);
+  const decrementQuantity = () => setQuantity(q => Math.max(1, q - 1));
+
+  return (
+    <Layout>
+      <Helmet>
+        <title>{product.name} - Verde D'Oro Microgreens</title>
+        <meta name="description" content={product.shortDescription} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.name,
+            "description": product.fullDescription,
+            "image": product.image,
+            "brand": {
+              "@type": "Brand",
+              "name": "Verde D'Oro"
+            },
+            "aggregateRating": product.rating ? {
+              "@type": "AggregateRating",
+              "ratingValue": product.rating,
+              "bestRating": "5",
+              "worstRating": "1"
+            } : undefined,
+            "offers": {
+              "@type": "Offer",
+              "availability": product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "priceCurrency": "EUR"
+            }
+          })}
+        </script>
+      </Helmet>
+
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="grid md:grid-cols-5 gap-8 items-start">
+          {/* Product Image - 40% */}
+          <div className="md:col-span-2">
+            <div className="relative rounded-lg overflow-hidden shadow-lg aspect-square">
+              <img 
+                src={product.image} 
+                alt={product.name}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            </div>
+          </div>
+
+          {/* Product Info - 60% */}
+          <div className="md:col-span-3">
+            <div className="flex items-center gap-3 mb-4">
+              <Badge variant="secondary" className="bg-verde-primary/10 text-verde-primary border-verde-primary/20">
+                {product.category}
+              </Badge>
+              {product.popular && (
+                <Badge variant="outline" className="border-oro-primary text-oro-primary">
+                  <Star className="h-3 w-3 mr-1" />
+                  Popolare
+                </Badge>
+              )}
+            </div>
+
+            <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
+              {product.name}
+            </h1>
+
+            <p className="font-body text-lg text-muted-foreground mb-6 leading-relaxed">
+              {product.shortDescription}
+            </p>
+
+            {/* Purchase Section */}
+            <Card className="border-2 border-oro-primary/20 shadow-oro mb-6">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center border-2 border-border rounded-lg">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={decrementQuantity}
+                      className="h-10 w-10"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <input 
+                      type="number" 
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-16 text-center border-x-2 border-border h-10 bg-background focus:outline-none"
+                      min="1"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={incrementQuantity}
+                      className="h-10 w-10"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Button 
+                    variant="oro" 
+                    size="lg" 
+                    className="flex-1 h-12 text-lg"
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="mr-2 h-5 w-5" />
+                    Aggiungi al Carrello
+                  </Button>
+                </div>
+
+                <p className="text-sm text-muted-foreground text-center">
+                  Coltivato a Reggio Emilia con semi biologici
+                </p>
+
+                <div className="mt-4 flex items-center justify-center">
+                  {product.inStock ? (
+                    <Badge variant="secondary" className="bg-verde-primary/10 text-verde-primary">
+                      ✓ Disponibile
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive">
+                      Non disponibile
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Product Information Tabs */}
+      <section className="container mx-auto px-4 py-12">
+        <Tabs defaultValue="descrizione" className="w-full">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-3 mb-8">
+            <TabsTrigger value="descrizione">Descrizione</TabsTrigger>
+            <TabsTrigger value="benefici">Benefici</TabsTrigger>
+            <TabsTrigger value="usi">Usi Culinari</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="descrizione" className="space-y-4">
+            <div className="prose prose-lg max-w-none">
+              <p className="text-muted-foreground leading-relaxed">
+                {product.fullDescription}
+              </p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="benefici">
+            <div className="grid md:grid-cols-2 gap-6">
+              {product.detailedBenefits.map((benefit, index) => {
+                const IconComponent = benefit.icon;
+                return (
+                  <Card key={index} className="border-verde-primary/20 hover:shadow-verde transition-shadow duration-300">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-lg bg-verde-primary/10">
+                          <IconComponent className="h-6 w-6 text-verde-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
+                          <p className="text-muted-foreground text-sm">{benefit.description}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="usi">
+            <Card className="border-oro-primary/20">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-xl">Suggerimenti per l'uso</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {product.culinaryUses}
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-4">
+                    {product.uses.map((use, index) => (
+                      <Badge key={index} variant="outline" className="border-oro-primary/30 text-oro-primary">
+                        {use}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </section>
+
+      {/* Related Products */}
+      <section className="container mx-auto px-4 py-16 bg-gradient-subtle">
+        <h2 className="font-display text-3xl font-bold text-center mb-12">
+          Altri prodotti che ti potrebbero interessare
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8">
+          {relatedProducts.map((relatedProduct) => (
+            <ProductCard
+              key={relatedProduct.id}
+              name={relatedProduct.name}
+              category={relatedProduct.category}
+              description={relatedProduct.shortDescription}
+              benefits={relatedProduct.benefits}
+              uses={relatedProduct.uses}
+              image={relatedProduct.image}
+              rating={relatedProduct.rating}
+              popular={relatedProduct.popular}
+              onCardClick={() => navigate(`/prodotto/${relatedProduct.id}`)}
+              onAddToCart={() => console.log(`Added ${relatedProduct.name} to cart`)}
+            />
+          ))}
+        </div>
+      </section>
+    </Layout>
+  );
+};
+
+export default ProductDetail;

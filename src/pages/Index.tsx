@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 const Index = () => {
+  const navigate = useNavigate();
   const benefits = [{
     icon: Heart,
     title: "Ricchi di Nutrienti",
@@ -48,6 +49,7 @@ const Index = () => {
     icon: Shield
   }];
   const featuredProducts = [{
+    id: "ravanello-rosso",
     name: "Rucola",
     description: "Sapore piccante e intenso",
     benefits: ["Ricca di vitamina K", "Antiossidanti naturali", "Sapore deciso"],
@@ -55,6 +57,7 @@ const Index = () => {
     image: varietiesImage,
     category: "Brassicaceae"
   }, {
+    id: "basilico",
     name: "Basilico",
     description: "Aroma mediterraneo concentrato",
     benefits: ["Oli essenziali", "Proprietà digestive", "Aroma intenso"],
@@ -62,6 +65,7 @@ const Index = () => {
     image: chefImage,
     category: "Erbe Aromatiche"
   }, {
+    id: "pisello",
     name: "Ravanello",
     description: "Croccante e leggermente piccante",
     benefits: ["Vitamina C", "Fibre", "Minerali"],
@@ -229,8 +233,8 @@ const Index = () => {
                 benefits={product.benefits}
                 uses={product.uses}
                 image={product.image}
-                onCardClick={() => console.log('Navigate to product:', product.name)}
-                onAddToCart={() => console.log('Add to cart:', product.name)}
+                onCardClick={() => navigate(`/prodotto/${product.id}`)}
+                onAddToCart={() => console.log(`Added ${product.name} to cart`)}
               />
             ))}
           </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +9,11 @@ import { ShoppingCart, Leaf, Star, Filter, Heart, Zap, Shield } from "lucide-rea
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 const Microgreens = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const categories = ["All", "Brassicaceae", "Legumi", "Erbe Aromatiche", "Cereali", "Amarantaceae"];
   const products = [{
+    id: "ravanello-rosso",
     name: "Rucola",
     category: "Brassicaceae",
     description: "Sapore piccante e intenso, perfetta per insalate gourmet",
@@ -20,6 +23,7 @@ const Microgreens = () => {
     rating: 4.9,
     popular: true
   }, {
+    id: "basilico",
     name: "Basilico",
     category: "Erbe Aromatiche",
     description: "Aroma mediterraneo concentrato, essenza della cucina italiana",
@@ -29,6 +33,7 @@ const Microgreens = () => {
     rating: 4.8,
     popular: true
   }, {
+    id: "ravanello-rosso",
     name: "Ravanello",
     category: "Brassicaceae",
     description: "Croccante e leggermente piccante, aggiunge carattere ai piatti",
@@ -38,6 +43,7 @@ const Microgreens = () => {
     rating: 4.7,
     popular: false
   }, {
+    id: "pisello",
     name: "Pisello",
     category: "Legumi",
     description: "Dolce e delicato, ricco di proteine vegetali",
@@ -47,6 +53,7 @@ const Microgreens = () => {
     rating: 4.6,
     popular: false
   }, {
+    id: "basilico",
     name: "Prezzemolo",
     category: "Erbe Aromatiche",
     description: "Fresco e aromatico, indispensabile in cucina",
@@ -56,6 +63,7 @@ const Microgreens = () => {
     rating: 4.5,
     popular: false
   }, {
+    id: "pisello",
     name: "Girasole",
     category: "Amarantaceae",
     description: "Croccante e nutriente, dal sapore leggermente nocciolato",
@@ -103,8 +111,8 @@ const Microgreens = () => {
                 image={product.image}
                 rating={product.rating}
                 popular={product.popular}
-                onCardClick={() => console.log('Navigate to product:', product.name)}
-                onAddToCart={() => console.log('Add to cart:', product.name)}
+                onCardClick={() => navigate(`/prodotto/${product.id}`)}
+                onAddToCart={() => console.log(`Added ${product.name} to cart`)}
               />
             ))}
           </div>

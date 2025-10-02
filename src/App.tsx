@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import ChiSiamo from "./pages/ChiSiamo";
 import Microgreens from "./pages/Microgreens";
 import MicrogreensCustom from "./pages/MicrogreensCustom";
+import ProductDetail from "./pages/ProductDetail";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
 import Contatti from "./pages/Contatti";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/chi-siamo" element={<ChiSiamo />} />
           <Route path="/microgreens" element={<Microgreens />} />
           <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
+          <Route path="/prodotto/:id" element={<ProductDetail />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogArticle />} />
           <Route path="/contatti" element={<Contatti />} />
