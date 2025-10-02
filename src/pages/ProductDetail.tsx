@@ -73,7 +73,7 @@ const microgreensData = {
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(100);
 
   const product = id ? microgreensData[id as keyof typeof microgreensData] : null;
 
@@ -97,8 +97,8 @@ const ProductDetail = () => {
     console.log(`Added ${quantity} ${product.name} to cart`);
   };
 
-  const incrementQuantity = () => setQuantity(q => q + 1);
-  const decrementQuantity = () => setQuantity(q => Math.max(1, q - 1));
+  const incrementQuantity = () => setQuantity(q => q + 100);
+  const decrementQuantity = () => setQuantity(q => Math.max(100, q - 100));
 
   return (
     <Layout>
@@ -171,49 +171,96 @@ const ProductDetail = () => {
             {/* Purchase Section */}
             <Card className="border-2 border-oro-primary/20 shadow-oro mb-6">
               <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center border-2 border-border rounded-lg">
+                {/* Quantity Label */}
+                <div className="mb-4">
+                  <label className="font-display font-semibold text-primary text-lg mb-3 block">
+                    Quantità
+                  </label>
+                  
+                  {/* Quick Preset Pills */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[100, 200, 300, 500].map((preset) => (
+                      <Button
+                        key={preset}
+                        variant={quantity === preset ? "verde" : "outline"}
+                        size="sm"
+                        onClick={() => setQuantity(preset)}
+                        className={`rounded-full px-4 transition-all duration-200 ${
+                          quantity === preset 
+                            ? 'shadow-verde' 
+                            : 'border-muted-foreground/30 hover:border-oro-primary hover:text-oro-primary'
+                        }`}
+                      >
+                        {preset} gr
+                      </Button>
+                    ))}
+                  </div>
+
+                  {/* Main Selector */}
+                  <div className="flex items-center justify-center gap-3 mb-3">
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="icon"
                       onClick={decrementQuantity}
-                      className="h-10 w-10"
+                      disabled={quantity <= 100}
+                      className="h-12 w-12 rounded-full border-2 disabled:opacity-30 hover:bg-verde-primary hover:text-white hover:border-verde-primary transition-all duration-200"
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-5 w-5" />
                     </Button>
-                    <input 
-                      type="number" 
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 text-center border-x-2 border-border h-10 bg-background focus:outline-none"
-                      min="1"
-                    />
+                    
+                    <div className="relative">
+                      <input 
+                        type="number" 
+                        value={quantity}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value) || 100;
+                          const rounded = Math.max(100, Math.round(value / 100) * 100);
+                          setQuantity(rounded);
+                        }}
+                        onFocus={(e) => e.target.select()}
+                        className="w-32 text-center text-2xl font-bold border-2 border-border rounded-lg h-12 bg-background focus:outline-none focus:border-verde-primary focus:ring-2 focus:ring-verde-primary/20 transition-all duration-200"
+                        min="100"
+                        step="100"
+                        inputMode="numeric"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium pointer-events-none">
+                        gr
+                      </span>
+                    </div>
+                    
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="icon"
                       onClick={incrementQuantity}
-                      className="h-10 w-10"
+                      className="h-12 w-12 rounded-full border-2 hover:bg-verde-primary hover:text-white hover:border-verde-primary transition-all duration-200"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-5 w-5" />
                     </Button>
                   </div>
 
-                  <Button 
-                    variant="oro" 
-                    size="lg" 
-                    className="flex-1 h-12 text-lg"
-                    onClick={handleAddToCart}
-                  >
-                    <ShoppingCart className="mr-2 h-5 w-5" />
-                    Aggiungi al Carrello
-                  </Button>
+                  {/* Minimum Order Notice */}
+                  <p className="text-xs text-muted-foreground text-center">
+                    Ordine minimo: 100 gr
+                  </p>
                 </div>
 
-                <p className="text-sm text-muted-foreground text-center">
+                {/* Add to Cart Button */}
+                <Button 
+                  variant="oro" 
+                  size="lg" 
+                  className="w-full h-14 text-lg mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Aggiungi al Carrello
+                </Button>
+
+                <p className="text-sm text-muted-foreground text-center mb-3">
                   Coltivato a Reggio Emilia con semi biologici
                 </p>
 
-                <div className="mt-4 flex items-center justify-center">
+                {/* Stock Status */}
+                <div className="flex items-center justify-center">
                   {product.inStock ? (
                     <Badge variant="secondary" className="bg-verde-primary/10 text-verde-primary">
                       ✓ Disponibile
