@@ -211,7 +211,7 @@ const ProductDetail = () => {
                       const value = parseInt(e.target.value) || 100;
                       const rounded = Math.max(100, Math.round(value / 100) * 100);
                       setQuantity(rounded);
-                    }} onFocus={e => e.target.select()} className="w-32 text-center text-2xl font-bold border-2 border-border rounded-lg h-12 bg-background focus:outline-none focus:border-verde-primary focus:ring-2 focus:ring-verde-primary/20 transition-all duration-200" min="100" step="100" inputMode="numeric" />
+                    }} onFocus={e => e.target.select()} className="w-32 text-center text-2xl font-bold border-2 border-border rounded-lg h-12 bg-background focus:outline-none focus:border-verde-primary focus:ring-2 focus:ring-verde-primary/20 transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" min="100" step="100" inputMode="numeric" />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium pointer-events-none">
                         gr
                       </span>
