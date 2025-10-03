@@ -188,9 +188,9 @@ const ProductDetail = () => {
               </p>
 
               {/* Purchase Section */}
-              <div className="flex justify-center md:justify-start">
-                <Card className="w-full md:max-w-md border border-border/50 bg-muted/30">
-                  <CardContent className="p-5">
+              <div className="flex justify-center">
+                <Card className="w-full md:max-w-sm border border-border/50 bg-muted/30">
+                  <CardContent className="p-4">
                     {/* Quantity Label */}
                     <div className="mb-4">
                       <label className="font-display font-medium text-primary text-base mb-2 block">
