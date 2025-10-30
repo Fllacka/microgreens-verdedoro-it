@@ -2,11 +2,14 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Leaf } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Menu, X, Leaf, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { totalItems, openCart } = useCart();
   const navigationItems = [{
     name: "Home",
     href: "/"
@@ -52,20 +55,53 @@ const Navigation = () => {
                 </Link>)}
             </div>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:flex md:items-center">
-              <Button variant="oro" size="sm" asChild>
-                
+            {/* Desktop CTA & Cart */}
+            <div className="hidden md:flex md:items-center md:gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={openCart}
+                aria-label="Apri carrello"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge 
+                    variant="default"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground"
+                  >
+                    {totalItems > 999 ? '999+' : totalItems}
+                  </Badge>
+                )}
               </Button>
             </div>
 
-            {/* Mobile Navigation */}
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" aria-label="Toggle menu">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
+            {/* Mobile Cart & Menu */}
+            <div className="flex items-center gap-2 md:hidden">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={openCart}
+                aria-label="Apri carrello"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge 
+                    variant="default"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground"
+                  >
+                    {totalItems > 999 ? '999+' : totalItems}
+                  </Badge>
+                )}
+              </Button>
+              
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label="Toggle menu">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
               <SheetContent side="right" className="w-80">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center space-x-3">
@@ -95,7 +131,8 @@ const Navigation = () => {
                 </div>
               </div>
             </SheetContent>
-          </Sheet>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ShoppingCart, Heart, Zap, Shield, Star, Leaf, Droplet, Sun } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useCart } from "@/contexts/CartContext";
 
 // Microgreens data
 const microgreensData = {
@@ -111,6 +112,7 @@ const ProductDetail = () => {
   }>();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(100);
+  const { addItem } = useCart();
   const product = id ? microgreensData[id as keyof typeof microgreensData] : null;
   if (!product) {
     return <Layout>
@@ -125,7 +127,14 @@ const ProductDetail = () => {
     ...data
   }));
   const handleAddToCart = () => {
-    console.log(`Added ${quantity}g ${product.name} to cart`);
+    if (!product || !id) return;
+    
+    addItem({
+      id,
+      name: product.name,
+      quantity,
+      image: product.image,
+    });
   };
   return <Layout>
       <Helmet>
