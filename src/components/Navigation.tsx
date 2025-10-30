@@ -9,7 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { totalItems, openCart } = useCart();
+  const { itemCount, openCart } = useCart();
   const navigationItems = [{
     name: "Home",
     href: "/"
@@ -65,12 +65,12 @@ const Navigation = () => {
                 aria-label="Apri carrello"
               >
                 <ShoppingBag className="h-5 w-5" />
-                {totalItems > 0 && (
+                {itemCount > 0 && (
                   <Badge 
                     variant="default"
                     className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground"
                   >
-                    {totalItems > 999 ? '999+' : totalItems}
+                    {itemCount > 9 ? '9+' : itemCount}
                   </Badge>
                 )}
               </Button>
@@ -86,12 +86,12 @@ const Navigation = () => {
                 aria-label="Apri carrello"
               >
                 <ShoppingBag className="h-5 w-5" />
-                {totalItems > 0 && (
+                {itemCount > 0 && (
                   <Badge 
                     variant="default"
                     className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground"
                   >
-                    {totalItems > 999 ? '999+' : totalItems}
+                    {itemCount > 9 ? '9+' : itemCount}
                   </Badge>
                 )}
               </Button>
