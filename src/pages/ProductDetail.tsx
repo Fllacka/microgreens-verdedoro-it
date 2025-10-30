@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import ProductCard from "@/components/ProductCard";
-import { ShoppingCart, Minus, Plus, Heart, Zap, Shield, Star, Leaf, Droplet, Sun } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ShoppingCart, Heart, Zap, Shield, Star, Leaf, Droplet, Sun } from "lucide-react";
 import { Helmet } from "react-helmet";
 
 // Microgreens data
@@ -124,10 +125,8 @@ const ProductDetail = () => {
     ...data
   }));
   const handleAddToCart = () => {
-    console.log(`Added ${quantity} ${product.name} to cart`);
+    console.log(`Added ${quantity}g ${product.name} to cart`);
   };
-  const incrementQuantity = () => setQuantity(q => q + 100);
-  const decrementQuantity = () => setQuantity(q => Math.max(100, q - 100));
   return <Layout>
       <Helmet>
         <title>{product.name} - Verde D'Oro Microgreens</title>
@@ -191,75 +190,28 @@ const ProductDetail = () => {
               <div className="flex justify-center">
                 <Card className="w-full md:max-w-sm border border-border/50 bg-muted/30">
                   <CardContent className="p-4">
-                    {/* Quantity Label */}
+                    {/* Quantity Selector */}
                     <div className="mb-4">
-                      <label className="font-display font-medium text-primary text-base mb-2 block">
-                        Quantità
+                      <label htmlFor="quantity" className="font-display font-medium text-primary text-sm mb-2 block">
+                        Seleziona quantità
                       </label>
                       
-                      {/* Quick Preset Pills */}
-                      <div className="flex gap-2 mb-3">
-                        {[100, 200, 300, 500].map((preset) => (
-                          <Button
-                            key={preset}
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setQuantity(preset)}
-                            className={`h-7 px-3 text-xs transition-all duration-200 ${
-                              quantity === preset
-                                ? 'bg-verde-primary text-white border-verde-primary hover:bg-verde-primary/90'
-                                : 'hover:border-verde-primary/50'
-                            }`}
-                          >
-                            {preset} gr
-                          </Button>
-                        ))}
-                      </div>
-
-                      {/* Main Selector */}
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={decrementQuantity} 
-                          disabled={quantity <= 100} 
-                          className="h-9 w-9 rounded-full border disabled:opacity-30 hover:bg-verde-primary hover:text-white hover:border-verde-primary transition-all duration-200"
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        
-                        <div className="relative">
-                          <input 
-                            type="number" 
-                            value={quantity} 
-                            onChange={e => {
-                              const value = parseInt(e.target.value) || 100;
-                              const rounded = Math.max(100, Math.round(value / 100) * 100);
-                              setQuantity(rounded);
-                            }} 
-                            onFocus={e => e.target.select()} 
-                            className="w-24 text-center text-lg font-semibold border border-border rounded-lg h-9 bg-background focus:outline-none focus:border-verde-primary focus:ring-1 focus:ring-verde-primary/20 transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
-                            min="100" 
-                            step="100" 
-                            inputMode="numeric" 
-                          />
-                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-medium pointer-events-none">
-                            gr
-                          </span>
-                        </div>
-                        
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          onClick={incrementQuantity} 
-                          className="h-9 w-9 rounded-full border hover:bg-verde-primary hover:text-white hover:border-verde-primary transition-all duration-200"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      {/* Minimum Order Notice */}
-                      <p className="text-[11px] text-muted-foreground text-center">
+                      <Select value={quantity.toString()} onValueChange={(value) => setQuantity(parseInt(value))}>
+                        <SelectTrigger id="quantity" className="w-full h-12 text-base">
+                          <SelectValue placeholder="Seleziona quantità" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="100">100 gr</SelectItem>
+                          <SelectItem value="200">200 gr</SelectItem>
+                          <SelectItem value="300">300 gr</SelectItem>
+                          <SelectItem value="400">400 gr</SelectItem>
+                          <SelectItem value="500">500 gr</SelectItem>
+                          <SelectItem value="750">750 gr</SelectItem>
+                          <SelectItem value="1000">1 kg</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <p className="text-xs text-muted-foreground mt-2">
                         Ordine minimo: 100 gr
                       </p>
                     </div>
