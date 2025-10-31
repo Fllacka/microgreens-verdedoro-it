@@ -47,18 +47,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
     
     setIsOpen(true);
-    toast({
-      title: "Aggiunto al carrello",
-      description: `${newItem.quantity}g di ${newItem.name}`,
-    });
   };
 
   const removeItem = (id: string) => {
     setItems(prev => prev.filter(item => item.id !== id));
-    toast({
-      title: "Rimosso dal carrello",
-      description: "Prodotto rimosso con successo",
-    });
   };
 
   const clearCart = () => {

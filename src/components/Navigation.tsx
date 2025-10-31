@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Leaf, ShoppingBag } from "lucide-react";
+import { Menu, X, Leaf, ShoppingBasket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 const Navigation = () => {
@@ -64,7 +64,7 @@ const Navigation = () => {
                 onClick={openCart}
                 aria-label="Apri carrello"
               >
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBasket className="h-5 w-5" />
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
@@ -85,7 +85,7 @@ const Navigation = () => {
                 onClick={openCart}
                 aria-label="Apri carrello"
               >
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBasket className="h-5 w-5" />
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
