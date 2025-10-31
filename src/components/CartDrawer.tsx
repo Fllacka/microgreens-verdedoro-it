@@ -5,27 +5,25 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { X, ShoppingBag, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 export function CartDrawer() {
-  const { items, removeItem, totalItems, isOpen, closeCart } = useCart();
-
-  return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
+  const {
+    items,
+    removeItem,
+    totalItems,
+    isOpen,
+    closeCart
+  } = useCart();
+  return <Sheet open={isOpen} onOpenChange={open => !open && closeCart()}>
       <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0">
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle className="flex items-center gap-2 text-xl">
             <ShoppingBag className="h-5 w-5" />
             Il tuo carrello
-            {totalItems > 0 && (
-              <span className="ml-auto text-sm font-normal text-muted-foreground">
-                {totalItems}g totali
-              </span>
-            )}
+            {totalItems > 0}
           </SheetTitle>
         </SheetHeader>
 
-        {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 px-6 text-center">
+        {items.length === 0 ? <div className="flex flex-col items-center justify-center flex-1 px-6 text-center">
             <ShoppingBag className="h-16 w-16 text-muted-foreground/30 mb-4" />
             <h3 className="font-display text-lg font-semibold mb-2">
               Il carrello è vuoto
@@ -39,21 +37,11 @@ export function CartDrawer() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-          </div>
-        ) : (
-          <>
+          </div> : <>
             <ScrollArea className="flex-1 px-6">
               <div className="space-y-4 py-4">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex gap-4 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-20 h-20 rounded object-cover"
-                    />
+                {items.map(item => <div key={item.id} className="flex gap-4 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                    <img src={item.image} alt={item.name} className="w-20 h-20 rounded object-cover" />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-display font-semibold text-sm truncate mb-1">
                         {item.name}
@@ -62,16 +50,10 @@ export function CartDrawer() {
                         {item.quantity}g
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 shrink-0"
-                      onClick={() => removeItem(item.id)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeItem(item.id)}>
                       <X className="h-4 w-4" />
                     </Button>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </ScrollArea>
 
@@ -84,35 +66,21 @@ export function CartDrawer() {
               <Separator />
               
               <div className="space-y-2">
-                <Button 
-                  variant="oro" 
-                  size="lg" 
-                  className="w-full"
-                  asChild
-                  onClick={closeCart}
-                >
+                <Button variant="oro" size="lg" className="w-full" asChild onClick={closeCart}>
                   <Link to="/contatti">
                     Richiedi preventivo
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={closeCart}
-                  asChild
-                >
+                <Button variant="outline" size="sm" className="w-full" onClick={closeCart} asChild>
                   <Link to="/microgreens">
                     Continua gli acquisti
                   </Link>
                 </Button>
               </div>
             </div>
-          </>
-        )}
+          </>}
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>;
 }
