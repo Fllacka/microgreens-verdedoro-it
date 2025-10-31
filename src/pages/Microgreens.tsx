@@ -112,7 +112,6 @@ const Microgreens = () => {
                 rating={product.rating}
                 popular={product.popular}
                 onCardClick={() => navigate(`/prodotto/${product.id}`)}
-                onAddToCart={() => console.log(`Added ${product.name} to cart`)}
               />
             ))}
           </div>

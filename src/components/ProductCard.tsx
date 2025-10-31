@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Star, Heart, Zap, Shield } from "lucide-react";
+import { Star, Heart, Zap, Shield } from "lucide-react";
 
 interface ProductCardProps {
   name: string;
@@ -13,7 +12,6 @@ interface ProductCardProps {
   rating?: number;
   popular?: boolean;
   onCardClick?: () => void;
-  onAddToCart?: () => void;
 }
 
 const ProductCard = ({
@@ -25,8 +23,7 @@ const ProductCard = ({
   image,
   rating,
   popular,
-  onCardClick,
-  onAddToCart
+  onCardClick
 }: ProductCardProps) => {
   return (
     <Card 
@@ -86,7 +83,7 @@ const ProductCard = ({
         </div>
         
         {/* Uses - small outlined tags in single row, max 3 */}
-        <div className="mb-6 flex-grow">
+        <div className="flex-grow">
           <div className="flex flex-wrap gap-1">
             {uses.slice(0, 3).map((use, i) => (
               <Badge key={i} variant="outline" className="text-xs px-2 py-0.5 border-muted-foreground/30 text-muted-foreground">
@@ -94,21 +91,6 @@ const ProductCard = ({
               </Badge>
             ))}
           </div>
-        </div>
-        
-        {/* CTA Button - gold outline, reduced padding, hover animation - pushed to bottom */}
-        <div className="mt-auto">
-          <Button 
-            variant="outline" 
-            className="cta-button w-full border-oro-primary text-oro-primary hover:bg-oro-primary hover:text-white px-4 py-2 transition-all duration-300"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddToCart?.();
-            }}
-          >
-            <ShoppingCart className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-            Aggiungi al Carrello
-          </Button>
         </div>
       </CardContent>
     </Card>
