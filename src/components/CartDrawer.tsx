@@ -40,18 +40,18 @@ export function CartDrawer() {
           </div> : <>
             <ScrollArea className="flex-1 px-6">
               <div className="space-y-4 py-4">
-                {items.map(item => <div key={item.id} className="flex gap-4 p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                    <img src={item.image} alt={item.name} className="w-20 h-20 rounded object-cover" />
+                {items.map(item => <div key={item.id} className="flex gap-3 p-2 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
+                    <img src={item.image} alt={item.name} className="w-14 h-14 rounded object-cover" />
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-display font-semibold text-sm truncate mb-1">
+                      <h4 className="font-display font-semibold text-xs truncate mb-0.5">
                         {item.name}
                       </h4>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {item.quantity}g
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeItem(item.id)}>
-                      <X className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeItem(item.id)}>
+                      <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>)}
               </div>
