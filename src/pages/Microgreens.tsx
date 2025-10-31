@@ -5,11 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
+import { useCart } from "@/contexts/CartContext";
 import { ShoppingCart, Leaf, Star, Filter, Heart, Zap, Shield } from "lucide-react";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 const Microgreens = () => {
   const navigate = useNavigate();
+  const { addItem } = useCart();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const categories = ["All", "Brassicaceae", "Legumi", "Erbe Aromatiche", "Cereali", "Amarantaceae"];
   const products = [{
@@ -112,6 +114,14 @@ const Microgreens = () => {
                 rating={product.rating}
                 popular={product.popular}
                 onCardClick={() => navigate(`/prodotto/${product.id}`)}
+                onAddToCart={() => {
+                  addItem({
+                    id: product.id,
+                    name: product.name,
+                    quantity: 50,
+                    image: product.image
+                  });
+                }}
               />
             ))}
           </div>

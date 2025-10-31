@@ -305,7 +305,14 @@ const ProductDetail = () => {
           Altri prodotti che ti potrebbero interessare
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
-          {relatedProducts.map(relatedProduct => <ProductCard key={relatedProduct.id} name={relatedProduct.name} category={relatedProduct.category} description={relatedProduct.shortDescription} benefits={relatedProduct.benefits} uses={relatedProduct.uses} image={relatedProduct.image} rating={relatedProduct.rating} popular={relatedProduct.popular} onCardClick={() => navigate(`/prodotto/${relatedProduct.id}`)} />)}
+          {relatedProducts.map(relatedProduct => <ProductCard key={relatedProduct.id} name={relatedProduct.name} category={relatedProduct.category} description={relatedProduct.shortDescription} benefits={relatedProduct.benefits} uses={relatedProduct.uses} image={relatedProduct.image} rating={relatedProduct.rating} popular={relatedProduct.popular} onCardClick={() => navigate(`/prodotto/${relatedProduct.id}`)} onAddToCart={() => {
+                  addItem({
+                    id: relatedProduct.id,
+                    name: relatedProduct.name,
+                    quantity: 50,
+                    image: relatedProduct.image
+                  });
+                }} />)}
         </div>
       </section>
     </Layout>;

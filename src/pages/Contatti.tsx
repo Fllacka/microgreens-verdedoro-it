@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/CartContext";
 import { 
   Phone, 
   Mail, 
@@ -19,22 +20,55 @@ import {
 
 const Contatti = () => {
   const { toast } = useToast();
+  const { items: cartItems } = useCart();
   const [isLoading, setIsLoading] = useState(false);
-  const [cartItems] = useState([
-    { name: "Rucola", quantity: "2x 50g", price: "€8,00" },
-    { name: "Basilico", quantity: "1x 100g", price: "€6,50" }
-  ]);
+  const [formData, setFormData] = useState({
+    nome: "",
+    cognome: "",
+    email: "",
+    telefono: "",
+    azienda: "",
+    messaggio: ""
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate form submission
+    // Build products list for WhatsApp message
+    const productsText = cartItems.length > 0 
+      ? `\n\nProdotti selezionati:\n${cartItems.map(item => `- ${item.name} (${item.quantity}g)`).join('\n')}`
+      : '';
+    
+    // Build WhatsApp message
+    const message = `Richiesta preventivo da ${formData.nome} ${formData.cognome}
+    
+Email: ${formData.email}
+Telefono: ${formData.telefono}
+${formData.azienda ? `Azienda: ${formData.azienda}` : ''}
+
+Messaggio:
+${formData.messaggio}${productsText}`;
+    
+    // Open WhatsApp with pre-filled message
+    const whatsappUrl = `https://wa.me/393330000000?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
     setTimeout(() => {
       setIsLoading(false);
       toast({
-        title: "Messaggio inviato!",
+        title: "Richiesta inviata!",
         description: "Ti contatteremo entro 24 ore per confermare la tua richiesta.",
+      });
+      
+      // Reset form
+      setFormData({
+        nome: "",
+        cognome: "",
+        email: "",
+        telefono: "",
+        azienda: "",
+        messaggio: ""
       });
     }, 1000);
   };
@@ -111,19 +145,15 @@ const Contatti = () => {
                             <div>
                               <span className="font-body font-medium">{item.name}</span>
                               <span className="text-muted-foreground text-sm ml-2">
-                                {item.quantity}
+                                {item.quantity}g
                               </span>
                             </div>
-                            <span className="font-body font-semibold text-primary">
-                              {item.price}
-                            </span>
                           </div>
                         ))}
                         <div className="border-t pt-3 mt-3">
-                          <div className="flex justify-between items-center font-semibold">
-                            <span>Totale:</span>
-                            <span className="text-primary">€14,50</span>
-                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Riceverai un preventivo dettagliato via WhatsApp
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -140,6 +170,8 @@ const Contatti = () => {
                           placeholder="Il tuo nome"
                           required
                           className="mt-2"
+                          value={formData.nome}
+                          onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                         />
                       </div>
                       <div>
@@ -151,6 +183,8 @@ const Contatti = () => {
                           placeholder="Il tuo cognome"
                           required
                           className="mt-2"
+                          value={formData.cognome}
+                          onChange={(e) => setFormData({ ...formData, cognome: e.target.value })}
                         />
                       </div>
                     </div>
@@ -166,6 +200,8 @@ const Contatti = () => {
                           placeholder="nome@email.com"
                           required
                           className="mt-2"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                       </div>
                       <div>
@@ -177,6 +213,8 @@ const Contatti = () => {
                           type="tel"
                           placeholder="+39 000 000 0000"
                           className="mt-2"
+                          value={formData.telefono}
+                          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                         />
                       </div>
                     </div>
@@ -189,6 +227,8 @@ const Contatti = () => {
                         id="azienda"
                         placeholder="Nome della tua attività (opzionale)"
                         className="mt-2"
+                        value={formData.azienda}
+                        onChange={(e) => setFormData({ ...formData, azienda: e.target.value })}
                       />
                     </div>
 
@@ -202,6 +242,8 @@ const Contatti = () => {
                         rows={6}
                         required
                         className="mt-2"
+                        value={formData.messaggio}
+                        onChange={(e) => setFormData({ ...formData, messaggio: e.target.value })}
                       />
                     </div>
 

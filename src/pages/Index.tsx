@@ -4,12 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
+import { useCart } from "@/contexts/CartContext";
 import { Leaf, Heart, Truck, Shield, Star, ArrowRight, CheckCircle, ShoppingCart } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 const Index = () => {
   const navigate = useNavigate();
+  const { addItem } = useCart();
   const benefits = [{
     icon: Heart,
     title: "Ricchi di Nutrienti",
@@ -234,6 +236,14 @@ const Index = () => {
                 uses={product.uses}
                 image={product.image}
                 onCardClick={() => navigate(`/prodotto/${product.id}`)}
+                onAddToCart={() => {
+                  addItem({
+                    id: product.id,
+                    name: product.name,
+                    quantity: 50,
+                    image: product.image
+                  });
+                }}
               />
             ))}
           </div>
