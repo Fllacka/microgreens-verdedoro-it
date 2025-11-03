@@ -15,16 +15,6 @@ const Microgreens = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const categories = ["All", "Brassicaceae", "Legumi", "Erbe Aromatiche", "Cereali", "Amarantaceae"];
   const products = [{
-    id: "ravanello-rosso",
-    name: "Rucola",
-    category: "Brassicaceae",
-    description: "Sapore piccante e intenso, perfetta per insalate gourmet",
-    benefits: ["Ricca di vitamina K", "Antiossidanti naturali", "Sapore deciso"],
-    uses: ["Insalate", "Pizza", "Carpacci"],
-    image: varietiesImage,
-    rating: 4.9,
-    popular: true
-  }, {
     id: "basilico",
     name: "Basilico",
     category: "Erbe Aromatiche",
@@ -32,18 +22,18 @@ const Microgreens = () => {
     benefits: ["Oli essenziali", "Proprietà digestive", "Aroma intenso"],
     uses: ["Pasta", "Bruschette", "Caprese"],
     image: chefImage,
-    rating: 4.8,
+    rating: 4.9,
     popular: true
   }, {
     id: "ravanello-rosso",
-    name: "Ravanello",
+    name: "Ravanello Rosso",
     category: "Brassicaceae",
     description: "Croccante e leggermente piccante, aggiunge carattere ai piatti",
     benefits: ["Vitamina C", "Fibre", "Minerali"],
     uses: ["Sushi", "Tartare", "Antipasti"],
     image: varietiesImage,
-    rating: 4.7,
-    popular: false
+    rating: 4.8,
+    popular: true
   }, {
     id: "pisello",
     name: "Pisello",
@@ -52,27 +42,7 @@ const Microgreens = () => {
     benefits: ["Proteine", "Vitamine del gruppo B", "Ferro"],
     uses: ["Zuppe", "Risotti", "Contorni"],
     image: chefImage,
-    rating: 4.6,
-    popular: false
-  }, {
-    id: "basilico",
-    name: "Prezzemolo",
-    category: "Erbe Aromatiche",
-    description: "Fresco e aromatico, indispensabile in cucina",
-    benefits: ["Vitamina A", "Ferro", "Calcio"],
-    uses: ["Condimenti", "Salse", "Decorazioni"],
-    image: varietiesImage,
-    rating: 4.5,
-    popular: false
-  }, {
-    id: "pisello",
-    name: "Girasole",
-    category: "Amarantaceae",
-    description: "Croccante e nutriente, dal sapore leggermente nocciolato",
-    benefits: ["Vitamina E", "Magnesio", "Selenio"],
-    uses: ["Insalate", "Bowls", "Smoothies"],
-    image: chefImage,
-    rating: 4.4,
+    rating: 4.7,
     popular: false
   }];
   const filteredProducts = selectedCategory === "All" ? products : products.filter(product => product.category === selectedCategory);

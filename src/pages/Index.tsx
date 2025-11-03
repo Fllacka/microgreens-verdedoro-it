@@ -51,14 +51,6 @@ const Index = () => {
     icon: Shield
   }];
   const featuredProducts = [{
-    id: "ravanello-rosso",
-    name: "Rucola",
-    description: "Sapore piccante e intenso",
-    benefits: ["Ricca di vitamina K", "Antiossidanti naturali", "Sapore deciso"],
-    uses: ["Insalate", "Pizza", "Carpacci"],
-    image: varietiesImage,
-    category: "Brassicaceae"
-  }, {
     id: "basilico",
     name: "Basilico",
     description: "Aroma mediterraneo concentrato",
@@ -67,13 +59,21 @@ const Index = () => {
     image: chefImage,
     category: "Erbe Aromatiche"
   }, {
-    id: "pisello",
-    name: "Ravanello",
+    id: "ravanello-rosso",
+    name: "Ravanello Rosso",
     description: "Croccante e leggermente piccante",
     benefits: ["Vitamina C", "Fibre", "Minerali"],
     uses: ["Sushi", "Tartare", "Antipasti"],
     image: varietiesImage,
     category: "Brassicaceae"
+  }, {
+    id: "pisello",
+    name: "Pisello",
+    description: "Dolce e delicato",
+    benefits: ["Proteine", "Vitamine del gruppo B", "Ferro"],
+    uses: ["Zuppe", "Risotti", "Contorni"],
+    image: chefImage,
+    category: "Legumi"
   }];
   return <Layout>
       {/* Hero Section */}
