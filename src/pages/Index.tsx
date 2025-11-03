@@ -236,14 +236,6 @@ const Index = () => {
                 uses={product.uses}
                 image={product.image}
                 onCardClick={() => navigate(`/prodotto/${product.id}`)}
-                onAddToCart={() => {
-                  addItem({
-                    id: product.id,
-                    name: product.name,
-                    quantity: 50,
-                    image: product.image
-                  });
-                }}
               />
             ))}
           </div>
