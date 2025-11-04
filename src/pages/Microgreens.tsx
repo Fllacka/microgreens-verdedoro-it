@@ -1,19 +1,13 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingCart, Leaf, Star, Filter, Heart, Zap, Shield } from "lucide-react";
+import { Leaf, Star } from "lucide-react";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 const Microgreens = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const categories = ["All", "Brassicaceae", "Legumi", "Erbe Aromatiche", "Cereali", "Amarantaceae"];
   const products = [{
     id: "basilico",
     name: "Basilico",
@@ -45,7 +39,6 @@ const Microgreens = () => {
     rating: 4.7,
     popular: false
   }];
-  const filteredProducts = selectedCategory === "All" ? products : products.filter(product => product.category === selectedCategory);
   return <Layout>
       {/* Hero Section */}
       <section className="section-padding bg-gradient-subtle">
@@ -57,14 +50,6 @@ const Microgreens = () => {
             Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. 
             Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali.
           </p>
-          
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            <Filter className="h-5 w-5 text-muted-foreground mr-2 mt-2" />
-            {categories.map(category => <Button key={category} variant={selectedCategory === category ? "verde" : "outline"} size="sm" onClick={() => setSelectedCategory(category)} className="mb-2">
-                {category}
-              </Button>)}
-          </div>
         </div>
       </section>
 
@@ -72,7 +57,7 @@ const Microgreens = () => {
       <section className="section-padding bg-background">
         <div className="container-width">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product, index) => (
+            {products.map((product, index) => (
               <ProductCard
                 key={index}
                 name={product.name}

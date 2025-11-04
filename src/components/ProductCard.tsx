@@ -37,13 +37,6 @@ const ProductCard = ({
         {/* Gradient overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
         
-        {/* Category badge - top-left, semi-transparent white with backdrop blur */}
-        <div className="absolute top-3 left-3 z-10">
-          <Badge className="bg-white/90 text-foreground border-0 backdrop-blur-sm text-xs">
-            {category}
-          </Badge>
-        </div>
-        
         {/* Popular badge - outline style with gold */}
         {popular && (
           <div className="absolute top-3 right-3 z-10">
