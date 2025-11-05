@@ -88,14 +88,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     try {
+      const redirectUrl = `${window.location.origin}/admin`;
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
       });
       if (error) throw error;
       toast({
         title: "Success",
-        description: "Account created successfully",
+        description: "Account created! Please check your email or add admin role in backend.",
       });
     } catch (error: any) {
       toast({
