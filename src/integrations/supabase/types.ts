@@ -14,16 +14,383 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          canonical_url: string | null
+          category: string | null
+          change_frequency: string | null
+          content: string | null
+          created_at: string | null
+          excerpt: string | null
+          featured_image_id: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_id: string | null
+          og_title: string | null
+          priority: number | null
+          published: boolean | null
+          published_at: string | null
+          robots: string | null
+          slug: string
+          structured_data: Json | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          change_frequency?: string | null
+          content?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image_id?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_id?: string | null
+          og_title?: string | null
+          priority?: number | null
+          published?: boolean | null
+          published_at?: string | null
+          robots?: string | null
+          slug: string
+          structured_data?: Json | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          canonical_url?: string | null
+          category?: string | null
+          change_frequency?: string | null
+          content?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image_id?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_id?: string | null
+          og_title?: string | null
+          priority?: number | null
+          published?: boolean | null
+          published_at?: string | null
+          robots?: string | null
+          slug?: string
+          structured_data?: Json | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_featured_image_id_fkey"
+            columns: ["featured_image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blog_posts_og_image_id_fkey"
+            columns: ["og_image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media: {
+        Row: {
+          alt_text: string | null
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string
+          id: string
+          storage_path: string
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          alt_text?: string | null
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type: string
+          id?: string
+          storage_path: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          alt_text?: string | null
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string
+          id?: string
+          storage_path?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
+      pages: {
+        Row: {
+          canonical_url: string | null
+          change_frequency: string | null
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_description: string | null
+          og_image_id: string | null
+          og_title: string | null
+          priority: number | null
+          published: boolean | null
+          robots: string | null
+          slug: string
+          structured_data: Json | null
+          template: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_url?: string | null
+          change_frequency?: string | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_id?: string | null
+          og_title?: string | null
+          priority?: number | null
+          published?: boolean | null
+          robots?: string | null
+          slug: string
+          structured_data?: Json | null
+          template?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_url?: string | null
+          change_frequency?: string | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_description?: string | null
+          og_image_id?: string | null
+          og_title?: string | null
+          priority?: number | null
+          published?: boolean | null
+          robots?: string | null
+          slug?: string
+          structured_data?: Json | null
+          template?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pages_og_image_id_fkey"
+            columns: ["og_image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          benefits: string[] | null
+          canonical_url: string | null
+          category: string | null
+          change_frequency: string | null
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          image_id: string | null
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          og_description: string | null
+          og_image_id: string | null
+          og_title: string | null
+          popular: boolean | null
+          price: number | null
+          priority: number | null
+          published: boolean | null
+          rating: number | null
+          robots: string | null
+          slug: string
+          structured_data: Json | null
+          updated_at: string | null
+          uses: string[] | null
+        }
+        Insert: {
+          benefits?: string[] | null
+          canonical_url?: string | null
+          category?: string | null
+          change_frequency?: string | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_id?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          og_description?: string | null
+          og_image_id?: string | null
+          og_title?: string | null
+          popular?: boolean | null
+          price?: number | null
+          priority?: number | null
+          published?: boolean | null
+          rating?: number | null
+          robots?: string | null
+          slug: string
+          structured_data?: Json | null
+          updated_at?: string | null
+          uses?: string[] | null
+        }
+        Update: {
+          benefits?: string[] | null
+          canonical_url?: string | null
+          category?: string | null
+          change_frequency?: string | null
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_id?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          og_description?: string | null
+          og_image_id?: string | null
+          og_title?: string | null
+          popular?: boolean | null
+          price?: number | null
+          priority?: number | null
+          published?: boolean | null
+          rating?: number | null
+          robots?: string | null
+          slug?: string
+          structured_data?: Json | null
+          updated_at?: string | null
+          uses?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_og_image_id_fkey"
+            columns: ["og_image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      redirects: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          created_by: string | null
+          from_path: string
+          id: string
+          redirect_type: number | null
+          to_path: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          from_path: string
+          id?: string
+          redirect_type?: number | null
+          to_path: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          from_path?: string
+          id?: string
+          redirect_type?: number | null
+          to_path?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +517,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor", "user"],
+    },
   },
 } as const
