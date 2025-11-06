@@ -131,14 +131,7 @@ const BlogArticle = () => {
                 
                 
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  {nutritionalData.map((item, index) => (
-                    <div key={index} className="bg-card p-6 rounded-lg">
-                      <h4 className="font-display text-lg font-semibold text-primary mb-2">{item.nutrient}</h4>
-                      <p className="text-accent font-semibold mb-2">{item.comparison}</p>
-                      <p className="text-sm text-muted-foreground mb-1">in {item.microgreen}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                  ))}
+                  {nutritionalData.map((item, index) => {})}
                 </div>
               </div>
 
@@ -169,20 +162,10 @@ const BlogArticle = () => {
 
               {/* Benefits Section */}
               <div className="mb-16">
-                <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
-                  I Benefici Unici dei Microgreens
-                </h2>
+                
                 
                 <div className="grid md:grid-cols-3 gap-8">
-                  {benefits.map((benefit, index) => <Card key={index} className="border-border/50 bg-card text-center hover-lift p-8">
-                      <div className="text-4xl mb-4">{benefit.icon}</div>
-                      <h3 className="font-display text-xl font-semibold text-foreground mb-4">
-                        {benefit.title}
-                      </h3>
-                      <p className="font-body text-muted-foreground leading-relaxed">
-                        {benefit.description}
-                      </p>
-                    </Card>)}
+                  {benefits.map((benefit, index) => {})}
                 </div>
               </div>
 
