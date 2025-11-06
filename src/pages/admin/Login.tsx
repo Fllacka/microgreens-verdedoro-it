@@ -32,12 +32,12 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-subtle p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{isSignUp ? "Create Admin Account" : "Admin Login"}</CardTitle>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
           <CardDescription>
-            {isSignUp ? "Sign up to create your admin account" : "Sign in to access the CMS"}
+            {isSignUp ? "Enter your details to create your account" : "Enter your credentials to access the CMS"}
           </CardDescription>
         </CardHeader>
         <CardContent>

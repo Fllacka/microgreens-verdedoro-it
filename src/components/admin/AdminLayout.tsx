@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, ShoppingBag, FileText, Files, Image, ArrowLeftRight } from "lucide-react";
+import { LogOut, LayoutDashboard, ShoppingBag, FileText, Files, Image, ArrowLeftRight, Users } from "lucide-react";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -69,12 +69,20 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             </Button>
           </Link>
           {userRole === "admin" && (
-            <Link to="/admin/redirects">
+            <>
+              <Link to="/admin/users">
+                <Button variant={isActive("/admin/users") ? "default" : "ghost"} className="w-full justify-start">
+                  <Users className="mr-2 h-4 w-4" />
+                  Users
+                </Button>
+              </Link>
+              <Link to="/admin/redirects">
               <Button variant={isActive("/admin/redirects") ? "default" : "ghost"} className="w-full justify-start">
-                <ArrowLeftRight className="mr-2 h-4 w-4" />
+              <ArrowLeftRight className="mr-2 h-4 w-4" />
                 Redirects
               </Button>
             </Link>
+            </>
           )}
         </nav>
 
