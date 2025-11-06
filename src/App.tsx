@@ -47,7 +47,7 @@ const App = () => (
               <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
               <Route path="/prodotto/:id" element={<ProductDetail />} />
               <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:id" element={<BlogArticle />} />
+              <Route path="/blog/:slug" element={<BlogArticle />} />
               <Route path="/contatti" element={<Contatti />} />
               
               {/* Admin Routes */}
