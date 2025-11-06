@@ -1,0 +1,66 @@
+interface ContentBlock {
+  id: string;
+  type: "heading" | "text" | "image";
+  level?: "h1" | "h2" | "h3";
+  content?: string;
+  url?: string;
+  alt?: string;
+}
+
+interface ContentBlockRendererProps {
+  blocks: ContentBlock[];
+}
+
+export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
+  if (!blocks || blocks.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="space-y-8">
+      {blocks.map((block) => {
+        switch (block.type) {
+          case "heading":
+            const HeadingTag = block.level || "h2";
+            const headingClasses = {
+              h1: "font-display text-4xl md:text-5xl font-bold text-foreground mb-6",
+              h2: "font-display text-3xl md:text-4xl font-bold text-foreground mb-6",
+              h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4",
+            };
+            return (
+              <HeadingTag key={block.id} className={headingClasses[block.level || "h2"]}>
+                {block.content}
+              </HeadingTag>
+            );
+
+          case "text":
+            return (
+              <div
+                key={block.id}
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: block.content || "" }}
+              />
+            );
+
+          case "image":
+            return (
+              <div key={block.id} className="my-8">
+                <img
+                  src={block.url}
+                  alt={block.alt || ""}
+                  className="w-full rounded-lg shadow-soft"
+                  loading="lazy"
+                />
+                {block.alt && (
+                  <p className="text-sm text-muted-foreground text-center mt-2">{block.alt}</p>
+                )}
+              </div>
+            );
+
+          default:
+            return null;
+        }
+      })}
+    </div>
+  );
+};

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBlockEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -23,11 +23,12 @@ const AdminBlogEdit = () => {
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
-    content: "",
     category: "",
     tags: "",
     published: false,
   });
+
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
 
   const [seoData, setSeoData] = useState({
     slug: "",
@@ -61,11 +62,24 @@ const AdminBlogEdit = () => {
       setFormData({
         title: data.title || "",
         excerpt: data.excerpt || "",
-        content: data.content || "",
         category: data.category || "",
         tags: data.tags?.join(", ") || "",
         published: data.published || false,
       });
+
+      // Load content blocks (new format) or migrate from old content field
+      if (data.content_blocks && Array.isArray(data.content_blocks) && data.content_blocks.length > 0) {
+        setContentBlocks(data.content_blocks as unknown as ContentBlock[]);
+      } else if (data.content) {
+        // Migrate old content to a single text block
+        setContentBlocks([
+          {
+            id: crypto.randomUUID(),
+            type: "text",
+            content: data.content,
+          },
+        ]);
+      }
 
       setSeoData({
         slug: data.slug || "",
@@ -100,7 +114,7 @@ const AdminBlogEdit = () => {
         title: formData.title,
         slug: seoData.slug,
         excerpt: formData.excerpt,
-        content: formData.content,
+        content_blocks: contentBlocks as any,
         category: formData.category,
         tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
         published: formData.published,
@@ -195,11 +209,8 @@ const AdminBlogEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
-                  <RichTextEditor
-                    content={formData.content}
-                    onChange={(content) => setFormData({ ...formData, content })}
-                  />
+                  <Label>Content Blocks</Label>
+                  <ContentBlockEditor blocks={contentBlocks} onChange={setContentBlocks} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

@@ -131,7 +131,20 @@ const BlogArticle = () => {
                 
                 
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  {nutritionalData.map((item, index) => {})}
+                  {nutritionalData.map((item, index) => (
+                    <Card key={index}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-display text-xl font-semibold mb-2">{item.nutrient}</h3>
+                            <p className="text-primary font-semibold mb-2">{item.comparison}</p>
+                            <p className="text-sm text-muted-foreground mb-1">Microgreen: {item.microgreen}</p>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
 
@@ -165,7 +178,15 @@ const BlogArticle = () => {
                 
                 
                 <div className="grid md:grid-cols-3 gap-8">
-                  {benefits.map((benefit, index) => {})}
+                  {benefits.map((benefit, index) => (
+                    <Card key={index}>
+                      <CardContent className="p-6 text-center">
+                        <div className="text-4xl mb-4">{benefit.icon}</div>
+                        <h3 className="font-display text-xl font-semibold mb-3">{benefit.title}</h3>
+                        <p className="text-muted-foreground">{benefit.description}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
 
