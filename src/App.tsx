@@ -24,6 +24,9 @@ import AdminBlog from "./pages/admin/Blog";
 import AdminBlogEdit from "./pages/admin/BlogEdit";
 import AdminRedirects from "./pages/admin/Redirects";
 import AdminUsers from "./pages/admin/Users";
+import AdminPages from "./pages/admin/Pages";
+import AdminPageEdit from "./pages/admin/PageEdit";
+import AdminMedia from "./pages/admin/Media";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +57,9 @@ const App = () => (
               <Route path="/admin/products/:id" element={<AdminProductEdit />} />
               <Route path="/admin/blog" element={<AdminBlog />} />
               <Route path="/admin/blog/:id" element={<AdminBlogEdit />} />
+              <Route path="/admin/pages" element={<AdminPages />} />
+              <Route path="/admin/pages/:id" element={<AdminPageEdit />} />
+              <Route path="/admin/media" element={<AdminMedia />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/redirects" element={<AdminRedirects />} />
               
