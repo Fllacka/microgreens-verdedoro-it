@@ -20,6 +20,9 @@ interface Product {
   uses: string[];
   rating: number;
   popular: boolean;
+  media?: {
+    file_path: string;
+  };
 }
 
 const Microgreens = () => {
@@ -33,13 +36,26 @@ const Microgreens = () => {
       try {
         const { data, error } = await supabase
           .from("products")
-          .select("id, name, slug, description, category, benefits, uses, rating, popular")
+          .select(`
+            id,
+            name,
+            slug,
+            description,
+            category,
+            benefits,
+            uses,
+            rating,
+            popular,
+            media:media!products_image_id_fkey (
+              file_path
+            )
+          `)
           .eq("published", true)
           .order("popular", { ascending: false })
           .order("name");
 
         if (error) throw error;
-        if (data) setProducts(data as Product[]);
+        if (data) setProducts(data as any);
       } catch (error) {
         console.error("Error fetching products:", error);
         toast.error("Errore nel caricamento dei prodotti");
@@ -87,7 +103,7 @@ const Microgreens = () => {
                   description={product.description}
                   benefits={product.benefits}
                   uses={product.uses}
-                  image={chefImage}
+                  image={product.media?.file_path || chefImage}
                   rating={product.rating}
                   popular={product.popular}
                   onCardClick={() => navigate(`/prodotto/${product.slug}`)}

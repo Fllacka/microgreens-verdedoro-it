@@ -37,6 +37,9 @@ interface Product {
   meta_title: string;
   meta_description: string;
   content_blocks: ContentBlock[];
+  media?: {
+    file_path: string;
+  };
 }
 
 const ProductDetail = () => {
@@ -56,7 +59,12 @@ const ProductDetail = () => {
         // Fetch current product
         const { data: productData, error: productError } = await supabase
           .from("products")
-          .select("*")
+          .select(`
+            *,
+            media:media!products_image_id_fkey (
+              file_path
+            )
+          `)
           .eq("slug", slug)
           .eq("published", true)
           .maybeSingle();
@@ -67,12 +75,17 @@ const ProductDetail = () => {
           setProduct({
             ...productData,
             content_blocks: (productData.content_blocks as unknown as ContentBlock[]) || [],
-          } as Product);
+          } as any);
 
           // Fetch related products (exclude current product)
           const { data: relatedData, error: relatedError } = await supabase
             .from("products")
-            .select("*")
+            .select(`
+              *,
+              media:media!products_image_id_fkey (
+                file_path
+              )
+            `)
             .eq("published", true)
             .neq("slug", slug)
             .limit(3);
@@ -83,7 +96,7 @@ const ProductDetail = () => {
               relatedData.map((p) => ({
                 ...p,
                 content_blocks: (p.content_blocks as unknown as ContentBlock[]) || [],
-              })) as Product[]
+              })) as any
             );
           }
         }
@@ -125,7 +138,7 @@ const ProductDetail = () => {
       id: product.slug,
       name: product.name,
       quantity,
-      image: "/src/assets/microgreens-varieties.jpg", // Default image, you can add image_id later
+      image: product.media?.file_path || "/placeholder.svg",
     });
   };
   return <Layout>
@@ -166,7 +179,7 @@ const ProductDetail = () => {
             {/* Product Image */}
             <div className="relative rounded-lg overflow-hidden shadow-lg aspect-square">
               <img 
-                src="/src/assets/microgreens-varieties.jpg" 
+                src={product.media?.file_path || "/placeholder.svg"} 
                 alt={product.name} 
                 className="w-full h-full object-cover" 
                 loading="eager" 
@@ -271,7 +284,7 @@ const ProductDetail = () => {
               description={relatedProduct.description}
               benefits={relatedProduct.benefits}
               uses={relatedProduct.uses}
-              image="/src/assets/microgreens-varieties.jpg"
+              image={relatedProduct.media?.file_path || "/placeholder.svg"}
               rating={relatedProduct.rating}
               popular={relatedProduct.popular}
               onCardClick={() => navigate(`/prodotto/${relatedProduct.slug}`)}

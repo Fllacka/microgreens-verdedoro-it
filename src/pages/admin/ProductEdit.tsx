@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
+import { MediaSelector } from "@/components/admin/MediaSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Save, ArrowLeft } from "lucide-react";
@@ -31,6 +32,7 @@ const AdminProductEdit = () => {
     rating: "",
     popular: false,
     published: false,
+    image_id: null as string | null,
   });
 
   const [seoData, setSeoData] = useState({
@@ -73,6 +75,7 @@ const AdminProductEdit = () => {
         rating: data.rating?.toString() || "",
         popular: data.popular || false,
         published: data.published || false,
+        image_id: data.image_id || null,
       });
 
       setSeoData({
@@ -116,6 +119,7 @@ const AdminProductEdit = () => {
         rating: formData.rating ? parseFloat(formData.rating) : null,
         popular: formData.popular,
         published: formData.published,
+        image_id: formData.image_id,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
         og_title: seoData.ogTitle,
@@ -270,6 +274,18 @@ const AdminProductEdit = () => {
                     onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Featured Image</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MediaSelector
+                  value={formData.image_id}
+                  onChange={(imageId) => setFormData({ ...formData, image_id: imageId })}
+                />
               </CardContent>
             </Card>
 
