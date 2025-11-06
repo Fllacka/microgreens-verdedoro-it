@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
@@ -5,41 +6,59 @@ import { useCart } from "@/contexts/CartContext";
 import { Leaf, Star } from "lucide-react";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Helmet } from "react-helmet";
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  category: string;
+  benefits: string[];
+  uses: string[];
+  rating: number;
+  popular: boolean;
+}
+
 const Microgreens = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const products = [{
-    id: "basilico",
-    name: "Basilico",
-    category: "Erbe Aromatiche",
-    description: "Aroma mediterraneo concentrato, essenza della cucina italiana",
-    benefits: ["Oli essenziali", "Proprietà digestive", "Aroma intenso"],
-    uses: ["Pasta", "Bruschette", "Caprese"],
-    image: chefImage,
-    rating: 4.9,
-    popular: true
-  }, {
-    id: "ravanello-rosso",
-    name: "Ravanello Rosso",
-    category: "Brassicaceae",
-    description: "Croccante e leggermente piccante, aggiunge carattere ai piatti",
-    benefits: ["Vitamina C", "Fibre", "Minerali"],
-    uses: ["Sushi", "Tartare", "Antipasti"],
-    image: varietiesImage,
-    rating: 4.8,
-    popular: true
-  }, {
-    id: "pisello",
-    name: "Pisello",
-    category: "Legumi",
-    description: "Dolce e delicato, ricco di proteine vegetali",
-    benefits: ["Proteine", "Vitamine del gruppo B", "Ferro"],
-    uses: ["Zuppe", "Risotti", "Contorni"],
-    image: chefImage,
-    rating: 4.7,
-    popular: false
-  }];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("id, name, slug, description, category, benefits, uses, rating, popular")
+          .eq("published", true)
+          .order("popular", { ascending: false })
+          .order("name");
+
+        if (error) throw error;
+        if (data) setProducts(data as Product[]);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Errore nel caricamento dei prodotti");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
   return <Layout>
+      <Helmet>
+        <title>I Nostri Microgreens - Verde D'Oro</title>
+        <meta
+          name="description"
+          content="Scopri la nostra selezione di microgreens biologici coltivati a Reggio Emilia. Basilico, ravanello rosso, pisello e molte altre varietà per la tua cucina gourmet."
+        />
+      </Helmet>
+
       {/* Hero Section */}
       <section className="section-padding bg-gradient-subtle">
         <div className="container-width text-center">
@@ -56,22 +75,26 @@ const Microgreens = () => {
       {/* Products Grid */}
       <section className="section-padding bg-background">
         <div className="container-width">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {products.map((product, index) => (
-              <ProductCard
-                key={index}
-                name={product.name}
-                category={product.category}
-                description={product.description}
-                benefits={product.benefits}
-                uses={product.uses}
-                image={product.image}
-                rating={product.rating}
-                popular={product.popular}
-                onCardClick={() => navigate(`/prodotto/${product.id}`)}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <p className="text-center">Caricamento prodotti...</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  name={product.name}
+                  category={product.category}
+                  description={product.description}
+                  benefits={product.benefits}
+                  uses={product.uses}
+                  image={chefImage}
+                  rating={product.rating}
+                  popular={product.popular}
+                  onCardClick={() => navigate(`/prodotto/${product.slug}`)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

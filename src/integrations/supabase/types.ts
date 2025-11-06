@@ -230,6 +230,7 @@ export type Database = {
           category: string | null
           change_frequency: string | null
           content: string | null
+          content_blocks: Json | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -258,6 +259,7 @@ export type Database = {
           category?: string | null
           change_frequency?: string | null
           content?: string | null
+          content_blocks?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -286,6 +288,7 @@ export type Database = {
           category?: string | null
           change_frequency?: string | null
           content?: string | null
+          content_blocks?: Json | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null

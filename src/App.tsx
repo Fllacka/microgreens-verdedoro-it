@@ -45,7 +45,7 @@ const App = () => (
               <Route path="/chi-siamo" element={<ChiSiamo />} />
               <Route path="/microgreens" element={<Microgreens />} />
               <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
-              <Route path="/prodotto/:id" element={<ProductDetail />} />
+              <Route path="/prodotto/:slug" element={<ProductDetail />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogArticle />} />
               <Route path="/contatti" element={<Contatti />} />
