@@ -70,17 +70,17 @@ const Navigation = () => {
             <div className="hidden md:flex md:items-center md:gap-2">
               <Button 
                 variant="ghost" 
-                size="lg" 
+                size="icon" 
                 className="relative hover:bg-primary/10"
                 onClick={openCart}
                 aria-label="Apri carrello"
               >
-                <ShoppingBasket className="h-7 w-7 text-primary" />
+                <ShoppingBasket className="h-6 w-6 text-primary" />
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground transition-transform",
+                      "absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground transition-transform",
                       isAnimating && "animate-cart-bounce"
                     )}
                   >
@@ -94,17 +94,17 @@ const Navigation = () => {
             <div className="flex items-center gap-2 md:hidden">
               <Button 
                 variant="ghost" 
-                size="lg" 
+                size="icon" 
                 className="relative hover:bg-primary/10"
                 onClick={openCart}
                 aria-label="Apri carrello"
               >
-                <ShoppingBasket className="h-7 w-7 text-primary" />
+                <ShoppingBasket className="h-6 w-6 text-primary" />
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
                     className={cn(
-                      "absolute -top-0.5 -right-0.5 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground transition-transform",
+                      "absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground transition-transform",
                       isAnimating && "animate-cart-bounce"
                     )}
                   >
