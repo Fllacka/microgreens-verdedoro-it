@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Menu, X, ShoppingBasket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
-import logoVerdeDoro from "@/assets/logo-verde-doro.png";
+import logoVerdeDoro from "@/assets/logo-variation-2-organic.png";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
