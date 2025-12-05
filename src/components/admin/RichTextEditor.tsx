@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -12,6 +13,12 @@ interface RichTextEditorProps {
 }
 
 export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
+  const [isLinkActive, setIsLinkActive] = useState(false);
+
+  const updateToolbarState = useCallback((editor: any) => {
+    setIsLinkActive(editor.isActive("link"));
+  }, []);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -28,6 +35,13 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+      updateToolbarState(editor);
+    },
+    onSelectionUpdate: ({ editor }) => {
+      updateToolbarState(editor);
+    },
+    onTransaction: ({ editor }) => {
+      updateToolbarState(editor);
     },
     editorProps: {
       handleClick: (view, pos, event) => {
@@ -125,7 +139,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           <ListOrdered className="h-4 w-4" />
         </Button>
         <LinkDialog
-          isActive={editor.isActive("link")}
+          isActive={isLinkActive}
           onSetLink={handleSetLink}
           onRemoveLink={handleRemoveLink}
         >
@@ -133,12 +147,12 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             type="button"
             variant="ghost"
             size="sm"
-            className={editor.isActive("link") ? "bg-muted" : ""}
+            className={isLinkActive ? "bg-muted" : ""}
           >
             <LinkIcon className="h-4 w-4" />
           </Button>
         </LinkDialog>
-        {editor.isActive("link") && (
+        {isLinkActive && (
           <Button
             type="button"
             variant="ghost"
