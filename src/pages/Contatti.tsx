@@ -220,16 +220,19 @@ ${formData.messaggio}${productsText}`;
                     </div>
 
                     <div>
-                      <Label htmlFor="azienda" className="font-body font-medium">
-                        Azienda / Ristorante
+                      <Label htmlFor="indirizzo" className="font-body font-medium">
+                        Indirizzo
                       </Label>
                       <Input
-                        id="azienda"
-                        placeholder="Nome della tua attività (opzionale)"
+                        id="indirizzo"
+                        placeholder="Via, numero civico, città"
                         className="mt-2"
                         value={formData.azienda}
                         onChange={(e) => setFormData({ ...formData, azienda: e.target.value })}
                       />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Nome attività/ristorante (opzionale)
+                      </p>
                     </div>
 
                     <div>
