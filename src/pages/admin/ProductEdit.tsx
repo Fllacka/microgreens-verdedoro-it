@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Save, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const AdminProductEdit = () => {
   const { id } = useParams();
@@ -21,6 +22,7 @@ const AdminProductEdit = () => {
   const isNew = id === "new";
 
   const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -93,8 +95,8 @@ const AdminProductEdit = () => {
     } catch (error) {
       console.error("Error fetching product:", error);
       toast({
-        title: "Error",
-        description: "Failed to load product",
+        title: "Errore",
+        description: "Impossibile caricare il prodotto",
         variant: "destructive",
       });
     } finally {
@@ -102,9 +104,8 @@ const AdminProductEdit = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const saveProduct = async (publishState?: boolean) => {
+    setSaving(true);
 
     try {
       const productData = {
@@ -118,7 +119,7 @@ const AdminProductEdit = () => {
         uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
         rating: formData.rating ? parseFloat(formData.rating) : null,
         popular: formData.popular,
-        published: formData.published,
+        published: publishState !== undefined ? publishState : formData.published,
         image_id: formData.image_id,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
@@ -132,66 +133,76 @@ const AdminProductEdit = () => {
       };
 
       if (isNew) {
-        const { error } = await supabase.from("products").insert(productData);
+        const { data, error } = await supabase.from("products").insert(productData).select().single();
         if (error) throw error;
+        toast({
+          title: "Successo",
+          description: "Prodotto creato con successo",
+        });
+        navigate(`/admin/products/${data.id}`);
       } else {
         const { error } = await supabase.from("products").update(productData).eq("id", id);
         if (error) throw error;
+        if (publishState !== undefined) {
+          setFormData(prev => ({ ...prev, published: publishState }));
+        }
+        toast({
+          title: "Successo",
+          description: "Prodotto aggiornato con successo",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: `Product ${isNew ? "created" : "updated"} successfully`,
-      });
-      navigate("/admin/products");
     } catch (error: any) {
       console.error("Error saving product:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to save product",
+        title: "Errore",
+        description: error.message || "Impossibile salvare il prodotto",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
+  };
+
+  const handleSave = async () => {
+    await saveProduct();
+  };
+
+  const handlePublish = async (publish: boolean) => {
+    await saveProduct(publish);
   };
 
   if (loading && !isNew) {
     return (
       <AdminLayout>
-        <div>Loading...</div>
+        <div>Caricamento...</div>
       </AdminLayout>
     );
   }
 
+  const previewUrl = seoData.slug ? `/microgreens/${seoData.slug}` : undefined;
+
   return (
     <AdminLayout>
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/products")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">{isNew ? "New Product" : "Edit Product"}</h1>
-              <p className="text-muted-foreground">Create and manage product details</p>
-            </div>
-          </div>
-          <Button type="submit" disabled={loading}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Product
+      <div className="space-y-8 pb-24">
+        <div className="flex items-center gap-4">
+          <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/products")}>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{isNew ? "Nuovo Prodotto" : "Modifica Prodotto"}</h1>
+            <p className="text-muted-foreground">Crea e gestisci i dettagli del prodotto</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Product Information</CardTitle>
+                <CardTitle>Informazioni Prodotto</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Product Name *</Label>
+                  <Label htmlFor="name">Nome Prodotto *</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -201,7 +212,7 @@ const AdminProductEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Short Description</Label>
+                  <Label htmlFor="description">Descrizione Breve</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
@@ -211,7 +222,7 @@ const AdminProductEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Full Description</Label>
+                  <Label htmlFor="content">Descrizione Completa</Label>
                   <RichTextEditor
                     content={formData.content}
                     onChange={(content) => setFormData({ ...formData, content })}
@@ -220,7 +231,7 @@ const AdminProductEdit = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">Categoria</Label>
                     <Input
                       id="category"
                       value={formData.category}
@@ -229,7 +240,7 @@ const AdminProductEdit = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price">Price (€)</Label>
+                    <Label htmlFor="price">Prezzo (€)</Label>
                     <Input
                       id="price"
                       type="number"
@@ -241,29 +252,29 @@ const AdminProductEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="benefits">Benefits (comma separated)</Label>
+                  <Label htmlFor="benefits">Benefici (separati da virgola)</Label>
                   <Textarea
                     id="benefits"
                     value={formData.benefits}
                     onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                    placeholder="High in vitamins, Antioxidant, Rich in minerals"
+                    placeholder="Ricco di vitamine, Antiossidante, Ricco di minerali"
                     rows={2}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="uses">Uses (comma separated)</Label>
+                  <Label htmlFor="uses">Usi (separati da virgola)</Label>
                   <Textarea
                     id="uses"
                     value={formData.uses}
                     onChange={(e) => setFormData({ ...formData, uses: e.target.value })}
-                    placeholder="Salads, Smoothies, Garnish"
+                    placeholder="Insalate, Smoothie, Guarnizione"
                     rows={2}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="rating">Rating (0-5)</Label>
+                  <Label htmlFor="rating">Valutazione (0-5)</Label>
                   <Input
                     id="rating"
                     type="number"
@@ -279,7 +290,7 @@ const AdminProductEdit = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Featured Image</CardTitle>
+                <CardTitle>Immagine in Evidenza</CardTitle>
               </CardHeader>
               <CardContent>
                 <MediaSelector
@@ -298,19 +309,11 @@ const AdminProductEdit = () => {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Publishing</CardTitle>
+                <CardTitle>Opzioni</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="published">Published</Label>
-                  <Switch
-                    id="published"
-                    checked={formData.published}
-                    onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="popular">Mark as Popular</Label>
+                  <Label htmlFor="popular">Segna come Popolare</Label>
                   <Switch
                     id="popular"
                     checked={formData.popular}
@@ -321,7 +324,15 @@ const AdminProductEdit = () => {
             </Card>
           </div>
         </div>
-      </form>
+      </div>
+
+      <PublishActionBar
+        isPublished={formData.published}
+        isSaving={saving}
+        onSave={handleSave}
+        onPublish={handlePublish}
+        previewUrl={previewUrl}
+      />
     </AdminLayout>
   );
 };
