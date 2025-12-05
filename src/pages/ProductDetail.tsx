@@ -268,14 +268,29 @@ const ProductDetail = () => {
         </div>
       </section>
 
+      {/* Product Overview - Panoramica del prodotto */}
+      {product.content && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-display text-3xl font-bold text-primary mb-8">Panoramica del Prodotto</h2>
+            <div 
+              className="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-a:text-verde-primary prose-strong:text-primary"
+              dangerouslySetInnerHTML={{ __html: product.content }}
+            />
+          </div>
+        </section>
+      )}
+
       {/* Product Content with Content Blocks */}
-      <section className="container mx-auto px-4 py-12">
-        <ContentBlockRenderer blocks={product.content_blocks || []} />
-      </section>
+      {product.content_blocks && product.content_blocks.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          <ContentBlockRenderer blocks={product.content_blocks} />
+        </section>
+      )}
 
       {/* Benefits Section */}
       {product.benefits_content && (
-        <section className="container mx-auto px-4 py-12 bg-verde-primary/5">
+        <section className="container mx-auto px-4 py-12 bg-muted/50">
           <div className="max-w-4xl mx-auto">
             <h2 className="font-display text-3xl font-bold text-primary mb-8">Benefici</h2>
             <div 
