@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Image, Check } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Image, Check, Upload, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +28,9 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -90,6 +93,140 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
     setSelectedImage(null);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Errore",
+        description: "Seleziona un file immagine valido",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${Math.random()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("cms-media")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("cms-media")
+        .getPublicUrl(filePath);
+
+      const { data: mediaData, error: dbError } = await supabase
+        .from("media")
+        .insert({
+          file_name: file.name,
+          file_path: urlData.publicUrl,
+          file_type: file.type,
+          file_size: file.size,
+          storage_path: filePath,
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Successo",
+        description: "Immagine caricata con successo",
+      });
+
+      // Auto-select the uploaded image
+      if (mediaData) {
+        handleSelect(mediaData.id, mediaData.file_path);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const renderMediaGrid = () => (
+    <>
+      {loading ? (
+        <div className="flex items-center justify-center py-8">Caricamento...</div>
+      ) : media.length === 0 ? (
+        <div className="flex items-center justify-center py-8 text-muted-foreground">
+          Nessuna immagine nella libreria media
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
+          {media.map((file) => (
+            <div
+              key={file.id}
+              className="relative cursor-pointer group aspect-square rounded-lg overflow-hidden border hover:border-primary transition-colors"
+              onClick={() => handleSelect(file.id, file.file_path)}
+            >
+              <img
+                src={file.file_path}
+                alt={file.file_name}
+                className="w-full h-full object-cover"
+              />
+              {value === file.id && (
+                <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                  <Check className="h-8 w-8 text-primary" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  const renderUploadTab = () => (
+    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+        <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <p className="text-sm text-muted-foreground mb-4">
+          Clicca per selezionare un'immagine o trascinala qui
+        </p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+          id="media-upload"
+        />
+        <Button
+          variant="outline"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Caricamento...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Seleziona File
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {selectedImage ? (
@@ -129,36 +266,20 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
                 <DialogHeader>
                   <DialogTitle>Seleziona Immagine</DialogTitle>
                 </DialogHeader>
-                <ScrollArea className="h-[60vh]">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">Caricamento...</div>
-                  ) : media.length === 0 ? (
-                    <div className="flex items-center justify-center py-8 text-muted-foreground">
-                      Nessuna immagine nella libreria media
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
-                      {media.map((file) => (
-                        <div
-                          key={file.id}
-                          className="relative cursor-pointer group aspect-square rounded-lg overflow-hidden border hover:border-primary transition-colors"
-                          onClick={() => handleSelect(file.id, file.file_path)}
-                        >
-                          <img
-                            src={file.file_path}
-                            alt={file.file_name}
-                            className="w-full h-full object-cover"
-                          />
-                          {value === file.id && (
-                            <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                              <Check className="h-8 w-8 text-primary" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
+                <Tabs defaultValue="library" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="library">Libreria Media</TabsTrigger>
+                    <TabsTrigger value="upload">Carica Nuova</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="library">
+                    <ScrollArea className="h-[55vh]">
+                      {renderMediaGrid()}
+                    </ScrollArea>
+                  </TabsContent>
+                  <TabsContent value="upload">
+                    {renderUploadTab()}
+                  </TabsContent>
+                </Tabs>
               </DialogContent>
             </Dialog>
             <Button variant="outline" size="sm" onClick={handleRemove}>
@@ -178,31 +299,20 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
             <DialogHeader>
               <DialogTitle>Seleziona Immagine</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="h-[60vh]">
-              {loading ? (
-                <div className="flex items-center justify-center py-8">Caricamento...</div>
-              ) : media.length === 0 ? (
-                <div className="flex items-center justify-center py-8 text-muted-foreground">
-                  Nessuna immagine nella libreria media
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
-                  {media.map((file) => (
-                    <div
-                      key={file.id}
-                      className="relative cursor-pointer group aspect-square rounded-lg overflow-hidden border hover:border-primary transition-colors"
-                      onClick={() => handleSelect(file.id, file.file_path)}
-                    >
-                      <img
-                        src={file.file_path}
-                        alt={file.file_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
+            <Tabs defaultValue="library" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="library">Libreria Media</TabsTrigger>
+                <TabsTrigger value="upload">Carica Nuova</TabsTrigger>
+              </TabsList>
+              <TabsContent value="library">
+                <ScrollArea className="h-[55vh]">
+                  {renderMediaGrid()}
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="upload">
+                {renderUploadTab()}
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       )}
