@@ -7,20 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  MessageSquare, 
-  Clock,
-  CheckCircle,
-  Truck,
-  ShoppingCart
-} from "lucide-react";
-
+import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart } from "lucide-react";
 const Contatti = () => {
-  const { toast } = useToast();
-  const { items: cartItems } = useCart();
+  const {
+    toast
+  } = useToast();
+  const {
+    items: cartItems
+  } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
@@ -30,16 +24,13 @@ const Contatti = () => {
     azienda: "",
     messaggio: ""
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Build products list for WhatsApp message
-    const productsText = cartItems.length > 0 
-      ? `\n\nProdotti selezionati:\n${cartItems.map(item => `- ${item.name} (${item.quantity}g)`).join('\n')}`
-      : '';
-    
+    const productsText = cartItems.length > 0 ? `\n\nProdotti selezionati:\n${cartItems.map(item => `- ${item.name} (${item.quantity}g)`).join('\n')}` : '';
+
     // Build WhatsApp message
     const message = `Richiesta preventivo da ${formData.nome} ${formData.cognome}
     
@@ -49,18 +40,17 @@ ${formData.azienda ? `Azienda: ${formData.azienda}` : ''}
 
 Messaggio:
 ${formData.messaggio}${productsText}`;
-    
+
     // Open WhatsApp with pre-filled message
     const whatsappUrl = `https://wa.me/393330000000?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    
     setTimeout(() => {
       setIsLoading(false);
       toast({
         title: "Richiesta inviata!",
-        description: "Ti contatteremo entro 24 ore per confermare la tua richiesta.",
+        description: "Ti contatteremo entro 24 ore per confermare la tua richiesta."
       });
-      
+
       // Reset form
       setFormData({
         nome: "",
@@ -72,36 +62,28 @@ ${formData.messaggio}${productsText}`;
       });
     }, 1000);
   };
-
-  const contactInfo = [
-    {
-      icon: Phone,
-      title: "Telefono",
-      details: "+39 0522 000 000",
-      description: "Lun-Ven 9:00-18:00"
-    },
-    {
-      icon: Mail,
-      title: "Email", 
-      details: "info@verdedoro.it",
-      description: "Risposta entro 24h"
-    },
-    {
-      icon: MapPin,
-      title: "Indirizzo",
-      details: "Via delle Microgreens, 42",
-      description: "42121 Reggio Emilia (RE)"
-    },
-    {
-      icon: MessageSquare,
-      title: "WhatsApp",
-      details: "+39 333 000 0000",
-      description: "Chat diretta"
-    }
-  ];
-
-  return (
-    <Layout>
+  const contactInfo = [{
+    icon: Phone,
+    title: "Telefono",
+    details: "+39 0522 000 000",
+    description: "Lun-Ven 9:00-18:00"
+  }, {
+    icon: Mail,
+    title: "Email",
+    details: "info@verdedoro.it",
+    description: "Risposta entro 24h"
+  }, {
+    icon: MapPin,
+    title: "Indirizzo",
+    details: "Via delle Microgreens, 42",
+    description: "42121 Reggio Emilia (RE)"
+  }, {
+    icon: MessageSquare,
+    title: "WhatsApp",
+    details: "+39 333 000 0000",
+    description: "Chat diretta"
+  }];
+  return <Layout>
       {/* Hero Section */}
       <section className="section-padding bg-gradient-subtle">
         <div className="container-width text-center">
@@ -133,31 +115,27 @@ ${formData.messaggio}${productsText}`;
                 </CardHeader>
                 <CardContent>
                   {/* Cart Summary */}
-                  {cartItems.length > 0 && (
-                    <div className="mb-8 p-4 bg-secondary rounded-lg">
+                  {cartItems.length > 0 && <div className="mb-8 p-4 bg-secondary rounded-lg">
                       <h3 className="font-display font-semibold text-primary mb-4 flex items-center">
                         <ShoppingCart className="mr-2 h-5 w-5" />
                         Prodotti Selezionati
                       </h3>
                       <div className="space-y-3">
-                        {cartItems.map((item, index) => (
-                          <div key={index} className="flex justify-between items-center">
+                        {cartItems.map((item, index) => <div key={index} className="flex justify-between items-center">
                             <div>
                               <span className="font-body font-medium">{item.name}</span>
                               <span className="text-muted-foreground text-sm ml-2">
                                 {item.quantity}g
                               </span>
                             </div>
-                          </div>
-                        ))}
+                          </div>)}
                         <div className="border-t pt-3 mt-3">
                           <p className="text-sm text-muted-foreground">
                             Riceverai un preventivo dettagliato via WhatsApp
                           </p>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div>}
 
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -165,27 +143,19 @@ ${formData.messaggio}${productsText}`;
                         <Label htmlFor="nome" className="font-body font-medium">
                           Nome *
                         </Label>
-                        <Input
-                          id="nome"
-                          placeholder="Il tuo nome"
-                          required
-                          className="mt-2"
-                          value={formData.nome}
-                          onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                        />
+                        <Input id="nome" placeholder="Il tuo nome" required className="mt-2" value={formData.nome} onChange={e => setFormData({
+                        ...formData,
+                        nome: e.target.value
+                      })} />
                       </div>
                       <div>
                         <Label htmlFor="cognome" className="font-body font-medium">
                           Cognome *
                         </Label>
-                        <Input
-                          id="cognome"
-                          placeholder="Il tuo cognome"
-                          required
-                          className="mt-2"
-                          value={formData.cognome}
-                          onChange={(e) => setFormData({ ...formData, cognome: e.target.value })}
-                        />
+                        <Input id="cognome" placeholder="Il tuo cognome" required className="mt-2" value={formData.cognome} onChange={e => setFormData({
+                        ...formData,
+                        cognome: e.target.value
+                      })} />
                       </div>
                     </div>
 
@@ -194,28 +164,19 @@ ${formData.messaggio}${productsText}`;
                         <Label htmlFor="email" className="font-body font-medium">
                           Email *
                         </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="nome@email.com"
-                          required
-                          className="mt-2"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        />
+                        <Input id="email" type="email" placeholder="nome@email.com" required className="mt-2" value={formData.email} onChange={e => setFormData({
+                        ...formData,
+                        email: e.target.value
+                      })} />
                       </div>
                       <div>
                         <Label htmlFor="telefono" className="font-body font-medium">
                           Telefono
                         </Label>
-                        <Input
-                          id="telefono"
-                          type="tel"
-                          placeholder="+39 000 000 0000"
-                          className="mt-2"
-                          value={formData.telefono}
-                          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                        />
+                        <Input id="telefono" type="tel" placeholder="+39 000 000 0000" className="mt-2" value={formData.telefono} onChange={e => setFormData({
+                        ...formData,
+                        telefono: e.target.value
+                      })} />
                       </div>
                     </div>
 
@@ -223,40 +184,24 @@ ${formData.messaggio}${productsText}`;
                       <Label htmlFor="indirizzo" className="font-body font-medium">
                         Indirizzo
                       </Label>
-                      <Input
-                        id="indirizzo"
-                        placeholder="Via, numero civico, città"
-                        className="mt-2"
-                        value={formData.azienda}
-                        onChange={(e) => setFormData({ ...formData, azienda: e.target.value })}
-                      />
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Nome attività/ristorante (opzionale)
-                      </p>
+                      <Input id="indirizzo" placeholder="Via, numero civico, città" className="mt-2" value={formData.azienda} onChange={e => setFormData({
+                      ...formData,
+                      azienda: e.target.value
+                    })} />
+                      
                     </div>
 
                     <div>
                       <Label htmlFor="messaggio" className="font-body font-medium">
                         Messaggio *
                       </Label>
-                      <Textarea
-                        id="messaggio"
-                        placeholder="Descrivici le tue esigenze: quantità, frequenza di consegna, varietà preferite..."
-                        rows={6}
-                        required
-                        className="mt-2"
-                        value={formData.messaggio}
-                        onChange={(e) => setFormData({ ...formData, messaggio: e.target.value })}
-                      />
+                      <Textarea id="messaggio" placeholder="Descrivici le tue esigenze: quantità, frequenza di consegna, varietà preferite..." rows={6} required className="mt-2" value={formData.messaggio} onChange={e => setFormData({
+                      ...formData,
+                      messaggio: e.target.value
+                    })} />
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      variant="oro" 
-                      size="lg" 
-                      className="w-full"
-                      disabled={isLoading}
-                    >
+                    <Button type="submit" variant="oro" size="lg" className="w-full" disabled={isLoading}>
                       {isLoading ? "Invio in corso..." : "Invia Richiesta"}
                       {!isLoading && <CheckCircle className="ml-2 h-5 w-5" />}
                     </Button>
@@ -274,8 +219,7 @@ ${formData.messaggio}${productsText}`;
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {contactInfo.map((info, index) => (
-                    <div key={index} className="flex items-start space-x-4">
+                  {contactInfo.map((info, index) => <div key={index} className="flex items-start space-x-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
                         <info.icon className="h-5 w-5 text-primary-foreground" />
                       </div>
@@ -290,8 +234,7 @@ ${formData.messaggio}${productsText}`;
                           {info.description}
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    </div>)}
                 </CardContent>
               </Card>
 
@@ -334,11 +277,7 @@ ${formData.messaggio}${productsText}`;
                   <p className="text-sm mb-4">
                     Contattaci direttamente su WhatsApp per una risposta immediata.
                   </p>
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-accent-foreground text-accent-foreground hover:bg-accent-foreground hover:text-oro-primary"
-                    asChild
-                  >
+                  <Button variant="outline" className="w-full border-accent-foreground text-accent-foreground hover:bg-accent-foreground hover:text-oro-primary" asChild>
                     <a href="https://wa.me/39333000000?text=Ciao! Vorrei informazioni sui vostri microgreens">
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Scrivici su WhatsApp
@@ -350,8 +289,6 @@ ${formData.messaggio}${productsText}`;
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Contatti;
