@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 export interface CartItem {
@@ -18,6 +18,7 @@ interface CartContextType {
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
+  lastAddedTimestamp: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,10 +29,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return saved ? JSON.parse(saved) : [];
   });
   const [isOpen, setIsOpen] = useState(false);
+  const [lastAddedTimestamp, setLastAddedTimestamp] = useState(0);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
+
+  const openCart = useCallback(() => setIsOpen(true), []);
 
   const addItem = (newItem: CartItem) => {
     setItems(prev => {
@@ -46,7 +50,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, newItem];
     });
     
-    setIsOpen(true);
+    // Trigger badge animation
+    setLastAddedTimestamp(Date.now());
+    
+    // Show toast notification instead of opening drawer
+    toast({
+      title: "Aggiunto al carrello",
+      description: `${newItem.name} (${newItem.quantity}g)`,
+      action: (
+        <button 
+          onClick={openCart}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          Vedi carrello
+        </button>
+      ),
+    });
   };
 
   const removeItem = (id: string) => {
@@ -69,8 +88,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       totalItems,
       itemCount,
       isOpen,
-      openCart: () => setIsOpen(true),
+      openCart,
       closeCart: () => setIsOpen(false),
+      lastAddedTimestamp,
     }}>
       {children}
     </CartContext.Provider>
