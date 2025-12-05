@@ -3,9 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, Leaf, ShoppingBasket } from "lucide-react";
+import { Menu, X, ShoppingBasket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
+import logoVerdeDoro from "@/assets/logo-verde-doro.png";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,16 +46,12 @@ const Navigation = () => {
       <div className="container-width">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 hover-lift">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
-              <Leaf className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="font-display text-xl font-bold text-primary">
-                Verde D'Oro
-              </h1>
-              <p className="text-xs text-muted-foreground font-body">Microgreens</p>
-            </div>
+          <Link to="/" className="flex items-center hover-lift">
+            <img 
+              src={logoVerdeDoro} 
+              alt="Verde D'Oro - Microgreens" 
+              className="h-14 w-auto"
+            />
           </Link>
 
           {/* Right side navigation */}
@@ -121,14 +118,11 @@ const Navigation = () => {
                 </SheetTrigger>
               <SheetContent side="right" className="w-80">
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-verde">
-                    <Leaf className="h-4 w-4 text-primary-foreground" />
-                  </div>
-                  <span className="font-display text-lg font-bold text-primary">
-                    Verde D'Oro
-                  </span>
-                </div>
+                <img 
+                  src={logoVerdeDoro} 
+                  alt="Verde D'Oro - Microgreens" 
+                  className="h-10 w-auto"
+                />
                 <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close menu">
                   <X className="h-5 w-5" />
                 </Button>
