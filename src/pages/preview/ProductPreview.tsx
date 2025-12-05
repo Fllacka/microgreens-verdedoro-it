@@ -170,9 +170,11 @@ const ProductPreview = () => {
             {/* Product Info & Purchase */}
             <div className="flex flex-col justify-start">
               <div className="flex items-center gap-3 mb-4">
-                <Badge variant="secondary" className="bg-verde-primary/10 text-verde-primary border-verde-primary/20">
-                  {product.category}
-                </Badge>
+                {product.category && (
+                  <Badge variant="secondary" className="bg-verde-primary/10 text-verde-primary border-verde-primary/20">
+                    {product.category}
+                  </Badge>
+                )}
                 {product.popular && (
                   <Badge variant="outline" className="border-oro-primary text-oro-primary">
                     <Star className="h-3 w-3 mr-1" />
