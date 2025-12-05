@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -6,10 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Menu, X, Leaf, ShoppingBasket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
+
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const location = useLocation();
-  const { itemCount, openCart } = useCart();
+  const { itemCount, openCart, lastAddedTimestamp } = useCart();
+
+  // Trigger animation when item is added
+  useEffect(() => {
+    if (lastAddedTimestamp > 0) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAddedTimestamp]);
   const navigationItems = [{
     name: "Home",
     href: "/"
@@ -68,7 +79,10 @@ const Navigation = () => {
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground"
+                    className={cn(
+                      "absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground transition-transform",
+                      isAnimating && "animate-cart-bounce"
+                    )}
                   >
                     {itemCount > 9 ? '9+' : itemCount}
                   </Badge>
@@ -89,7 +103,10 @@ const Navigation = () => {
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground"
+                    className={cn(
+                      "absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-oro-primary text-primary-foreground transition-transform",
+                      isAnimating && "animate-cart-bounce"
+                    )}
                   >
                     {itemCount > 9 ? '9+' : itemCount}
                   </Badge>
