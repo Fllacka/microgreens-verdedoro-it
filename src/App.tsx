@@ -29,6 +29,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminPages from "./pages/admin/Pages";
 import AdminPageEdit from "./pages/admin/PageEdit";
 import AdminMedia from "./pages/admin/Media";
+import AdminSettings from "./pages/admin/Settings";
 import ProductPreview from "./pages/preview/ProductPreview";
 import BlogPreview from "./pages/preview/BlogPreview";
 import PagePreview from "./pages/preview/PagePreview";
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/admin/media" element={<AdminMedia />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/redirects" element={<AdminRedirects />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
               
               {/* Preview Routes (authenticated) */}
               <Route path="/preview/product/:slug" element={<ProductPreview />} />

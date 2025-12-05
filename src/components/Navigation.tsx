@@ -3,16 +3,45 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, ShoppingBasket } from "lucide-react";
+import { Menu, X, ShoppingBasket, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
-import logoVerdeDoro from "@/assets/logo-variation-4-wordmark.png";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const location = useLocation();
   const { itemCount, openCart, lastAddedTimestamp } = useCart();
+
+  // Fetch logo from site settings
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("site_settings")
+          .select(`
+            logo_id,
+            media:logo_id (
+              file_path
+            )
+          `)
+          .eq("id", "default")
+          .single();
+
+        if (error) throw error;
+
+        if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
+          setLogoUrl(data.media.file_path as string);
+        }
+      } catch (error) {
+        console.error("Error fetching logo:", error);
+      }
+    };
+
+    fetchLogo();
+  }, []);
 
   // Trigger animation when item is added
   useEffect(() => {
@@ -22,6 +51,7 @@ const Navigation = () => {
       return () => clearTimeout(timer);
     }
   }, [lastAddedTimestamp]);
+
   const navigationItems = [{
     name: "Home",
     href: "/"
@@ -41,26 +71,58 @@ const Navigation = () => {
     name: "Contatti",
     href: "/contatti"
   }];
+
   const isActive = (path: string) => location.pathname === path;
-  return <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+
+  // Fallback logo component
+  const FallbackLogo = ({ className }: { className?: string }) => (
+    <div className={cn("flex items-center space-x-3", className)}>
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
+        <Leaf className="h-6 w-6 text-primary-foreground" />
+      </div>
+      <div>
+        <h1 className="font-display text-xl font-bold text-primary">
+          Verde D'Oro
+        </h1>
+        <p className="text-xs text-muted-foreground font-body">Microgreens</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container-width">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center hover-lift">
-            <img 
-              src={logoVerdeDoro} 
-              alt="Verde D'Oro - Microgreens" 
-              className="h-14 w-auto"
-            />
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="Verde D'Oro - Microgreens" 
+                className="h-14 w-auto"
+              />
+            ) : (
+              <FallbackLogo />
+            )}
           </Link>
 
           {/* Right side navigation */}
           <div className="flex items-center space-x-8">
             {/* Desktop Navigation */}
             <div className="hidden md:flex md:items-center md:space-x-8">
-              {navigationItems.map(item => <Link key={item.name} to={item.href} className={cn("relative font-body font-medium transition-colors hover:text-primary", "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100", isActive(item.href) ? "text-primary after:scale-x-100" : "text-muted-foreground")}>
+              {navigationItems.map(item => (
+                <Link 
+                  key={item.name} 
+                  to={item.href} 
+                  className={cn(
+                    "relative font-body font-medium transition-colors hover:text-primary",
+                    "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100",
+                    isActive(item.href) ? "text-primary after:scale-x-100" : "text-muted-foreground"
+                  )}
+                >
                   {item.name}
-                </Link>)}
+                </Link>
+              ))}
             </div>
 
             {/* Desktop CTA & Cart */}
@@ -116,37 +178,55 @@ const Navigation = () => {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-              <SheetContent side="right" className="w-80">
-              <div className="flex items-center justify-between mb-8">
-                <img 
-                  src={logoVerdeDoro} 
-                  alt="Verde D'Oro - Microgreens" 
-                  className="h-10 w-auto"
-                />
-                <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close menu">
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-              
-              <div className="flex flex-col space-y-4">
-                {navigationItems.map(item => <Link key={item.name} to={item.href} onClick={() => setIsOpen(false)} className={cn("block px-4 py-3 rounded-lg font-body font-medium transition-colors", isActive(item.href) ? "bg-secondary text-primary" : "text-muted-foreground hover:text-primary hover:bg-secondary/50")}>
-                    {item.name}
-                  </Link>)}
-                
-                <div className="pt-4 border-t border-border">
-                  <Button variant="oro" className="w-full" asChild>
-                    <Link to="/contatti" onClick={() => setIsOpen(false)}>
-                      Richiedi Preventivo
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
+                <SheetContent side="right" className="w-80">
+                  <div className="flex items-center justify-between mb-8">
+                    {logoUrl ? (
+                      <img 
+                        src={logoUrl} 
+                        alt="Verde D'Oro - Microgreens" 
+                        className="h-10 w-auto"
+                      />
+                    ) : (
+                      <FallbackLogo className="scale-90" />
+                    )}
+                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close menu">
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-col space-y-4">
+                    {navigationItems.map(item => (
+                      <Link 
+                        key={item.name} 
+                        to={item.href} 
+                        onClick={() => setIsOpen(false)} 
+                        className={cn(
+                          "block px-4 py-3 rounded-lg font-body font-medium transition-colors",
+                          isActive(item.href) 
+                            ? "bg-secondary text-primary" 
+                            : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
+                        )}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                    
+                    <div className="pt-4 border-t border-border">
+                      <Button variant="oro" className="w-full" asChild>
+                        <Link to="/contatti" onClick={() => setIsOpen(false)}>
+                          Richiedi Preventivo
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
               </Sheet>
             </div>
           </div>
         </div>
       </div>
-    </nav>;
+    </nav>
+  );
 };
+
 export default Navigation;
