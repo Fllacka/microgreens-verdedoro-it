@@ -17,12 +17,14 @@ interface BlogPost {
   category: string;
   created_at: string;
   content_blocks: any;
+  featured_image_id?: string | null;
 }
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<{ name: string; count: number; color: string }[]>([]);
+  const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,6 +42,22 @@ const Blog = () => {
       if (error) throw error;
 
       setPosts(data || []);
+
+      // Fetch cover images for all posts
+      const imageIds = data
+        ?.map(p => p.featured_image_id)
+        .filter((id): id is string => !!id) || [];
+      if (imageIds.length > 0) {
+        const { data: media } = await supabase
+          .from("media")
+          .select("id, file_path")
+          .in("id", imageIds);
+        if (media) {
+          const map: Record<string, string> = {};
+          media.forEach(m => { map[m.id] = m.file_path; });
+          setMediaMap(map);
+        }
+      }
 
       // Calculate categories from posts
       const categoryMap = new Map<string, number>();
@@ -152,7 +170,7 @@ const Blog = () => {
                 <div className="grid md:grid-cols-2 gap-0">
                   <div 
                     className="h-64 md:h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${varietiesImage})` }}
+                    style={{ backgroundImage: `url(${featuredPost.featured_image_id && mediaMap[featuredPost.featured_image_id] ? mediaMap[featuredPost.featured_image_id] : varietiesImage})` }}
                   />
                   <CardContent className="p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-4 mb-4">
@@ -208,7 +226,7 @@ const Blog = () => {
                     <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card">
                       <div 
                         className="h-48 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${varietiesImage})` }}
+                        style={{ backgroundImage: `url(${article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage})` }}
                       />
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-3">

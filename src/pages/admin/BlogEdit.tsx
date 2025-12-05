@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBlockEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
+import { MediaSelector } from "@/components/admin/MediaSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
@@ -28,6 +29,7 @@ const AdminBlogEdit = () => {
     tags: "",
     published: false,
     publishedAt: "",
+    featuredImageId: null as string | null,
   });
 
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
@@ -68,6 +70,7 @@ const AdminBlogEdit = () => {
         tags: data.tags?.join(", ") || "",
         published: data.published || false,
         publishedAt: data.published_at ? data.published_at.split("T")[0] : "",
+        featuredImageId: data.featured_image_id || null,
       });
 
       if (data.content_blocks && Array.isArray(data.content_blocks) && data.content_blocks.length > 0) {
@@ -119,6 +122,7 @@ const AdminBlogEdit = () => {
         tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
         published: publishState !== undefined ? publishState : formData.published,
         published_at: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
+        featured_image_id: formData.featuredImageId,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
         og_title: seoData.ogTitle,
@@ -257,6 +261,22 @@ const AdminBlogEdit = () => {
           </div>
 
           <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Immagine di Copertina</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MediaSelector
+                  value={formData.featuredImageId}
+                  onChange={(imageId) => setFormData({ ...formData, featuredImageId: imageId })}
+                  showAltText={false}
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Questa immagine apparirà come copertina dell'articolo e nelle anteprime.
+                </p>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Opzioni</CardTitle>

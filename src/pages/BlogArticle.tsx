@@ -28,6 +28,7 @@ interface BlogPost {
   category: string;
   content_blocks: ContentBlock[];
   published_at: string;
+  featured_image_id?: string | null;
   meta_title?: string;
   meta_description?: string;
   og_title?: string;
@@ -40,6 +41,8 @@ const BlogArticle = () => {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [relatedMediaMap, setRelatedMediaMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -67,6 +70,16 @@ const BlogArticle = () => {
           content_blocks: (postData.content_blocks as unknown as ContentBlock[]) || []
         } as BlogPost);
 
+        // Fetch cover image if exists
+        if (postData.featured_image_id) {
+          const { data: media } = await supabase
+            .from("media")
+            .select("file_path")
+            .eq("id", postData.featured_image_id)
+            .maybeSingle();
+          if (media) setCoverImageUrl(media.file_path);
+        }
+
         // Fetch related posts from the same category
         const { data: relatedData, error: relatedError } = await supabase
           .from("blog_posts")
@@ -77,10 +90,27 @@ const BlogArticle = () => {
           .limit(3);
 
         if (relatedError) throw relatedError;
-        setRelatedPosts((relatedData?.map(post => ({
+        const related = (relatedData?.map(post => ({
           ...post,
           content_blocks: (post.content_blocks as unknown as ContentBlock[]) || []
-        })) as BlogPost[]) || []);
+        })) as BlogPost[]) || [];
+        setRelatedPosts(related);
+
+        // Fetch cover images for related posts
+        const relatedImageIds = related
+          .map(p => p.featured_image_id)
+          .filter((id): id is string => !!id);
+        if (relatedImageIds.length > 0) {
+          const { data: relatedMedia } = await supabase
+            .from("media")
+            .select("id, file_path")
+            .in("id", relatedImageIds);
+          if (relatedMedia) {
+            const map: Record<string, string> = {};
+            relatedMedia.forEach(m => { map[m.id] = m.file_path; });
+            setRelatedMediaMap(map);
+          }
+        }
       } catch (error) {
         console.error("Error fetching blog post:", error);
       } finally {
@@ -144,8 +174,15 @@ const BlogArticle = () => {
 
       <article className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative min-h-[60vh] flex items-center justify-center bg-gradient-hero">
-          <div className="absolute inset-0 bg-gradient-hero"></div>
+        <section 
+          className="relative min-h-[60vh] flex items-center justify-center"
+          style={coverImageUrl ? { 
+            backgroundImage: `url(${coverImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          } : {}}
+        >
+          <div className={`absolute inset-0 ${coverImageUrl ? 'bg-black/60' : 'bg-gradient-hero'}`}></div>
           
           <div className="relative z-10 container-width py-16">
             <div className="max-w-4xl mx-auto text-center text-white">
@@ -246,9 +283,14 @@ const BlogArticle = () => {
                   Articoli Correlati
                 </h2>
                 <div className="grid md:grid-cols-3 gap-8">
-                  {relatedPosts.map((relatedPost) => (
+                  {relatedPosts.map((relatedPost) => {
+                    const relatedCoverUrl = relatedPost.featured_image_id && relatedMediaMap[relatedPost.featured_image_id];
+                    return (
                     <Card key={relatedPost.id} className="overflow-hidden hover-lift border-border/50 bg-card group">
-                      <div className="h-48 bg-gradient-hero" />
+                      <div 
+                        className="h-48 bg-cover bg-center"
+                        style={relatedCoverUrl ? { backgroundImage: `url(${relatedCoverUrl})` } : { background: 'var(--gradient-hero)' }}
+                      />
                       <div className="p-6">
                         {relatedPost.category && (
                           <Badge variant="outline" className="text-xs mb-3">
@@ -268,7 +310,7 @@ const BlogArticle = () => {
                         </Button>
                       </div>
                     </Card>
-                  ))}
+                  )})}
                 </div>
               </div>
             </div>

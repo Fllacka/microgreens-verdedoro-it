@@ -31,6 +31,7 @@ interface BlogPost {
   content_blocks: ContentBlock[];
   published_at: string;
   published: boolean;
+  featured_image_id?: string | null;
   meta_title?: string;
   meta_description?: string;
 }
@@ -42,6 +43,7 @@ const BlogPreview = () => {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -76,6 +78,16 @@ const BlogPreview = () => {
             ...postData,
             content_blocks: (postData.content_blocks as unknown as ContentBlock[]) || []
           } as BlogPost);
+
+          // Fetch cover image if exists
+          if (postData.featured_image_id) {
+            const { data: media } = await supabase
+              .from("media")
+              .select("file_path")
+              .eq("id", postData.featured_image_id)
+              .maybeSingle();
+            if (media) setCoverImageUrl(media.file_path);
+          }
         }
       } catch (error) {
         console.error("Error fetching blog post:", error);
@@ -154,8 +166,15 @@ const BlogPreview = () => {
 
       <article className="min-h-screen">
         {/* Hero Section */}
-        <section className="relative min-h-[60vh] flex items-center justify-center bg-gradient-hero">
-          <div className="absolute inset-0 bg-gradient-hero"></div>
+        <section 
+          className="relative min-h-[60vh] flex items-center justify-center"
+          style={coverImageUrl ? { 
+            backgroundImage: `url(${coverImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          } : {}}
+        >
+          <div className={`absolute inset-0 ${coverImageUrl ? 'bg-black/60' : 'bg-gradient-hero'}`}></div>
           
           <div className="relative z-10 container-width py-16">
             <div className="max-w-4xl mx-auto text-center text-white">
