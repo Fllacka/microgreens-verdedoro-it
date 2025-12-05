@@ -9,18 +9,8 @@ import { ShoppingCart, Star, AlertTriangle } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-
-interface ContentBlock {
-  id: string;
-  type: "heading" | "text" | "image";
-  level?: "h1" | "h2" | "h3";
-  content?: string;
-  url?: string;
-  alt?: string;
-}
 
 interface Product {
   id: string;
@@ -39,7 +29,6 @@ interface Product {
   published: boolean;
   meta_title: string;
   meta_description: string;
-  content_blocks: ContentBlock[];
   media?: {
     file_path: string;
   };
@@ -91,10 +80,7 @@ const ProductPreview = () => {
         if (productError) throw productError;
 
         if (productData) {
-          setProduct({
-            ...productData,
-            content_blocks: (productData.content_blocks as unknown as ContentBlock[]) || [],
-          } as any);
+          setProduct(productData as Product);
         }
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -267,13 +253,6 @@ const ProductPreview = () => {
               dangerouslySetInnerHTML={{ __html: product.content }}
             />
           </div>
-        </section>
-      )}
-
-      {/* Product Content with Content Blocks */}
-      {product.content_blocks && product.content_blocks.length > 0 && (
-        <section className="container mx-auto px-4 py-12">
-          <ContentBlockRenderer blocks={product.content_blocks} />
         </section>
       )}
 
