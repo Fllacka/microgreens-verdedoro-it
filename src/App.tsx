@@ -18,6 +18,7 @@ import Contatti from "./pages/Contatti";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/Login";
 import AdminResetPassword from "./pages/admin/ResetPassword";
+import AdminEmailConfirmation from "./pages/admin/EmailConfirmation";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminProducts from "./pages/admin/Products";
 import AdminProductEdit from "./pages/admin/ProductEdit";
@@ -53,6 +54,7 @@ const App = () => (
               
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/email-confirmation" element={<AdminEmailConfirmation />} />
               <Route path="/admin/reset-password" element={<AdminResetPassword />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/products" element={<AdminProducts />} />

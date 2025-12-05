@@ -24,6 +24,7 @@ const AdminLogin = () => {
         setIsForgotPassword(false);
       } else if (isSignUp) {
         await signUp(email, password);
+        navigate("/admin/email-confirmation");
       } else {
         await signIn(email, password);
         navigate("/admin");
