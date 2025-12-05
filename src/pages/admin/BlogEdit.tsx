@@ -180,7 +180,7 @@ const AdminBlogEdit = () => {
     );
   }
 
-  const previewUrl = seoData.slug ? `/blog/${seoData.slug}` : undefined;
+  const previewUrl = seoData.slug ? `/preview/blog/${seoData.slug}` : undefined;
 
   return (
     <AdminLayout>

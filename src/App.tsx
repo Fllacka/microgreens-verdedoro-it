@@ -29,6 +29,9 @@ import AdminUsers from "./pages/admin/Users";
 import AdminPages from "./pages/admin/Pages";
 import AdminPageEdit from "./pages/admin/PageEdit";
 import AdminMedia from "./pages/admin/Media";
+import ProductPreview from "./pages/preview/ProductPreview";
+import BlogPreview from "./pages/preview/BlogPreview";
+import PagePreview from "./pages/preview/PagePreview";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +69,11 @@ const App = () => (
               <Route path="/admin/media" element={<AdminMedia />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/redirects" element={<AdminRedirects />} />
+              
+              {/* Preview Routes (authenticated) */}
+              <Route path="/preview/product/:slug" element={<ProductPreview />} />
+              <Route path="/preview/blog/:slug" element={<BlogPreview />} />
+              <Route path="/preview/page/:slug" element={<PagePreview />} />
               
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
