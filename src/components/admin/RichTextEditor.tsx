@@ -5,7 +5,7 @@ import Link from "@tiptap/extension-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Heading3, Heading4, Unlink, Trash2, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Heading3, Heading4, Unlink, Trash2, AlignLeft, AlignCenter, AlignRight, Replace } from "lucide-react";
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
 import { ResizableImage } from "./ResizableImage";
@@ -20,6 +20,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const [isImageSelected, setIsImageSelected] = useState(false);
   const [imageSize, setImageSize] = useState({ width: "", height: "" });
   const [imageAlign, setImageAlign] = useState<string | null>(null);
+  const [imageAlt, setImageAlt] = useState("");
 
   const updateToolbarState = useCallback((editor: any) => {
     setIsLinkActive(editor.isActive("link"));
@@ -33,6 +34,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
         height: attrs.height || "",
       });
       setImageAlign(attrs.align || null);
+      setImageAlt(attrs.alt || "");
     }
   }, []);
 
@@ -105,6 +107,20 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 
   const addImage = (url: string, alt: string) => {
     editor.chain().focus().setImage({ src: url, alt }).run();
+  };
+
+  const replaceImage = (url: string, alt: string) => {
+    if (editor.isActive("image")) {
+      editor.chain().focus().updateAttributes("image", { src: url, alt }).run();
+      setImageAlt(alt);
+    }
+  };
+
+  const updateImageAlt = (alt: string) => {
+    setImageAlt(alt);
+    if (editor.isActive("image")) {
+      editor.chain().focus().updateAttributes("image", { alt }).run();
+    }
   };
 
   const updateImageSize = (dimension: "width" | "height", value: string) => {
@@ -236,6 +252,26 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       
       {isImageSelected && (
         <div className="flex flex-wrap items-center gap-3 p-2 border-b bg-blue-50 dark:bg-blue-950/30">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs whitespace-nowrap">Alt:</Label>
+            <Input
+              type="text"
+              value={imageAlt}
+              onChange={(e) => updateImageAlt(e.target.value)}
+              className="h-7 w-40 text-xs"
+              placeholder="Testo alternativo"
+            />
+          </div>
+          
+          <ImageDialog onSelectImage={replaceImage}>
+            <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs">
+              <Replace className="h-3 w-3 mr-1" />
+              Sostituisci
+            </Button>
+          </ImageDialog>
+          
+          <div className="h-6 w-px bg-border" />
+          
           <span className="text-sm font-medium text-muted-foreground">Dimensioni:</span>
           <div className="flex items-center gap-1">
             <Button
