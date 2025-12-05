@@ -17,8 +17,10 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       StarterKit,
       Link.configure({
         openOnClick: false,
+        autolink: false,
+        linkOnPaste: false,
         HTMLAttributes: {
-          class: "text-primary underline",
+          class: "text-primary underline cursor-text",
         },
       }),
       Image,
@@ -125,7 +127,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       </div>
       <EditorContent 
         editor={editor} 
-        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1"
+        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:pointer-events-auto [&_a]:cursor-text"
       />
     </div>
   );
