@@ -60,15 +60,14 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
       const { data, error } = await supabase
         .from("media")
         .select("*")
-        .eq("file_type", "image/jpeg")
-        .or("file_type.eq.image/png,file_type.eq.image/webp,file_type.eq.image/jpg")
+        .or("file_type.eq.image/jpeg,file_type.eq.image/png,file_type.eq.image/webp,file_type.eq.image/jpg")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       setMedia(data || []);
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Errore",
         description: error.message,
         variant: "destructive",
       });
