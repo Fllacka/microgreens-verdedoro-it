@@ -113,7 +113,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       </div>
       <EditorContent 
         editor={editor} 
-        className="prose max-w-none p-4 min-h-[300px] focus:outline-none"
+        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1"
       />
     </div>
   );
