@@ -40,13 +40,16 @@ export const SEOFields = ({ values, onChange }: SEOFieldsProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="canonicalUrl">Canonical URL</Label>
+            <Label htmlFor="canonicalUrl">Canonical Path</Label>
             <Input
               id="canonicalUrl"
               value={values.canonicalUrl}
               onChange={(e) => onChange("canonicalUrl", e.target.value)}
-              placeholder="https://example.com/page"
+              placeholder="/percorso-alternativo"
             />
+            <span className="text-xs text-muted-foreground">
+              Lascia vuoto per auto-riferimento. Inserisci solo il percorso (es. /blog/articolo).
+            </span>
           </div>
         </div>
 

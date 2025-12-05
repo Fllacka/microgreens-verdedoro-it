@@ -169,7 +169,7 @@ const BlogArticle = () => {
         <meta name="description" content={post.meta_description || post.excerpt} />
         <meta property="og:title" content={post.og_title || post.title} />
         <meta property="og:description" content={post.og_description || post.excerpt} />
-        {post.canonical_url && <link rel="canonical" href={post.canonical_url} />}
+        <link rel="canonical" href={`${window.location.origin}${post.canonical_url || `/blog/${post.slug}`}`} />
       </Helmet>
 
       <article className="min-h-screen">
