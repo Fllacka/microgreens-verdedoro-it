@@ -115,7 +115,7 @@ export const PublishActionBar = ({
                 Programma
               </Button>
               
-              {isPublished ? (
+              {isPublished && (
                 <Button
                   type="button"
                   variant="secondary"
@@ -125,19 +125,19 @@ export const PublishActionBar = ({
                 >
                   Rimuovi pubblicazione
                 </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowPublishDialog(true)}
-                  disabled={isSaving}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Pubblica
-                </Button>
               )}
+              
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                onClick={() => setShowPublishDialog(true)}
+                disabled={isSaving}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {isPublished ? "Ripubblica" : "Pubblica"}
+              </Button>
             </div>
           </div>
         </div>
