@@ -188,7 +188,7 @@ const AdminProductEdit = () => {
     );
   }
 
-  const previewUrl = seoData.slug ? `/microgreens/${seoData.slug}` : undefined;
+  const previewUrl = seoData.slug ? `/preview/product/${seoData.slug}` : undefined;
 
   return (
     <AdminLayout>

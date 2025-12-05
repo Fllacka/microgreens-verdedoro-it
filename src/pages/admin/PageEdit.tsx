@@ -143,7 +143,7 @@ export default function PageEdit() {
     );
   }
 
-  const previewUrl = formData.slug ? `/${formData.slug}` : undefined;
+  const previewUrl = formData.slug ? `/preview/page/${formData.slug}` : undefined;
 
   return (
     <AdminLayout>
