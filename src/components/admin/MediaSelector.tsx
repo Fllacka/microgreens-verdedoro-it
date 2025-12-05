@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Image, Check } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
 interface MediaFile {
@@ -16,9 +18,12 @@ interface MediaFile {
 interface MediaSelectorProps {
   value: string | null;
   onChange: (imageId: string | null, imageUrl: string | null) => void;
+  altText?: string;
+  onAltTextChange?: (altText: string) => void;
+  showAltText?: boolean;
 }
 
-export const MediaSelector = ({ value, onChange }: MediaSelectorProps) => {
+export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, showAltText = true }: MediaSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -87,34 +92,50 @@ export const MediaSelector = ({ value, onChange }: MediaSelectorProps) => {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {selectedImage ? (
-        <div className="space-y-2">
+        <div className="space-y-4">
           <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border">
             <img
               src={selectedImage.url}
-              alt={selectedImage.name}
+              alt={altText || selectedImage.name}
               className="w-full h-full object-cover"
             />
           </div>
+          
+          {showAltText && onAltTextChange && (
+            <div className="space-y-2 max-w-md">
+              <Label htmlFor="image-alt">Testo alternativo (Alt Text)</Label>
+              <Input
+                id="image-alt"
+                value={altText}
+                onChange={(e) => onAltTextChange(e.target.value)}
+                placeholder="Descrivi l'immagine per SEO e accessibilità"
+              />
+              <p className="text-xs text-muted-foreground">
+                Importante per SEO e accessibilità. Descrivi brevemente cosa mostra l'immagine.
+              </p>
+            </div>
+          )}
+          
           <div className="flex gap-2">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" onClick={() => fetchMedia()}>
                   <Image className="mr-2 h-4 w-4" />
-                  Change Image
+                  Sostituisci
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl max-h-[80vh]">
                 <DialogHeader>
-                  <DialogTitle>Select Image</DialogTitle>
+                  <DialogTitle>Seleziona Immagine</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className="h-[60vh]">
                   {loading ? (
-                    <div className="flex items-center justify-center py-8">Loading...</div>
+                    <div className="flex items-center justify-center py-8">Caricamento...</div>
                   ) : media.length === 0 ? (
                     <div className="flex items-center justify-center py-8 text-muted-foreground">
-                      No images in media library
+                      Nessuna immagine nella libreria media
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">
@@ -142,7 +163,7 @@ export const MediaSelector = ({ value, onChange }: MediaSelectorProps) => {
               </DialogContent>
             </Dialog>
             <Button variant="outline" size="sm" onClick={handleRemove}>
-              Remove
+              Rimuovi
             </Button>
           </div>
         </div>
@@ -151,19 +172,19 @@ export const MediaSelector = ({ value, onChange }: MediaSelectorProps) => {
           <DialogTrigger asChild>
             <Button variant="outline" onClick={() => fetchMedia()}>
               <Image className="mr-2 h-4 w-4" />
-              Select Image
+              Seleziona Immagine
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[80vh]">
             <DialogHeader>
-              <DialogTitle>Select Image</DialogTitle>
+              <DialogTitle>Seleziona Immagine</DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[60vh]">
               {loading ? (
-                <div className="flex items-center justify-center py-8">Loading...</div>
+                <div className="flex items-center justify-center py-8">Caricamento...</div>
               ) : media.length === 0 ? (
                 <div className="flex items-center justify-center py-8 text-muted-foreground">
-                  No images in media library
+                  Nessuna immagine nella libreria media
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4">

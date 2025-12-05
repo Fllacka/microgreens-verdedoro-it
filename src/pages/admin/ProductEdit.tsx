@@ -37,6 +37,7 @@ const AdminProductEdit = () => {
     popular: false,
     published: false,
     image_id: null as string | null,
+    image_alt: "",
   });
 
   const [seoData, setSeoData] = useState({
@@ -82,6 +83,7 @@ const AdminProductEdit = () => {
         popular: data.popular || false,
         published: data.published || false,
         image_id: data.image_id || null,
+        image_alt: (data as any).image_alt || "",
       });
 
       setSeoData({
@@ -127,6 +129,7 @@ const AdminProductEdit = () => {
         popular: formData.popular,
         published: publishState !== undefined ? publishState : formData.published,
         image_id: formData.image_id,
+        image_alt: formData.image_alt,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
         og_title: seoData.ogTitle,
@@ -320,6 +323,8 @@ const AdminProductEdit = () => {
                 <MediaSelector
                   value={formData.image_id}
                   onChange={(imageId) => setFormData({ ...formData, image_id: imageId })}
+                  altText={formData.image_alt}
+                  onAltTextChange={(altText) => setFormData({ ...formData, image_alt: altText })}
                 />
               </CardContent>
             </Card>

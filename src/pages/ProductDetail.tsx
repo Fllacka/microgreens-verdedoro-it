@@ -33,6 +33,7 @@ interface Product {
   uses: string[];
   benefits_content?: string;
   uses_content?: string;
+  image_alt?: string;
   rating: number;
   popular: boolean;
   published: boolean;
@@ -182,7 +183,7 @@ const ProductDetail = () => {
             <div className="relative rounded-lg overflow-hidden shadow-lg aspect-square">
               <img 
                 src={product.media?.file_path || "/placeholder.svg"} 
-                alt={product.name} 
+                alt={product.image_alt || product.name} 
                 className="w-full h-full object-cover" 
                 loading="eager" 
               />
