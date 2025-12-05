@@ -20,6 +20,14 @@ export const ResizableImage = Image.extend({
           return { height: attributes.height };
         },
       },
+      align: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("data-align"),
+        renderHTML: (attributes) => {
+          if (!attributes.align) return {};
+          return { "data-align": attributes.align };
+        },
+      },
     };
   },
 });
