@@ -5,7 +5,7 @@ import Link from "@tiptap/extension-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Unlink, Trash2, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Heading3, Heading4, Unlink, Trash2, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
 import { ResizableImage } from "./ResizableImage";
@@ -165,6 +165,24 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           className={editor.isActive("heading", { level: 2 }) ? "bg-muted" : ""}
         >
           <Heading2 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          className={editor.isActive("heading", { level: 3 }) ? "bg-muted" : ""}
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+          className={editor.isActive("heading", { level: 4 }) ? "bg-muted" : ""}
+        >
+          <Heading4 className="h-4 w-4" />
         </Button>
         <Button
           type="button"
