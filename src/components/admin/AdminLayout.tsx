@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, ShoppingBag, FileText, Files, Image, ArrowLeftRight, Users, Settings } from "lucide-react";
+import { LogOut, LayoutDashboard, ShoppingBag, FileText, Files, Image, ArrowLeftRight, Users, Settings, Home } from "lucide-react";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -42,6 +42,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             <Button variant={isActive("/admin") && location.pathname === "/admin" ? "default" : "ghost"} className="w-full justify-start">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               Dashboard
+            </Button>
+          </Link>
+          <Link to="/admin/homepage">
+            <Button variant={isActive("/admin/homepage") ? "default" : "ghost"} className="w-full justify-start">
+              <Home className="mr-2 h-4 w-4" />
+              Homepage
             </Button>
           </Link>
           <Link to="/admin/products">
