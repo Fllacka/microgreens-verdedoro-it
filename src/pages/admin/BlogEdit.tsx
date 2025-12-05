@@ -26,6 +26,7 @@ const AdminBlogEdit = () => {
     category: "",
     tags: "",
     published: false,
+    publishedAt: "",
   });
 
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
@@ -65,6 +66,7 @@ const AdminBlogEdit = () => {
         category: data.category || "",
         tags: data.tags?.join(", ") || "",
         published: data.published || false,
+        publishedAt: data.published_at ? data.published_at.split("T")[0] : "",
       });
 
       // Load content blocks (new format) or migrate from old content field
@@ -118,6 +120,7 @@ const AdminBlogEdit = () => {
         category: formData.category,
         tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
         published: formData.published,
+        published_at: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
         og_title: seoData.ogTitle,
@@ -255,6 +258,16 @@ const AdminBlogEdit = () => {
                     checked={formData.published}
                     onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="publishedAt">Publication Date</Label>
+                  <Input
+                    id="publishedAt"
+                    type="date"
+                    value={formData.publishedAt}
+                    onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">Optional. Leave empty for no specific date.</p>
                 </div>
               </CardContent>
             </Card>
