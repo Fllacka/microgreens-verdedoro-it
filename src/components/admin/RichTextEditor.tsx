@@ -6,6 +6,7 @@ import Image from "@tiptap/extension-image";
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Unlink } from "lucide-react";
 import { LinkDialog } from "./LinkDialog";
+import { ImageDialog } from "./ImageDialog";
 
 interface RichTextEditorProps {
   content: string;
@@ -83,11 +84,8 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     editor.chain().focus().unsetLink().run();
   };
 
-  const addImage = () => {
-    const url = window.prompt("Enter image URL");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
+  const addImage = (url: string, alt: string) => {
+    editor.chain().focus().setImage({ src: url, alt }).run();
   };
 
   return (
@@ -163,14 +161,11 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             <Unlink className="h-4 w-4" />
           </Button>
         )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addImage}
-        >
-          <ImageIcon className="h-4 w-4" />
-        </Button>
+        <ImageDialog onSelectImage={addImage}>
+          <Button type="button" variant="ghost" size="sm">
+            <ImageIcon className="h-4 w-4" />
+          </Button>
+        </ImageDialog>
       </div>
       <EditorContent 
         editor={editor} 
