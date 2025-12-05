@@ -1,12 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Unlink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Unlink, Trash2 } from "lucide-react";
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
+import { ResizableImage } from "./ResizableImage";
 
 interface RichTextEditorProps {
   content: string;
@@ -15,9 +17,21 @@ interface RichTextEditorProps {
 
 export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const [isLinkActive, setIsLinkActive] = useState(false);
+  const [isImageSelected, setIsImageSelected] = useState(false);
+  const [imageSize, setImageSize] = useState({ width: "", height: "" });
 
   const updateToolbarState = useCallback((editor: any) => {
     setIsLinkActive(editor.isActive("link"));
+    const isImage = editor.isActive("image");
+    setIsImageSelected(isImage);
+    
+    if (isImage) {
+      const attrs = editor.getAttributes("image");
+      setImageSize({
+        width: attrs.width || "",
+        height: attrs.height || "",
+      });
+    }
   }, []);
 
   const editor = useEditor({
@@ -31,7 +45,11 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           class: "text-primary underline",
         },
       }),
-      Image,
+      ResizableImage.configure({
+        HTMLAttributes: {
+          class: "max-w-full h-auto",
+        },
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -46,7 +64,6 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     },
     editorProps: {
       handleClick: (view, pos, event) => {
-        // Prevent link navigation
         const target = event.target as HTMLElement;
         if (target.tagName === 'A' || target.closest('a')) {
           event.preventDefault();
@@ -86,6 +103,28 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 
   const addImage = (url: string, alt: string) => {
     editor.chain().focus().setImage({ src: url, alt }).run();
+  };
+
+  const updateImageSize = (dimension: "width" | "height", value: string) => {
+    const numValue = value ? parseInt(value, 10) : null;
+    setImageSize(prev => ({ ...prev, [dimension]: value }));
+    
+    if (editor.isActive("image")) {
+      editor.chain().focus().updateAttributes("image", { [dimension]: numValue }).run();
+    }
+  };
+
+  const setPresetSize = (width: number) => {
+    if (editor.isActive("image")) {
+      setImageSize({ width: String(width), height: "" });
+      editor.chain().focus().updateAttributes("image", { width, height: null }).run();
+    }
+  };
+
+  const deleteImage = () => {
+    if (editor.isActive("image")) {
+      editor.chain().focus().deleteSelection().run();
+    }
   };
 
   return (
@@ -167,9 +206,84 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           </Button>
         </ImageDialog>
       </div>
+      
+      {isImageSelected && (
+        <div className="flex flex-wrap items-center gap-3 p-2 border-b bg-blue-50 dark:bg-blue-950/30">
+          <span className="text-sm font-medium text-muted-foreground">Dimensioni:</span>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPresetSize(200)}
+              className="h-7 px-2 text-xs"
+            >
+              Piccola
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPresetSize(400)}
+              className="h-7 px-2 text-xs"
+            >
+              Media
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPresetSize(600)}
+              className="h-7 px-2 text-xs"
+            >
+              Grande
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setImageSize({ width: "", height: "" });
+                editor.chain().focus().updateAttributes("image", { width: null, height: null }).run();
+              }}
+              className="h-7 px-2 text-xs"
+            >
+              Auto
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs">W:</Label>
+            <Input
+              type="number"
+              value={imageSize.width}
+              onChange={(e) => updateImageSize("width", e.target.value)}
+              className="h-7 w-16 text-xs"
+              placeholder="auto"
+            />
+            <Label className="text-xs">H:</Label>
+            <Input
+              type="number"
+              value={imageSize.height}
+              onChange={(e) => updateImageSize("height", e.target.value)}
+              className="h-7 w-16 text-xs"
+              placeholder="auto"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={deleteImage}
+            className="h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+      
       <EditorContent 
         editor={editor} 
-        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:pointer-events-auto [&_a]:cursor-text"
+        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:pointer-events-auto [&_a]:cursor-text [&_.ProseMirror-selectednode]:outline [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-primary [&_.ProseMirror-selectednode]:outline-offset-2"
       />
     </div>
   );
