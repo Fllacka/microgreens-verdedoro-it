@@ -35,7 +35,7 @@ const ProductCard = ({
         backgroundImage: `url(${image})`
       }}>
         {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none" />
         
         {/* Popular badge - outline style with gold */}
         {popular && (
