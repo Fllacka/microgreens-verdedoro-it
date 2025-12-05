@@ -37,6 +37,7 @@ interface Product {
   published: boolean;
   meta_title: string;
   meta_description: string;
+  canonical_url?: string;
   media?: {
     file_path: string;
   };
@@ -142,6 +143,7 @@ const ProductDetail = () => {
       <Helmet>
         <title>{product.meta_title || `${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="description" content={product.meta_description || product.description} />
+        <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/prodotto/${product.slug}`}`} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org/",
