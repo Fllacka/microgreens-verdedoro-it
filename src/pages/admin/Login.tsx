@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,19 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { user, userRole, loading: authLoading, signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the intended destination or default to /admin
+  const from = (location.state as any)?.from?.pathname || "/admin";
+
+  // Redirect if already authenticated with proper role
+  useEffect(() => {
+    if (!authLoading && user && (userRole === "admin" || userRole === "editor")) {
+      navigate(from, { replace: true });
+    }
+  }, [user, userRole, authLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +38,7 @@ const AdminLogin = () => {
         navigate("/admin/email-confirmation");
       } else {
         await signIn(email, password);
-        navigate("/admin");
+        // Navigation will happen via useEffect when auth state updates
       }
     } catch (error) {
       console.error(error);
@@ -35,6 +46,24 @@ const AdminLogin = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while checking auth state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
+        <div className="text-muted-foreground">Caricamento...</div>
+      </div>
+    );
+  }
+
+  // Don't show login form if already authenticated (redirect will happen)
+  if (user && (userRole === "admin" || userRole === "editor")) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
+        <div className="text-muted-foreground">Reindirizzamento...</div>
+      </div>
+    );
+  }
 
   if (isForgotPassword) {
     return (
