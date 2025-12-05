@@ -37,7 +37,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
             return (
               <div
                 key={block.id}
-                className="prose prose-lg max-w-none"
+                className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline"
                 dangerouslySetInnerHTML={{ __html: block.content || "" }}
               />
             );
