@@ -9,9 +9,67 @@ import { Leaf, Heart, Truck, Shield, Star, ArrowRight, CheckCircle, ShoppingCart
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { it } from "date-fns/locale";
+
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  published_at: string | null;
+  featured_image_id: string | null;
+}
+
+interface MediaItem {
+  id: string;
+  file_path: string;
+}
+
 const Index = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      const { data: posts } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, excerpt, published_at, featured_image_id')
+        .eq('published', true)
+        .order('published_at', { ascending: false })
+        .limit(3);
+
+      if (posts && posts.length > 0) {
+        setBlogPosts(posts);
+        
+        // Fetch media for featured images
+        const imageIds = posts
+          .map(p => p.featured_image_id)
+          .filter((id): id is string => id !== null);
+        
+        if (imageIds.length > 0) {
+          const { data: media } = await supabase
+            .from('media')
+            .select('id, file_path')
+            .in('id', imageIds);
+          
+          if (media) {
+            const map: Record<string, string> = {};
+            media.forEach((m: MediaItem) => {
+              map[m.id] = m.file_path;
+            });
+            setMediaMap(map);
+          }
+        }
+      }
+    };
+
+    fetchBlogPosts();
+  }, []);
   const benefits = [{
     icon: Heart,
     title: "Ricchi di Nutrienti",
@@ -285,42 +343,63 @@ const Index = () => {
       </section>
 
       {/* Blog Section */}
-      <section className="section-padding bg-gradient-subtle">
-        <div className="container-width text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
-            Esplora il Nostro Blog
-          </h2>
-          <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
-            Consigli, ricette e l'incredibile mondo dei microgreens e scoprirne più che 
-            mai sulle curiosità nutrizionali e tutto culinarie.
-          </p>
-          
-          <Card className="max-w-md mx-auto overflow-hidden hover-lift border-border/50">
-            <div className="h-48 bg-cover bg-center relative" style={{
-            backgroundImage: `url(${varietiesImage})`
-          }}>
-              <div className="absolute inset-0 bg-gradient-hero/20" />
+      {blogPosts.length > 0 && (
+        <section className="section-padding bg-gradient-subtle">
+          <div className="container-width text-center">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+              Esplora il Nostro Blog
+            </h2>
+            <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
+              Consigli, ricette e l'incredibile mondo dei microgreens e scoprirne più che 
+              mai sulle curiosità nutrizionali e tutto culinarie.
+            </p>
+            
+            <div className={`grid gap-8 mb-8 ${blogPosts.length === 1 ? 'max-w-md mx-auto' : blogPosts.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto' : 'grid-cols-1 md:grid-cols-3'}`}>
+              {blogPosts.map((post) => {
+                const imageUrl = post.featured_image_id && mediaMap[post.featured_image_id] 
+                  ? mediaMap[post.featured_image_id] 
+                  : varietiesImage;
+                
+                return (
+                  <Link key={post.id} to={`/blog/${post.slug}`}>
+                    <Card className="overflow-hidden hover-lift border-border/50 h-full">
+                      <div 
+                        className="h-48 bg-cover bg-center relative" 
+                        style={{ backgroundImage: `url(${imageUrl})` }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-hero/20" />
+                      </div>
+                      <CardContent className="p-6 text-left">
+                        <h3 className="font-display text-xl font-semibold text-primary mb-2 line-clamp-2">
+                          {post.title}
+                        </h3>
+                        {post.excerpt && (
+                          <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-2">
+                            {post.excerpt}
+                          </p>
+                        )}
+                        {post.published_at && (
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(post.published_at), 'd MMM yyyy', { locale: it })}
+                          </span>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
-            <CardContent className="p-6 text-left">
-              <h3 className="font-display text-xl font-semibold text-primary mb-2">
-                La sostenibilità dei microgreens: dalla terra all'alta cucina
-              </h3>
-              <p className="font-body text-muted-foreground text-sm mb-4">
-                Scopri come i microgreens rappresentano una scelta sostenibile...
-              </p>
-              <span className="text-xs text-muted-foreground">15 gen 2024</span>
-            </CardContent>
-          </Card>
 
-          <div className="mt-8">
-            <Button variant="verde" size="lg" asChild>
-              <Link to="/blog">
-                Leggi tutti gli articoli
-              </Link>
-            </Button>
+            <div className="mt-8">
+              <Button variant="verde" size="lg" asChild>
+                <Link to="/blog">
+                  Leggi tutti gli articoli
+                </Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </Layout>;
 };
 export default Index;
