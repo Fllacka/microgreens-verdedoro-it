@@ -31,6 +31,8 @@ const AdminProductEdit = () => {
     price: "",
     benefits: "",
     uses: "",
+    benefits_content: "",
+    uses_content: "",
     rating: "",
     popular: false,
     published: false,
@@ -74,6 +76,8 @@ const AdminProductEdit = () => {
         price: data.price?.toString() || "",
         benefits: data.benefits?.join(", ") || "",
         uses: data.uses?.join(", ") || "",
+        benefits_content: (data as any).benefits_content || "",
+        uses_content: (data as any).uses_content || "",
         rating: data.rating?.toString() || "",
         popular: data.popular || false,
         published: data.published || false,
@@ -117,6 +121,8 @@ const AdminProductEdit = () => {
         price: formData.price ? parseFloat(formData.price) : null,
         benefits: formData.benefits ? formData.benefits.split(",").map(b => b.trim()) : [],
         uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
+        benefits_content: formData.benefits_content,
+        uses_content: formData.uses_content,
         rating: formData.rating ? parseFloat(formData.rating) : null,
         popular: formData.popular,
         published: publishState !== undefined ? publishState : formData.published,
@@ -252,7 +258,7 @@ const AdminProductEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="benefits">Benefici (separati da virgola)</Label>
+                  <Label htmlFor="benefits">Benefici (etichette, separati da virgola)</Label>
                   <Textarea
                     id="benefits"
                     value={formData.benefits}
@@ -260,16 +266,34 @@ const AdminProductEdit = () => {
                     placeholder="Ricco di vitamine, Antiossidante, Ricco di minerali"
                     rows={2}
                   />
+                  <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="uses">Usi (separati da virgola)</Label>
+                  <Label>Benefici (contenuto dettagliato)</Label>
+                  <RichTextEditor
+                    content={formData.benefits_content}
+                    onChange={(content) => setFormData({ ...formData, benefits_content: content })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="uses">Usi (etichette, separati da virgola)</Label>
                   <Textarea
                     id="uses"
                     value={formData.uses}
                     onChange={(e) => setFormData({ ...formData, uses: e.target.value })}
                     placeholder="Insalate, Smoothie, Guarnizione"
                     rows={2}
+                  />
+                  <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Usi Culinari (contenuto dettagliato)</Label>
+                  <RichTextEditor
+                    content={formData.uses_content}
+                    onChange={(content) => setFormData({ ...formData, uses_content: content })}
                   />
                 </div>
 

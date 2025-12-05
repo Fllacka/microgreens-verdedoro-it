@@ -31,6 +31,8 @@ interface Product {
   category: string;
   benefits: string[];
   uses: string[];
+  benefits_content?: string;
+  uses_content?: string;
   rating: number;
   popular: boolean;
   published: boolean;
@@ -269,6 +271,32 @@ const ProductDetail = () => {
       <section className="container mx-auto px-4 py-12">
         <ContentBlockRenderer blocks={product.content_blocks || []} />
       </section>
+
+      {/* Benefits Section */}
+      {product.benefits_content && (
+        <section className="container mx-auto px-4 py-12 bg-verde-primary/5">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-display text-3xl font-bold text-primary mb-8">Benefici</h2>
+            <div 
+              className="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-a:text-verde-primary prose-strong:text-primary"
+              dangerouslySetInnerHTML={{ __html: product.benefits_content }}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Uses Section */}
+      {product.uses_content && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-display text-3xl font-bold text-primary mb-8">Usi Culinari</h2>
+            <div 
+              className="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-a:text-verde-primary prose-strong:text-primary"
+              dangerouslySetInnerHTML={{ __html: product.uses_content }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Related Products */}
       <section className="container mx-auto px-4 py-16 bg-gradient-subtle">

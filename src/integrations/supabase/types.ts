@@ -226,6 +226,7 @@ export type Database = {
       products: {
         Row: {
           benefits: string[] | null
+          benefits_content: string | null
           canonical_url: string | null
           category: string | null
           change_frequency: string | null
@@ -252,9 +253,11 @@ export type Database = {
           structured_data: Json | null
           updated_at: string | null
           uses: string[] | null
+          uses_content: string | null
         }
         Insert: {
           benefits?: string[] | null
+          benefits_content?: string | null
           canonical_url?: string | null
           category?: string | null
           change_frequency?: string | null
@@ -281,9 +284,11 @@ export type Database = {
           structured_data?: Json | null
           updated_at?: string | null
           uses?: string[] | null
+          uses_content?: string | null
         }
         Update: {
           benefits?: string[] | null
+          benefits_content?: string | null
           canonical_url?: string | null
           category?: string | null
           change_frequency?: string | null
@@ -310,6 +315,7 @@ export type Database = {
           structured_data?: Json | null
           updated_at?: string | null
           uses?: string[] | null
+          uses_content?: string | null
         }
         Relationships: [
           {
