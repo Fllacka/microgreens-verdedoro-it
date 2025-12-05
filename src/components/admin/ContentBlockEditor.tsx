@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "./RichTextEditor";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown } from "lucide-react";
+import { ImageDialog } from "./ImageDialog";
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Image as ImageIcon, Replace } from "lucide-react";
 
 export interface ContentBlock {
   id: string;
@@ -51,6 +52,10 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     const newBlocks = [...blocks];
     [newBlocks[index], newBlocks[newIndex]] = [newBlocks[newIndex], newBlocks[index]];
     onChange(newBlocks);
+  };
+
+  const handleImageSelect = (blockId: string, url: string, alt: string) => {
+    updateBlock(blockId, { url, alt });
   };
 
   return (
@@ -143,24 +148,43 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
 
                   {block.type === "image" && (
                     <div className="space-y-4">
-                      <div>
-                        <Label>Image URL</Label>
-                        <Input
-                          value={block.url || ""}
-                          onChange={(e) => updateBlock(block.id, { url: e.target.value })}
-                          placeholder="https://example.com/image.jpg"
-                        />
-                      </div>
-                      <div>
-                        <Label>Alt Text</Label>
-                        <Input
-                          value={block.alt || ""}
-                          onChange={(e) => updateBlock(block.id, { alt: e.target.value })}
-                          placeholder="Describe the image"
-                        />
-                      </div>
-                      {block.url && (
-                        <img src={block.url} alt={block.alt} className="max-w-md rounded border" />
+                      {block.url ? (
+                        <div className="space-y-4">
+                          <div className="relative">
+                            <img 
+                              src={block.url} 
+                              alt={block.alt || ""} 
+                              className="max-w-md rounded-lg border shadow-sm" 
+                            />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
+                              <Button type="button" variant="outline" size="sm">
+                                <Replace className="h-4 w-4 mr-2" />
+                                Sostituisci Immagine
+                              </Button>
+                            </ImageDialog>
+                          </div>
+                          <div>
+                            <Label>Testo Alternativo (Alt)</Label>
+                            <Input
+                              value={block.alt || ""}
+                              onChange={(e) => updateBlock(block.id, { alt: e.target.value })}
+                              placeholder="Descrizione dell'immagine per SEO e accessibilità"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                          <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground mb-4">Nessuna immagine selezionata</p>
+                          <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
+                            <Button type="button" variant="outline">
+                              <ImageIcon className="h-4 w-4 mr-2" />
+                              Seleziona Immagine
+                            </Button>
+                          </ImageDialog>
+                        </div>
                       )}
                     </div>
                   )}
