@@ -71,11 +71,11 @@ const Navigation = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="relative"
+                className="relative hover:bg-primary/10"
                 onClick={openCart}
                 aria-label="Apri carrello"
               >
-                <ShoppingBasket className="h-5 w-5" />
+                <ShoppingBasket className="h-6 w-6 text-primary" />
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
@@ -95,11 +95,11 @@ const Navigation = () => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="relative"
+                className="relative hover:bg-primary/10"
                 onClick={openCart}
                 aria-label="Apri carrello"
               >
-                <ShoppingBasket className="h-5 w-5" />
+                <ShoppingBasket className="h-6 w-6 text-primary" />
                 {itemCount > 0 && (
                   <Badge 
                     variant="default"
