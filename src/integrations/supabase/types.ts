@@ -236,6 +236,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          image_alt: string | null
           image_id: string | null
           meta_description: string | null
           meta_title: string | null
@@ -267,6 +268,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          image_alt?: string | null
           image_id?: string | null
           meta_description?: string | null
           meta_title?: string | null
@@ -298,6 +300,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          image_alt?: string | null
           image_id?: string | null
           meta_description?: string | null
           meta_title?: string | null
