@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Eye, Save, Send, Clock } from "lucide-react";
+import { Calendar, Eye, Save, Send, Clock, ChevronUp, EyeOff } from "lucide-react";
 
 interface PublishActionBarProps {
   isPublished: boolean;
@@ -115,29 +116,51 @@ export const PublishActionBar = ({
                 Programma
               </Button>
               
-              {isPublished && (
+              {isPublished ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      disabled={isSaving}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Ripubblica
+                      <ChevronUp className="h-4 w-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="top" align="end" className="bg-background border shadow-lg">
+                    <DropdownMenuItem 
+                      onClick={() => setShowPublishDialog(true)}
+                      className="cursor-pointer"
+                    >
+                      <Send className="h-4 w-4 mr-2 text-green-600" />
+                      Ripubblica contenuto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={handleUnpublish}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <EyeOff className="h-4 w-4 mr-2" />
+                      Rimuovi pubblicazione
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="default"
                   size="sm"
-                  onClick={handleUnpublish}
+                  onClick={() => setShowPublishDialog(true)}
                   disabled={isSaving}
+                  className="bg-green-600 hover:bg-green-700"
                 >
-                  Rimuovi pubblicazione
+                  <Send className="h-4 w-4 mr-2" />
+                  Pubblica
                 </Button>
               )}
-              
-              <Button
-                type="button"
-                variant="default"
-                size="sm"
-                onClick={() => setShowPublishDialog(true)}
-                disabled={isSaving}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Send className="h-4 w-4 mr-2" />
-                {isPublished ? "Ripubblica" : "Pubblica"}
-              </Button>
             </div>
           </div>
         </div>
