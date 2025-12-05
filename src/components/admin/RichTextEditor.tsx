@@ -3,7 +3,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2 } from "lucide-react";
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2, Unlink } from "lucide-react";
 import { LinkDialog } from "./LinkDialog";
 
 interface RichTextEditorProps {
@@ -20,7 +20,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
         autolink: false,
         linkOnPaste: false,
         HTMLAttributes: {
-          class: "text-primary underline cursor-text",
+          class: "text-primary underline",
         },
       }),
       Image,
@@ -28,6 +28,28 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    editorProps: {
+      handleClick: (view, pos, event) => {
+        // Prevent link navigation
+        const target = event.target as HTMLElement;
+        if (target.tagName === 'A' || target.closest('a')) {
+          event.preventDefault();
+          event.stopPropagation();
+          return true;
+        }
+        return false;
+      },
+      handleDOMEvents: {
+        click: (view, event) => {
+          const target = event.target as HTMLElement;
+          if (target.tagName === 'A' || target.closest('a')) {
+            event.preventDefault();
+            return true;
+          }
+          return false;
+        },
+      },
     },
   });
 
@@ -116,6 +138,17 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             <LinkIcon className="h-4 w-4" />
           </Button>
         </LinkDialog>
+        {editor.isActive("link") && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleRemoveLink}
+            title="Rimuovi link"
+          >
+            <Unlink className="h-4 w-4" />
+          </Button>
+        )}
         <Button
           type="button"
           variant="ghost"
