@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBlockEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
+import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Save, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const AdminBlogEdit = () => {
   const { id } = useParams();
@@ -20,6 +20,7 @@ const AdminBlogEdit = () => {
   const isNew = id === "new";
 
   const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -69,11 +70,9 @@ const AdminBlogEdit = () => {
         publishedAt: data.published_at ? data.published_at.split("T")[0] : "",
       });
 
-      // Load content blocks (new format) or migrate from old content field
       if (data.content_blocks && Array.isArray(data.content_blocks) && data.content_blocks.length > 0) {
         setContentBlocks(data.content_blocks as unknown as ContentBlock[]);
       } else if (data.content) {
-        // Migrate old content to a single text block
         setContentBlocks([
           {
             id: crypto.randomUUID(),
@@ -98,8 +97,8 @@ const AdminBlogEdit = () => {
     } catch (error) {
       console.error("Error fetching blog post:", error);
       toast({
-        title: "Error",
-        description: "Failed to load blog post",
+        title: "Errore",
+        description: "Impossibile caricare l'articolo",
         variant: "destructive",
       });
     } finally {
@@ -107,9 +106,8 @@ const AdminBlogEdit = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const savePost = async (publishState?: boolean) => {
+    setSaving(true);
 
     try {
       const postData = {
@@ -119,7 +117,7 @@ const AdminBlogEdit = () => {
         content_blocks: contentBlocks as any,
         category: formData.category,
         tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
-        published: formData.published,
+        published: publishState !== undefined ? publishState : formData.published,
         published_at: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
@@ -133,66 +131,79 @@ const AdminBlogEdit = () => {
       };
 
       if (isNew) {
-        const { error } = await supabase.from("blog_posts").insert(postData);
+        const { data, error } = await supabase.from("blog_posts").insert(postData).select().single();
         if (error) throw error;
+        toast({
+          title: "Successo",
+          description: "Articolo creato con successo",
+        });
+        navigate(`/admin/blog/${data.id}`);
       } else {
         const { error } = await supabase.from("blog_posts").update(postData).eq("id", id);
         if (error) throw error;
+        if (publishState !== undefined) {
+          setFormData(prev => ({ ...prev, published: publishState }));
+        }
+        toast({
+          title: "Successo",
+          description: "Articolo aggiornato con successo",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: `Blog post ${isNew ? "created" : "updated"} successfully`,
-      });
-      navigate("/admin/blog");
     } catch (error: any) {
       console.error("Error saving blog post:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to save blog post",
+        title: "Errore",
+        description: error.message || "Impossibile salvare l'articolo",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
+  };
+
+  const handleSave = async () => {
+    await savePost();
+  };
+
+  const handlePublish = async (publish: boolean, scheduledDate?: string) => {
+    if (scheduledDate) {
+      setFormData(prev => ({ ...prev, publishedAt: scheduledDate.split("T")[0] }));
+    }
+    await savePost(publish);
   };
 
   if (loading && !isNew) {
     return (
       <AdminLayout>
-        <div>Loading...</div>
+        <div>Caricamento...</div>
       </AdminLayout>
     );
   }
 
+  const previewUrl = seoData.slug ? `/blog/${seoData.slug}` : undefined;
+
   return (
     <AdminLayout>
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/blog")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">{isNew ? "New Blog Post" : "Edit Blog Post"}</h1>
-              <p className="text-muted-foreground">Create and manage blog content</p>
-            </div>
-          </div>
-          <Button type="submit" disabled={loading}>
-            <Save className="mr-2 h-4 w-4" />
-            Save Post
+      <div className="space-y-8 pb-24">
+        <div className="flex items-center gap-4">
+          <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/blog")}>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{isNew ? "Nuovo Articolo" : "Modifica Articolo"}</h1>
+            <p className="text-muted-foreground">Crea e gestisci i contenuti del blog</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Post Information</CardTitle>
+                <CardTitle>Informazioni Articolo</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Post Title *</Label>
+                  <Label htmlFor="title">Titolo Articolo *</Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -202,7 +213,7 @@ const AdminBlogEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <Label htmlFor="excerpt">Estratto</Label>
                   <Textarea
                     id="excerpt"
                     value={formData.excerpt}
@@ -212,13 +223,13 @@ const AdminBlogEdit = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Content Blocks</Label>
+                  <Label>Blocchi di Contenuto</Label>
                   <ContentBlockEditor blocks={contentBlocks} onChange={setContentBlocks} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category">Categoria</Label>
                     <Input
                       id="category"
                       value={formData.category}
@@ -227,12 +238,12 @@ const AdminBlogEdit = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="tags">Tags (comma separated)</Label>
+                    <Label htmlFor="tags">Tag (separati da virgola)</Label>
                     <Input
                       id="tags"
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                      placeholder="health, nutrition, microgreens"
+                      placeholder="salute, nutrizione, microgreens"
                     />
                   </div>
                 </div>
@@ -248,32 +259,32 @@ const AdminBlogEdit = () => {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Publishing</CardTitle>
+                <CardTitle>Opzioni</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="published">Published</Label>
-                  <Switch
-                    id="published"
-                    checked={formData.published}
-                    onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
-                  />
-                </div>
                 <div className="space-y-2">
-                  <Label htmlFor="publishedAt">Publication Date</Label>
+                  <Label htmlFor="publishedAt">Data Pubblicazione</Label>
                   <Input
                     id="publishedAt"
                     type="date"
                     value={formData.publishedAt}
                     onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
                   />
-                  <p className="text-xs text-muted-foreground">Optional. Leave empty for no specific date.</p>
+                  <p className="text-xs text-muted-foreground">Opzionale. Lascia vuoto per nessuna data specifica.</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
-      </form>
+      </div>
+
+      <PublishActionBar
+        isPublished={formData.published}
+        isSaving={saving}
+        onSave={handleSave}
+        onPublish={handlePublish}
+        previewUrl={previewUrl}
+      />
     </AdminLayout>
   );
 };

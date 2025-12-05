@@ -4,12 +4,12 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
-import { Switch } from "@/components/ui/switch";
+import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { ArrowLeft } from "lucide-react";
 
 export default function PageEdit() {
@@ -71,7 +71,7 @@ export default function PageEdit() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Errore",
         description: error.message,
         variant: "destructive",
       });
@@ -80,8 +80,7 @@ export default function PageEdit() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const savePage = async (publishState?: boolean) => {
     setSaving(true);
 
     try {
@@ -89,32 +88,35 @@ export default function PageEdit() {
       
       const pageData = {
         ...formData,
+        published: publishState !== undefined ? publishState : formData.published,
         created_by: user?.id,
       };
 
       if (isNew) {
-        const { error } = await supabase.from("pages").insert([pageData]);
+        const { data, error } = await supabase.from("pages").insert([pageData]).select().single();
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Page created successfully",
+          title: "Successo",
+          description: "Pagina creata con successo",
         });
+        navigate(`/admin/pages/${data.id}`);
       } else {
         const { error } = await supabase
           .from("pages")
           .update(pageData)
           .eq("id", id);
         if (error) throw error;
+        if (publishState !== undefined) {
+          setFormData(prev => ({ ...prev, published: publishState }));
+        }
         toast({
-          title: "Success",
-          description: "Page updated successfully",
+          title: "Successo",
+          description: "Pagina aggiornata con successo",
         });
       }
-
-      navigate("/admin/pages");
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Errore",
         description: error.message,
         variant: "destructive",
       });
@@ -123,19 +125,29 @@ export default function PageEdit() {
     }
   };
 
+  const handleSave = async () => {
+    await savePage();
+  };
+
+  const handlePublish = async (publish: boolean) => {
+    await savePage(publish);
+  };
+
   if (loading) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center min-h-[400px]">
-          Loading...
+          Caricamento...
         </div>
       </AdminLayout>
     );
   }
 
+  const previewUrl = formData.slug ? `/${formData.slug}` : undefined;
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 pb-24">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -143,106 +155,100 @@ export default function PageEdit() {
             onClick={() => navigate("/admin/pages")}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Indietro
           </Button>
-          <h1 className="text-3xl font-bold">
-            {isNew ? "New Page" : "Edit Page"}
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold">
+              {isNew ? "Nuova Pagina" : "Modifica Pagina"}
+            </h1>
+            <p className="text-muted-foreground">Crea e gestisci i contenuti della pagina</p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <Card className="p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="published">Publish Page</Label>
-              <Switch
-                id="published"
-                checked={formData.published}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, published: checked })
-                }
-              />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Informazioni Pagina</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Titolo *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    required
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                required
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Slug *</Label>
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
+                    required
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) =>
-                  setFormData({ ...formData, slug: e.target.value })
-                }
-                required
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label>Contenuto</Label>
+                  <RichTextEditor
+                    content={formData.content}
+                    onChange={(content) =>
+                      setFormData({ ...formData, content })
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-            <div>
-              <Label>Content</Label>
-              <RichTextEditor
-                content={formData.content}
-                onChange={(content) =>
-                  setFormData({ ...formData, content })
-                }
-              />
-            </div>
-          </Card>
-
-          <SEOFields
-            values={{
-              slug: formData.slug,
-              metaTitle: formData.meta_title,
-              metaDescription: formData.meta_description,
-              ogTitle: formData.og_title,
-              ogDescription: formData.og_description,
-              canonicalUrl: formData.canonical_url,
-              robots: formData.robots,
-              changeFrequency: formData.change_frequency,
-              priority: formData.priority.toString(),
-              structuredData: "",
-            }}
-            onChange={(field, value) => {
-              const fieldMap: Record<string, string> = {
-                slug: "slug",
-                metaTitle: "meta_title",
-                metaDescription: "meta_description",
-                ogTitle: "og_title",
-                ogDescription: "og_description",
-                canonicalUrl: "canonical_url",
-                robots: "robots",
-                changeFrequency: "change_frequency",
-                priority: "priority",
-              };
-              const dbField = fieldMap[field] || field;
-              const processedValue = field === "priority" ? parseFloat(value as string) : value;
-              setFormData({ ...formData, [dbField]: processedValue });
-            }}
-          />
-
-          <div className="flex gap-2">
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Save Page"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate("/admin/pages")}
-            >
-              Cancel
-            </Button>
+            <SEOFields
+              values={{
+                slug: formData.slug,
+                metaTitle: formData.meta_title,
+                metaDescription: formData.meta_description,
+                ogTitle: formData.og_title,
+                ogDescription: formData.og_description,
+                canonicalUrl: formData.canonical_url,
+                robots: formData.robots,
+                changeFrequency: formData.change_frequency,
+                priority: formData.priority.toString(),
+                structuredData: "",
+              }}
+              onChange={(field, value) => {
+                const fieldMap: Record<string, string> = {
+                  slug: "slug",
+                  metaTitle: "meta_title",
+                  metaDescription: "meta_description",
+                  ogTitle: "og_title",
+                  ogDescription: "og_description",
+                  canonicalUrl: "canonical_url",
+                  robots: "robots",
+                  changeFrequency: "change_frequency",
+                  priority: "priority",
+                };
+                const dbField = fieldMap[field] || field;
+                const processedValue = field === "priority" ? parseFloat(value as string) : value;
+                setFormData({ ...formData, [dbField]: processedValue });
+              }}
+            />
           </div>
-        </form>
+        </div>
       </div>
+
+      <PublishActionBar
+        isPublished={formData.published}
+        isSaving={saving}
+        onSave={handleSave}
+        onPublish={handlePublish}
+        previewUrl={previewUrl}
+      />
     </AdminLayout>
   );
 }
