@@ -10,17 +10,7 @@ import { ShoppingCart, Star, Leaf } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
 import { toast } from "sonner";
-
-interface ContentBlock {
-  id: string;
-  type: "heading" | "text" | "image";
-  level?: "h1" | "h2" | "h3";
-  content?: string;
-  url?: string;
-  alt?: string;
-}
 
 interface Product {
   id: string;
@@ -39,7 +29,6 @@ interface Product {
   published: boolean;
   meta_title: string;
   meta_description: string;
-  content_blocks: ContentBlock[];
   media?: {
     file_path: string;
   };
@@ -75,10 +64,7 @@ const ProductDetail = () => {
         if (productError) throw productError;
 
         if (productData) {
-          setProduct({
-            ...productData,
-            content_blocks: (productData.content_blocks as unknown as ContentBlock[]) || [],
-          } as any);
+          setProduct(productData as Product);
 
           // Fetch related products (exclude current product)
           const { data: relatedData, error: relatedError } = await supabase
@@ -95,12 +81,7 @@ const ProductDetail = () => {
 
           if (relatedError) throw relatedError;
           if (relatedData) {
-            setRelatedProducts(
-              relatedData.map((p) => ({
-                ...p,
-                content_blocks: (p.content_blocks as unknown as ContentBlock[]) || [],
-              })) as any
-            );
+            setRelatedProducts(relatedData as Product[]);
           }
         }
       } catch (error) {
@@ -278,13 +259,6 @@ const ProductDetail = () => {
               dangerouslySetInnerHTML={{ __html: product.content }}
             />
           </div>
-        </section>
-      )}
-
-      {/* Product Content with Content Blocks */}
-      {product.content_blocks && product.content_blocks.length > 0 && (
-        <section className="container mx-auto px-4 py-12">
-          <ContentBlockRenderer blocks={product.content_blocks} />
         </section>
       )}
 
