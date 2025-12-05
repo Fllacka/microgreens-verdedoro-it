@@ -4,6 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading2 } from "lucide-react";
+import { LinkDialog } from "./LinkDialog";
 
 interface RichTextEditorProps {
   content: string;
@@ -32,11 +33,16 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     return null;
   }
 
-  const addLink = () => {
-    const url = window.prompt("Enter URL");
-    if (url) {
+  const handleSetLink = (url: string, openInNewTab: boolean) => {
+    if (openInNewTab) {
+      editor.chain().focus().setLink({ href: url, target: "_blank", rel: "noopener noreferrer" }).run();
+    } else {
       editor.chain().focus().setLink({ href: url }).run();
     }
+  };
+
+  const handleRemoveLink = () => {
+    editor.chain().focus().unsetLink().run();
   };
 
   const addImage = () => {
@@ -94,14 +100,20 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addLink}
+        <LinkDialog
+          isActive={editor.isActive("link")}
+          onSetLink={handleSetLink}
+          onRemoveLink={handleRemoveLink}
         >
-          <LinkIcon className="h-4 w-4" />
-        </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={editor.isActive("link") ? "bg-muted" : ""}
+          >
+            <LinkIcon className="h-4 w-4" />
+          </Button>
+        </LinkDialog>
         <Button
           type="button"
           variant="ghost"
