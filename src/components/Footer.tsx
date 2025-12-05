@@ -1,25 +1,67 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Leaf, Phone, Mail, MapPin, Instagram, Facebook, Youtube } from "lucide-react";
-import { ExternalLink } from "lucide-react";
+import { Leaf, Phone, Mail, MapPin, Instagram, Facebook, Youtube, ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
 const Footer = () => {
-  return <footer className="bg-gradient-subtle border-t border-border">
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("site_settings")
+          .select(`
+            logo_id,
+            media:logo_id (
+              file_path
+            )
+          `)
+          .eq("id", "default")
+          .single();
+
+        if (error) throw error;
+
+        if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
+          setLogoUrl(data.media.file_path as string);
+        }
+      } catch (error) {
+        console.error("Error fetching logo:", error);
+      }
+    };
+
+    fetchLogo();
+  }, []);
+
+  return (
+    <footer className="bg-gradient-subtle border-t border-border">
       <div className="container-width section-padding">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand & Description */}
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-verde">
-                <Leaf className="h-7 w-7 text-primary-foreground" />
-              </div>
-              <div>
-                <h3 className="font-display text-2xl font-bold text-primary">
-                  Verde D'Oro
-                </h3>
-                <p className="text-sm text-muted-foreground font-body">
-                  Microgreens di Reggio Emilia
-                </p>
-              </div>
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="Verde D'Oro - Microgreens" 
+                  className="h-14 w-auto"
+                />
+              ) : (
+                <>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-verde">
+                    <Leaf className="h-7 w-7 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-2xl font-bold text-primary">
+                      Verde D'Oro
+                    </h3>
+                    <p className="text-sm text-muted-foreground font-body">
+                      Microgreens di Reggio Emilia
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
             <p className="text-muted-foreground font-body leading-relaxed mb-6 max-w-md">
               Coltiviamo microgreens freschi e nutrienti nel cuore dell'Emilia-Romagna, 
@@ -56,25 +98,27 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3">
               {[{
-              name: "Chi Siamo",
-              href: "/chi-siamo"
-            }, {
-              name: "I Nostri Microgreens",
-              href: "/microgreens"
-            }, {
-              name: "Microgreens su Misura",
-              href: "/microgreens-su-misura"
-            }, {
-              name: "Blog & Ricette",
-              href: "/blog"
-            }, {
-              name: "Cosa sono i Microgreens",
-              href: "/cosa-sono-i-microgreens"
-            }].map(link => <li key={link.name}>
+                name: "Chi Siamo",
+                href: "/chi-siamo"
+              }, {
+                name: "I Nostri Microgreens",
+                href: "/microgreens"
+              }, {
+                name: "Microgreens su Misura",
+                href: "/microgreens-su-misura"
+              }, {
+                name: "Blog & Ricette",
+                href: "/blog"
+              }, {
+                name: "Cosa sono i Microgreens",
+                href: "/cosa-sono-i-microgreens"
+              }].map(link => (
+                <li key={link.name}>
                   <Link to={link.href} className="text-muted-foreground font-body hover:text-primary transition-colors">
                     {link.name}
                   </Link>
-                </li>)}
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -106,7 +150,7 @@ const Footer = () => {
 
             <div className="mt-6">
               <Button variant="oro" size="sm" className="w-full" asChild>
-                
+                <Link to="/contatti">Contattaci</Link>
               </Button>
             </div>
           </div>
@@ -129,6 +173,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;
