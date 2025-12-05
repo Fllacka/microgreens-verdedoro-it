@@ -30,6 +30,7 @@ import AdminPages from "./pages/admin/Pages";
 import AdminPageEdit from "./pages/admin/PageEdit";
 import AdminMedia from "./pages/admin/Media";
 import AdminSettings from "./pages/admin/Settings";
+import AdminHomepage from "./pages/admin/Homepage";
 import ProductPreview from "./pages/preview/ProductPreview";
 import BlogPreview from "./pages/preview/BlogPreview";
 import PagePreview from "./pages/preview/PagePreview";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/admin/email-confirmation" element={<AdminEmailConfirmation />} />
               <Route path="/admin/reset-password" element={<AdminResetPassword />} />
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/homepage" element={<AdminHomepage />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/products/:id" element={<AdminProductEdit />} />
               <Route path="/admin/blog" element={<AdminBlog />} />
