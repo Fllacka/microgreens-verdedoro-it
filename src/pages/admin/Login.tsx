@@ -11,14 +11,18 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const { signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        await resetPassword(email);
+        setIsForgotPassword(false);
+      } else if (isSignUp) {
         await signUp(email, password);
       } else {
         await signIn(email, password);
@@ -31,13 +35,53 @@ const AdminLogin = () => {
     }
   };
 
+  if (isForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">Password Dimenticata</CardTitle>
+            <CardDescription>
+              Inserisci la tua email per ricevere il link di reset
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Invio in corso..." : "Invia Link di Reset"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => setIsForgotPassword(false)}
+              >
+                Torna al login
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl">{isSignUp ? "Create Account" : "Welcome Back"}</CardTitle>
+          <CardTitle className="text-2xl">{isSignUp ? "Crea Account" : "Bentornato"}</CardTitle>
           <CardDescription>
-            {isSignUp ? "Enter your details to create your account" : "Enter your credentials to access the CMS"}
+            {isSignUp ? "Inserisci i tuoi dati per creare un account" : "Inserisci le tue credenziali per accedere al CMS"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,15 +108,25 @@ const AdminLogin = () => {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}
+              {loading ? (isSignUp ? "Creazione account..." : "Accesso...") : (isSignUp ? "Registrati" : "Accedi")}
             </Button>
+            {!isSignUp && (
+              <Button
+                type="button"
+                variant="link"
+                className="w-full text-muted-foreground"
+                onClick={() => setIsForgotPassword(true)}
+              >
+                Password dimenticata?
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"
               className="w-full"
               onClick={() => setIsSignUp(!isSignUp)}
             >
-              {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+              {isSignUp ? "Hai già un account? Accedi" : "Non hai un account? Registrati"}
             </Button>
           </form>
         </CardContent>
