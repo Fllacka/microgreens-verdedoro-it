@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Trash2, GripVertical, Search, Image, MessageSquare, Leaf, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -263,295 +263,320 @@ const AdminMicrogreensCustom = () => {
           <p className="text-muted-foreground mt-1">Gestisci i contenuti della pagina Microgreens su Misura</p>
         </div>
 
-        <Accordion type="multiple" defaultValue={["seo"]} className="space-y-4">
-          {/* SEO Section */}
-          <AccordionItem value="seo" className="border rounded-lg">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <span className="font-semibold">SEO</span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              {seoSection && (
-                <SEOFields
-                  values={{
-                    slug: seoSection.content.slug || '',
-                    metaTitle: seoSection.content.meta_title || '',
-                    metaDescription: seoSection.content.meta_description || '',
-                    ogTitle: seoSection.content.og_title || '',
-                    ogDescription: seoSection.content.og_description || '',
-                    canonicalUrl: seoSection.content.canonical_url || '',
-                    robots: seoSection.content.robots || 'index, follow',
-                    changeFrequency: seoSection.content.change_frequency || 'monthly',
-                    priority: seoSection.content.priority || '0.7',
-                    structuredData: seoSection.content.structured_data || ''
-                  }}
-                  onChange={(field, value) => {
-                    const fieldMap: Record<string, string> = {
-                      metaTitle: 'meta_title',
-                      metaDescription: 'meta_description',
-                      ogTitle: 'og_title',
-                      ogDescription: 'og_description',
-                      canonicalUrl: 'canonical_url',
-                      changeFrequency: 'change_frequency',
-                      structuredData: 'structured_data'
-                    };
-                    updateSectionContent('seo', fieldMap[field] || field, value);
-                  }}
-                />
-              )}
-            </AccordionContent>
-          </AccordionItem>
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="content">Contenuti</TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Hero Section */}
-          <AccordionItem value="hero" className="border rounded-lg">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <span className="font-semibold">Hero</span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              {heroSection && (
-                <>
+          <TabsContent value="content" className="space-y-6">
+            {/* Hero Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Image className="h-5 w-5" />
+                  Hero Section
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="hero-visible">Visibile</Label>
+                  <Switch
+                    id="hero-visible"
+                    checked={heroSection?.is_visible ?? true}
+                    onCheckedChange={(checked) => updateSectionVisibility('hero', checked)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="hero-title">Titolo</Label>
+                  <Input
+                    id="hero-title"
+                    value={heroSection?.content?.title || ''}
+                    onChange={(e) => updateSectionContent('hero', 'title', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Immagine di sfondo</Label>
+                  <MediaSelector
+                    value={heroSection?.content?.image_url || ''}
+                    onChange={(url) => updateSectionContent('hero', 'image_url', url)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="hero-image-alt">Alt text immagine</Label>
+                  <Input
+                    id="hero-image-alt"
+                    value={heroSection?.content?.image_alt || ''}
+                    onChange={(e) => updateSectionContent('hero', 'image_alt', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Intro Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Introduzione
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="intro-visible">Visibile</Label>
+                  <Switch
+                    id="intro-visible"
+                    checked={introSection?.is_visible ?? true}
+                    onCheckedChange={(checked) => updateSectionVisibility('intro', checked)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="intro-text">Testo</Label>
+                  <Textarea
+                    id="intro-text"
+                    value={introSection?.content?.text || ''}
+                    onChange={(e) => updateSectionContent('intro', 'text', e.target.value)}
+                    rows={5}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Immagine</Label>
+                  <MediaSelector
+                    value={introSection?.content?.image_url || ''}
+                    onChange={(url) => updateSectionContent('intro', 'image_url', url)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="intro-image-alt">Alt text immagine</Label>
+                  <Input
+                    id="intro-image-alt"
+                    value={introSection?.content?.image_alt || ''}
+                    onChange={(e) => updateSectionContent('intro', 'image_alt', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Varieties Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Leaf className="h-5 w-5" />
+                  Varietà Disponibili
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="varieties-visible">Visibile</Label>
+                  <Switch
+                    id="varieties-visible"
+                    checked={varietiesSection?.is_visible ?? true}
+                    onCheckedChange={(checked) => updateSectionVisibility('varieties', checked)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="varieties-title">Titolo sezione</Label>
+                  <Input
+                    id="varieties-title"
+                    value={varietiesSection?.content?.title || ''}
+                    onChange={(e) => updateSectionContent('varieties', 'title', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="varieties-description">Descrizione</Label>
+                  <Textarea
+                    id="varieties-description"
+                    value={varietiesSection?.content?.description || ''}
+                    onChange={(e) => updateSectionContent('varieties', 'description', e.target.value)}
+                    rows={3}
+                    className="mt-1"
+                  />
+                </div>
+
+                {/* Categories */}
+                <div className="space-y-4 mt-6">
                   <div className="flex items-center justify-between">
-                    <Label>Sezione visibile</Label>
-                    <Switch
-                      checked={heroSection.is_visible}
-                      onCheckedChange={(checked) => updateSectionVisibility('hero', checked)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Titolo</Label>
-                    <Input
-                      value={heroSection.content.title || ''}
-                      onChange={(e) => updateSectionContent('hero', 'title', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Immagine di sfondo</Label>
-                    <MediaSelector
-                      value={heroSection.content.image_url || ''}
-                      onChange={(url) => updateSectionContent('hero', 'image_url', url)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Alt text immagine</Label>
-                    <Input
-                      value={heroSection.content.image_alt || ''}
-                      onChange={(e) => updateSectionContent('hero', 'image_alt', e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Intro Section */}
-          <AccordionItem value="intro" className="border rounded-lg">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <span className="font-semibold">Introduzione</span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              {introSection && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <Label>Sezione visibile</Label>
-                    <Switch
-                      checked={introSection.is_visible}
-                      onCheckedChange={(checked) => updateSectionVisibility('intro', checked)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Testo</Label>
-                    <Textarea
-                      value={introSection.content.text || ''}
-                      onChange={(e) => updateSectionContent('intro', 'text', e.target.value)}
-                      rows={5}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Immagine</Label>
-                    <MediaSelector
-                      value={introSection.content.image_url || ''}
-                      onChange={(url) => updateSectionContent('intro', 'image_url', url)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Alt text immagine</Label>
-                    <Input
-                      value={introSection.content.image_alt || ''}
-                      onChange={(e) => updateSectionContent('intro', 'image_alt', e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Varieties Section */}
-          <AccordionItem value="varieties" className="border rounded-lg">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <span className="font-semibold">Varietà Disponibili</span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              {varietiesSection && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <Label>Sezione visibile</Label>
-                    <Switch
-                      checked={varietiesSection.is_visible}
-                      onCheckedChange={(checked) => updateSectionVisibility('varieties', checked)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Titolo sezione</Label>
-                    <Input
-                      value={varietiesSection.content.title || ''}
-                      onChange={(e) => updateSectionContent('varieties', 'title', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea
-                      value={varietiesSection.content.description || ''}
-                      onChange={(e) => updateSectionContent('varieties', 'description', e.target.value)}
-                      rows={3}
-                    />
+                    <Label className="text-base font-semibold">Categorie</Label>
+                    <Button size="sm" onClick={addCategory}>
+                      <Plus className="w-4 h-4 mr-1" />
+                      Aggiungi Categoria
+                    </Button>
                   </div>
 
-                  {/* Categories */}
-                  <div className="space-y-4 mt-6">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-base font-semibold">Categorie</Label>
-                      <Button size="sm" onClick={addCategory}>
-                        <Plus className="w-4 h-4 mr-1" />
-                        Aggiungi Categoria
-                      </Button>
-                    </div>
-
-                    {(varietiesSection.content.categories || []).map((category: Category, catIndex: number) => (
-                      <Card key={category.id} className="border-border/50">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
+                  {(varietiesSection?.content?.categories || []).map((category: Category) => (
+                    <Card key={category.id} className="border-border/50">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <GripVertical className="w-4 h-4 text-muted-foreground" />
+                            <CardTitle className="text-base">{category.name}</CardTitle>
+                          </div>
+                          <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
-                              <GripVertical className="w-4 h-4 text-muted-foreground" />
-                              <CardTitle className="text-base">{category.name}</CardTitle>
+                              <Label className="text-sm">Visibile</Label>
+                              <Switch
+                                checked={category.is_visible}
+                                onCheckedChange={(checked) => updateCategory(category.id, 'is_visible', checked)}
+                              />
                             </div>
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-2">
-                                <Label className="text-sm">Visibile</Label>
-                                <Switch
-                                  checked={category.is_visible}
-                                  onCheckedChange={(checked) => updateCategory(category.id, 'is_visible', checked)}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteCategory(category.id)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Nome categoria</Label>
+                          <Input
+                            value={category.name}
+                            onChange={(e) => updateCategory(category.id, 'name', e.target.value)}
+                            className="mt-1"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label>Varietà</Label>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addItemToCategory(category.id)}
+                            >
+                              <Plus className="w-3 h-3 mr-1" />
+                              Aggiungi
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            {category.items.map((item, itemIndex) => (
+                              <div key={itemIndex} className="flex items-center gap-2">
+                                <Input
+                                  value={item}
+                                  onChange={(e) => updateCategoryItem(category.id, itemIndex, e.target.value)}
+                                  className="flex-1"
                                 />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => deleteCategoryItem(category.id, itemIndex)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => deleteCategory(category.id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
+                            ))}
                           </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Nome categoria</Label>
-                            <Input
-                              value={category.name}
-                              onChange={(e) => updateCategory(category.id, 'name', e.target.value)}
-                            />
-                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <Label>Varietà</Label>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => addItemToCategory(category.id)}
-                              >
-                                <Plus className="w-3 h-3 mr-1" />
-                                Aggiungi
-                              </Button>
-                            </div>
-                            <div className="space-y-2">
-                              {category.items.map((item, itemIndex) => (
-                                <div key={itemIndex} className="flex items-center gap-2">
-                                  <Input
-                                    value={item}
-                                    onChange={(e) => updateCategoryItem(category.id, itemIndex, e.target.value)}
-                                    className="flex-1"
-                                  />
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteCategoryItem(category.id, itemIndex)}
-                                    className="text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </>
-              )}
-            </AccordionContent>
-          </AccordionItem>
+            {/* CTA Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Send className="h-5 w-5" />
+                  Call to Action
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="cta-visible">Visibile</Label>
+                  <Switch
+                    id="cta-visible"
+                    checked={ctaSection?.is_visible ?? true}
+                    onCheckedChange={(checked) => updateSectionVisibility('cta', checked)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="cta-title">Titolo</Label>
+                  <Input
+                    id="cta-title"
+                    value={ctaSection?.content?.title || ''}
+                    onChange={(e) => updateSectionContent('cta', 'title', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cta-description">Descrizione</Label>
+                  <Textarea
+                    id="cta-description"
+                    value={ctaSection?.content?.description || ''}
+                    onChange={(e) => updateSectionContent('cta', 'description', e.target.value)}
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cta-button-text">Testo pulsante</Label>
+                  <Input
+                    id="cta-button-text"
+                    value={ctaSection?.content?.button_text || ''}
+                    onChange={(e) => updateSectionContent('cta', 'button_text', e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="cta-button-link">Link pulsante</Label>
+                  <Input
+                    id="cta-button-link"
+                    value={ctaSection?.content?.button_link || ''}
+                    onChange={(e) => updateSectionContent('cta', 'button_link', e.target.value)}
+                    placeholder="/contatti"
+                    className="mt-1"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {/* CTA Section */}
-          <AccordionItem value="cta" className="border rounded-lg">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <span className="font-semibold">Call to Action</span>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4 space-y-4">
-              {ctaSection && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <Label>Sezione visibile</Label>
-                    <Switch
-                      checked={ctaSection.is_visible}
-                      onCheckedChange={(checked) => updateSectionVisibility('cta', checked)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Titolo</Label>
-                    <Input
-                      value={ctaSection.content.title || ''}
-                      onChange={(e) => updateSectionContent('cta', 'title', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea
-                      value={ctaSection.content.description || ''}
-                      onChange={(e) => updateSectionContent('cta', 'description', e.target.value)}
-                      rows={2}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Testo pulsante</Label>
-                    <Input
-                      value={ctaSection.content.button_text || ''}
-                      onChange={(e) => updateSectionContent('cta', 'button_text', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Link pulsante</Label>
-                    <Input
-                      value={ctaSection.content.button_link || ''}
-                      onChange={(e) => updateSectionContent('cta', 'button_link', e.target.value)}
-                      placeholder="/contatti"
-                    />
-                  </div>
-                </>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+          <TabsContent value="seo">
+            {seoSection && (
+              <SEOFields
+                values={{
+                  slug: seoSection.content.slug || '',
+                  metaTitle: seoSection.content.meta_title || '',
+                  metaDescription: seoSection.content.meta_description || '',
+                  ogTitle: seoSection.content.og_title || '',
+                  ogDescription: seoSection.content.og_description || '',
+                  canonicalUrl: seoSection.content.canonical_url || '',
+                  robots: seoSection.content.robots || 'index, follow',
+                  changeFrequency: seoSection.content.change_frequency || 'monthly',
+                  priority: seoSection.content.priority || '0.7',
+                  structuredData: seoSection.content.structured_data || ''
+                }}
+                onChange={(field, value) => {
+                  const fieldMap: Record<string, string> = {
+                    metaTitle: 'meta_title',
+                    metaDescription: 'meta_description',
+                    ogTitle: 'og_title',
+                    ogDescription: 'og_description',
+                    canonicalUrl: 'canonical_url',
+                    changeFrequency: 'change_frequency',
+                    structuredData: 'structured_data'
+                  };
+                  updateSectionContent('seo', fieldMap[field] || field, value);
+                }}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <PublishActionBar
