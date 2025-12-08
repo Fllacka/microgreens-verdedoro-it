@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBlockEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PenSquare, Search } from "lucide-react";
 
 const AdminBlogEdit = () => {
   const { id } = useParams();
@@ -199,103 +200,120 @@ const AdminBlogEdit = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informazioni Articolo</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Titolo Articolo *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                </div>
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="content">
+              <PenSquare className="h-4 w-4 mr-2" />
+              Contenuto
+            </TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
+          </TabsList>
 
-                <div className="space-y-2">
-                  <Label htmlFor="excerpt">Estratto</Label>
-                  <Textarea
-                    id="excerpt"
-                    value={formData.excerpt}
-                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                    rows={3}
-                  />
-                </div>
+          <TabsContent value="content" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Informazioni Articolo</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Titolo Articolo *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label>Blocchi di Contenuto</Label>
-                  <ContentBlockEditor blocks={contentBlocks} onChange={setContentBlocks} />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="excerpt">Estratto</Label>
+                      <Textarea
+                        id="excerpt"
+                        value={formData.excerpt}
+                        onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                        rows={3}
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Input
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    <div className="space-y-2">
+                      <Label>Blocchi di Contenuto</Label>
+                      <ContentBlockEditor blocks={contentBlocks} onChange={setContentBlocks} />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Categoria</Label>
+                        <Input
+                          id="category"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="tags">Tag (separati da virgola)</Label>
+                        <Input
+                          id="tags"
+                          value={formData.tags}
+                          onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                          placeholder="salute, nutrizione, microgreens"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Immagine di Copertina</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MediaSelector
+                      value={formData.featuredImageId}
+                      onChange={(imageId) => setFormData({ ...formData, featuredImageId: imageId })}
+                      showAltText={false}
                     />
-                  </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Questa immagine apparirà come copertina dell'articolo e nelle anteprime.
+                    </p>
+                  </CardContent>
+                </Card>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="tags">Tag (separati da virgola)</Label>
-                    <Input
-                      id="tags"
-                      value={formData.tags}
-                      onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                      placeholder="salute, nutrizione, microgreens"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Opzioni</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="publishedAt">Data Pubblicazione</Label>
+                      <Input
+                        id="publishedAt"
+                        type="date"
+                        value={formData.publishedAt}
+                        onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
+                      />
+                      <p className="text-xs text-muted-foreground">Opzionale. Lascia vuoto per nessuna data specifica.</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
 
+          <TabsContent value="seo" className="space-y-6">
             <SEOFields
               values={seoData}
               onChange={(field, value) => setSeoData({ ...seoData, [field]: value })}
             />
-          </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Immagine di Copertina</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MediaSelector
-                  value={formData.featuredImageId}
-                  onChange={(imageId) => setFormData({ ...formData, featuredImageId: imageId })}
-                  showAltText={false}
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  Questa immagine apparirà come copertina dell'articolo e nelle anteprime.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Opzioni</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="publishedAt">Data Pubblicazione</Label>
-                  <Input
-                    id="publishedAt"
-                    type="date"
-                    value={formData.publishedAt}
-                    onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
-                  />
-                  <p className="text-xs text-muted-foreground">Opzionale. Lascia vuoto per nessuna data specifica.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <PublishActionBar

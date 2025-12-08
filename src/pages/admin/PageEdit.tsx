@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText, Search } from "lucide-react";
 
 export default function PageEdit() {
   const { id } = useParams();
@@ -23,18 +24,22 @@ export default function PageEdit() {
 
   const [formData, setFormData] = useState({
     title: "",
-    slug: "",
     content: "",
     published: false,
     template: "default",
-    meta_title: "",
-    meta_description: "",
-    og_title: "",
-    og_description: "",
-    canonical_url: "",
+  });
+
+  const [seoData, setSeoData] = useState({
+    slug: "",
+    metaTitle: "",
+    metaDescription: "",
+    ogTitle: "",
+    ogDescription: "",
+    canonicalUrl: "",
     robots: "index, follow",
-    change_frequency: "monthly",
-    priority: 0.5,
+    changeFrequency: "monthly",
+    priority: "0.5",
+    structuredData: "",
   });
 
   useEffect(() => {
@@ -55,18 +60,22 @@ export default function PageEdit() {
       if (data) {
         setFormData({
           title: data.title || "",
-          slug: data.slug || "",
           content: data.content || "",
           published: data.published || false,
           template: data.template || "default",
-          meta_title: data.meta_title || "",
-          meta_description: data.meta_description || "",
-          og_title: data.og_title || "",
-          og_description: data.og_description || "",
-          canonical_url: data.canonical_url || "",
+        });
+
+        setSeoData({
+          slug: data.slug || "",
+          metaTitle: data.meta_title || "",
+          metaDescription: data.meta_description || "",
+          ogTitle: data.og_title || "",
+          ogDescription: data.og_description || "",
+          canonicalUrl: data.canonical_url || "",
           robots: data.robots || "index, follow",
-          change_frequency: data.change_frequency || "monthly",
-          priority: data.priority || 0.5,
+          changeFrequency: data.change_frequency || "monthly",
+          priority: data.priority?.toString() || "0.5",
+          structuredData: data.structured_data ? JSON.stringify(data.structured_data, null, 2) : "",
         });
       }
     } catch (error: any) {
@@ -87,8 +96,20 @@ export default function PageEdit() {
       const { data: { user } } = await supabase.auth.getUser();
       
       const pageData = {
-        ...formData,
+        title: formData.title,
+        slug: seoData.slug,
+        content: formData.content,
         published: publishState !== undefined ? publishState : formData.published,
+        template: formData.template,
+        meta_title: seoData.metaTitle,
+        meta_description: seoData.metaDescription,
+        og_title: seoData.ogTitle,
+        og_description: seoData.ogDescription,
+        canonical_url: seoData.canonicalUrl,
+        robots: seoData.robots,
+        change_frequency: seoData.changeFrequency,
+        priority: parseFloat(seoData.priority),
+        structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
         created_by: user?.id,
       };
 
@@ -143,7 +164,7 @@ export default function PageEdit() {
     );
   }
 
-  const previewUrl = formData.slug ? `/preview/page/${formData.slug}` : undefined;
+  const previewUrl = seoData.slug ? `/preview/page/${seoData.slug}` : undefined;
 
   return (
     <AdminLayout>
@@ -165,8 +186,19 @@ export default function PageEdit() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="content">
+              <FileText className="h-4 w-4 mr-2" />
+              Contenuto
+            </TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="content" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Informazioni Pagina</CardTitle>
@@ -185,18 +217,6 @@ export default function PageEdit() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="slug">Slug *</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({ ...formData, slug: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label>Contenuto</Label>
                   <RichTextEditor
                     content={formData.content}
@@ -207,39 +227,15 @@ export default function PageEdit() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
+          <TabsContent value="seo" className="space-y-6">
             <SEOFields
-              values={{
-                slug: formData.slug,
-                metaTitle: formData.meta_title,
-                metaDescription: formData.meta_description,
-                ogTitle: formData.og_title,
-                ogDescription: formData.og_description,
-                canonicalUrl: formData.canonical_url,
-                robots: formData.robots,
-                changeFrequency: formData.change_frequency,
-                priority: formData.priority.toString(),
-                structuredData: "",
-              }}
-              onChange={(field, value) => {
-                const fieldMap: Record<string, string> = {
-                  slug: "slug",
-                  metaTitle: "meta_title",
-                  metaDescription: "meta_description",
-                  ogTitle: "og_title",
-                  ogDescription: "og_description",
-                  canonicalUrl: "canonical_url",
-                  robots: "robots",
-                  changeFrequency: "change_frequency",
-                  priority: "priority",
-                };
-                const dbField = fieldMap[field] || field;
-                const processedValue = field === "priority" ? parseFloat(value as string) : value;
-                setFormData({ ...formData, [dbField]: processedValue });
-              }}
+              values={seoData}
+              onChange={(field, value) => setSeoData({ ...seoData, [field]: value })}
             />
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <PublishActionBar
