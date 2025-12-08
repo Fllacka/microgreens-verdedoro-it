@@ -1,0 +1,604 @@
+import { useState, useEffect } from "react";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { MediaSelector } from "@/components/admin/MediaSelector";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PublishActionBar } from "@/components/admin/PublishActionBar";
+
+interface ChiSiamoSection {
+  id: string;
+  content: Record<string, any>;
+  is_visible: boolean;
+  sort_order: number;
+}
+
+const ICON_OPTIONS = [
+  { value: "Leaf", label: "Foglia" },
+  { value: "Heart", label: "Cuore" },
+  { value: "Users", label: "Utenti" },
+  { value: "Award", label: "Premio" },
+  { value: "Shield", label: "Scudo" },
+  { value: "Sprout", label: "Germoglio" },
+  { value: "Star", label: "Stella" },
+];
+
+const ChiSiamoAdmin = () => {
+  const [sections, setSections] = useState<Record<string, ChiSiamoSection>>({});
+  const [originalSections, setOriginalSections] = useState<Record<string, ChiSiamoSection>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
+
+  const fetchSections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("chi_siamo_sections")
+        .select("*")
+        .order("sort_order");
+
+      if (error) throw error;
+
+      const sectionsMap: Record<string, ChiSiamoSection> = {};
+      data?.forEach((section) => {
+        sectionsMap[section.id] = {
+          ...section,
+          content: section.content as Record<string, any>,
+        };
+      });
+      setSections(sectionsMap);
+      setOriginalSections(sectionsMap);
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSectionContent = (sectionId: string, key: string, value: any) => {
+    setSections((prev) => ({
+      ...prev,
+      [sectionId]: {
+        ...prev[sectionId],
+        content: {
+          ...prev[sectionId].content,
+          [key]: value,
+        },
+      },
+    }));
+  };
+
+  const updateSectionVisibility = (sectionId: string, visible: boolean) => {
+    setSections((prev) => ({
+      ...prev,
+      [sectionId]: {
+        ...prev[sectionId],
+        is_visible: visible,
+      },
+    }));
+  };
+
+  const updateNestedContent = (sectionId: string, arrayKey: string, index: number, field: string, value: any) => {
+    setSections((prev) => {
+      const section = prev[sectionId];
+      const array = [...(section.content[arrayKey] || [])];
+      array[index] = { ...array[index], [field]: value };
+      return {
+        ...prev,
+        [sectionId]: {
+          ...section,
+          content: {
+            ...section.content,
+            [arrayKey]: array,
+          },
+        },
+      };
+    });
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const updates = Object.values(sections).map((section) =>
+        supabase
+          .from("chi_siamo_sections")
+          .update({
+            content: section.content,
+            is_visible: section.is_visible,
+          })
+          .eq("id", section.id)
+      );
+
+      await Promise.all(updates);
+      setOriginalSections(sections);
+
+      toast({
+        title: "Salvato",
+        description: "Pagina Chi Siamo aggiornata con successo",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAndPreview = async () => {
+    await handleSave();
+    window.open("/preview/chi-siamo", "_blank");
+  };
+
+  const seoContent = sections.seo?.content || {};
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
+      <div className="max-w-4xl pb-24">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Chi Siamo</h1>
+          <p className="text-muted-foreground">Gestisci i contenuti della pagina Chi Siamo</p>
+        </div>
+
+        <Accordion type="multiple" className="space-y-4" defaultValue={["hero"]}>
+          {/* SEO Section */}
+          {sections.seo && (
+            <AccordionItem value="seo" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">SEO Settings</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="metaTitle">Meta Title</Label>
+                    <Input
+                      id="metaTitle"
+                      value={seoContent.meta_title || ""}
+                      onChange={(e) => updateSectionContent("seo", "meta_title", e.target.value)}
+                      placeholder="Titolo pagina (max 60 caratteri)"
+                      maxLength={60}
+                    />
+                    <span className="text-xs text-muted-foreground">{(seoContent.meta_title || "").length}/60 caratteri</span>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="metaDescription">Meta Description</Label>
+                    <Textarea
+                      id="metaDescription"
+                      value={seoContent.meta_description || ""}
+                      onChange={(e) => updateSectionContent("seo", "meta_description", e.target.value)}
+                      placeholder="Descrizione pagina (max 160 caratteri)"
+                      maxLength={160}
+                      rows={3}
+                    />
+                    <span className="text-xs text-muted-foreground">{(seoContent.meta_description || "").length}/160 caratteri</span>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogTitle">Open Graph Title</Label>
+                    <Input
+                      id="ogTitle"
+                      value={seoContent.og_title || ""}
+                      onChange={(e) => updateSectionContent("seo", "og_title", e.target.value)}
+                      placeholder="Titolo per social media"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogDescription">Open Graph Description</Label>
+                    <Textarea
+                      id="ogDescription"
+                      value={seoContent.og_description || ""}
+                      onChange={(e) => updateSectionContent("seo", "og_description", e.target.value)}
+                      placeholder="Descrizione per social media"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Open Graph Image</Label>
+                    <MediaSelector
+                      value={seoContent.og_image_id}
+                      onChange={(id) => updateSectionContent("seo", "og_image_id", id)}
+                      altText={seoContent.og_image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("seo", "og_image_alt", alt)}
+                      showAltText={true}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="canonicalUrl">Canonical URL</Label>
+                      <Input
+                        id="canonicalUrl"
+                        value={seoContent.canonical_url || ""}
+                        onChange={(e) => updateSectionContent("seo", "canonical_url", e.target.value)}
+                        placeholder="Lascia vuoto per auto-riferimento"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="robots">Robots</Label>
+                      <Select
+                        value={seoContent.robots || "index, follow"}
+                        onValueChange={(value) => updateSectionContent("seo", "robots", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="index, follow">Index, Follow</SelectItem>
+                          <SelectItem value="noindex, follow">NoIndex, Follow</SelectItem>
+                          <SelectItem value="index, nofollow">Index, NoFollow</SelectItem>
+                          <SelectItem value="noindex, nofollow">NoIndex, NoFollow</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="structuredData">JSON-LD Structured Data (opzionale)</Label>
+                    <Textarea
+                      id="structuredData"
+                      value={seoContent.structured_data || ""}
+                      onChange={(e) => updateSectionContent("seo", "structured_data", e.target.value)}
+                      placeholder='{"@context": "https://schema.org", "@type": "Organization", ...}'
+                      rows={6}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* Hero Section */}
+          {sections.hero && (
+            <AccordionItem value="hero" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">Hero Section</span>
+                  {sections.hero.is_visible ? (
+                    <Eye className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={sections.hero.is_visible}
+                    onCheckedChange={(checked) => updateSectionVisibility("hero", checked)}
+                  />
+                  <Label>Sezione visibile</Label>
+                </div>
+
+                <div className="grid gap-4">
+                  <div>
+                    <Label>Titolo</Label>
+                    <Input
+                      value={sections.hero.content.title || ""}
+                      onChange={(e) => updateSectionContent("hero", "title", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Descrizione</Label>
+                    <Textarea
+                      value={sections.hero.content.description || ""}
+                      onChange={(e) => updateSectionContent("hero", "description", e.target.value)}
+                      rows={4}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Testo Pulsante</Label>
+                      <Input
+                        value={sections.hero.content.button_text || ""}
+                        onChange={(e) => updateSectionContent("hero", "button_text", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Link Pulsante</Label>
+                      <Input
+                        value={sections.hero.content.button_link || ""}
+                        onChange={(e) => updateSectionContent("hero", "button_link", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Immagine Hero</Label>
+                    <MediaSelector
+                      value={sections.hero.content.image_id}
+                      onChange={(id) => updateSectionContent("hero", "image_id", id)}
+                      altText={sections.hero.content.image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("hero", "image_alt", alt)}
+                      showAltText={true}
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* Mission Section */}
+          {sections.mission && (
+            <AccordionItem value="mission" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">La Nostra Missione</span>
+                  {sections.mission.is_visible ? (
+                    <Eye className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={sections.mission.is_visible}
+                    onCheckedChange={(checked) => updateSectionVisibility("mission", checked)}
+                  />
+                  <Label>Sezione visibile</Label>
+                </div>
+
+                <div className="grid gap-4">
+                  <div>
+                    <Label>Titolo</Label>
+                    <Input
+                      value={sections.mission.content.title || ""}
+                      onChange={(e) => updateSectionContent("mission", "title", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Descrizione</Label>
+                    <Textarea
+                      value={sections.mission.content.description || ""}
+                      onChange={(e) => updateSectionContent("mission", "description", e.target.value)}
+                      rows={4}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Valori</Label>
+                    {(sections.mission.content.values || []).map((value: any, index: number) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Icona</Label>
+                            <Select
+                              value={value.icon}
+                              onValueChange={(v) => updateNestedContent("mission", "values", index, "icon", v)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ICON_OPTIONS.map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Titolo</Label>
+                            <Input
+                              value={value.title || ""}
+                              onChange={(e) => updateNestedContent("mission", "values", index, "title", e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Descrizione</Label>
+                          <Textarea
+                            value={value.description || ""}
+                            onChange={(e) => updateNestedContent("mission", "values", index, "description", e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* Story Section */}
+          {sections.story && (
+            <AccordionItem value="story" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">La Nostra Storia</span>
+                  {sections.story.is_visible ? (
+                    <Eye className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={sections.story.is_visible}
+                    onCheckedChange={(checked) => updateSectionVisibility("story", checked)}
+                  />
+                  <Label>Sezione visibile</Label>
+                </div>
+
+                <div className="grid gap-4">
+                  <div>
+                    <Label>Titolo</Label>
+                    <Input
+                      value={sections.story.content.title || ""}
+                      onChange={(e) => updateSectionContent("story", "title", e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Paragrafi</Label>
+                    {(sections.story.content.paragraphs || []).map((paragraph: string, index: number) => (
+                      <div key={index}>
+                        <Label>Paragrafo {index + 1}</Label>
+                        <Textarea
+                          value={paragraph}
+                          onChange={(e) => {
+                            const newParagraphs = [...(sections.story.content.paragraphs || [])];
+                            newParagraphs[index] = e.target.value;
+                            updateSectionContent("story", "paragraphs", newParagraphs);
+                          }}
+                          rows={3}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Statistiche</Label>
+                    {(sections.story.content.stats || []).map((stat: any, index: number) => (
+                      <div key={index} className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Valore</Label>
+                          <Input
+                            value={stat.value || ""}
+                            onChange={(e) => updateNestedContent("story", "stats", index, "value", e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Etichetta</Label>
+                          <Input
+                            value={stat.label || ""}
+                            onChange={(e) => updateNestedContent("story", "stats", index, "label", e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Certificazioni</Label>
+                    {(sections.story.content.certifications || []).map((cert: string, index: number) => (
+                      <div key={index}>
+                        <Label>Certificazione {index + 1}</Label>
+                        <Input
+                          value={cert}
+                          onChange={(e) => {
+                            const newCerts = [...(sections.story.content.certifications || [])];
+                            newCerts[index] = e.target.value;
+                            updateSectionContent("story", "certifications", newCerts);
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* CTA Section */}
+          {sections.cta && (
+            <AccordionItem value="cta" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">Call to Action</span>
+                  {sections.cta.is_visible ? (
+                    <Eye className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={sections.cta.is_visible}
+                    onCheckedChange={(checked) => updateSectionVisibility("cta", checked)}
+                  />
+                  <Label>Sezione visibile</Label>
+                </div>
+
+                <div className="grid gap-4">
+                  <div>
+                    <Label>Titolo</Label>
+                    <Input
+                      value={sections.cta.content.title || ""}
+                      onChange={(e) => updateSectionContent("cta", "title", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Descrizione</Label>
+                    <Textarea
+                      value={sections.cta.content.description || ""}
+                      onChange={(e) => updateSectionContent("cta", "description", e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Testo Pulsante Primario</Label>
+                      <Input
+                        value={sections.cta.content.primary_button_text || ""}
+                        onChange={(e) => updateSectionContent("cta", "primary_button_text", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Link Pulsante Primario</Label>
+                      <Input
+                        value={sections.cta.content.primary_button_link || ""}
+                        onChange={(e) => updateSectionContent("cta", "primary_button_link", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+        </Accordion>
+      </div>
+
+      <PublishActionBar
+        isPublished={true}
+        hasChanges={hasUnsavedChanges}
+        isSaving={saving}
+        onSave={handleSave}
+        onPublish={async () => {}}
+        previewUrl="/preview/chi-siamo"
+      />
+    </AdminLayout>
+  );
+};
+
+export default ChiSiamoAdmin;

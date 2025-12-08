@@ -1,187 +1,260 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
-import { Leaf, Heart, Users, Award, ArrowRight } from "lucide-react";
+import { Leaf, Heart, Users, Award, ArrowRight, Shield, Sprout, Star } from "lucide-react";
+import { Helmet } from "react-helmet";
+import { supabase } from "@/integrations/supabase/client";
 import chefImage from "@/assets/chef-microgreens.jpg";
+
+interface ChiSiamoSection {
+  id: string;
+  content: Record<string, any>;
+  is_visible: boolean;
+}
+
+const iconMap: Record<string, any> = {
+  Leaf,
+  Heart,
+  Users,
+  Award,
+  Shield,
+  Sprout,
+  Star,
+};
+
 const ChiSiamo = () => {
-  const values = [{
-    icon: Leaf,
-    title: "Sostenibilità",
-    description: "Coltiviamo nel rispetto dell'ambiente, utilizzando metodi naturali e sostenibili per preservare la terra per le future generazioni."
-  }, {
-    icon: Heart,
-    title: "Passione",
-    description: "Ogni microgreen è coltivato con amore e dedizione, dalla semina alla raccolta, per garantire il massimo della qualità e del sapore."
-  }, {
-    icon: Users,
-    title: "Famiglia",
-    description: "Siamo un'azienda familiare che crede nei valori tradizionali dell'agricoltura italiana, trasmessi di generazione in generazione."
-  }, {
-    icon: Award,
-    title: "Eccellenza",
-    description: "La nostra missione è portare sulle vostre tavole solo il meglio, con standard qualitativi che non accettano compromessi."
-  }];
-  return <Layout>
+  const [sections, setSections] = useState<Record<string, ChiSiamoSection>>({});
+  const [heroImageUrl, setHeroImageUrl] = useState<string>(chefImage);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
+
+  const fetchSections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("chi_siamo_sections")
+        .select("*")
+        .order("sort_order");
+
+      if (error) throw error;
+
+      const sectionsMap: Record<string, ChiSiamoSection> = {};
+      data?.forEach((section) => {
+        sectionsMap[section.id] = {
+          ...section,
+          content: section.content as Record<string, any>,
+        };
+      });
+      setSections(sectionsMap);
+
+      // Fetch hero image if exists
+      if (sectionsMap.hero?.content?.image_id) {
+        const { data: mediaData } = await supabase
+          .from("media")
+          .select("file_path")
+          .eq("id", sectionsMap.hero.content.image_id)
+          .single();
+        if (mediaData) {
+          setHeroImageUrl(mediaData.file_path);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching chi siamo sections:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Default values for fallback
+  const defaultValues = [
+    { icon: "Leaf", title: "Sostenibilità", description: "Coltiviamo nel rispetto dell'ambiente, utilizzando metodi naturali e sostenibili per preservare la terra per le future generazioni." },
+    { icon: "Heart", title: "Passione", description: "Ogni microgreen è coltivato con amore e dedizione, dalla semina alla raccolta, per garantire il massimo della qualità e del sapore." },
+    { icon: "Users", title: "Famiglia", description: "Siamo un'azienda familiare che crede nei valori tradizionali dell'agricoltura italiana, trasmessi di generazione in generazione." },
+    { icon: "Award", title: "Eccellenza", description: "La nostra missione è portare sulle vostre tavole solo il meglio, con standard qualitativi che non accettano compromessi." },
+  ];
+
+  const seoContent = sections.seo?.content || {};
+  const heroContent = sections.hero?.content || {};
+  const missionContent = sections.mission?.content || {};
+  const storyContent = sections.story?.content || {};
+  const ctaContent = sections.cta?.content || {};
+
+  const values = missionContent.values || defaultValues;
+  const paragraphs = storyContent.paragraphs || [
+    "La nostra avventura è iniziata nel 2020, quando abbiamo deciso di trasformare la nostra passione per l'agricoltura in una realtà imprenditoriale. Situati nelle fertili terre di Reggio Emilia, abbiamo scelto di specializzarci nei microgreens per la loro incredibile densità nutrizionale e il loro potenziale culinario inesplorato.",
+    "Quello che ci distingue è l'attenzione maniacale alla qualità: dalla selezione dei semi biologici alle tecniche di coltivazione innovative, ogni fase del processo è seguita personalmente dal nostro team. Non utilizziamo pesticidi o fertilizzanti chimici, affidandoci esclusivamente ai metodi naturali che la terra dell'Emilia ci ha insegnato.",
+    "Oggi, Verde D'Oro fornisce ristoranti stellati, chef appassionati e famiglie che credono in un'alimentazione sana e consapevole. La nostra visione è semplice: portare l'eccellenza italiana nel mondo dei microgreens, un germoglio alla volta.",
+  ];
+  const stats = storyContent.stats || [
+    { value: "25+", label: "Varietà di Microgreens" },
+    { value: "100%", label: "Biologico e Naturale" },
+    { value: "24h", label: "Dalla Raccolta alla Consegna" },
+  ];
+  const certifications = storyContent.certifications || ["Agricoltura Biologica", "Produzione Sostenibile", "Qualità Italiana"];
+
+  const currentUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const canonicalUrl = seoContent.canonical_url 
+    ? `${currentUrl}${seoContent.canonical_url}`
+    : `${currentUrl}/chi-siamo`;
+
+  return (
+    <Layout>
+      <Helmet>
+        <title>{seoContent.meta_title || "Chi Siamo - Verde D'Oro Microgreens"}</title>
+        <meta name="description" content={seoContent.meta_description || "Scopri la storia di Verde D'Oro, azienda familiare di Reggio Emilia specializzata in microgreens biologici."} />
+        <meta name="robots" content={seoContent.robots || "index, follow"} />
+        <link rel="canonical" href={canonicalUrl} />
+        {seoContent.og_title && <meta property="og:title" content={seoContent.og_title} />}
+        {seoContent.og_description && <meta property="og:description" content={seoContent.og_description} />}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        {seoContent.structured_data && (
+          <script type="application/ld+json">{seoContent.structured_data}</script>
+        )}
+      </Helmet>
+
       {/* Hero Section */}
-      <section className="section-padding bg-gradient-subtle">
-        <div className="container-width">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
-                La Nostra Storia
-              </h1>
-              <p className="font-body text-xl text-muted-foreground mb-8 leading-relaxed">
-                Nel cuore dell'Emilia-Romagna, dove la tradizione agricola si sposa con l'innovazione, 
-                nasce Verde D'Oro Microgreens. La nostra storia inizia dalla passione per l'agricoltura 
-                sostenibile e dalla volontà di portare sulle tavole italiane il meglio della natura.
+      {(sections.hero?.is_visible !== false) && (
+        <section className="section-padding bg-gradient-subtle">
+          <div className="container-width">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
+                  {heroContent.title || "La Nostra Storia"}
+                </h1>
+                <p className="font-body text-xl text-muted-foreground mb-8 leading-relaxed">
+                  {heroContent.description || "Nel cuore dell'Emilia-Romagna, dove la tradizione agricola si sposa con l'innovazione, nasce Verde D'Oro Microgreens. La nostra storia inizia dalla passione per l'agricoltura sostenibile e dalla volontà di portare sulle tavole italiane il meglio della natura."}
+                </p>
+                <Button variant="oro" size="lg" asChild>
+                  <Link to={heroContent.button_link || "/microgreens"}>
+                    {heroContent.button_text || "Scopri i Nostri Prodotti"}
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="relative">
+                <div 
+                  className="h-96 rounded-2xl bg-cover bg-center shadow-soft" 
+                  style={{ backgroundImage: `url(${heroImageUrl})` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Mission Section */}
+      {(sections.mission?.is_visible !== false) && (
+        <section className="section-padding bg-background">
+          <div className="container-width">
+            <div className="max-w-4xl mx-auto text-center mb-16">
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
+                {missionContent.title || "La Nostra Missione"}
+              </h2>
+              <p className="font-body text-xl text-muted-foreground leading-relaxed">
+                {missionContent.description || "Vogliamo rivoluzionare il modo di intendere l'alimentazione sana e sostenibile, offrendo microgreens di altissima qualità che racchiudono tutto il sapore e i nutrienti della tradizione agricola italiana. Ogni prodotto Verde D'Oro è il risultato di ricerca, passione e rispetto per l'ambiente."}
               </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {values.map((value: any, index: number) => {
+                const IconComponent = iconMap[value.icon] || Leaf;
+                return (
+                  <Card key={index} className="text-center hover-lift border-border/50">
+                    <CardContent className="p-8">
+                      <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-oro mb-6">
+                        <IconComponent className="h-8 w-8 text-accent-foreground" />
+                      </div>
+                      <h3 className="font-display text-xl font-semibold text-primary mb-4">
+                        {value.title}
+                      </h3>
+                      <p className="font-body text-muted-foreground">
+                        {value.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Story Section */}
+      {(sections.story?.is_visible !== false) && (
+        <section className="section-padding bg-gradient-subtle">
+          <div className="container-width">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+              <div className="lg:col-span-2">
+                <h2 className="font-display text-4xl font-bold text-primary mb-8">
+                  {storyContent.title || "Da Reggio Emilia al Mondo"}
+                </h2>
+                
+                <div className="space-y-8 font-body text-muted-foreground leading-relaxed">
+                  {paragraphs.map((paragraph: string, index: number) => (
+                    <p key={index} className="text-lg">{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="space-y-8">
+                <Card className="p-8 bg-primary text-primary-foreground">
+                  <h3 className="font-display text-2xl font-bold mb-4">I Nostri Numeri</h3>
+                  <div className="space-y-4">
+                    {stats.map((stat: any, index: number) => (
+                      <div key={index}>
+                        <div className="text-3xl font-display font-bold text-oro-primary">{stat.value}</div>
+                        <div className="text-primary-foreground/80">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+                
+                <Card className="p-8 bg-oro-primary text-accent-foreground">
+                  <h3 className="font-display text-2xl font-bold mb-4">Certificazioni</h3>
+                  <ul className="space-y-3">
+                    {certifications.map((cert: string, index: number) => (
+                      <li key={index} className="flex items-center">
+                        <Award className="h-5 w-5 mr-3" />
+                        {cert}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section */}
+      {(sections.cta?.is_visible !== false) && (
+        <section className="section-padding bg-primary text-primary-foreground">
+          <div className="container-width text-center">
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
+              {ctaContent.title || "Unisciti alla Rivoluzione Verde"}
+            </h2>
+            <p className="font-body text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto">
+              {ctaContent.description || "Scopri il sapore autentico dei nostri microgreens e diventa parte della nostra storia. Insieme possiamo costruire un futuro più sostenibile e gustoso."}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="oro" size="lg" asChild>
-                <Link to="/microgreens">
-                  Scopri i Nostri Prodotti
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Link to={ctaContent.primary_button_link || "/microgreens"}>
+                  {ctaContent.primary_button_text || "Esplora i Nostri Microgreens"}
                 </Link>
               </Button>
             </div>
-            <div className="relative">
-              <div className="h-96 rounded-2xl bg-cover bg-center shadow-soft" style={{
-              backgroundImage: `url(${chefImage})`
-            }}>
-                <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
-
-      {/* Mission Section */}
-      <section className="section-padding bg-background">
-        <div className="container-width">
-          <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
-              La Nostra Missione
-            </h2>
-            <p className="font-body text-xl text-muted-foreground leading-relaxed">
-              Vogliamo rivoluzionare il modo di intendere l'alimentazione sana e sostenibile, 
-              offrendo microgreens di altissima qualità che racchiudono tutto il sapore e i nutrienti 
-              della tradizione agricola italiana. Ogni prodotto Verde D'Oro è il risultato di ricerca, 
-              passione e rispetto per l'ambiente.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => <Card key={index} className="text-center hover-lift border-border/50">
-                <CardContent className="p-8">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-oro mb-6">
-                    <value.icon className="h-8 w-8 text-accent-foreground" />
-                  </div>
-                  <h3 className="font-display text-xl font-semibold text-primary mb-4">
-                    {value.title}
-                  </h3>
-                  <p className="font-body text-muted-foreground">
-                    {value.description}
-                  </p>
-                </CardContent>
-              </Card>)}
-          </div>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="section-padding bg-gradient-subtle">
-        <div className="container-width">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2">
-              <h2 className="font-display text-4xl font-bold text-primary mb-8">
-                Da Reggio Emilia al Mondo
-              </h2>
-              
-              <div className="space-y-8 font-body text-muted-foreground leading-relaxed">
-                <p className="text-lg">
-                  La nostra avventura è iniziata nel 2020, quando abbiamo deciso di trasformare 
-                  la nostra passione per l'agricoltura in una realtà imprenditoriale. Situati 
-                  nelle fertili terre di Reggio Emilia, abbiamo scelto di specializzarci nei 
-                  microgreens per la loro incredibile densità nutrizionale e il loro potenziale 
-                  culinario inesplorato.
-                </p>
-                
-                <p className="text-lg">
-                  Quello che ci distingue è l'attenzione maniacale alla qualità: dalla selezione 
-                  dei semi biologici alle tecniche di coltivazione innovative, ogni fase del processo 
-                  è seguita personalmente dal nostro team. Non utilizziamo pesticidi o fertilizzanti 
-                  chimici, affidandoci esclusivamente ai metodi naturali che la terra dell'Emilia 
-                  ci ha insegnato.
-                </p>
-                
-                <p className="text-lg">
-                  Oggi, Verde D'Oro fornisce ristoranti stellati, chef appassionati e famiglie 
-                  che credono in un'alimentazione sana e consapevole. La nostra visione è semplice: 
-                  portare l'eccellenza italiana nel mondo dei microgreens, un germoglio alla volta.
-                </p>
-              </div>
-            </div>
-            
-            <div className="space-y-8">
-              <Card className="p-8 bg-primary text-primary-foreground">
-                <h3 className="font-display text-2xl font-bold mb-4">I Nostri Numeri</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-3xl font-display font-bold text-oro-primary">25+</div>
-                    <div className="text-primary-foreground/80">Varietà di Microgreens</div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-display font-bold text-oro-primary">100%</div>
-                    <div className="text-primary-foreground/80">Biologico e Naturale</div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-display font-bold text-oro-primary">24h</div>
-                    <div className="text-primary-foreground/80">Dalla Raccolta alla Consegna</div>
-                  </div>
-                </div>
-              </Card>
-              
-              <Card className="p-8 bg-oro-primary text-accent-foreground">
-                <h3 className="font-display text-2xl font-bold mb-4">Certificazioni</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-center">
-                    <Award className="h-5 w-5 mr-3" />
-                    Agricoltura Biologica
-                  </li>
-                  <li className="flex items-center">
-                    <Award className="h-5 w-5 mr-3" />
-                    Produzione Sostenibile
-                  </li>
-                  <li className="flex items-center">
-                    <Award className="h-5 w-5 mr-3" />
-                    Qualità Italiana
-                  </li>
-                </ul>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="section-padding bg-primary text-primary-foreground">
-        <div className="container-width text-center">
-          <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
-            Unisciti alla Rivoluzione Verde
-          </h2>
-          <p className="font-body text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto">
-            Scopri il sapore autentico dei nostri microgreens e diventa parte della nostra storia. 
-            Insieme possiamo costruire un futuro più sostenibile e gustoso.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="oro" size="lg" asChild>
-              <Link to="/microgreens">Esplora i Nostri Microgreens</Link>
-            </Button>
-            <Button variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
-              
-            </Button>
-          </div>
-        </div>
-      </section>
-    </Layout>;
+        </section>
+      )}
+    </Layout>
+  );
 };
+
 export default ChiSiamo;
