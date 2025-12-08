@@ -7,17 +7,21 @@ import {
   LogOut, 
   LayoutDashboard, 
   ShoppingBag, 
-  FileText, 
+  PenSquare, 
   Files, 
   Image, 
   ArrowLeftRight, 
   Users, 
   Settings, 
   Home, 
-  Leaf,
+  Sprout,
+  Sparkles,
   ChevronDown,
   ChevronRight,
-  Phone
+  Mail,
+  FileText,
+  Info,
+  Palette
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -109,25 +113,25 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               </Link>
               <Link to="/admin/chi-siamo">
                 <Button variant={isActive("/admin/chi-siamo") ? "default" : "ghost"} className="w-full justify-start" size="sm">
-                  <Users className="mr-2 h-4 w-4" />
+                  <Info className="mr-2 h-4 w-4" />
                   Chi Siamo
                 </Button>
               </Link>
               <Link to="/admin/microgreens">
                 <Button variant={isActive("/admin/microgreens") && !location.pathname.includes("su-misura") ? "default" : "ghost"} className="w-full justify-start" size="sm">
-                  <Leaf className="mr-2 h-4 w-4" />
+                  <Sprout className="mr-2 h-4 w-4" />
                   Microgreens
                 </Button>
               </Link>
               <Link to="/admin/microgreens-su-misura">
                 <Button variant={isActive("/admin/microgreens-su-misura") ? "default" : "ghost"} className="w-full justify-start" size="sm">
-                  <Leaf className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-2 h-4 w-4" />
                   Microgreens su Misura
                 </Button>
               </Link>
               <Link to="/admin/contatti">
                 <Button variant={isActive("/admin/contatti") ? "default" : "ghost"} className="w-full justify-start" size="sm">
-                  <Phone className="mr-2 h-4 w-4" />
+                  <Mail className="mr-2 h-4 w-4" />
                   Contatti
                 </Button>
               </Link>
@@ -151,7 +155,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           {/* Blog Posts */}
           <Link to="/admin/blog">
             <Button variant={isActive("/admin/blog") ? "default" : "ghost"} className="w-full justify-start">
-              <FileText className="mr-2 h-4 w-4" />
+              <PenSquare className="mr-2 h-4 w-4" />
               Blog
             </Button>
           </Link>
@@ -190,7 +194,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                   </Link>
                   <Link to="/admin/settings">
                     <Button variant={isActive("/admin/settings") ? "default" : "ghost"} className="w-full justify-start" size="sm">
-                      <Settings className="mr-2 h-4 w-4" />
+                      <Palette className="mr-2 h-4 w-4" />
                       Logo & Generali
                     </Button>
                   </Link>
