@@ -9,6 +9,7 @@ import chefImage from "@/assets/chef-microgreens.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Product {
   id: string;
@@ -35,62 +36,67 @@ interface Section {
   is_visible: boolean;
 }
 
-const Microgreens = () => {
+const MicrogreensPreview = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { user, userRole } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [sections, setSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, sectionsRes] = await Promise.all([
-          supabase
-            .from("products")
-            .select(`
-              id,
-              name,
-              slug,
-              description,
-              category,
-              benefits,
-              uses,
-              rating,
-              popular,
-              media:media!products_image_id_fkey (
-                file_path
-              )
-            `)
-            .eq("published", true)
-            .order("popular", { ascending: false })
-            .order("name"),
-          supabase
-            .from("microgreens_sections")
-            .select("*")
-            .order("sort_order"),
-        ]);
-
-        if (productsRes.error) throw productsRes.error;
-        if (sectionsRes.error) throw sectionsRes.error;
-
-        if (productsRes.data) setProducts(productsRes.data as any);
-
-        const sectionsMap: Record<string, Section> = {};
-        sectionsRes.data?.forEach((section) => {
-          sectionsMap[section.id] = section as Section;
-        });
-        setSections(sectionsMap);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Errore nel caricamento dei dati");
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    if (!user || (userRole !== "admin" && userRole !== "editor")) {
+      navigate("/admin/login");
+      return;
+    }
     fetchData();
-  }, []);
+  }, [user, userRole, navigate]);
+
+  const fetchData = async () => {
+    try {
+      const [productsRes, sectionsRes] = await Promise.all([
+        supabase
+          .from("products")
+          .select(`
+            id,
+            name,
+            slug,
+            description,
+            category,
+            benefits,
+            uses,
+            rating,
+            popular,
+            media:media!products_image_id_fkey (
+              file_path
+            )
+          `)
+          .eq("published", true)
+          .order("popular", { ascending: false })
+          .order("name"),
+        supabase
+          .from("microgreens_sections")
+          .select("*")
+          .order("sort_order"),
+      ]);
+
+      if (productsRes.error) throw productsRes.error;
+      if (sectionsRes.error) throw sectionsRes.error;
+
+      if (productsRes.data) setProducts(productsRes.data as any);
+
+      const sectionsMap: Record<string, Section> = {};
+      sectionsRes.data?.forEach((section) => {
+        sectionsMap[section.id] = section as Section;
+      });
+      setSections(sectionsMap);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Errore nel caricamento dei dati");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const seoSection = sections["seo"];
   const heroSection = sections["hero"];
@@ -107,7 +113,7 @@ const Microgreens = () => {
         <title>{seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"}</title>
         <meta
           name="description"
-          content={seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici coltivati a Reggio Emilia. Basilico, ravanello rosso, pisello e molte altre varietà per la tua cucina gourmet."}
+          content={seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici."}
         />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
@@ -119,6 +125,11 @@ const Microgreens = () => {
         )}
       </Helmet>
 
+      {/* Preview Banner */}
+      <div className="bg-yellow-500 text-black text-center py-2 px-4 font-semibold">
+        Modalità Anteprima - Le modifiche non sono ancora pubblicate
+      </div>
+
       {/* Hero Section */}
       {heroSection?.is_visible !== false && (
         <section className="section-padding bg-gradient-subtle">
@@ -128,7 +139,7 @@ const Microgreens = () => {
             </h1>
             <p className="font-body text-xl text-muted-foreground max-w-4xl mx-auto mb-8">
               {heroSection?.content?.subtitle ||
-                "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali."}
+                "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna."}
             </p>
           </div>
         </section>
@@ -180,7 +191,7 @@ const Microgreens = () => {
                       </h3>
                       <p className="text-muted-foreground">
                         {infoSection?.content?.feature1_description ||
-                          "Utilizziamo esclusivamente semi biologici certificati e metodi di coltivazione naturali, senza pesticidi o fertilizzanti chimici."}
+                          "Utilizziamo esclusivamente semi biologici certificati e metodi di coltivazione naturali."}
                       </p>
                     </div>
                   </div>
@@ -195,7 +206,7 @@ const Microgreens = () => {
                       </h3>
                       <p className="text-muted-foreground">
                         {infoSection?.content?.feature2_description ||
-                          "I nostri microgreens vengono raccolti al momento ottimale e consegnati entro 24 ore per garantire sapore e proprietà nutrizionali al massimo."}
+                          "I nostri microgreens vengono raccolti al momento ottimale e consegnati entro 24 ore."}
                       </p>
                     </div>
                   </div>
@@ -210,7 +221,7 @@ const Microgreens = () => {
                       </h3>
                       <p className="text-muted-foreground">
                         {infoSection?.content?.feature3_description ||
-                          "Ogni varietà è selezionata per esaltare i sapori della cucina italiana, dalle erbe aromatiche ai microgreens più innovativi."}
+                          "Ogni varietà è selezionata per esaltare i sapori della cucina italiana."}
                       </p>
                     </div>
                   </div>
@@ -231,4 +242,4 @@ const Microgreens = () => {
   );
 };
 
-export default Microgreens;
+export default MicrogreensPreview;
