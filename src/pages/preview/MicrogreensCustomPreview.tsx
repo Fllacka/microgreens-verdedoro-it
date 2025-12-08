@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import heroImageFallback from "@/assets/microgreens-varieties.jpg";
 import chefImageFallback from "@/assets/chef-custom-microgreens.jpg";
 
@@ -27,9 +29,17 @@ interface Section {
   sort_order: number;
 }
 
-const MicrogreensCustom = () => {
+const MicrogreensCustomPreview = () => {
+  const navigate = useNavigate();
+  const { user, userRole, loading: authLoading } = useAuth();
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && (!user || (userRole !== 'admin' && userRole !== 'editor'))) {
+      navigate('/admin/login');
+    }
+  }, [user, userRole, authLoading, navigate]);
 
   useEffect(() => {
     fetchSections();
@@ -46,6 +56,7 @@ const MicrogreensCustom = () => {
       setSections((data || []) as unknown as Section[]);
     } catch (error) {
       console.error('Error fetching sections:', error);
+      toast.error('Errore nel caricamento');
     } finally {
       setLoading(false);
     }
@@ -53,7 +64,7 @@ const MicrogreensCustom = () => {
 
   const getSection = (id: string) => sections.find(s => s.id === id);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
@@ -72,19 +83,6 @@ const MicrogreensCustom = () => {
   const heroImage = heroSection?.content.image_url || heroImageFallback;
   const introImage = introSection?.content.image_url || chefImageFallback;
 
-  // Generate structured data
-  const structuredData = seoSection?.content.structured_data ? 
-    JSON.parse(seoSection.content.structured_data) : {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "Microgreens su Misura",
-      "provider": {
-        "@type": "Organization",
-        "name": "Verde d'Oro"
-      },
-      "description": seoSection?.content.meta_description || "Coltivazione su misura di microgreens per chef e ristoranti."
-    };
-
   return (
     <Layout>
       <Helmet>
@@ -94,10 +92,12 @@ const MicrogreensCustom = () => {
         {seoSection?.content.og_description && <meta property="og:description" content={seoSection.content.og_description} />}
         {seoSection?.content.robots && <meta name="robots" content={seoSection.content.robots} />}
         <link rel="canonical" href={seoSection?.content.canonical_url || `${window.location.origin}/microgreens-custom`} />
-        <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
-        </script>
       </Helmet>
+
+      {/* Preview Banner */}
+      <div className="bg-amber-500 text-white text-center py-2 text-sm font-medium">
+        Modalità Anteprima - Stai visualizzando una bozza
+      </div>
 
       {/* Hero Section */}
       {heroSection?.is_visible && (
@@ -105,8 +105,6 @@ const MicrogreensCustom = () => {
           <div 
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${heroImage})` }}
-            role="img"
-            aria-label={heroSection.content.image_alt || 'Microgreens su Misura'}
           />
           <div className="absolute inset-0 bg-gradient-hero-transparent" />
           <div className="relative z-10 text-center text-white">
@@ -126,8 +124,6 @@ const MicrogreensCustom = () => {
                 <div 
                   className="h-96 rounded-2xl bg-cover bg-center shadow-soft"
                   style={{ backgroundImage: `url(${introImage})` }}
-                  role="img"
-                  aria-label={introSection.content.image_alt || 'Chef con microgreens'}
                 >
                   <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
                 </div>
@@ -205,4 +201,4 @@ const MicrogreensCustom = () => {
   );
 };
 
-export default MicrogreensCustom;
+export default MicrogreensCustomPreview;
