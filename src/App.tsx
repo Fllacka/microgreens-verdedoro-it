@@ -74,7 +74,7 @@ const App = () => (
               <Route path="/admin/homepage" element={<AdminHomepage />} />
               <Route path="/admin/chi-siamo" element={<AdminChiSiamo />} />
               <Route path="/admin/microgreens" element={<AdminMicrogreensPage />} />
-              <Route path="/admin/microgreens-custom" element={<AdminMicrogreensCustom />} />
+              <Route path="/admin/microgreens-su-misura" element={<AdminMicrogreensCustom />} />
               <Route path="/admin/contatti" element={<AdminContatti />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/products/:id" element={<AdminProductEdit />} />
@@ -91,7 +91,7 @@ const App = () => (
               <Route path="/preview/homepage" element={<HomepagePreview />} />
               <Route path="/preview/chi-siamo" element={<ChiSiamoPreview />} />
               <Route path="/preview/microgreens" element={<MicrogreensPreview />} />
-              <Route path="/preview/microgreens-custom" element={<MicrogreensCustomPreview />} />
+              <Route path="/preview/microgreens-su-misura" element={<MicrogreensCustomPreview />} />
               <Route path="/preview/contatti" element={<ContattiPreview />} />
               <Route path="/preview/product/:slug" element={<ProductPreview />} />
               <Route path="/preview/blog/:slug" element={<BlogPreview />} />
