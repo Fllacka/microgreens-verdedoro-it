@@ -57,9 +57,15 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
             </Button>
           </Link>
           <Link to="/admin/microgreens">
-            <Button variant={isActive("/admin/microgreens") ? "default" : "ghost"} className="w-full justify-start">
+            <Button variant={isActive("/admin/microgreens") && !location.pathname.includes("custom") ? "default" : "ghost"} className="w-full justify-start">
               <Leaf className="mr-2 h-4 w-4" />
               Microgreens Page
+            </Button>
+          </Link>
+          <Link to="/admin/microgreens-custom">
+            <Button variant={isActive("/admin/microgreens-custom") ? "default" : "ghost"} className="w-full justify-start">
+              <Leaf className="mr-2 h-4 w-4" />
+              Microgreens su Misura
             </Button>
           </Link>
           <Link to="/admin/contatti">
