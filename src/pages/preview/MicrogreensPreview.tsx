@@ -163,7 +163,7 @@ const MicrogreensPreview = () => {
                   image={product.media?.file_path || chefImage}
                   rating={product.rating}
                   popular={product.popular}
-                  onCardClick={() => navigate(`/prodotto/${product.slug}`)}
+                  onCardClick={() => navigate(`/microgreens/${product.slug}`)}
                 />
               ))}
             </div>

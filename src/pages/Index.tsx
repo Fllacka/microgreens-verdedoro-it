@@ -508,7 +508,7 @@ const Index = () => {
                     benefits={product.benefits || []}
                     uses={product.uses || []}
                     image={productImage}
-                    onCardClick={() => navigate(`/prodotto/${product.slug}`)}
+                    onCardClick={() => navigate(`/microgreens/${product.slug}`)}
                   />
                 );
               })}
