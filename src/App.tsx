@@ -61,7 +61,7 @@ const App = () => (
               <Route path="/chi-siamo" element={<ChiSiamo />} />
               <Route path="/microgreens" element={<Microgreens />} />
               <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
-              <Route path="/prodotto/:slug" element={<ProductDetail />} />
+              <Route path="/microgreens/:slug" element={<ProductDetail />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogArticle />} />
               <Route path="/contatti" element={<Contatti />} />
@@ -93,7 +93,7 @@ const App = () => (
               <Route path="/preview/microgreens" element={<MicrogreensPreview />} />
               <Route path="/preview/microgreens-su-misura" element={<MicrogreensCustomPreview />} />
               <Route path="/preview/contatti" element={<ContattiPreview />} />
-              <Route path="/preview/product/:slug" element={<ProductPreview />} />
+              <Route path="/preview/microgreens/:slug" element={<ProductPreview />} />
               <Route path="/preview/blog/:slug" element={<BlogPreview />} />
               <Route path="/preview/page/:slug" element={<PagePreview />} />
               

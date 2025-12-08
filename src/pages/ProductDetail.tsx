@@ -143,7 +143,7 @@ const ProductDetail = () => {
       <Helmet>
         <title>{product.meta_title || `${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="description" content={product.meta_description || product.description} />
-        <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/prodotto/${product.slug}`}`} />
+        <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`} />
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org/",
@@ -393,7 +393,7 @@ const ProductDetail = () => {
                     image={relatedProduct.media?.file_path || "/placeholder.svg"}
                     rating={relatedProduct.rating}
                     popular={relatedProduct.popular}
-                    onCardClick={() => navigate(`/prodotto/${relatedProduct.slug}`)}
+                    onCardClick={() => navigate(`/microgreens/${relatedProduct.slug}`)}
                   />
                 ))}
               </div>
