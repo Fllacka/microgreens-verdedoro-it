@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search, Package } from "lucide-react";
 
 const AdminProductEdit = () => {
   const { id } = useParams();
@@ -203,156 +204,173 @@ const AdminProductEdit = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informazioni Prodotto</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome Prodotto *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="content">
+              <Package className="h-4 w-4 mr-2" />
+              Contenuto
+            </TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
+          </TabsList>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrizione Breve</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                  />
-                </div>
+          <TabsContent value="content" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Informazioni Prodotto</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Prodotto *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="content">Descrizione Completa</Label>
-                  <RichTextEditor
-                    content={formData.content}
-                    onChange={(content) => setFormData({ ...formData, content })}
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Descrizione Breve</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={3}
+                      />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Categoria</Label>
-                    <Input
-                      id="category"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    <div className="space-y-2">
+                      <Label htmlFor="content">Descrizione Completa</Label>
+                      <RichTextEditor
+                        content={formData.content}
+                        onChange={(content) => setFormData({ ...formData, content })}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Categoria</Label>
+                        <Input
+                          id="category"
+                          value={formData.category}
+                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="price">Prezzo (€)</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          step="0.01"
+                          value={formData.price}
+                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="benefits">Benefici (etichette, separati da virgola)</Label>
+                      <Textarea
+                        id="benefits"
+                        value={formData.benefits}
+                        onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                        placeholder="Ricco di vitamine, Antiossidante, Ricco di minerali"
+                        rows={2}
+                      />
+                      <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Benefici (contenuto dettagliato)</Label>
+                      <RichTextEditor
+                        content={formData.benefits_content}
+                        onChange={(content) => setFormData({ ...formData, benefits_content: content })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="uses">Usi (etichette, separati da virgola)</Label>
+                      <Textarea
+                        id="uses"
+                        value={formData.uses}
+                        onChange={(e) => setFormData({ ...formData, uses: e.target.value })}
+                        placeholder="Insalate, Smoothie, Guarnizione"
+                        rows={2}
+                      />
+                      <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Usi Culinari (contenuto dettagliato)</Label>
+                      <RichTextEditor
+                        content={formData.uses_content}
+                        onChange={(content) => setFormData({ ...formData, uses_content: content })}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="rating">Valutazione (0-5)</Label>
+                      <Input
+                        id="rating"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="5"
+                        value={formData.rating}
+                        onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Immagine in Evidenza</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MediaSelector
+                      value={formData.image_id}
+                      onChange={(imageId) => setFormData({ ...formData, image_id: imageId })}
+                      altText={formData.image_alt}
+                      onAltTextChange={(altText) => setFormData({ ...formData, image_alt: altText })}
                     />
-                  </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Prezzo (€)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.01"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    />
-                  </div>
-                </div>
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Opzioni</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="popular">Segna come Popolare</Label>
+                      <Switch
+                        id="popular"
+                        checked={formData.popular}
+                        onCheckedChange={(checked) => setFormData({ ...formData, popular: checked })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
 
-                <div className="space-y-2">
-                  <Label htmlFor="benefits">Benefici (etichette, separati da virgola)</Label>
-                  <Textarea
-                    id="benefits"
-                    value={formData.benefits}
-                    onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                    placeholder="Ricco di vitamine, Antiossidante, Ricco di minerali"
-                    rows={2}
-                  />
-                  <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Benefici (contenuto dettagliato)</Label>
-                  <RichTextEditor
-                    content={formData.benefits_content}
-                    onChange={(content) => setFormData({ ...formData, benefits_content: content })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="uses">Usi (etichette, separati da virgola)</Label>
-                  <Textarea
-                    id="uses"
-                    value={formData.uses}
-                    onChange={(e) => setFormData({ ...formData, uses: e.target.value })}
-                    placeholder="Insalate, Smoothie, Guarnizione"
-                    rows={2}
-                  />
-                  <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Usi Culinari (contenuto dettagliato)</Label>
-                  <RichTextEditor
-                    content={formData.uses_content}
-                    onChange={(content) => setFormData({ ...formData, uses_content: content })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="rating">Valutazione (0-5)</Label>
-                  <Input
-                    id="rating"
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="5"
-                    value={formData.rating}
-                    onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Immagine in Evidenza</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <MediaSelector
-                  value={formData.image_id}
-                  onChange={(imageId) => setFormData({ ...formData, image_id: imageId })}
-                  altText={formData.image_alt}
-                  onAltTextChange={(altText) => setFormData({ ...formData, image_alt: altText })}
-                />
-              </CardContent>
-            </Card>
-
+          <TabsContent value="seo" className="space-y-6">
             <SEOFields
               values={seoData}
               onChange={(field, value) => setSeoData({ ...seoData, [field]: value })}
             />
-          </div>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Opzioni</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="popular">Segna come Popolare</Label>
-                  <Switch
-                    id="popular"
-                    checked={formData.popular}
-                    onCheckedChange={(checked) => setFormData({ ...formData, popular: checked })}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <PublishActionBar
