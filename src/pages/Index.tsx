@@ -457,8 +457,9 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
               {productsToShow.map((product, index) => {
-                const productImage = 'image_id' in product && product.image_id && productMediaMap[product.image_id]
-                  ? productMediaMap[product.image_id]
+                const imageId = 'image_id' in product ? (product.image_id as string | null) : null;
+                const productImage = imageId && productMediaMap[imageId]
+                  ? productMediaMap[imageId]
                   : hasDefaultProducts
                     ? (index === 1 ? varietiesImage : chefImage)
                     : chefImage;
