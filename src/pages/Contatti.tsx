@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart } from "lucide-react";
+import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart, X } from "lucide-react";
 import { Helmet } from "react-helmet";
 
 interface SectionContent {
@@ -23,7 +23,7 @@ interface Section {
 
 const Contatti = () => {
   const { toast } = useToast();
-  const { items: cartItems } = useCart();
+  const { items: cartItems, removeItem } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [sections, setSections] = useState<Record<string, Section>>({});
   const [pageLoading, setPageLoading] = useState(true);
@@ -234,12 +234,20 @@ const Contatti = () => {
                         <div className="space-y-3">
                           {cartItems.map((item, index) => (
                             <div key={index} className="flex justify-between items-center">
-                              <div>
+                              <div className="flex items-center gap-2">
                                 <span className="font-body font-medium">{item.name}</span>
-                                <span className="text-muted-foreground text-sm ml-2">
+                                <span className="text-muted-foreground text-sm">
                                   {item.quantity}g
                                 </span>
                               </div>
+                              <button
+                                type="button"
+                                onClick={() => removeItem(item.id)}
+                                className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                aria-label={`Rimuovi ${item.name}`}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
                             </div>
                           ))}
                           <div className="border-t pt-3 mt-3">
