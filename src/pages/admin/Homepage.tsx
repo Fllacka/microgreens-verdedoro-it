@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -10,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Save, Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PublishActionBar } from "@/components/admin/PublishActionBar";
 
 interface HomepageSection {
   id: string;
@@ -41,10 +41,13 @@ const ICON_OPTIONS = [
 
 const Homepage = () => {
   const [sections, setSections] = useState<Record<string, HomepageSection>>({});
+  const [originalSections, setOriginalSections] = useState<Record<string, HomepageSection>>({});
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+
+  const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
 
   useEffect(() => {
     fetchSections();
@@ -68,6 +71,7 @@ const Homepage = () => {
         };
       });
       setSections(sectionsMap);
+      setOriginalSections(sectionsMap);
     } catch (error: any) {
       toast({
         title: "Errore",
@@ -149,6 +153,7 @@ const Homepage = () => {
       );
 
       await Promise.all(updates);
+      setOriginalSections(sections);
 
       toast({
         title: "Salvato",
@@ -165,6 +170,11 @@ const Homepage = () => {
     }
   };
 
+  const handleSaveAndPreview = async () => {
+    await handleSave();
+    window.open("/preview/homepage", "_blank");
+  };
+
   const toggleProductSelection = (sectionId: string, slug: string) => {
     const currentSlugs = sections[sectionId]?.content?.product_slugs || [];
     const newSlugs = currentSlugs.includes(slug)
@@ -172,6 +182,9 @@ const Homepage = () => {
       : [...currentSlugs, slug];
     updateSectionContent(sectionId, "product_slugs", newSlugs);
   };
+
+  // SEO section helpers
+  const seoContent = sections.seo?.content || {};
 
   if (loading) {
     return (
@@ -185,19 +198,125 @@ const Homepage = () => {
 
   return (
     <AdminLayout>
-      <div className="max-w-4xl">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Homepage</h1>
-            <p className="text-muted-foreground">Gestisci i contenuti della homepage</p>
-          </div>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-            Salva Modifiche
-          </Button>
+      <div className="max-w-4xl pb-24">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Homepage</h1>
+          <p className="text-muted-foreground">Gestisci i contenuti della homepage</p>
         </div>
 
         <Accordion type="multiple" className="space-y-4" defaultValue={["hero"]}>
+          {/* SEO Section */}
+          {sections.seo && (
+            <AccordionItem value="seo" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">SEO Settings</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="metaTitle">Meta Title</Label>
+                    <Input
+                      id="metaTitle"
+                      value={seoContent.meta_title || ""}
+                      onChange={(e) => updateSectionContent("seo", "meta_title", e.target.value)}
+                      placeholder="Titolo pagina (max 60 caratteri)"
+                      maxLength={60}
+                    />
+                    <span className="text-xs text-muted-foreground">{(seoContent.meta_title || "").length}/60 caratteri</span>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="metaDescription">Meta Description</Label>
+                    <Textarea
+                      id="metaDescription"
+                      value={seoContent.meta_description || ""}
+                      onChange={(e) => updateSectionContent("seo", "meta_description", e.target.value)}
+                      placeholder="Descrizione pagina (max 160 caratteri)"
+                      maxLength={160}
+                      rows={3}
+                    />
+                    <span className="text-xs text-muted-foreground">{(seoContent.meta_description || "").length}/160 caratteri</span>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogTitle">Open Graph Title</Label>
+                    <Input
+                      id="ogTitle"
+                      value={seoContent.og_title || ""}
+                      onChange={(e) => updateSectionContent("seo", "og_title", e.target.value)}
+                      placeholder="Titolo per social media"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="ogDescription">Open Graph Description</Label>
+                    <Textarea
+                      id="ogDescription"
+                      value={seoContent.og_description || ""}
+                      onChange={(e) => updateSectionContent("seo", "og_description", e.target.value)}
+                      placeholder="Descrizione per social media"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Open Graph Image</Label>
+                    <MediaSelector
+                      value={seoContent.og_image_id}
+                      onChange={(id) => updateSectionContent("seo", "og_image_id", id)}
+                      altText={seoContent.og_image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("seo", "og_image_alt", alt)}
+                      showAltText={true}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="canonicalUrl">Canonical URL</Label>
+                      <Input
+                        id="canonicalUrl"
+                        value={seoContent.canonical_url || ""}
+                        onChange={(e) => updateSectionContent("seo", "canonical_url", e.target.value)}
+                        placeholder="Lascia vuoto per auto-riferimento"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="robots">Robots</Label>
+                      <Select
+                        value={seoContent.robots || "index, follow"}
+                        onValueChange={(value) => updateSectionContent("seo", "robots", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="index, follow">Index, Follow</SelectItem>
+                          <SelectItem value="noindex, follow">NoIndex, Follow</SelectItem>
+                          <SelectItem value="index, nofollow">Index, NoFollow</SelectItem>
+                          <SelectItem value="noindex, nofollow">NoIndex, NoFollow</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="structuredData">JSON-LD Structured Data (opzionale)</Label>
+                    <Textarea
+                      id="structuredData"
+                      value={seoContent.structured_data || ""}
+                      onChange={(e) => updateSectionContent("seo", "structured_data", e.target.value)}
+                      placeholder='{"@context": "https://schema.org", "@type": "Organization", ...}'
+                      rows={6}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
           {/* Hero Section */}
           {sections.hero && (
             <AccordionItem value="hero" className="border rounded-lg px-4">
@@ -289,7 +408,9 @@ const Homepage = () => {
                     <MediaSelector
                       value={sections.hero.content.background_image_id}
                       onChange={(id) => updateSectionContent("hero", "background_image_id", id)}
-                      showAltText={false}
+                      altText={sections.hero.content.background_image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("hero", "background_image_alt", alt)}
+                      showAltText={true}
                     />
                   </div>
                 </div>
@@ -340,7 +461,9 @@ const Homepage = () => {
                     <MediaSelector
                       value={sections.what_are_microgreens.content.image_id}
                       onChange={(id) => updateSectionContent("what_are_microgreens", "image_id", id)}
-                      showAltText={false}
+                      altText={sections.what_are_microgreens.content.image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("what_are_microgreens", "image_alt", alt)}
+                      showAltText={true}
                     />
                   </div>
 
@@ -691,7 +814,9 @@ const Homepage = () => {
                     <MediaSelector
                       value={sections.custom_microgreens.content.image_id}
                       onChange={(id) => updateSectionContent("custom_microgreens", "image_id", id)}
-                      showAltText={false}
+                      altText={sections.custom_microgreens.content.image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("custom_microgreens", "image_alt", alt)}
+                      showAltText={true}
                     />
                   </div>
                 </div>
@@ -773,8 +898,17 @@ const Homepage = () => {
               </AccordionContent>
             </AccordionItem>
           )}
-        </Accordion>
+      </Accordion>
       </div>
+
+      <PublishActionBar
+        isPublished={true}
+        hasChanges={hasUnsavedChanges}
+        isSaving={saving}
+        onSave={handleSave}
+        onPublish={() => Promise.resolve()}
+        previewUrl="/preview/homepage"
+      />
     </AdminLayout>
   );
 };

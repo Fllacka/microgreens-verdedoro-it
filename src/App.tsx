@@ -34,6 +34,7 @@ import AdminHomepage from "./pages/admin/Homepage";
 import ProductPreview from "./pages/preview/ProductPreview";
 import BlogPreview from "./pages/preview/BlogPreview";
 import PagePreview from "./pages/preview/PagePreview";
+import HomepagePreview from "./pages/preview/HomepagePreview";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +76,7 @@ const App = () => (
               <Route path="/admin/settings" element={<AdminSettings />} />
               
               {/* Preview Routes (authenticated) */}
+              <Route path="/preview/homepage" element={<HomepagePreview />} />
               <Route path="/preview/product/:slug" element={<ProductPreview />} />
               <Route path="/preview/blog/:slug" element={<BlogPreview />} />
               <Route path="/preview/page/:slug" element={<PagePreview />} />
