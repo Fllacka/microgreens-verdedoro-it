@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEOFields } from "@/components/admin/SEOFields";
@@ -270,23 +270,25 @@ const AdminContatti = () => {
                   />
                 </div>
 
-                <Accordion type="multiple" className="w-full">
+                <div className="space-y-4">
                   {/* Phone */}
-                  <AccordionItem value="phone">
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-2">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 font-medium">
                         <Phone className="h-4 w-4" />
                         Telefono
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm text-muted-foreground">Visibile</Label>
                         <Switch
                           checked={contactInfoSection?.content?.phone_visible ?? true}
                           onCheckedChange={(checked) => {
                             updateSectionContent("contact_info", "phone_visible", checked);
                           }}
-                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-2">
+                    </div>
+                    <div className="space-y-3">
                       <div>
                         <Label>Titolo</Label>
                         <Input
@@ -317,25 +319,27 @@ const AdminContatti = () => {
                           className="mt-1"
                         />
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                    </div>
+                  </div>
 
                   {/* Email */}
-                  <AccordionItem value="email">
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-2">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 font-medium">
                         <Mail className="h-4 w-4" />
                         Email
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm text-muted-foreground">Visibile</Label>
                         <Switch
                           checked={contactInfoSection?.content?.email_visible ?? true}
                           onCheckedChange={(checked) => {
                             updateSectionContent("contact_info", "email_visible", checked);
                           }}
-                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-2">
+                    </div>
+                    <div className="space-y-3">
                       <div>
                         <Label>Titolo</Label>
                         <Input
@@ -366,25 +370,27 @@ const AdminContatti = () => {
                           className="mt-1"
                         />
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                    </div>
+                  </div>
 
                   {/* Address */}
-                  <AccordionItem value="address">
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-2">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 font-medium">
                         <MapPin className="h-4 w-4" />
                         Indirizzo
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm text-muted-foreground">Visibile</Label>
                         <Switch
                           checked={contactInfoSection?.content?.address_visible ?? true}
                           onCheckedChange={(checked) => {
                             updateSectionContent("contact_info", "address_visible", checked);
                           }}
-                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-2">
+                    </div>
+                    <div className="space-y-3">
                       <div>
                         <Label>Titolo</Label>
                         <Input
@@ -415,25 +421,27 @@ const AdminContatti = () => {
                           className="mt-1"
                         />
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
+                    </div>
+                  </div>
 
                   {/* WhatsApp */}
-                  <AccordionItem value="whatsapp">
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center gap-2">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 font-medium">
                         <MessageSquare className="h-4 w-4" />
                         WhatsApp
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-sm text-muted-foreground">Visibile</Label>
                         <Switch
                           checked={contactInfoSection?.content?.whatsapp_visible ?? true}
                           onCheckedChange={(checked) => {
                             updateSectionContent("contact_info", "whatsapp_visible", checked);
                           }}
-                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-3 pt-2">
+                    </div>
+                    <div className="space-y-3">
                       <div>
                         <Label>Titolo</Label>
                         <Input
@@ -464,9 +472,9 @@ const AdminContatti = () => {
                           className="mt-1"
                         />
                       </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
