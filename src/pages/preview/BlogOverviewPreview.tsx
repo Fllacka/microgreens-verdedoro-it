@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, ArrowRight, Calendar, Tag } from "lucide-react";
+import { Clock, ArrowRight, Calendar, Tag, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +31,7 @@ interface Section {
   is_visible: boolean;
 }
 
-const Blog = () => {
+const BlogOverviewPreview = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<{ name: string; count: number; color: string }[]>([]);
@@ -51,34 +51,28 @@ const Blog = () => {
         .select("*")
         .order("sort_order");
 
-      if (!sectionsError && sectionsData) {
-        const sectionsMap: Record<string, Section> = {};
-        sectionsData.forEach((section) => {
-          sectionsMap[section.id] = section as Section;
-        });
-        setSections(sectionsMap);
-      }
+      if (sectionsError) throw sectionsError;
 
-      // Fetch posts
+      const sectionsMap: Record<string, Section> = {};
+      sectionsData?.forEach((section) => {
+        sectionsMap[section.id] = section as Section;
+      });
+      setSections(sectionsMap);
+
+      // Fetch posts (include unpublished for preview)
       const { data, error } = await supabase
         .from("blog_posts")
         .select("*")
-        .eq("published", true)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
       setPosts(data || []);
 
-      // Fetch cover images for all posts
-      const imageIds = data
-        ?.map(p => p.featured_image_id)
-        .filter((id): id is string => !!id) || [];
+      // Fetch cover images
+      const imageIds = data?.map(p => p.featured_image_id).filter((id): id is string => !!id) || [];
       if (imageIds.length > 0) {
-        const { data: media } = await supabase
-          .from("media")
-          .select("id, file_path")
-          .in("id", imageIds);
+        const { data: media } = await supabase.from("media").select("id, file_path").in("id", imageIds);
         if (media) {
           const map: Record<string, string> = {};
           media.forEach(m => { map[m.id] = m.file_path; });
@@ -86,7 +80,7 @@ const Blog = () => {
         }
       }
 
-      // Calculate categories from posts
+      // Calculate categories
       const categoryMap = new Map<string, number>();
       data?.forEach((post) => {
         if (post.category) {
@@ -102,10 +96,10 @@ const Blog = () => {
 
       setCategories(categoriesArray);
     } catch (error: any) {
-      console.error("Error fetching blog posts:", error);
+      console.error("Error fetching data:", error);
       toast({
         title: "Error",
-        description: "Failed to load blog posts",
+        description: "Failed to load data",
         variant: "destructive",
       });
     } finally {
@@ -115,7 +109,6 @@ const Blog = () => {
 
   const calculateReadTime = (contentBlocks: any) => {
     if (!contentBlocks || !Array.isArray(contentBlocks)) return "3 min";
-    
     const wordCount = contentBlocks.reduce((total, block) => {
       if (block.type === "text" && block.content) {
         const text = block.content.replace(/<[^>]*>/g, "");
@@ -123,7 +116,6 @@ const Blog = () => {
       }
       return total;
     }, 0);
-
     const readTime = Math.max(1, Math.ceil(wordCount / 200));
     return `${readTime} min`;
   };
@@ -152,19 +144,20 @@ const Blog = () => {
     <Layout>
       <Helmet>
         <title>{seoSection?.content?.meta_title || "Blog - Verde D'Oro"}</title>
-        <meta
-          name="description"
-          content={seoSection?.content?.meta_description || "Scopri il mondo dei microgreens: ricette, benefici nutrizionali, consigli per la conservazione e guide pratiche."}
-        />
+        <meta name="description" content={seoSection?.content?.meta_description || ""} />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        {seoSection?.content?.og_title && (
-          <meta property="og:title" content={seoSection.content.og_title} />
-        )}
-        {seoSection?.content?.og_description && (
-          <meta property="og:description" content={seoSection.content.og_description} />
-        )}
+        {seoSection?.content?.og_title && <meta property="og:title" content={seoSection.content.og_title} />}
+        {seoSection?.content?.og_description && <meta property="og:description" content={seoSection.content.og_description} />}
       </Helmet>
+
+      {/* Preview Banner */}
+      <div className="bg-amber-100 border-b border-amber-300 px-4 py-2">
+        <div className="container-width flex items-center gap-2 text-amber-800">
+          <AlertTriangle className="h-4 w-4" />
+          <span className="text-sm font-medium">Anteprima - Questa è una visualizzazione di anteprima</span>
+        </div>
+      </div>
 
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
@@ -176,18 +169,11 @@ const Blog = () => {
                   {heroSection?.content?.badge || "Il Mondo dei Microgreens"}
                 </div>
                 <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-6 animate-fade-in">
-                  {heroSection?.content?.title?.includes("Microgreens") ? (
-                    <>
-                      {heroSection.content.title.split("Microgreens")[0]}
-                      <span className="text-primary">Microgreens</span>
-                      {heroSection.content.title.split("Microgreens")[1] || ""}
-                    </>
-                  ) : (
-                    <>Blog di <span className="text-primary">Microgreens</span></>
-                  )}
+                  {heroSection?.content?.title?.split("Microgreens")[0] || "Blog di "}
+                  <span className="text-primary">Microgreens</span>
                 </h1>
                 <p className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in">
-                  {heroSection?.content?.subtitle || "Esplora il mondo dei microgreens attraverso ricette originali, guide agli usi culinari, approfondimenti sui benefici nutrizionali e consigli pratici per consumo e conservazione."}
+                  {heroSection?.content?.subtitle || ""}
                 </p>
               </div>
             </div>
@@ -205,13 +191,8 @@ const Blog = () => {
                 {categories.map((category, index) => (
                   <Card key={index} className="hover-lift cursor-pointer border-border/50 bg-card">
                     <CardContent className="p-4 text-center">
-                      <Tag className={`w-8 h-8 mx-auto mb-2 ${
-                        category.color === 'verde' ? 'text-primary' :
-                        category.color === 'oro' ? 'text-accent' : 'text-muted-foreground'
-                      }`} />
-                      <h3 className="font-body font-semibold text-foreground mb-1">
-                        {category.name}
-                      </h3>
+                      <Tag className={`w-8 h-8 mx-auto mb-2 ${category.color === 'verde' ? 'text-primary' : 'text-accent'}`} />
+                      <h3 className="font-body font-semibold text-foreground mb-1">{category.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         {category.count} {category.count === 1 ? 'articolo' : 'articoli'}
                       </p>
@@ -239,9 +220,7 @@ const Blog = () => {
                   <CardContent className="p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-4 mb-4">
                       {featuredPost.category && (
-                        <Badge variant="outline" className="text-xs">
-                          {featuredPost.category}
-                        </Badge>
+                        <Badge variant="outline" className="text-xs">{featuredPost.category}</Badge>
                       )}
                       <div className="flex items-center text-sm text-muted-foreground gap-4">
                         <span className="flex items-center gap-1">
@@ -254,12 +233,8 @@ const Blog = () => {
                         </span>
                       </div>
                     </div>
-                    <h3 className="font-display text-2xl font-bold text-foreground mb-4">
-                      {featuredPost.title}
-                    </h3>
-                    <p className="font-body text-muted-foreground mb-6 leading-relaxed">
-                      {featuredPost.excerpt}
-                    </p>
+                    <h3 className="font-display text-2xl font-bold text-foreground mb-4">{featuredPost.title}</h3>
+                    <p className="font-body text-muted-foreground mb-6 leading-relaxed">{featuredPost.excerpt}</p>
                     <Button variant="verde" className="inline-flex items-center w-fit" asChild>
                       <Link to={`/blog/${featuredPost.slug}`}>
                         Leggi l'articolo
@@ -295,30 +270,18 @@ const Blog = () => {
                         />
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between mb-3">
-                            {article.category && (
-                              <Badge variant="outline" className="text-xs">
-                                {article.category}
-                              </Badge>
-                            )}
+                            {article.category && <Badge variant="outline" className="text-xs">{article.category}</Badge>}
                             <div className="flex items-center text-xs text-muted-foreground gap-2">
                               <Clock className="w-3 h-3" />
                               {calculateReadTime(article.content_blocks)}
                             </div>
                           </div>
-                          <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2">
-                            {article.title}
-                          </h3>
-                          <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-3">
-                            {article.excerpt}
-                          </p>
+                          <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2">{article.title}</h3>
+                          <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-3">{article.excerpt}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
-                              {formatDate(article.created_at)}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{formatDate(article.created_at)}</span>
                             <Button variant="outline" size="sm" asChild>
-                              <Link to={`/blog/${article.slug}`}>
-                                Leggi
-                              </Link>
+                              <Link to={`/blog/${article.slug}`}>Leggi</Link>
                             </Button>
                           </div>
                         </CardContent>
@@ -335,7 +298,7 @@ const Blog = () => {
           </section>
         )}
 
-        {/* Newsletter Signup */}
+        {/* Newsletter */}
         {newsletterSection?.is_visible !== false && (
           <section className="section-padding bg-gradient-verde text-white">
             <div className="container-width text-center">
@@ -344,7 +307,7 @@ const Blog = () => {
                   {newsletterSection?.content?.title || "Non Perdere Nessun Articolo"}
                 </h2>
                 <p className="font-body mb-8 text-white/90">
-                  {newsletterSection?.content?.subtitle || "Iscriviti alla nostra newsletter per ricevere le ultime novità, ricette esclusive e consigli pratici direttamente nella tua inbox."}
+                  {newsletterSection?.content?.subtitle || ""}
                 </p>
                 <Button variant="oro" size="lg" className="font-semibold">
                   {newsletterSection?.content?.button_text || "Iscriviti alla Newsletter"}
@@ -358,4 +321,4 @@ const Blog = () => {
   );
 };
 
-export default Blog;
+export default BlogOverviewPreview;

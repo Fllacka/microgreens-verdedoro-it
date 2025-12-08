@@ -35,6 +35,7 @@ import AdminChiSiamo from "./pages/admin/ChiSiamo";
 import AdminMicrogreensPage from "./pages/admin/Microgreens";
 import AdminMicrogreensCustom from "./pages/admin/MicrogreensCustom";
 import AdminContatti from "./pages/admin/Contatti";
+import AdminBlogOverview from "./pages/admin/BlogOverview";
 import ProductPreview from "./pages/preview/ProductPreview";
 import BlogPreview from "./pages/preview/BlogPreview";
 import PagePreview from "./pages/preview/PagePreview";
@@ -43,6 +44,7 @@ import ChiSiamoPreview from "./pages/preview/ChiSiamoPreview";
 import MicrogreensPreview from "./pages/preview/MicrogreensPreview";
 import MicrogreensCustomPreview from "./pages/preview/MicrogreensCustomPreview";
 import ContattiPreview from "./pages/preview/ContattiPreview";
+import BlogOverviewPreview from "./pages/preview/BlogOverviewPreview";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +78,7 @@ const App = () => (
               <Route path="/admin/microgreens" element={<AdminMicrogreensPage />} />
               <Route path="/admin/microgreens-su-misura" element={<AdminMicrogreensCustom />} />
               <Route path="/admin/contatti" element={<AdminContatti />} />
+              <Route path="/admin/blog-overview" element={<AdminBlogOverview />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/products/:id" element={<AdminProductEdit />} />
               <Route path="/admin/blog" element={<AdminBlog />} />
@@ -93,6 +96,7 @@ const App = () => (
               <Route path="/preview/microgreens" element={<MicrogreensPreview />} />
               <Route path="/preview/microgreens-su-misura" element={<MicrogreensCustomPreview />} />
               <Route path="/preview/contatti" element={<ContattiPreview />} />
+              <Route path="/preview/blog-overview" element={<BlogOverviewPreview />} />
               <Route path="/preview/microgreens/:slug" element={<ProductPreview />} />
               <Route path="/preview/blog/:slug" element={<BlogPreview />} />
               <Route path="/preview/page/:slug" element={<PagePreview />} />
