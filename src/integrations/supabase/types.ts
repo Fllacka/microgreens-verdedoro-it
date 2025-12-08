@@ -137,6 +137,33 @@ export type Database = {
         }
         Relationships: []
       }
+      contatti_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_visible: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id: string
+          is_visible?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       homepage_sections: {
         Row: {
           content: Json

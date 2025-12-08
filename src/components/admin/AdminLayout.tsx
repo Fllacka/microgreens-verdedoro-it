@@ -62,6 +62,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               Microgreens Page
             </Button>
           </Link>
+          <Link to="/admin/contatti">
+            <Button variant={isActive("/admin/contatti") ? "default" : "ghost"} className="w-full justify-start">
+              <FileText className="mr-2 h-4 w-4" />
+              Contatti
+            </Button>
+          </Link>
           <Link to="/admin/products">
             <Button variant={isActive("/admin/products") ? "default" : "ghost"} className="w-full justify-start">
               <ShoppingBag className="mr-2 h-4 w-4" />
