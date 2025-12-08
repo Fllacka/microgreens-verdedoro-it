@@ -40,6 +40,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     "/admin/microgreens",
     "/admin/microgreens-su-misura",
     "/admin/contatti",
+    "/admin/blog-overview",
     "/admin/pages"
   ].some(path => location.pathname.startsWith(path));
 
@@ -133,6 +134,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 <Button variant={isActive("/admin/contatti") ? "default" : "ghost"} className="w-full justify-start" size="sm">
                   <Mail className="mr-2 h-4 w-4" />
                   Contatti
+                </Button>
+              </Link>
+              <Link to="/admin/blog-overview">
+                <Button variant={isActive("/admin/blog-overview") ? "default" : "ghost"} className="w-full justify-start" size="sm">
+                  <PenSquare className="mr-2 h-4 w-4" />
+                  Blog
                 </Button>
               </Link>
               <Link to="/admin/pages">
