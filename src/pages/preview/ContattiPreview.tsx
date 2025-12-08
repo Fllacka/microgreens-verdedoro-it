@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Layout from "@/components/Layout";
-import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { Badge } from "@/components/ui/badge";
 
 interface SectionContent {
   [key: string]: any;
@@ -21,12 +21,10 @@ interface Section {
   is_visible: boolean;
 }
 
-const Contatti = () => {
-  const { toast } = useToast();
+const ContattiPreview = () => {
   const { items: cartItems } = useCart();
-  const [isLoading, setIsLoading] = useState(false);
   const [sections, setSections] = useState<Record<string, Section>>({});
-  const [pageLoading, setPageLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     nome: "",
     cognome: "",
@@ -54,14 +52,13 @@ const Contatti = () => {
       } catch (error) {
         console.error("Error fetching sections:", error);
       } finally {
-        setPageLoading(false);
+        setLoading(false);
       }
     };
 
     fetchSections();
   }, []);
 
-  // Auto-populate message with cart items
   useEffect(() => {
     if (cartItems.length > 0) {
       const productsText = cartItems.map(item => `- ${item.name}: ${item.quantity}g`).join('\n');
@@ -73,52 +70,12 @@ const Contatti = () => {
     }
   }, [cartItems]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('send-quote-request', {
-        body: {
-          nome: formData.nome,
-          cognome: formData.cognome,
-          email: formData.email,
-          telefono: formData.telefono,
-          indirizzo: formData.indirizzo,
-          messaggio: formData.messaggio,
-          prodotti: cartItems.map(item => ({ name: item.name, quantity: item.quantity }))
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Richiesta inviata con successo!",
-        description: "Ti abbiamo inviato una conferma via email. Ti risponderemo entro 24 ore."
-      });
-
-      // Reset form
-      setFormData({
-        nome: "",
-        cognome: "",
-        email: "",
-        telefono: "",
-        indirizzo: "",
-        messaggio: ""
-      });
-    } catch (error: any) {
-      console.error("Error sending request:", error);
-      toast({
-        title: "Errore nell'invio",
-        description: "Si è verificato un errore. Riprova o contattaci su WhatsApp.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    alert("Preview mode: form submission disabled");
   };
 
-  if (pageLoading) {
+  if (loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
@@ -140,38 +97,37 @@ const Contatti = () => {
     ? `${window.location.origin}${seoSection.content.canonical_url}`
     : currentUrl;
 
-  // Build contact info items based on visibility
   const contactInfoItems = [];
   if (contactInfoSection?.content?.phone_visible) {
     contactInfoItems.push({
       icon: Phone,
-      title: contactInfoSection.content.phone_title || "Telefono",
-      details: contactInfoSection.content.phone_details || "+39 0522 000 000",
-      description: contactInfoSection.content.phone_description || "Lun-Ven 9:00-18:00"
+      title: contactInfoSection.content.phone_title,
+      details: contactInfoSection.content.phone_details,
+      description: contactInfoSection.content.phone_description
     });
   }
   if (contactInfoSection?.content?.email_visible) {
     contactInfoItems.push({
       icon: Mail,
-      title: contactInfoSection.content.email_title || "Email",
-      details: contactInfoSection.content.email_details || "verdedoro.microgreens@gmail.com",
-      description: contactInfoSection.content.email_description || "Risposta entro 24h"
+      title: contactInfoSection.content.email_title,
+      details: contactInfoSection.content.email_details,
+      description: contactInfoSection.content.email_description
     });
   }
   if (contactInfoSection?.content?.address_visible) {
     contactInfoItems.push({
       icon: MapPin,
-      title: contactInfoSection.content.address_title || "Indirizzo",
-      details: contactInfoSection.content.address_details || "Via delle Microgreens, 42",
-      description: contactInfoSection.content.address_description || "42121 Reggio Emilia (RE)"
+      title: contactInfoSection.content.address_title,
+      details: contactInfoSection.content.address_details,
+      description: contactInfoSection.content.address_description
     });
   }
   if (contactInfoSection?.content?.whatsapp_visible) {
     contactInfoItems.push({
       icon: MessageSquare,
-      title: contactInfoSection.content.whatsapp_title || "WhatsApp",
-      details: contactInfoSection.content.whatsapp_details || "+39 333 000 0000",
-      description: contactInfoSection.content.whatsapp_description || "Chat diretta"
+      title: contactInfoSection.content.whatsapp_title,
+      details: contactInfoSection.content.whatsapp_details,
+      description: contactInfoSection.content.whatsapp_description
     });
   }
 
@@ -181,7 +137,7 @@ const Contatti = () => {
         <title>{seoSection?.content?.meta_title || "Contatti - Verde D'Oro"}</title>
         <meta
           name="description"
-          content={seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."}
+          content={seoSection?.content?.meta_description || ""}
         />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
@@ -193,6 +149,14 @@ const Contatti = () => {
         )}
       </Helmet>
 
+      {/* Preview Banner */}
+      <div className="bg-amber-500 text-white py-2 px-4 text-center">
+        <Badge variant="outline" className="border-white text-white">
+          Anteprima
+        </Badge>
+        <span className="ml-2">Stai visualizzando un'anteprima della pagina</span>
+      </div>
+
       {/* Hero Section */}
       {heroSection?.is_visible !== false && (
         <section className="section-padding bg-gradient-subtle">
@@ -201,7 +165,7 @@ const Contatti = () => {
               {heroSection?.content?.title || "Contattaci"}
             </h1>
             <p className="font-body text-xl text-muted-foreground max-w-4xl mx-auto">
-              {heroSection?.content?.subtitle || "Siamo qui per aiutarti! Che tu sia uno chef, un ristoratore o semplicemente un appassionato di cucina sana, saremo felici di consigliarti i microgreens perfetti per le tue esigenze."}
+              {heroSection?.content?.subtitle || ""}
             </p>
           </div>
         </section>
@@ -220,11 +184,10 @@ const Contatti = () => {
                       {formSection?.content?.title || "Richiedi un Preventivo"}
                     </CardTitle>
                     <p className="text-muted-foreground font-body">
-                      {formSection?.content?.description || "Compila il form per ricevere una proposta personalizzata"}
+                      {formSection?.content?.description || ""}
                     </p>
                   </CardHeader>
                   <CardContent>
-                    {/* Cart Summary */}
                     {cartItems.length > 0 && (
                       <div className="mb-8 p-4 bg-secondary rounded-lg">
                         <h3 className="font-display font-semibold text-primary mb-4 flex items-center">
@@ -254,9 +217,7 @@ const Contatti = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <Label htmlFor="nome" className="font-body font-medium">
-                            Nome *
-                          </Label>
+                          <Label htmlFor="nome" className="font-body font-medium">Nome *</Label>
                           <Input
                             id="nome"
                             placeholder="Il tuo nome"
@@ -267,9 +228,7 @@ const Contatti = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="cognome" className="font-body font-medium">
-                            Cognome *
-                          </Label>
+                          <Label htmlFor="cognome" className="font-body font-medium">Cognome *</Label>
                           <Input
                             id="cognome"
                             placeholder="Il tuo cognome"
@@ -283,9 +242,7 @@ const Contatti = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <Label htmlFor="email" className="font-body font-medium">
-                            Email *
-                          </Label>
+                          <Label htmlFor="email" className="font-body font-medium">Email *</Label>
                           <Input
                             id="email"
                             type="email"
@@ -297,9 +254,7 @@ const Contatti = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="telefono" className="font-body font-medium">
-                            Telefono
-                          </Label>
+                          <Label htmlFor="telefono" className="font-body font-medium">Telefono</Label>
                           <Input
                             id="telefono"
                             type="tel"
@@ -312,9 +267,7 @@ const Contatti = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="indirizzo" className="font-body font-medium">
-                          Indirizzo *
-                        </Label>
+                        <Label htmlFor="indirizzo" className="font-body font-medium">Indirizzo *</Label>
                         <Input
                           id="indirizzo"
                           placeholder="Via, numero civico, città"
@@ -326,12 +279,10 @@ const Contatti = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="messaggio" className="font-body font-medium">
-                          Messaggio *
-                        </Label>
+                        <Label htmlFor="messaggio" className="font-body font-medium">Messaggio *</Label>
                         <Textarea
                           id="messaggio"
-                          placeholder="Descrivici le tue esigenze: quantità, frequenza di consegna, varietà preferite..."
+                          placeholder="Descrivici le tue esigenze..."
                           rows={6}
                           required
                           className="mt-2"
@@ -340,9 +291,9 @@ const Contatti = () => {
                         />
                       </div>
 
-                      <Button type="submit" variant="oro" size="lg" className="w-full" disabled={isLoading}>
-                        {isLoading ? "Invio in corso..." : "Invia Richiesta"}
-                        {!isLoading && <CheckCircle className="ml-2 h-5 w-5" />}
+                      <Button type="submit" variant="oro" size="lg" className="w-full">
+                        Invia Richiesta
+                        <CheckCircle className="ml-2 h-5 w-5" />
                       </Button>
                     </form>
                   </CardContent>
@@ -366,15 +317,9 @@ const Contatti = () => {
                           <info.icon className="h-5 w-5 text-primary-foreground" />
                         </div>
                         <div>
-                          <h3 className="font-body font-semibold text-primary">
-                            {info.title}
-                          </h3>
-                          <p className="font-body text-foreground">
-                            {info.details}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {info.description}
-                          </p>
+                          <h3 className="font-body font-semibold text-primary">{info.title}</h3>
+                          <p className="font-body text-foreground">{info.details}</p>
+                          <p className="text-sm text-muted-foreground">{info.description}</p>
                         </div>
                       </div>
                     ))}
@@ -396,7 +341,7 @@ const Contatti = () => {
                         <div className="flex items-center space-x-3">
                           <Clock className="h-4 w-4 text-oro-primary" />
                           <span className="text-sm font-body">
-                            {deliverySection.content.item1_text || "Consegna in 24-48h in Emilia-Romagna"}
+                            {deliverySection.content.item1_text}
                           </span>
                         </div>
                       )}
@@ -404,7 +349,7 @@ const Contatti = () => {
                         <div className="flex items-center space-x-3">
                           <CheckCircle className="h-4 w-4 text-verde-primary" />
                           <span className="text-sm font-body">
-                            {deliverySection.content.item2_text || "Spedizione gratuita per ordini superiori a €50"}
+                            {deliverySection.content.item2_text}
                           </span>
                         </div>
                       )}
@@ -412,7 +357,7 @@ const Contatti = () => {
                         <div className="flex items-center space-x-3">
                           <CheckCircle className="h-4 w-4 text-verde-primary" />
                           <span className="text-sm font-body">
-                            {deliverySection.content.item3_text || "Packaging sostenibile e refrigerato"}
+                            {deliverySection.content.item3_text}
                           </span>
                         </div>
                       )}
@@ -428,14 +373,14 @@ const Contatti = () => {
                       {whatsappCtaSection?.content?.title || "Hai fretta?"}
                     </h3>
                     <p className="text-sm mb-4">
-                      {whatsappCtaSection?.content?.description || "Contattaci direttamente su WhatsApp per una risposta immediata."}
+                      {whatsappCtaSection?.content?.description || ""}
                     </p>
                     <Button
                       variant="outline"
                       className="w-full border-accent-foreground text-accent-foreground hover:bg-accent-foreground hover:text-oro-primary"
                       asChild
                     >
-                      <a href={whatsappCtaSection?.content?.whatsapp_link || "https://wa.me/39333000000?text=Ciao! Vorrei informazioni sui vostri microgreens"}>
+                      <a href={whatsappCtaSection?.content?.whatsapp_link || "#"}>
                         <MessageSquare className="mr-2 h-4 w-4" />
                         {whatsappCtaSection?.content?.button_text || "Scrivici su WhatsApp"}
                       </a>
@@ -451,4 +396,4 @@ const Contatti = () => {
   );
 };
 
-export default Contatti;
+export default ContattiPreview;

@@ -33,12 +33,14 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminHomepage from "./pages/admin/Homepage";
 import AdminChiSiamo from "./pages/admin/ChiSiamo";
 import AdminMicrogreensPage from "./pages/admin/Microgreens";
+import AdminContatti from "./pages/admin/Contatti";
 import ProductPreview from "./pages/preview/ProductPreview";
 import BlogPreview from "./pages/preview/BlogPreview";
 import PagePreview from "./pages/preview/PagePreview";
 import HomepagePreview from "./pages/preview/HomepagePreview";
 import ChiSiamoPreview from "./pages/preview/ChiSiamoPreview";
 import MicrogreensPreview from "./pages/preview/MicrogreensPreview";
+import ContattiPreview from "./pages/preview/ContattiPreview";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,7 @@ const App = () => (
               <Route path="/admin/homepage" element={<AdminHomepage />} />
               <Route path="/admin/chi-siamo" element={<AdminChiSiamo />} />
               <Route path="/admin/microgreens" element={<AdminMicrogreensPage />} />
+              <Route path="/admin/contatti" element={<AdminContatti />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/products/:id" element={<AdminProductEdit />} />
               <Route path="/admin/blog" element={<AdminBlog />} />
@@ -85,6 +88,7 @@ const App = () => (
               <Route path="/preview/homepage" element={<HomepagePreview />} />
               <Route path="/preview/chi-siamo" element={<ChiSiamoPreview />} />
               <Route path="/preview/microgreens" element={<MicrogreensPreview />} />
+              <Route path="/preview/contatti" element={<ContattiPreview />} />
               <Route path="/preview/product/:slug" element={<ProductPreview />} />
               <Route path="/preview/blog/:slug" element={<BlogPreview />} />
               <Route path="/preview/page/:slug" element={<PagePreview />} />
