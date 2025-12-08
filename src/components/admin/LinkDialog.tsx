@@ -29,7 +29,7 @@ interface InternalPage {
 const STATIC_PAGES: InternalPage[] = [
   { label: "Home", path: "/", type: "static" },
   { label: "Microgreens", path: "/microgreens", type: "static" },
-  { label: "Microgreens Custom", path: "/microgreens-custom", type: "static" },
+  { label: "Microgreens su Misura", path: "/microgreens-su-misura", type: "static" },
   { label: "Chi Siamo", path: "/chi-siamo", type: "static" },
   { label: "Blog", path: "/blog", type: "static" },
   { label: "Contatti", path: "/contatti", type: "static" },

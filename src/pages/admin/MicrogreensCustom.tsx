@@ -585,7 +585,7 @@ const AdminMicrogreensCustom = () => {
         hasChanges={hasChanges}
         onSave={handleSave}
         onPublish={handlePublish}
-        previewUrl="/preview/microgreens-custom"
+        previewUrl="/preview/microgreens-su-misura"
       />
     </AdminLayout>
   );

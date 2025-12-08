@@ -62,8 +62,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               Microgreens Page
             </Button>
           </Link>
-          <Link to="/admin/microgreens-custom">
-            <Button variant={isActive("/admin/microgreens-custom") ? "default" : "ghost"} className="w-full justify-start">
+          <Link to="/admin/microgreens-su-misura">
+            <Button variant={isActive("/admin/microgreens-su-misura") ? "default" : "ghost"} className="w-full justify-start">
               <Leaf className="mr-2 h-4 w-4" />
               Microgreens su Misura
             </Button>

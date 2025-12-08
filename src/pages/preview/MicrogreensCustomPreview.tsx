@@ -91,7 +91,7 @@ const MicrogreensCustomPreview = () => {
         {seoSection?.content.og_title && <meta property="og:title" content={seoSection.content.og_title} />}
         {seoSection?.content.og_description && <meta property="og:description" content={seoSection.content.og_description} />}
         {seoSection?.content.robots && <meta name="robots" content={seoSection.content.robots} />}
-        <link rel="canonical" href={seoSection?.content.canonical_url || `${window.location.origin}/microgreens-custom`} />
+        <link rel="canonical" href={seoSection?.content.canonical_url || `${window.location.origin}/microgreens-su-misura`} />
       </Helmet>
 
       {/* Preview Banner */}
