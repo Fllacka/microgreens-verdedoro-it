@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
@@ -251,6 +252,14 @@ const Index = () => {
     button_link: "/blog",
   };
 
+  const seoContent = sections.seo?.content || {
+    meta_title: "Verde D'Oro - Microgreens Freschi a Reggio Emilia",
+    meta_description: "Microgreens coltivati con passione a Reggio Emilia. Consegna in giornata per ristoranti, chef e privati. Scopri i nostri germogli freschi e nutrienti.",
+    og_title: "Verde D'Oro - Microgreens Freschi a Reggio Emilia",
+    og_description: "Microgreens coltivati con passione a Reggio Emilia. Consegna in giornata per ristoranti, chef e privati.",
+    robots: "index, follow",
+  };
+
   // Get images from CMS or use defaults
   const getHeroImage = () => {
     if (heroContent.background_image_id && mediaMap[heroContent.background_image_id]) {
@@ -271,6 +280,19 @@ const Index = () => {
       return mediaMap[customMicrogreensContent.image_id];
     }
     return chefImage;
+  };
+
+  // Alt text getters
+  const getHeroAlt = () => heroContent.background_image_alt || "Microgreens freschi Verde D'Oro";
+  const getWhatAreMicrogreensAlt = () => whatAreMicrogreensContent.image_alt || "Varietà di microgreens";
+  const getCustomMicrogreensAlt = () => customMicrogreensContent.image_alt || "Chef con microgreens";
+
+  // Get OG image URL
+  const getOgImageUrl = () => {
+    if (seoContent.og_image_id && mediaMap[seoContent.og_image_id]) {
+      return mediaMap[seoContent.og_image_id];
+    }
+    return undefined;
   };
 
   // Use default products if no CMS products are selected
@@ -310,6 +332,19 @@ const Index = () => {
 
   return (
     <Layout>
+      <Helmet>
+        <title>{seoContent.meta_title}</title>
+        <meta name="description" content={seoContent.meta_description} />
+        <meta name="robots" content={seoContent.robots} />
+        {seoContent.canonical_url && <link rel="canonical" href={seoContent.canonical_url} />}
+        <meta property="og:title" content={seoContent.og_title || seoContent.meta_title} />
+        <meta property="og:description" content={seoContent.og_description || seoContent.meta_description} />
+        <meta property="og:type" content="website" />
+        {getOgImageUrl() && <meta property="og:image" content={getOgImageUrl()} />}
+        {seoContent.structured_data && (
+          <script type="application/ld+json">{seoContent.structured_data}</script>
+        )}
+      </Helmet>
       {/* Hero Section */}
       {(sections.hero?.is_visible !== false) && (
         <section
@@ -354,7 +389,7 @@ const Index = () => {
               <div className="order-2 lg:order-1">
                 <img
                   src={getWhatAreMicrogreensImage()}
-                  alt="Albero con microgreens che crescono"
+                  alt={getWhatAreMicrogreensAlt()}
                   className="w-full h-80 object-cover rounded-lg shadow-elegant"
                 />
               </div>
@@ -511,7 +546,7 @@ const Index = () => {
                 <div className="bg-white/10 p-8 rounded-lg backdrop-blur-sm">
                   <img
                     src={getCustomMicrogreensImage()}
-                    alt="Chef con microgreens"
+                    alt={getCustomMicrogreensAlt()}
                     className="w-full h-64 object-cover rounded-lg"
                   />
                 </div>
