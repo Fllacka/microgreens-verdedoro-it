@@ -5,10 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Search } from "lucide-react";
+import { Sprout, Search } from "lucide-react";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -168,151 +168,166 @@ const AdminMicrogreens = () => {
           </div>
         </div>
 
-        <Accordion type="multiple" defaultValue={["seo", "hero", "info"]} className="space-y-4">
-          <AccordionItem value="seo" className="border rounded-lg px-4">
-            <AccordionTrigger className="text-lg font-semibold">
-              <div className="flex items-center gap-2">
-                <Search className="h-5 w-5" />
-                SEO Settings
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-4">
-              <SEOFields values={seoValues} onChange={handleSEOChange} />
-            </AccordionContent>
-          </AccordionItem>
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="content">
+              <Sprout className="h-4 w-4 mr-2" />
+              Contenuto
+            </TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
+          </TabsList>
 
-          <AccordionItem value="hero" className="border rounded-lg px-4">
-            <AccordionTrigger className="text-lg font-semibold">
-              Sezione Hero
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-4">
-              <div className="flex items-center justify-between mb-4">
-                <Label>Sezione visibile</Label>
-                <Switch
-                  checked={heroSection?.is_visible ?? true}
-                  onCheckedChange={(checked) => updateSectionVisibility("hero", checked)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Titolo</Label>
-                <Input
-                  value={heroSection?.content?.title || ""}
-                  onChange={(e) => updateSectionContent("hero", "title", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Sottotitolo</Label>
-                <Textarea
-                  value={heroSection?.content?.subtitle || ""}
-                  onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="info" className="border rounded-lg px-4">
-            <AccordionTrigger className="text-lg font-semibold">
-              Sezione Informazioni
-            </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-4">
-              <div className="flex items-center justify-between mb-4">
-                <Label>Sezione visibile</Label>
-                <Switch
-                  checked={infoSection?.is_visible ?? true}
-                  onCheckedChange={(checked) => updateSectionVisibility("info", checked)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Titolo sezione</Label>
-                <Input
-                  value={infoSection?.content?.title || ""}
-                  onChange={(e) => updateSectionContent("info", "title", e.target.value)}
-                />
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Feature 1</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Titolo</Label>
-                    <Input
-                      value={infoSection?.content?.feature1_title || ""}
-                      onChange={(e) => updateSectionContent("info", "feature1_title", e.target.value)}
+          <TabsContent value="content" className="space-y-6">
+            {/* Hero Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Sezione Hero</span>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="hero-visible" className="text-sm font-normal">Visibile</Label>
+                    <Switch
+                      id="hero-visible"
+                      checked={heroSection?.is_visible ?? true}
+                      onCheckedChange={(checked) => updateSectionVisibility("hero", checked)}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea
-                      value={infoSection?.content?.feature1_description || ""}
-                      onChange={(e) => updateSectionContent("info", "feature1_description", e.target.value)}
-                      rows={2}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Titolo</Label>
+                  <Input
+                    value={heroSection?.content?.title || ""}
+                    onChange={(e) => updateSectionContent("hero", "title", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Sottotitolo</Label>
+                  <Textarea
+                    value={heroSection?.content?.subtitle || ""}
+                    onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Feature 2</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Titolo</Label>
-                    <Input
-                      value={infoSection?.content?.feature2_title || ""}
-                      onChange={(e) => updateSectionContent("info", "feature2_title", e.target.value)}
+            {/* Info Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Sezione Informazioni</span>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="info-visible" className="text-sm font-normal">Visibile</Label>
+                    <Switch
+                      id="info-visible"
+                      checked={infoSection?.is_visible ?? true}
+                      onCheckedChange={(checked) => updateSectionVisibility("info", checked)}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea
-                      value={infoSection?.content?.feature2_description || ""}
-                      onChange={(e) => updateSectionContent("info", "feature2_description", e.target.value)}
-                      rows={2}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Titolo sezione</Label>
+                  <Input
+                    value={infoSection?.content?.title || ""}
+                    onChange={(e) => updateSectionContent("info", "title", e.target.value)}
+                  />
+                </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Feature 3</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Titolo</Label>
-                    <Input
-                      value={infoSection?.content?.feature3_title || ""}
-                      onChange={(e) => updateSectionContent("info", "feature3_title", e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrizione</Label>
-                    <Textarea
-                      value={infoSection?.content?.feature3_description || ""}
-                      onChange={(e) => updateSectionContent("info", "feature3_description", e.target.value)}
-                      rows={2}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Feature 1</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <Label>Titolo</Label>
+                        <Input
+                          value={infoSection?.content?.feature1_title || ""}
+                          onChange={(e) => updateSectionContent("info", "feature1_title", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Descrizione</Label>
+                        <Textarea
+                          value={infoSection?.content?.feature1_description || ""}
+                          onChange={(e) => updateSectionContent("info", "feature1_description", e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
 
-              <div className="space-y-2">
-                <Label>Immagine sezione</Label>
-                <MediaSelector
-                  value={infoSection?.content?.image_id || null}
-                  onChange={(id) => updateSectionContent("info", "image_id", id)}
-                  showAltText
-                  altText={infoSection?.content?.image_alt || ""}
-                  onAltTextChange={(alt) => updateSectionContent("info", "image_alt", alt)}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Feature 2</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <Label>Titolo</Label>
+                        <Input
+                          value={infoSection?.content?.feature2_title || ""}
+                          onChange={(e) => updateSectionContent("info", "feature2_title", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Descrizione</Label>
+                        <Textarea
+                          value={infoSection?.content?.feature2_description || ""}
+                          onChange={(e) => updateSectionContent("info", "feature2_description", e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Feature 3</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <Label>Titolo</Label>
+                        <Input
+                          value={infoSection?.content?.feature3_title || ""}
+                          onChange={(e) => updateSectionContent("info", "feature3_title", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Descrizione</Label>
+                        <Textarea
+                          value={infoSection?.content?.feature3_description || ""}
+                          onChange={(e) => updateSectionContent("info", "feature3_description", e.target.value)}
+                          rows={2}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Immagine sezione</Label>
+                  <MediaSelector
+                    value={infoSection?.content?.image_id || null}
+                    onChange={(id) => updateSectionContent("info", "image_id", id)}
+                    showAltText
+                    altText={infoSection?.content?.image_alt || ""}
+                    onAltTextChange={(alt) => updateSectionContent("info", "image_alt", alt)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="seo" className="space-y-6">
+            <SEOFields values={seoValues} onChange={handleSEOChange} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <PublishActionBar

@@ -9,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Eye, EyeOff, Home, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
-
+import { SEOFields } from "@/components/admin/SEOFields";
 interface HomepageSection {
   id: string;
   content: Record<string, any>;
@@ -196,6 +197,31 @@ const Homepage = () => {
     );
   }
 
+  const seoValues = {
+    slug: "/",
+    metaTitle: seoContent.meta_title || "",
+    metaDescription: seoContent.meta_description || "",
+    ogTitle: seoContent.og_title || "",
+    ogDescription: seoContent.og_description || "",
+    canonicalUrl: seoContent.canonical_url || "",
+    robots: seoContent.robots || "index, follow",
+    changeFrequency: "daily",
+    priority: "1.0",
+    structuredData: seoContent.structured_data || "",
+  };
+
+  const handleSEOChange = (field: string, value: string) => {
+    const fieldMap: Record<string, string> = {
+      metaTitle: "meta_title",
+      metaDescription: "meta_description",
+      ogTitle: "og_title",
+      ogDescription: "og_description",
+      canonicalUrl: "canonical_url",
+      structuredData: "structured_data",
+    };
+    updateSectionContent("seo", fieldMap[field] || field, value);
+  };
+
   return (
     <AdminLayout>
       <div className="max-w-4xl pb-24">
@@ -204,119 +230,20 @@ const Homepage = () => {
           <p className="text-muted-foreground">Gestisci i contenuti della homepage</p>
         </div>
 
-        <Accordion type="multiple" className="space-y-4" defaultValue={["hero"]}>
-          {/* SEO Section */}
-          {sections.seo && (
-            <AccordionItem value="seo" className="border rounded-lg px-4">
-              <AccordionTrigger className="hover:no-underline">
-                <div className="flex items-center gap-4">
-                  <span className="font-semibold">SEO Settings</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-6 pt-4">
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="metaTitle">Meta Title</Label>
-                    <Input
-                      id="metaTitle"
-                      value={seoContent.meta_title || ""}
-                      onChange={(e) => updateSectionContent("seo", "meta_title", e.target.value)}
-                      placeholder="Titolo pagina (max 60 caratteri)"
-                      maxLength={60}
-                    />
-                    <span className="text-xs text-muted-foreground">{(seoContent.meta_title || "").length}/60 caratteri</span>
-                  </div>
+        <Tabs defaultValue="content" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="content">
+              <Home className="h-4 w-4 mr-2" />
+              Contenuto
+            </TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
+          </TabsList>
 
-                  <div>
-                    <Label htmlFor="metaDescription">Meta Description</Label>
-                    <Textarea
-                      id="metaDescription"
-                      value={seoContent.meta_description || ""}
-                      onChange={(e) => updateSectionContent("seo", "meta_description", e.target.value)}
-                      placeholder="Descrizione pagina (max 160 caratteri)"
-                      maxLength={160}
-                      rows={3}
-                    />
-                    <span className="text-xs text-muted-foreground">{(seoContent.meta_description || "").length}/160 caratteri</span>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="ogTitle">Open Graph Title</Label>
-                    <Input
-                      id="ogTitle"
-                      value={seoContent.og_title || ""}
-                      onChange={(e) => updateSectionContent("seo", "og_title", e.target.value)}
-                      placeholder="Titolo per social media"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="ogDescription">Open Graph Description</Label>
-                    <Textarea
-                      id="ogDescription"
-                      value={seoContent.og_description || ""}
-                      onChange={(e) => updateSectionContent("seo", "og_description", e.target.value)}
-                      placeholder="Descrizione per social media"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Open Graph Image</Label>
-                    <MediaSelector
-                      value={seoContent.og_image_id}
-                      onChange={(id) => updateSectionContent("seo", "og_image_id", id)}
-                      altText={seoContent.og_image_alt || ""}
-                      onAltTextChange={(alt) => updateSectionContent("seo", "og_image_alt", alt)}
-                      showAltText={true}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="canonicalUrl">Canonical URL</Label>
-                      <Input
-                        id="canonicalUrl"
-                        value={seoContent.canonical_url || ""}
-                        onChange={(e) => updateSectionContent("seo", "canonical_url", e.target.value)}
-                        placeholder="Lascia vuoto per auto-riferimento"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="robots">Robots</Label>
-                      <Select
-                        value={seoContent.robots || "index, follow"}
-                        onValueChange={(value) => updateSectionContent("seo", "robots", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="index, follow">Index, Follow</SelectItem>
-                          <SelectItem value="noindex, follow">NoIndex, Follow</SelectItem>
-                          <SelectItem value="index, nofollow">Index, NoFollow</SelectItem>
-                          <SelectItem value="noindex, nofollow">NoIndex, NoFollow</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="structuredData">JSON-LD Structured Data (opzionale)</Label>
-                    <Textarea
-                      id="structuredData"
-                      value={seoContent.structured_data || ""}
-                      onChange={(e) => updateSectionContent("seo", "structured_data", e.target.value)}
-                      placeholder='{"@context": "https://schema.org", "@type": "Organization", ...}'
-                      rows={6}
-                      className="font-mono text-sm"
-                    />
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          )}
-
+          <TabsContent value="content" className="space-y-6">
+            <Accordion type="multiple" className="space-y-4" defaultValue={["hero"]}>
           {/* Hero Section */}
           {sections.hero && (
             <AccordionItem value="hero" className="border rounded-lg px-4">
@@ -898,7 +825,13 @@ const Homepage = () => {
               </AccordionContent>
             </AccordionItem>
           )}
-      </Accordion>
+            </Accordion>
+          </TabsContent>
+
+          <TabsContent value="seo" className="space-y-6">
+            <SEOFields values={seoValues} onChange={handleSEOChange} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <PublishActionBar
