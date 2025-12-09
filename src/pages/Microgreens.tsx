@@ -50,6 +50,7 @@ const Microgreens = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,6 +101,19 @@ const Microgreens = () => {
             .filter(cat => productsRes.data?.some(product => product.category === cat.name));
           setCategories(categoriesWithProducts);
         }
+
+        // Fetch hero background image if set
+        const heroImageId = sectionsMap["hero"]?.content?.background_image_id;
+        if (heroImageId) {
+          const { data: mediaData } = await supabase
+            .from("media")
+            .select("file_path")
+            .eq("id", heroImageId)
+            .maybeSingle();
+          if (mediaData) {
+            setHeroImageUrl(mediaData.file_path);
+          }
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Errore nel caricamento dei dati");
@@ -146,8 +160,24 @@ const Microgreens = () => {
 
       {/* Hero Section */}
       {heroSection?.is_visible !== false && (
-        <section className="section-padding bg-gradient-subtle">
-          <div className="container-width text-center">
+        <section 
+          className="section-padding relative"
+          style={heroImageUrl ? { 
+            backgroundImage: `url(${heroImageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          } : undefined}
+        >
+          {/* Overlay for background image */}
+          {heroImageUrl && (
+            <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+          )}
+          {/* Gradient fallback when no image */}
+          {!heroImageUrl && (
+            <div className="absolute inset-0 bg-gradient-subtle" />
+          )}
+          
+          <div className="container-width text-center relative z-10">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
               {heroSection?.content?.title || "I Nostri Microgreens"}
             </h1>
@@ -155,33 +185,31 @@ const Microgreens = () => {
               {heroSection?.content?.subtitle ||
                 "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali."}
             </p>
-          </div>
-        </section>
-      )}
 
-      {/* Category Filters */}
-      {categoriesSection?.is_visible !== false && categories.length > 0 && (
-        <section className="py-6 bg-background border-b">
-          <div className="container-width">
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <Button
-                variant={selectedCategory === null ? "default" : "outline"}
-                onClick={() => setSelectedCategory(null)}
-                className="rounded-full"
-              >
-                Tutti
-              </Button>
-              {categories.map((category) => (
+            {/* Category filters in hero */}
+            {categories.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-2 animate-fade-in">
                 <Button
-                  key={category.id}
-                  variant={selectedCategory === category.name ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category.name)}
+                  variant={selectedCategory === null ? "verde" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(null)}
                   className="rounded-full"
                 >
-                  {category.name}
+                  Tutti
                 </Button>
-              ))}
-            </div>
+                {categories.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.name ? "verde" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category.name)}
+                    className="rounded-full"
+                  >
+                    {category.name}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}

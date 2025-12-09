@@ -38,6 +38,7 @@ const Blog = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
   const [sections, setSections] = useState<Record<string, Section>>({});
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -95,6 +96,20 @@ const Blog = () => {
           .filter(cat => cat.name?.trim()) // Filter out empty categories
           .filter(cat => data?.some(post => post.category === cat.name));
         setCategories(categoriesWithPosts);
+      }
+
+      // Fetch hero background image if set
+      const heroSection = sectionsData?.find(s => s.id === "hero");
+      const heroImageId = (heroSection?.content as any)?.background_image_id;
+      if (heroImageId) {
+        const { data: mediaData } = await supabase
+          .from("media")
+          .select("file_path")
+          .eq("id", heroImageId)
+          .maybeSingle();
+        if (mediaData) {
+          setHeroImageUrl(mediaData.file_path);
+        }
       }
     } catch (error: any) {
       console.error("Error fetching blog posts:", error);
@@ -169,8 +184,24 @@ const Blog = () => {
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         {heroSection?.is_visible !== false && (
-          <section className="section-padding bg-gradient-subtle">
-            <div className="container-width text-center">
+          <section 
+            className="section-padding relative"
+            style={heroImageUrl ? { 
+              backgroundImage: `url(${heroImageUrl})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            } : undefined}
+          >
+            {/* Overlay for background image */}
+            {heroImageUrl && (
+              <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+            )}
+            {/* Gradient fallback when no image */}
+            {!heroImageUrl && (
+              <div className="absolute inset-0 bg-gradient-subtle" />
+            )}
+            
+            <div className="container-width text-center relative z-10">
               <div className="max-w-4xl mx-auto">
                 <div className="inline-block bg-oro-primary text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium mb-6 animate-fade-in">
                   {heroSection?.content?.badge || "Il Mondo dei Microgreens"}
@@ -220,7 +251,6 @@ const Blog = () => {
             </div>
           </section>
         )}
-
 
         {/* Featured Article */}
         {featuredSection?.is_visible !== false && featuredPost && (
