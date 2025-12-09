@@ -90,10 +90,10 @@ const Blog = () => {
       // Get categories from CMS configuration
       const categoriesContent = sectionsData?.find(s => s.id === "categories")?.content as { items?: { id: string; name: string; slug: string }[] } | null;
       if (categoriesContent?.items) {
-        // Filter to only show categories that have published posts
-        const categoriesWithPosts = categoriesContent.items.filter(cat => 
-          data?.some(post => post.category === cat.name)
-        );
+        // Filter to only show categories that have published posts AND have valid names
+        const categoriesWithPosts = categoriesContent.items
+          .filter(cat => cat.name?.trim()) // Filter out empty categories
+          .filter(cat => data?.some(post => post.category === cat.name));
         setCategories(categoriesWithPosts);
       }
     } catch (error: any) {

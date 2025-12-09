@@ -132,6 +132,16 @@ const AdminBlogOverview = () => {
 
       // Update all sections
       for (const [id, section] of Object.entries(sections)) {
+        let contentToSave = section.content;
+        
+        // Filter out empty categories before saving
+        if (id === "categories" && section.content?.items) {
+          contentToSave = {
+            ...section.content,
+            items: section.content.items.filter((cat: { name: string }) => cat.name?.trim()),
+          };
+        }
+        
         if (id === "seo") {
           await supabase
             .from("blog_overview_sections")
@@ -140,7 +150,7 @@ const AdminBlogOverview = () => {
         } else {
           await supabase
             .from("blog_overview_sections")
-            .update({ content: section.content, is_visible: section.is_visible, updated_at: new Date().toISOString() })
+            .update({ content: contentToSave, is_visible: section.is_visible, updated_at: new Date().toISOString() })
             .eq("id", id);
         }
       }
