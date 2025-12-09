@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
+import { Button } from "@/components/ui/button";
 import { Leaf, Star } from "lucide-react";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -35,12 +36,20 @@ interface Section {
   is_visible: boolean;
 }
 
+interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 const Microgreens = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [sections, setSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +90,16 @@ const Microgreens = () => {
           sectionsMap[section.id] = section as Section;
         });
         setSections(sectionsMap);
+
+        // Get categories from CMS configuration
+        const categoriesContent = sectionsMap["categories"]?.content as { items?: CategoryItem[] } | null;
+        if (categoriesContent?.items) {
+          // Filter to only show categories that have published products AND have valid names
+          const categoriesWithProducts = categoriesContent.items
+            .filter(cat => cat.name?.trim())
+            .filter(cat => productsRes.data?.some(product => product.category === cat.name));
+          setCategories(categoriesWithProducts);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Errore nel caricamento dei dati");
@@ -95,6 +114,12 @@ const Microgreens = () => {
   const seoSection = sections["seo"];
   const heroSection = sections["hero"];
   const infoSection = sections["info"];
+  const categoriesSection = sections["categories"];
+
+  // Filter products by selected category
+  const filteredProducts = selectedCategory
+    ? products.filter(product => product.category === selectedCategory)
+    : products;
 
   const currentUrl = window.location.origin + "/microgreens";
   const canonicalUrl = seoSection?.content?.canonical_url
@@ -134,14 +159,43 @@ const Microgreens = () => {
         </section>
       )}
 
+      {/* Category Filters */}
+      {categoriesSection?.is_visible !== false && categories.length > 0 && (
+        <section className="py-6 bg-background border-b">
+          <div className="container-width">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant={selectedCategory === null ? "default" : "outline"}
+                onClick={() => setSelectedCategory(null)}
+                className="rounded-full"
+              >
+                Tutti
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.name ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category.name)}
+                  className="rounded-full"
+                >
+                  {category.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Products Grid */}
       <section className="section-padding bg-background">
         <div className="container-width">
           {loading ? (
             <p className="text-center">Caricamento prodotti...</p>
+          ) : filteredProducts.length === 0 ? (
+            <p className="text-center text-muted-foreground">Nessun prodotto trovato in questa categoria.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   name={product.name}

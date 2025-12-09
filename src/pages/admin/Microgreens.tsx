@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sprout, Search } from "lucide-react";
+import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info } from "lucide-react";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -83,10 +85,20 @@ const AdminMicrogreens = () => {
     setSaving(true);
     try {
       for (const [id, section] of Object.entries(sections)) {
+        let contentToSave = section.content;
+        
+        // Filter out empty categories before saving
+        if (id === "categories" && section.content?.items) {
+          contentToSave = {
+            ...section.content,
+            items: section.content.items.filter((cat: { name: string }) => cat.name?.trim()),
+          };
+        }
+        
         const { error } = await supabase
           .from("microgreens_sections")
           .update({
-            content: section.content,
+            content: contentToSave,
             is_visible: section.is_visible,
             updated_at: new Date().toISOString(),
           })
@@ -122,6 +134,7 @@ const AdminMicrogreens = () => {
   const seoSection = sections["seo"];
   const heroSection = sections["hero"];
   const infoSection = sections["info"];
+  const categoriesSection = sections["categories"];
 
   const seoValues = {
     slug: "/microgreens",
@@ -181,147 +194,242 @@ const AdminMicrogreens = () => {
           </TabsList>
 
           <TabsContent value="content" className="space-y-6">
-            {/* Hero Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Sezione Hero</span>
+            <Accordion type="multiple" defaultValue={["hero", "categories", "info"]} className="space-y-4">
+              {/* Hero Section */}
+              <AccordionItem value="hero" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="hero-visible" className="text-sm font-normal">Visibile</Label>
+                    <FileText className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">Hero</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <Label>Sezione visibile</Label>
                     <Switch
-                      id="hero-visible"
                       checked={heroSection?.is_visible ?? true}
                       onCheckedChange={(checked) => updateSectionVisibility("hero", checked)}
                     />
                   </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Titolo</Label>
-                  <Input
-                    value={heroSection?.content?.title || ""}
-                    onChange={(e) => updateSectionContent("hero", "title", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sottotitolo</Label>
-                  <Textarea
-                    value={heroSection?.content?.subtitle || ""}
-                    onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
-                    rows={3}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="space-y-2">
+                    <Label>Titolo</Label>
+                    <Input
+                      value={heroSection?.content?.title || ""}
+                      onChange={(e) => updateSectionContent("hero", "title", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sottotitolo</Label>
+                    <Textarea
+                      value={heroSection?.content?.subtitle || ""}
+                      onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
-            {/* Info Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Sezione Informazioni</span>
+              {/* Categories Section */}
+              <AccordionItem value="categories" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="info-visible" className="text-sm font-normal">Visibile</Label>
+                    <Tag className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">Categorie</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <Label>Sezione visibile</Label>
                     <Switch
-                      id="info-visible"
+                      checked={categoriesSection?.is_visible ?? true}
+                      onCheckedChange={(checked) => updateSectionVisibility("categories", checked)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Titolo sezione</Label>
+                    <Input
+                      value={categoriesSection?.content?.title || ""}
+                      onChange={(e) => updateSectionContent("categories", "title", e.target.value)}
+                      placeholder="Esplora per Categoria"
+                    />
+                  </div>
+                  
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-base font-medium">Categorie Disponibili</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentCategories = categoriesSection?.content?.items || [];
+                          updateSectionContent("categories", "items", [
+                            ...currentCategories,
+                            { id: crypto.randomUUID(), name: "", slug: "" }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Aggiungi Categoria
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Le categorie aggiunte qui saranno disponibili per la selezione nei prodotti microgreens.
+                    </p>
+                    
+                    {(categoriesSection?.content?.items || []).length === 0 ? (
+                      <div className="text-center py-6 bg-muted/30 rounded-lg border border-dashed">
+                        <Tag className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Nessuna categoria aggiunta</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {(categoriesSection?.content?.items || []).map((category: { id: string; name: string; slug: string }, index: number) => (
+                          <div key={category.id} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                            <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                            <Input
+                              value={category.name}
+                              onChange={(e) => {
+                                const items = [...(categoriesSection?.content?.items || [])];
+                                items[index] = { 
+                                  ...items[index], 
+                                  name: e.target.value,
+                                  slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+                                };
+                                updateSectionContent("categories", "items", items);
+                              }}
+                              placeholder="Nome categoria"
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const items = (categoriesSection?.content?.items || []).filter(
+                                  (_: any, i: number) => i !== index
+                                );
+                                updateSectionContent("categories", "items", items);
+                              }}
+                            >
+                              <X className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Info Section */}
+              <AccordionItem value="info" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">Sezione Informazioni</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <Label>Sezione visibile</Label>
+                    <Switch
                       checked={infoSection?.is_visible ?? true}
                       onCheckedChange={(checked) => updateSectionVisibility("info", checked)}
                     />
                   </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Titolo sezione</Label>
-                  <Input
-                    value={infoSection?.content?.title || ""}
-                    onChange={(e) => updateSectionContent("info", "title", e.target.value)}
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label>Titolo sezione</Label>
+                    <Input
+                      value={infoSection?.content?.title || ""}
+                      onChange={(e) => updateSectionContent("info", "title", e.target.value)}
+                    />
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Feature 1</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label>Titolo</Label>
-                        <Input
-                          value={infoSection?.content?.feature1_title || ""}
-                          onChange={(e) => updateSectionContent("info", "feature1_title", e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Descrizione</Label>
-                        <Textarea
-                          value={infoSection?.content?.feature1_description || ""}
-                          onChange={(e) => updateSectionContent("info", "feature1_description", e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Feature 1</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Titolo</Label>
+                          <Input
+                            value={infoSection?.content?.feature1_title || ""}
+                            onChange={(e) => updateSectionContent("info", "feature1_title", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Descrizione</Label>
+                          <Textarea
+                            value={infoSection?.content?.feature1_description || ""}
+                            onChange={(e) => updateSectionContent("info", "feature1_description", e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Feature 2</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label>Titolo</Label>
-                        <Input
-                          value={infoSection?.content?.feature2_title || ""}
-                          onChange={(e) => updateSectionContent("info", "feature2_title", e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Descrizione</Label>
-                        <Textarea
-                          value={infoSection?.content?.feature2_description || ""}
-                          onChange={(e) => updateSectionContent("info", "feature2_description", e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Feature 2</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Titolo</Label>
+                          <Input
+                            value={infoSection?.content?.feature2_title || ""}
+                            onChange={(e) => updateSectionContent("info", "feature2_title", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Descrizione</Label>
+                          <Textarea
+                            value={infoSection?.content?.feature2_description || ""}
+                            onChange={(e) => updateSectionContent("info", "feature2_description", e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base">Feature 3</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="space-y-2">
-                        <Label>Titolo</Label>
-                        <Input
-                          value={infoSection?.content?.feature3_title || ""}
-                          onChange={(e) => updateSectionContent("info", "feature3_title", e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Descrizione</Label>
-                        <Textarea
-                          value={infoSection?.content?.feature3_description || ""}
-                          onChange={(e) => updateSectionContent("info", "feature3_description", e.target.value)}
-                          rows={2}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Feature 3</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Titolo</Label>
+                          <Input
+                            value={infoSection?.content?.feature3_title || ""}
+                            onChange={(e) => updateSectionContent("info", "feature3_title", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Descrizione</Label>
+                          <Textarea
+                            value={infoSection?.content?.feature3_description || ""}
+                            onChange={(e) => updateSectionContent("info", "feature3_description", e.target.value)}
+                            rows={2}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Immagine sezione</Label>
-                  <MediaSelector
-                    value={infoSection?.content?.image_id || null}
-                    onChange={(id) => updateSectionContent("info", "image_id", id)}
-                    showAltText
-                    altText={infoSection?.content?.image_alt || ""}
-                    onAltTextChange={(alt) => updateSectionContent("info", "image_alt", alt)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="space-y-2">
+                    <Label>Immagine sezione</Label>
+                    <MediaSelector
+                      value={infoSection?.content?.image_id || null}
+                      onChange={(id) => updateSectionContent("info", "image_id", id)}
+                      showAltText
+                      altText={infoSection?.content?.image_alt || ""}
+                      onAltTextChange={(alt) => updateSectionContent("info", "image_alt", alt)}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-6">
