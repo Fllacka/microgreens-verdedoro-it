@@ -170,7 +170,7 @@ const Microgreens = () => {
         >
           {/* Overlay for background image */}
           {heroImageUrl && (
-            <div className="absolute inset-0 bg-background/85 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-gradient-hero" />
           )}
           {/* Gradient fallback when no image */}
           {!heroImageUrl && (
