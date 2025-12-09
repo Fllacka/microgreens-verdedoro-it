@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
@@ -15,6 +16,12 @@ import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Search, Package } from "lucide-react";
+
+interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 const AdminProductEdit = () => {
   const { id } = useParams();
@@ -54,11 +61,32 @@ const AdminProductEdit = () => {
     structuredData: "",
   });
 
+  const [availableCategories, setAvailableCategories] = useState<CategoryItem[]>([]);
+
   useEffect(() => {
+    fetchCategories();
     if (!isNew) {
       fetchProduct();
     }
   }, [id]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("microgreens_sections")
+        .select("content")
+        .eq("id", "categories")
+        .maybeSingle();
+
+      if (error) throw error;
+
+      const items = (data?.content as { items?: CategoryItem[] })?.items || [];
+      // Filter out empty category names
+      setAvailableCategories(items.filter(cat => cat.name?.trim()));
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchProduct = async () => {
     try {
@@ -255,11 +283,22 @@ const AdminProductEdit = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
-                        <Input
-                          id="category"
-                          value={formData.category}
-                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        />
+                        <Select
+                          value={formData.category || "none"}
+                          onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Nessuna categoria</SelectItem>
+                            {availableCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.name}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       <div className="space-y-2">
