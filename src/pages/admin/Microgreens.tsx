@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info } from "lucide-react";
+import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info, Image } from "lucide-react";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -224,6 +224,19 @@ const AdminMicrogreens = () => {
                       value={heroSection?.content?.subtitle || ""}
                       onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
                       rows={3}
+                    />
+                  </div>
+                  <div className="space-y-2 pt-4 border-t">
+                    <Label className="flex items-center gap-2">
+                      <Image className="h-4 w-4" />
+                      Immagine di Sfondo (opzionale)
+                    </Label>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Se non viene impostata un'immagine, verrà utilizzato il gradiente predefinito.
+                    </p>
+                    <MediaSelector
+                      value={heroSection?.content?.background_image_id || null}
+                      onChange={(id) => updateSectionContent("hero", "background_image_id", id)}
                     />
                   </div>
                 </AccordionContent>
