@@ -4,6 +4,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,6 +35,7 @@ const AdminBlogEdit = () => {
   });
 
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
 
   const [seoData, setSeoData] = useState({
     slug: "",
@@ -49,10 +51,30 @@ const AdminBlogEdit = () => {
   });
 
   useEffect(() => {
+    fetchCategories();
     if (!isNew) {
       fetchPost();
     }
   }, [id]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("blog_overview_sections")
+        .select("content")
+        .eq("id", "categories")
+        .maybeSingle();
+
+      if (error) throw error;
+
+      const content = data?.content as { items?: { id: string; name: string; slug: string }[] } | null;
+      if (content?.items) {
+        setAvailableCategories(content.items);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchPost = async () => {
     try {
@@ -248,11 +270,36 @@ const AdminBlogEdit = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
-                        <Input
-                          id="category"
-                          value={formData.category}
-                          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                        />
+                        {availableCategories.length > 0 ? (
+                          <Select
+                            value={formData.category}
+                            onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleziona categoria" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Nessuna categoria</SelectItem>
+                              {availableCategories.map((cat) => (
+                                <SelectItem key={cat.id} value={cat.name}>
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input
+                            id="category"
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            placeholder="Aggiungi categorie dal CMS Blog"
+                          />
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          {availableCategories.length === 0 
+                            ? "Aggiungi categorie dalla pagina Blog Overview nel CMS." 
+                            : "Opzionale - seleziona una categoria."}
+                        </p>
                       </div>
 
                       <div className="space-y-2">

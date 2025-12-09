@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Tag, Star, Clock, Mail } from "lucide-react";
+import { FileText, Tag, Star, Clock, Mail, Plus, X, GripVertical } from "lucide-react";
 
 interface SectionContent {
   [key: string]: any;
@@ -263,6 +264,72 @@ const AdminBlogOverview = () => {
                       onChange={(e) => updateSectionContent("categories", "title", e.target.value)}
                       placeholder="Esplora per Categoria"
                     />
+                  </div>
+                  
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-base font-medium">Categorie Disponibili</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const currentCategories = categoriesSection?.content?.items || [];
+                          updateSectionContent("categories", "items", [
+                            ...currentCategories,
+                            { id: crypto.randomUUID(), name: "", slug: "" }
+                          ]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Aggiungi Categoria
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Le categorie aggiunte qui saranno disponibili per la selezione negli articoli del blog.
+                    </p>
+                    
+                    {(categoriesSection?.content?.items || []).length === 0 ? (
+                      <div className="text-center py-6 bg-muted/30 rounded-lg border border-dashed">
+                        <Tag className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">Nessuna categoria aggiunta</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {(categoriesSection?.content?.items || []).map((category: { id: string; name: string; slug: string }, index: number) => (
+                          <div key={category.id} className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                            <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                            <Input
+                              value={category.name}
+                              onChange={(e) => {
+                                const items = [...(categoriesSection?.content?.items || [])];
+                                items[index] = { 
+                                  ...items[index], 
+                                  name: e.target.value,
+                                  slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+                                };
+                                updateSectionContent("categories", "items", items);
+                              }}
+                              placeholder="Nome categoria"
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const items = (categoriesSection?.content?.items || []).filter(
+                                  (_: any, i: number) => i !== index
+                                );
+                                updateSectionContent("categories", "items", items);
+                              }}
+                            >
+                              <X className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </AccordionContent>
               </AccordionItem>

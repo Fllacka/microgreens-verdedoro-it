@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, ArrowRight, Calendar, Tag } from "lucide-react";
+import { Clock, ArrowRight, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,7 +34,8 @@ interface Section {
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<{ name: string; count: number; color: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
   const [sections, setSections] = useState<Record<string, Section>>({});
   const { toast } = useToast();
@@ -86,21 +87,15 @@ const Blog = () => {
         }
       }
 
-      // Calculate categories from posts
-      const categoryMap = new Map<string, number>();
-      data?.forEach((post) => {
-        if (post.category) {
-          categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1);
-        }
-      });
-
-      const categoriesArray = Array.from(categoryMap.entries()).map(([name, count], index) => ({
-        name,
-        count,
-        color: index % 2 === 0 ? "verde" : "oro",
-      }));
-
-      setCategories(categoriesArray);
+      // Get categories from CMS configuration
+      const categoriesContent = sectionsData?.find(s => s.id === "categories")?.content as { items?: { id: string; name: string; slug: string }[] } | null;
+      if (categoriesContent?.items) {
+        // Filter to only show categories that have published posts
+        const categoriesWithPosts = categoriesContent.items.filter(cat => 
+          data?.some(post => post.category === cat.name)
+        );
+        setCategories(categoriesWithPosts);
+      }
     } catch (error: any) {
       console.error("Error fetching blog posts:", error);
       toast({
@@ -140,8 +135,13 @@ const Blog = () => {
   const latestSection = sections["latest"];
   const newsletterSection = sections["newsletter"];
 
-  const featuredPost = posts[0];
-  const latestPosts = posts.slice(1);
+  // Filter posts by selected category
+  const filteredPosts = selectedCategory 
+    ? posts.filter(post => post.category === selectedCategory)
+    : posts;
+
+  const featuredPost = filteredPosts[0];
+  const latestPosts = filteredPosts.slice(1);
 
   const currentUrl = window.location.origin + "/blog";
   const canonicalUrl = seoSection?.content?.canonical_url
@@ -186,42 +186,39 @@ const Blog = () => {
                     <>Blog di <span className="text-primary">Microgreens</span></>
                   )}
                 </h1>
-                <p className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in">
+                <p className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in mb-8">
                   {heroSection?.content?.subtitle || "Esplora il mondo dei microgreens attraverso ricette originali, guide agli usi culinari, approfondimenti sui benefici nutrizionali e consigli pratici per consumo e conservazione."}
                 </p>
+
+                {/* Category filters in hero */}
+                {categories.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-2 animate-fade-in">
+                    <Button
+                      variant={selectedCategory === null ? "verde" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedCategory(null)}
+                      className="rounded-full"
+                    >
+                      Tutti
+                    </Button>
+                    {categories.map((category) => (
+                      <Button
+                        key={category.id}
+                        variant={selectedCategory === category.name ? "verde" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category.name)}
+                        className="rounded-full"
+                      >
+                        {category.name}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </section>
         )}
 
-        {/* Categories */}
-        {categoriesSection?.is_visible !== false && categories.length > 0 && (
-          <section className="section-padding bg-background">
-            <div className="container-width">
-              <h2 className="font-display text-2xl font-bold text-foreground mb-8 text-center">
-                {categoriesSection?.content?.title || "Esplora per Categoria"}
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-                {categories.map((category, index) => (
-                  <Card key={index} className="hover-lift cursor-pointer border-border/50 bg-card">
-                    <CardContent className="p-4 text-center">
-                      <Tag className={`w-8 h-8 mx-auto mb-2 ${
-                        category.color === 'verde' ? 'text-primary' :
-                        category.color === 'oro' ? 'text-accent' : 'text-muted-foreground'
-                      }`} />
-                      <h3 className="font-body font-semibold text-foreground mb-1">
-                        {category.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {category.count} {category.count === 1 ? 'articolo' : 'articoli'}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* Featured Article */}
         {featuredSection?.is_visible !== false && featuredPost && (
