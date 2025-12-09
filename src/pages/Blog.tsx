@@ -186,34 +186,9 @@ const Blog = () => {
                     <>Blog di <span className="text-primary">Microgreens</span></>
                   )}
                 </h1>
-                <p className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in mb-8">
+                <p className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in">
                   {heroSection?.content?.subtitle || "Esplora il mondo dei microgreens attraverso ricette originali, guide agli usi culinari, approfondimenti sui benefici nutrizionali e consigli pratici per consumo e conservazione."}
                 </p>
-
-                {/* Category filters in hero */}
-                {categories.length > 0 && (
-                  <div className="flex flex-wrap justify-center gap-2 animate-fade-in">
-                    <Button
-                      variant={selectedCategory === null ? "verde" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(null)}
-                      className="rounded-full"
-                    >
-                      Tutti
-                    </Button>
-                    {categories.map((category) => (
-                      <Button
-                        key={category.id}
-                        variant={selectedCategory === category.name ? "verde" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedCategory(category.name)}
-                        className="rounded-full"
-                      >
-                        {category.name}
-                      </Button>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           </section>
