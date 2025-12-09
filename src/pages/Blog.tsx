@@ -201,17 +201,19 @@ const Blog = () => {
                     >
                       Tutti
                     </Button>
-                    {categories.map((category) => (
-                      <Button
-                        key={category.id}
-                        variant={selectedCategory === category.name ? "verde" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedCategory(category.name)}
-                        className="rounded-full"
-                      >
-                        {category.name}
-                      </Button>
-                    ))}
+                    {categories
+                      .filter((category) => category.name && category.name.trim() !== "")
+                      .map((category) => (
+                        <Button
+                          key={category.id}
+                          variant={selectedCategory === category.name ? "verde" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedCategory(category.name)}
+                          className="rounded-full"
+                        >
+                          {category.name}
+                        </Button>
+                      ))}
                   </div>
                 )}
               </div>
