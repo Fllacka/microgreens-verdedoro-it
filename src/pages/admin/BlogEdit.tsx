@@ -270,9 +270,9 @@ const AdminBlogEdit = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
-                        {availableCategories.length > 0 ? (
+                        {availableCategories.filter(c => c.name?.trim()).length > 0 ? (
                           <Select
-                            value={formData.category}
+                            value={formData.category || "none"}
                             onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value })}
                           >
                             <SelectTrigger>
@@ -280,11 +280,13 @@ const AdminBlogEdit = () => {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="none">Nessuna categoria</SelectItem>
-                              {availableCategories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.name}>
-                                  {cat.name}
-                                </SelectItem>
-                              ))}
+                              {availableCategories
+                                .filter(cat => cat.name?.trim())
+                                .map((cat) => (
+                                  <SelectItem key={cat.id} value={cat.name}>
+                                    {cat.name}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         ) : (
