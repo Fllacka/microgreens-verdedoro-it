@@ -13,6 +13,7 @@ import { Loader2, Eye, EyeOff, Info, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 interface ChiSiamoSection {
   id: string;
@@ -241,10 +242,9 @@ const ChiSiamoAdmin = () => {
                   </div>
                   <div>
                     <Label>Descrizione</Label>
-                    <Textarea
-                      value={sections.hero.content.description || ""}
-                      onChange={(e) => updateSectionContent("hero", "description", e.target.value)}
-                      rows={4}
+                    <RichTextEditor
+                      content={sections.hero.content.description || ""}
+                      onChange={(value) => updateSectionContent("hero", "description", value)}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -310,10 +310,9 @@ const ChiSiamoAdmin = () => {
                   </div>
                   <div>
                     <Label>Descrizione</Label>
-                    <Textarea
-                      value={sections.mission.content.description || ""}
-                      onChange={(e) => updateSectionContent("mission", "description", e.target.value)}
-                      rows={4}
+                    <RichTextEditor
+                      content={sections.mission.content.description || ""}
+                      onChange={(value) => updateSectionContent("mission", "description", value)}
                     />
                   </div>
 
@@ -400,14 +399,13 @@ const ChiSiamoAdmin = () => {
                     {(sections.story.content.paragraphs || []).map((paragraph: string, index: number) => (
                       <div key={index}>
                         <Label>Paragrafo {index + 1}</Label>
-                        <Textarea
-                          value={paragraph}
-                          onChange={(e) => {
+                        <RichTextEditor
+                          content={paragraph}
+                          onChange={(value) => {
                             const newParagraphs = [...(sections.story.content.paragraphs || [])];
-                            newParagraphs[index] = e.target.value;
+                            newParagraphs[index] = value;
                             updateSectionContent("story", "paragraphs", newParagraphs);
                           }}
-                          rows={3}
                         />
                       </div>
                     ))}
@@ -488,10 +486,9 @@ const ChiSiamoAdmin = () => {
                   </div>
                   <div>
                     <Label>Descrizione</Label>
-                    <Textarea
-                      value={sections.cta.content.description || ""}
-                      onChange={(e) => updateSectionContent("cta", "description", e.target.value)}
-                      rows={3}
+                    <RichTextEditor
+                      content={sections.cta.content.description || ""}
+                      onChange={(value) => updateSectionContent("cta", "description", value)}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">

@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 interface Category {
   id: string;
@@ -337,13 +338,12 @@ const AdminMicrogreensCustom = () => {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="intro-text">Testo</Label>
-                  <Textarea
-                    id="intro-text"
-                    value={introSection?.content?.text || ''}
-                    onChange={(e) => updateSectionContent('intro', 'text', e.target.value)}
-                    rows={5}
-                    className="mt-1"
-                  />
+                  <div className="mt-1">
+                    <RichTextEditor
+                      content={introSection?.content?.text || ''}
+                      onChange={(value) => updateSectionContent('intro', 'text', value)}
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label>Immagine</Label>
@@ -392,13 +392,12 @@ const AdminMicrogreensCustom = () => {
                 </div>
                 <div>
                   <Label htmlFor="varieties-description">Descrizione</Label>
-                  <Textarea
-                    id="varieties-description"
-                    value={varietiesSection?.content?.description || ''}
-                    onChange={(e) => updateSectionContent('varieties', 'description', e.target.value)}
-                    rows={3}
-                    className="mt-1"
-                  />
+                  <div className="mt-1">
+                    <RichTextEditor
+                      content={varietiesSection?.content?.description || ''}
+                      onChange={(value) => updateSectionContent('varieties', 'description', value)}
+                    />
+                  </div>
                 </div>
 
                 {/* Categories */}
@@ -515,13 +514,12 @@ const AdminMicrogreensCustom = () => {
                 </div>
                 <div>
                   <Label htmlFor="cta-description">Descrizione</Label>
-                  <Textarea
-                    id="cta-description"
-                    value={ctaSection?.content?.description || ''}
-                    onChange={(e) => updateSectionContent('cta', 'description', e.target.value)}
-                    rows={2}
-                    className="mt-1"
-                  />
+                  <div className="mt-1">
+                    <RichTextEditor
+                      content={ctaSection?.content?.description || ''}
+                      onChange={(value) => updateSectionContent('cta', 'description', value)}
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="cta-button-text">Testo pulsante</Label>

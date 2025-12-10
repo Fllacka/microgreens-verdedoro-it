@@ -14,6 +14,7 @@ import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info, Image } fro
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 interface SectionContent {
   [key: string]: any;
@@ -220,10 +221,9 @@ const AdminMicrogreens = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Sottotitolo</Label>
-                    <Textarea
-                      value={heroSection?.content?.subtitle || ""}
-                      onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
-                      rows={3}
+                    <RichTextEditor
+                      content={heroSection?.content?.subtitle || ""}
+                      onChange={(value) => updateSectionContent("hero", "subtitle", value)}
                     />
                   </div>
                   <div className="space-y-2 pt-4 border-t">
@@ -374,10 +374,9 @@ const AdminMicrogreens = () => {
                         </div>
                         <div className="space-y-2">
                           <Label>Descrizione</Label>
-                          <Textarea
-                            value={infoSection?.content?.feature1_description || ""}
-                            onChange={(e) => updateSectionContent("info", "feature1_description", e.target.value)}
-                            rows={2}
+                          <RichTextEditor
+                            content={infoSection?.content?.feature1_description || ""}
+                            onChange={(value) => updateSectionContent("info", "feature1_description", value)}
                           />
                         </div>
                       </CardContent>
@@ -397,10 +396,9 @@ const AdminMicrogreens = () => {
                         </div>
                         <div className="space-y-2">
                           <Label>Descrizione</Label>
-                          <Textarea
-                            value={infoSection?.content?.feature2_description || ""}
-                            onChange={(e) => updateSectionContent("info", "feature2_description", e.target.value)}
-                            rows={2}
+                          <RichTextEditor
+                            content={infoSection?.content?.feature2_description || ""}
+                            onChange={(value) => updateSectionContent("info", "feature2_description", value)}
                           />
                         </div>
                       </CardContent>
@@ -420,10 +418,9 @@ const AdminMicrogreens = () => {
                         </div>
                         <div className="space-y-2">
                           <Label>Descrizione</Label>
-                          <Textarea
-                            value={infoSection?.content?.feature3_description || ""}
-                            onChange={(e) => updateSectionContent("info", "feature3_description", e.target.value)}
-                            rows={2}
+                          <RichTextEditor
+                            content={infoSection?.content?.feature3_description || ""}
+                            onChange={(value) => updateSectionContent("info", "feature3_description", value)}
                           />
                         </div>
                       </CardContent>
