@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, Zap, Shield } from "lucide-react";
+import { useState } from "react";
 
 interface ProductCardProps {
   name: string;
@@ -12,6 +13,7 @@ interface ProductCardProps {
   rating?: number;
   popular?: boolean;
   onCardClick?: () => void;
+  priority?: boolean;
 }
 
 const ProductCard = ({
@@ -23,17 +25,37 @@ const ProductCard = ({
   image,
   rating,
   popular,
-  onCardClick
+  onCardClick,
+  priority = false,
 }: ProductCardProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
   return (
     <Card 
       className="product-card overflow-hidden border-border/50 relative cursor-pointer group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex flex-col"
       onClick={onCardClick}
     >
-      {/* Product Image */}
-      <div className="h-48 bg-cover bg-center relative" style={{
-        backgroundImage: `url(${image})`
-      }}>
+      {/* Product Image - Optimized for mobile */}
+      <div className="relative h-48 overflow-hidden bg-muted/30">
+        {/* Skeleton placeholder */}
+        {!isLoaded && !hasError && (
+          <div className="absolute inset-0 animate-pulse bg-muted/50" />
+        )}
+        
+        <img
+          src={image}
+          alt={`${name} - microgreen fresco`}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+          width={400}
+          height={192}
+          loading={priority ? "eager" : "lazy"}
+          decoding={priority ? "sync" : "async"}
+          fetchPriority={priority ? "high" : "auto"}
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setHasError(true)}
+        />
+        
         {/* Gradient overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none" />
         

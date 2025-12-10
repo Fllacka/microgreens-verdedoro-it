@@ -267,10 +267,17 @@ const Blog = () => {
               </h2>
               <Card className="overflow-hidden hover-lift border-border/50 bg-card max-w-4xl mx-auto">
                 <div className="grid md:grid-cols-2 gap-0">
-                  <div 
-                    className="h-64 md:h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${featuredPost.featured_image_id && mediaMap[featuredPost.featured_image_id] ? mediaMap[featuredPost.featured_image_id] : varietiesImage})` }}
-                  />
+                  <div className="relative h-64 md:h-full overflow-hidden bg-muted/30">
+                    <img
+                      src={featuredPost.featured_image_id && mediaMap[featuredPost.featured_image_id] ? mediaMap[featuredPost.featured_image_id] : varietiesImage}
+                      alt={`${featuredPost.title} - articolo blog`}
+                      className="w-full h-full object-cover"
+                      width={600}
+                      height={400}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                   <CardContent className="p-8 flex flex-col justify-center">
                     <div className="flex items-center gap-4 mb-4">
                       {featuredPost.category && (
@@ -324,10 +331,17 @@ const Blog = () => {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {latestPosts.map((article) => (
                       <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card">
-                        <div 
-                          className="h-48 bg-cover bg-center"
-                          style={{ backgroundImage: `url(${article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage})` }}
-                        />
+                        <div className="relative h-48 overflow-hidden bg-muted/30">
+                          <img
+                            src={article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage}
+                            alt={`${article.title} - articolo blog`}
+                            className="w-full h-full object-cover"
+                            width={400}
+                            height={192}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between mb-3">
                             {article.category && (

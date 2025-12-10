@@ -391,11 +391,17 @@ const Index = () => {
           <div className="container-width">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="order-2 lg:order-1">
-                <img
-                  src={getWhatAreMicrogreensImage()}
-                  alt={getWhatAreMicrogreensAlt()}
-                  className="w-full h-80 object-cover rounded-lg shadow-elegant"
-                />
+                <div className="relative w-full h-80 overflow-hidden rounded-lg shadow-elegant bg-muted/30">
+                  <img
+                    src={getWhatAreMicrogreensImage()}
+                    alt={getWhatAreMicrogreensAlt()}
+                    className="w-full h-full object-cover"
+                    width={600}
+                    height={320}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
               </div>
               <div className="order-1 lg:order-2">
                 <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
@@ -513,6 +519,7 @@ const Index = () => {
                     uses={product.uses || []}
                     image={productImage}
                     onCardClick={() => navigate(`/microgreens/${product.slug}`)}
+                    priority={index < 3} // First 3 products load eagerly
                   />
                 );
               })}
@@ -548,11 +555,17 @@ const Index = () => {
               </div>
               <div className="lg:order-2">
                 <div className="bg-white/10 p-8 rounded-lg backdrop-blur-sm">
-                  <img
-                    src={getCustomMicrogreensImage()}
-                    alt={getCustomMicrogreensAlt()}
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
+                  <div className="relative w-full h-64 overflow-hidden rounded-lg bg-muted/30">
+                    <img
+                      src={getCustomMicrogreensImage()}
+                      alt={getCustomMicrogreensAlt()}
+                      className="w-full h-full object-cover"
+                      width={600}
+                      height={256}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -589,10 +602,16 @@ const Index = () => {
                 return (
                   <Link key={post.id} to={`/blog/${post.slug}`}>
                     <Card className="overflow-hidden hover-lift border-border/50 h-full">
-                      <div
-                        className="h-48 bg-cover bg-center relative"
-                        style={{ backgroundImage: `url(${imageUrl})` }}
-                      >
+                      <div className="relative h-48 overflow-hidden bg-muted/30">
+                        <img
+                          src={imageUrl}
+                          alt={`${post.title} - articolo blog`}
+                          className="w-full h-full object-cover"
+                          width={400}
+                          height={192}
+                          loading="lazy"
+                          decoding="async"
+                        />
                         <div className="absolute inset-0 bg-gradient-hero/20" />
                       </div>
                       <CardContent className="p-6 text-left">
