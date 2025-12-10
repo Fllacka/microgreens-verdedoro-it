@@ -98,7 +98,7 @@ const Navigation = () => {
       <div className="container-width">
         <div className="flex h-20 items-center justify-between">
           {/* Logo - Fixed dimensions to prevent CLS */}
-          <Link to="/" className="flex items-center hover-lift">
+          <Link to="/" className="flex items-center">
             <div className="h-14 min-w-[140px] flex items-center">
               {logoUrl === undefined ? (
                 // Loading state - skeleton with exact dimensions
