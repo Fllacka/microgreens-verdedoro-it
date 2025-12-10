@@ -93,9 +93,12 @@ const defaultFooterSettings: FooterSettings = {
     { platform: "instagram", url: "", visible: true },
     { platform: "facebook", url: "", visible: true },
     { platform: "youtube", url: "", visible: true },
-    { platform: "pinterest", url: "", visible: false },
+    { platform: "pinterest", url: "", visible: true },
+    { platform: "tiktok", url: "", visible: true },
+    { platform: "twitter", url: "", visible: false },
     { platform: "linkedin", url: "", visible: false },
-    { platform: "tiktok", url: "", visible: false },
+    { platform: "whatsapp", url: "", visible: false },
+    { platform: "threads", url: "", visible: false },
   ],
   quick_links: {
     title: "Link Utili",
@@ -122,12 +125,15 @@ const defaultFooterSettings: FooterSettings = {
 };
 
 const socialPlatformOptions = [
-  { value: "instagram", label: "Instagram" },
-  { value: "facebook", label: "Facebook" },
-  { value: "youtube", label: "YouTube" },
-  { value: "pinterest", label: "Pinterest" },
-  { value: "linkedin", label: "LinkedIn" },
-  { value: "tiktok", label: "TikTok" },
+  { value: "instagram", label: "Instagram", icon: "📷" },
+  { value: "facebook", label: "Facebook", icon: "📘" },
+  { value: "youtube", label: "YouTube", icon: "▶️" },
+  { value: "pinterest", label: "Pinterest", icon: "📌" },
+  { value: "tiktok", label: "TikTok", icon: "🎵" },
+  { value: "twitter", label: "X (Twitter)", icon: "𝕏" },
+  { value: "linkedin", label: "LinkedIn", icon: "💼" },
+  { value: "whatsapp", label: "WhatsApp", icon: "💬" },
+  { value: "threads", label: "Threads", icon: "🧵" },
 ];
 
 const Settings = () => {
