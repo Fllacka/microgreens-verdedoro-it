@@ -164,7 +164,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const copyrightText = footerSettings.copyright.replace("{year}", currentYear.toString());
 
-  const visibleSocialLinks = footerSettings.social_links.filter(link => link.visible && link.url);
+  const visibleSocialLinks = footerSettings.social_links.filter(link => link.visible && link.url && link.url.trim() !== '');
   const visibleQuickLinks = footerSettings.quick_links.items
     .filter(item => item.visible)
     .sort((a, b) => a.order - b.order);
