@@ -535,18 +535,24 @@ export type Database = {
       site_settings: {
         Row: {
           created_at: string
+          footer_settings: Json | null
+          header_settings: Json | null
           id: string
           logo_id: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          footer_settings?: Json | null
+          header_settings?: Json | null
           id?: string
           logo_id?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          footer_settings?: Json | null
+          header_settings?: Json | null
           id?: string
           logo_id?: string | null
           updated_at?: string
