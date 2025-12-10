@@ -73,7 +73,7 @@ export function CartDrawer() {
                   </Link>
                 </Button>
                 
-                <Button variant="outline" size="sm" className="w-full" onClick={closeCart} asChild>
+                <Button variant="oro" size="sm" className="w-full" onClick={closeCart} asChild>
                   <Link to="/microgreens">
                     Continua gli acquisti
                   </Link>
