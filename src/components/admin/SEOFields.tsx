@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SERPPreview } from "./SERPPreview";
+import { cn } from "@/lib/utils";
 
 interface SEOFieldsProps {
   values: {
@@ -18,15 +20,42 @@ interface SEOFieldsProps {
     structuredData: string;
   };
   onChange: (field: string, value: string) => void;
+  baseUrl?: string;
 }
 
-export const SEOFields = ({ values, onChange }: SEOFieldsProps) => {
+const CharacterCounter = ({ current, max, optimal }: { current: number; max: number; optimal?: number }) => {
+  const getColor = () => {
+    if (current === 0) return "text-muted-foreground";
+    if (current > max) return "text-destructive";
+    if (optimal && current >= optimal) return "text-primary";
+    if (current >= max * 0.8) return "text-yellow-600";
+    return "text-muted-foreground";
+  };
+
+  return (
+    <span className={cn("text-xs transition-colors", getColor())}>
+      {current}/{max} caratteri
+      {current > max && " (troppo lungo)"}
+    </span>
+  );
+};
+
+export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFieldsProps) => {
+  const previewUrl = values.slug ? `${baseUrl}/${values.slug}` : baseUrl;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>SEO Settings</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        {/* SERP Preview */}
+        <SERPPreview
+          title={values.metaTitle}
+          description={values.metaDescription}
+          url={previewUrl}
+        />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="slug">URL Slug *</Label>
@@ -59,10 +88,12 @@ export const SEOFields = ({ values, onChange }: SEOFieldsProps) => {
             id="metaTitle"
             value={values.metaTitle}
             onChange={(e) => onChange("metaTitle", e.target.value)}
-            placeholder="Page title (max 60 characters)"
-            maxLength={60}
+            placeholder="Titolo pagina (ideale: 50-60 caratteri)"
+            className={cn(
+              values.metaTitle.length > 60 && "border-destructive focus-visible:ring-destructive"
+            )}
           />
-          <span className="text-xs text-muted-foreground">{values.metaTitle.length}/60 characters</span>
+          <CharacterCounter current={values.metaTitle.length} max={60} optimal={50} />
         </div>
 
         <div className="space-y-2">
@@ -71,11 +102,13 @@ export const SEOFields = ({ values, onChange }: SEOFieldsProps) => {
             id="metaDescription"
             value={values.metaDescription}
             onChange={(e) => onChange("metaDescription", e.target.value)}
-            placeholder="Page description (max 160 characters)"
-            maxLength={160}
+            placeholder="Descrizione pagina (ideale: 150-160 caratteri)"
             rows={3}
+            className={cn(
+              values.metaDescription.length > 160 && "border-destructive focus-visible:ring-destructive"
+            )}
           />
-          <span className="text-xs text-muted-foreground">{values.metaDescription.length}/160 characters</span>
+          <CharacterCounter current={values.metaDescription.length} max={160} optimal={150} />
         </div>
 
         <div className="space-y-2">
