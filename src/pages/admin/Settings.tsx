@@ -174,7 +174,20 @@ const Settings = () => {
           setHeaderSettings(data.header_settings as unknown as HeaderSettings);
         }
         if (data.footer_settings) {
-          setFooterSettings(data.footer_settings as unknown as FooterSettings);
+          const dbFooterSettings = data.footer_settings as unknown as FooterSettings;
+          
+          // Merge social links - ensure all default platforms exist
+          const mergedSocialLinks = defaultFooterSettings.social_links.map(defaultLink => {
+            const existingLink = dbFooterSettings.social_links?.find(
+              link => link.platform === defaultLink.platform
+            );
+            return existingLink || defaultLink;
+          });
+          
+          setFooterSettings({
+            ...dbFooterSettings,
+            social_links: mergedSocialLinks
+          });
         }
       }
     } catch (error) {
