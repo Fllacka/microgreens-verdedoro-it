@@ -10,6 +10,7 @@ import chefImage from "@/assets/chef-microgreens.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
+import { generateBreadcrumbSchema } from "@/lib/seo";
 
 interface Product {
   id: string;
@@ -150,12 +151,16 @@ const Microgreens = () => {
         />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        {seoSection?.content?.og_title && (
-          <meta property="og:title" content={seoSection.content.og_title} />
-        )}
-        {seoSection?.content?.og_description && (
-          <meta property="og:description" content={seoSection.content.og_description} />
-        )}
+        <meta property="og:title" content={seoSection?.content?.og_title || "I Nostri Microgreens - Verde D'Oro"} />
+        <meta property="og:description" content={seoSection?.content?.og_description || "Scopri la nostra selezione di microgreens biologici"} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={currentUrl} />
+        <script type="application/ld+json">
+          {JSON.stringify(generateBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Microgreens", url: "/microgreens" },
+          ]))}
+        </script>
       </Helmet>
 
       {/* Hero Section */}

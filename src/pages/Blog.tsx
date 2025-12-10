@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
+import { generateBreadcrumbSchema } from "@/lib/seo";
 
 interface BlogPost {
   id: string;
@@ -173,12 +174,16 @@ const Blog = () => {
         />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        {seoSection?.content?.og_title && (
-          <meta property="og:title" content={seoSection.content.og_title} />
-        )}
-        {seoSection?.content?.og_description && (
-          <meta property="og:description" content={seoSection.content.og_description} />
-        )}
+        <meta property="og:title" content={seoSection?.content?.og_title || "Blog - Verde D'Oro"} />
+        <meta property="og:description" content={seoSection?.content?.og_description || "Scopri il mondo dei microgreens"} />
+        <meta property="og:type" content="blog" />
+        <meta property="og:url" content={currentUrl} />
+        <script type="application/ld+json">
+          {JSON.stringify(generateBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Blog", url: "/blog" },
+          ]))}
+        </script>
       </Helmet>
 
       <div className="min-h-screen bg-background">
