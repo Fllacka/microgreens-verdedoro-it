@@ -12,6 +12,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { 
+  generateOrganizationSchema, 
+  generateWebSiteSchema, 
+  generateLocalBusinessSchema,
+  combineSchemas 
+} from "@/lib/seo";
 
 interface BlogPost {
   id: string;
@@ -340,7 +346,17 @@ const Index = () => {
         <meta property="og:title" content={seoContent.og_title || seoContent.meta_title} />
         <meta property="og:description" content={seoContent.og_description || seoContent.meta_description} />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://verdedoro.it/" />
+        <meta property="og:locale" content="it_IT" />
         {getOgImageUrl() && <meta property="og:image" content={getOgImageUrl()} />}
+        {/* Combined structured data for homepage */}
+        <script type="application/ld+json">
+          {JSON.stringify(combineSchemas(
+            generateOrganizationSchema(),
+            generateWebSiteSchema(),
+            generateLocalBusinessSchema()
+          ))}
+        </script>
         {seoContent.structured_data && (
           <script type="application/ld+json">{seoContent.structured_data}</script>
         )}

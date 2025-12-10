@@ -19,6 +19,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { generateProductSchema, generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
 
 interface Product {
   id: string;
@@ -138,36 +139,35 @@ const ProductDetail = () => {
     });
   };
 
+  // Generate structured data
+  const productSchema = generateProductSchema({
+    name: product.name,
+    description: product.description || product.content || "",
+    slug: product.slug,
+    image: product.media?.file_path,
+    rating: product.rating,
+    category: product.category,
+  });
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Microgreens", url: "/microgreens" },
+    { name: product.name, url: `/microgreens/${product.slug}` },
+  ]);
+
   return (
     <Layout>
       <Helmet>
         <title>{product.meta_title || `${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="description" content={product.meta_description || product.description} />
         <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`} />
+        <meta property="og:title" content={product.meta_title || product.name} />
+        <meta property="og:description" content={product.meta_description || product.description} />
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={`${window.location.origin}/microgreens/${product.slug}`} />
+        {product.media?.file_path && <meta property="og:image" content={product.media.file_path} />}
         <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            name: product.name,
-            description: product.content,
-            brand: {
-              "@type": "Brand",
-              name: "Verde D'Oro",
-            },
-            aggregateRating: product.rating
-              ? {
-                  "@type": "AggregateRating",
-                  ratingValue: product.rating,
-                  bestRating: "5",
-                  worstRating: "1",
-                }
-              : undefined,
-            offers: {
-              "@type": "Offer",
-              availability: "https://schema.org/InStock",
-              priceCurrency: "EUR",
-            },
-          })}
+          {JSON.stringify(combineSchemas(productSchema, breadcrumbSchema))}
         </script>
       </Helmet>
 

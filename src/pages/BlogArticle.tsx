@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar, Clock, Share2, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { generateArticleSchema, generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
 
 interface ContentBlock {
   id: string;
@@ -162,6 +163,32 @@ const BlogArticle = () => {
 
   const readTime = calculateReadTime(post.content_blocks);
 
+  // Calculate word count for structured data
+  const wordCount = post.content_blocks?.reduce((total, block) => {
+    if (block.content) {
+      const text = block.content.replace(/<[^>]*>/g, "");
+      return total + text.split(/\s+/).length;
+    }
+    return total;
+  }, 0) || 0;
+
+  // Generate structured data
+  const articleSchema = generateArticleSchema({
+    title: post.title,
+    description: post.excerpt || post.meta_description || "",
+    slug: post.slug,
+    publishedAt: post.published_at,
+    image: coverImageUrl || undefined,
+    category: post.category,
+    wordCount,
+  });
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Blog", url: "/blog" },
+    { name: post.title, url: `/blog/${post.slug}` },
+  ]);
+
   return (
     <Layout>
       <Helmet>
@@ -169,7 +196,15 @@ const BlogArticle = () => {
         <meta name="description" content={post.meta_description || post.excerpt} />
         <meta property="og:title" content={post.og_title || post.title} />
         <meta property="og:description" content={post.og_description || post.excerpt} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`${window.location.origin}/blog/${post.slug}`} />
+        <meta property="article:published_time" content={post.published_at} />
+        {post.category && <meta property="article:section" content={post.category} />}
+        {coverImageUrl && <meta property="og:image" content={coverImageUrl} />}
         <link rel="canonical" href={`${window.location.origin}${post.canonical_url || `/blog/${post.slug}`}`} />
+        <script type="application/ld+json">
+          {JSON.stringify(combineSchemas(articleSchema, breadcrumbSchema))}
+        </script>
       </Helmet>
 
       <article className="min-h-screen">
