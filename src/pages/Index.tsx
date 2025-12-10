@@ -385,9 +385,10 @@ const Index = () => {
               <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">
                 {heroContent.title_part1} <span className="text-oro-primary">{heroContent.title_highlight}</span>
               </h1>
-              <p className="font-body text-lg md:text-xl mb-8 text-white/90 leading-relaxed">
-                {heroContent.subtitle}
-              </p>
+              <div 
+                className="font-body text-lg md:text-xl mb-8 text-white/90 leading-relaxed prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: heroContent.subtitle }}
+              />
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button variant="oro" size="lg" className="text-lg px-8 py-4" asChild>
                   <Link to={heroContent.primary_button_link}>{heroContent.primary_button_text}</Link>
@@ -423,9 +424,10 @@ const Index = () => {
                 <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
                   {whatAreMicrogreensContent.heading}
                 </h2>
-                <p className="font-body text-muted-foreground mb-6 leading-relaxed">
-                  {whatAreMicrogreensContent.description}
-                </p>
+                <div 
+                  className="font-body text-muted-foreground mb-6 leading-relaxed prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: whatAreMicrogreensContent.description }}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => (
@@ -455,9 +457,10 @@ const Index = () => {
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
                 {howItWorksContent.heading}
               </h2>
-              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
-                {howItWorksContent.subtitle}
-              </p>
+              <div 
+                className="font-body text-lg text-muted-foreground max-w-2xl mx-auto prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: howItWorksContent.subtitle }}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -493,9 +496,10 @@ const Index = () => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
               {ordersDeliveryContent.heading}
             </h2>
-            <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-              {ordersDeliveryContent.description}
-            </p>
+            <div 
+              className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-8 prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+              dangerouslySetInnerHTML={{ __html: ordersDeliveryContent.description }}
+            />
             <Button variant="verde" size="lg" asChild>
               <Link to={ordersDeliveryContent.button_link}>{ordersDeliveryContent.button_text}</Link>
             </Button>
@@ -511,9 +515,10 @@ const Index = () => {
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
                 {featuredProductsContent.heading}
               </h2>
-              <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto">
-                {featuredProductsContent.subtitle}
-              </p>
+              <div 
+                className="font-body text-lg text-muted-foreground max-w-3xl mx-auto prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: featuredProductsContent.subtitle }}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -559,12 +564,14 @@ const Index = () => {
                 <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
                   {customMicrogreensContent.heading}
                 </h2>
-                <p className="font-body mb-6 leading-relaxed text-white">
-                  {customMicrogreensContent.description1}
-                </p>
-                <p className="font-body mb-8 text-base text-slate-50">
-                  {customMicrogreensContent.description2}
-                </p>
+                <div 
+                  className="font-body mb-6 leading-relaxed text-white prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: customMicrogreensContent.description1 }}
+                />
+                <div 
+                  className="font-body mb-8 text-base text-slate-50 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: customMicrogreensContent.description2 }}
+                />
                 <Button variant="oro" size="lg" asChild>
                   <Link to={customMicrogreensContent.button_link}>{customMicrogreensContent.button_text}</Link>
                 </Button>
@@ -596,9 +603,10 @@ const Index = () => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
               {blogContent.heading}
             </h2>
-            <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
-              {blogContent.subtitle}
-            </p>
+            <div 
+              className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12 prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+              dangerouslySetInnerHTML={{ __html: blogContent.subtitle }}
+            />
 
             <div
               className={`grid gap-8 mb-8 ${
