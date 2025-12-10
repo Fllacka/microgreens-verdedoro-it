@@ -192,10 +192,11 @@ const Microgreens = () => {
             <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
               {heroSection?.content?.title || "I Nostri Microgreens"}
             </h1>
-            <p className="font-body text-xl text-muted-foreground max-w-4xl mx-auto mb-8">
-              {heroSection?.content?.subtitle ||
-                "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali."}
-            </p>
+            <div 
+              className="font-body text-xl text-muted-foreground max-w-4xl mx-auto mb-8 prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+              dangerouslySetInnerHTML={{ __html: heroSection?.content?.subtitle ||
+                "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali." }}
+            />
 
             {/* Category filters in hero */}
             {categories.length > 0 && (
@@ -272,10 +273,11 @@ const Microgreens = () => {
                       <h3 className="font-semibold text-primary mb-2">
                         {infoSection?.content?.feature1_title || "Coltivazione Biologica"}
                       </h3>
-                      <p className="text-muted-foreground">
-                        {infoSection?.content?.feature1_description ||
-                          "Utilizziamo esclusivamente semi biologici certificati e metodi di coltivazione naturali, senza pesticidi o fertilizzanti chimici."}
-                      </p>
+                      <div 
+                        className="text-muted-foreground prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline"
+                        dangerouslySetInnerHTML={{ __html: infoSection?.content?.feature1_description ||
+                          "Utilizziamo esclusivamente semi biologici certificati e metodi di coltivazione naturali, senza pesticidi o fertilizzanti chimici." }}
+                      />
                     </div>
                   </div>
 
@@ -287,10 +289,11 @@ const Microgreens = () => {
                       <h3 className="font-semibold text-primary mb-2">
                         {infoSection?.content?.feature2_title || "Massima Freschezza"}
                       </h3>
-                      <p className="text-muted-foreground">
-                        {infoSection?.content?.feature2_description ||
-                          "I nostri microgreens vengono raccolti al momento ottimale e consegnati entro 24 ore per garantire sapore e proprietà nutrizionali al massimo."}
-                      </p>
+                      <div 
+                        className="text-muted-foreground prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline"
+                        dangerouslySetInnerHTML={{ __html: infoSection?.content?.feature2_description ||
+                          "I nostri microgreens vengono raccolti al momento ottimale e consegnati entro 24 ore per garantire sapore e proprietà nutrizionali al massimo." }}
+                      />
                     </div>
                   </div>
 
@@ -302,10 +305,11 @@ const Microgreens = () => {
                       <h3 className="font-semibold text-primary mb-2">
                         {infoSection?.content?.feature3_title || "Tradizione Italiana"}
                       </h3>
-                      <p className="text-muted-foreground">
-                        {infoSection?.content?.feature3_description ||
-                          "Ogni varietà è selezionata per esaltare i sapori della cucina italiana, dalle erbe aromatiche ai microgreens più innovativi."}
-                      </p>
+                      <div 
+                        className="text-muted-foreground prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline"
+                        dangerouslySetInnerHTML={{ __html: infoSection?.content?.feature3_description ||
+                          "Ogni varietà è selezionata per esaltare i sapori della cucina italiana, dalle erbe aromatiche ai microgreens più innovativi." }}
+                      />
                     </div>
                   </div>
                 </div>

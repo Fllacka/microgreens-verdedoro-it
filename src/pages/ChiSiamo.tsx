@@ -126,9 +126,10 @@ const ChiSiamo = () => {
                 <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
                   {heroContent.title || "La Nostra Storia"}
                 </h1>
-                <p className="font-body text-xl text-muted-foreground mb-8 leading-relaxed">
-                  {heroContent.description || "Nel cuore dell'Emilia-Romagna, dove la tradizione agricola si sposa con l'innovazione, nasce Verde D'Oro Microgreens. La nostra storia inizia dalla passione per l'agricoltura sostenibile e dalla volontà di portare sulle tavole italiane il meglio della natura."}
-                </p>
+                <div 
+                  className="font-body text-xl text-muted-foreground mb-8 leading-relaxed prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: heroContent.description || "Nel cuore dell'Emilia-Romagna, dove la tradizione agricola si sposa con l'innovazione, nasce Verde D'Oro Microgreens. La nostra storia inizia dalla passione per l'agricoltura sostenibile e dalla volontà di portare sulle tavole italiane il meglio della natura." }}
+                />
                 <Button variant="oro" size="lg" asChild>
                   <Link to={heroContent.button_link || "/microgreens"}>
                     {heroContent.button_text || "Scopri i Nostri Prodotti"}
@@ -157,9 +158,10 @@ const ChiSiamo = () => {
               <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
                 {missionContent.title || "La Nostra Missione"}
               </h2>
-              <p className="font-body text-xl text-muted-foreground leading-relaxed">
-                {missionContent.description || "Vogliamo rivoluzionare il modo di intendere l'alimentazione sana e sostenibile, offrendo microgreens di altissima qualità che racchiudono tutto il sapore e i nutrienti della tradizione agricola italiana. Ogni prodotto Verde D'Oro è il risultato di ricerca, passione e rispetto per l'ambiente."}
-              </p>
+              <div 
+                className="font-body text-xl text-muted-foreground leading-relaxed prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                dangerouslySetInnerHTML={{ __html: missionContent.description || "Vogliamo rivoluzionare il modo di intendere l'alimentazione sana e sostenibile, offrendo microgreens di altissima qualità che racchiudono tutto il sapore e i nutrienti della tradizione agricola italiana. Ogni prodotto Verde D'Oro è il risultato di ricerca, passione e rispetto per l'ambiente." }}
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -198,7 +200,11 @@ const ChiSiamo = () => {
                 
                 <div className="space-y-8 font-body text-muted-foreground leading-relaxed">
                   {paragraphs.map((paragraph: string, index: number) => (
-                    <p key={index} className="text-lg">{paragraph}</p>
+                    <div 
+                      key={index} 
+                      className="text-lg prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                      dangerouslySetInnerHTML={{ __html: paragraph }}
+                    />
                   ))}
                 </div>
               </div>
@@ -240,9 +246,10 @@ const ChiSiamo = () => {
             <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
               {ctaContent.title || "Unisciti alla Rivoluzione Verde"}
             </h2>
-            <p className="font-body text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto">
-              {ctaContent.description || "Scopri il sapore autentico dei nostri microgreens e diventa parte della nostra storia. Insieme possiamo costruire un futuro più sostenibile e gustoso."}
-            </p>
+            <div 
+              className="font-body text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
+              dangerouslySetInnerHTML={{ __html: ctaContent.description || "Scopri il sapore autentico dei nostri microgreens e diventa parte della nostra storia. Insieme possiamo costruire un futuro più sostenibile e gustoso." }}
+            />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="oro" size="lg" asChild>
                 <Link to={ctaContent.primary_button_link || "/microgreens"}>

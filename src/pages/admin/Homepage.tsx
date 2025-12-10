@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 interface HomepageSection {
   id: string;
   content: Record<string, any>;
@@ -292,10 +293,9 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Sottotitolo</Label>
-                    <Textarea
-                      value={sections.hero.content.subtitle || ""}
-                      onChange={(e) => updateSectionContent("hero", "subtitle", e.target.value)}
-                      rows={3}
+                    <RichTextEditor
+                      content={sections.hero.content.subtitle || ""}
+                      onChange={(value) => updateSectionContent("hero", "subtitle", value)}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -377,10 +377,9 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Descrizione</Label>
-                    <Textarea
-                      value={sections.what_are_microgreens.content.description || ""}
-                      onChange={(e) => updateSectionContent("what_are_microgreens", "description", e.target.value)}
-                      rows={4}
+                    <RichTextEditor
+                      content={sections.what_are_microgreens.content.description || ""}
+                      onChange={(value) => updateSectionContent("what_are_microgreens", "description", value)}
                     />
                   </div>
                   <div>
@@ -471,10 +470,9 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Sottotitolo</Label>
-                    <Textarea
-                      value={sections.how_it_works.content.subtitle || ""}
-                      onChange={(e) => updateSectionContent("how_it_works", "subtitle", e.target.value)}
-                      rows={2}
+                    <RichTextEditor
+                      content={sections.how_it_works.content.subtitle || ""}
+                      onChange={(value) => updateSectionContent("how_it_works", "subtitle", value)}
                     />
                   </div>
 
@@ -566,10 +564,9 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Descrizione</Label>
-                    <Textarea
-                      value={sections.orders_delivery.content.description || ""}
-                      onChange={(e) => updateSectionContent("orders_delivery", "description", e.target.value)}
-                      rows={3}
+                    <RichTextEditor
+                      content={sections.orders_delivery.content.description || ""}
+                      onChange={(value) => updateSectionContent("orders_delivery", "description", value)}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -625,10 +622,9 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Sottotitolo</Label>
-                    <Textarea
-                      value={sections.featured_products.content.subtitle || ""}
-                      onChange={(e) => updateSectionContent("featured_products", "subtitle", e.target.value)}
-                      rows={2}
+                    <RichTextEditor
+                      content={sections.featured_products.content.subtitle || ""}
+                      onChange={(value) => updateSectionContent("featured_products", "subtitle", value)}
                     />
                   </div>
 
@@ -706,18 +702,16 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Descrizione 1</Label>
-                    <Textarea
-                      value={sections.custom_microgreens.content.description1 || ""}
-                      onChange={(e) => updateSectionContent("custom_microgreens", "description1", e.target.value)}
-                      rows={3}
+                    <RichTextEditor
+                      content={sections.custom_microgreens.content.description1 || ""}
+                      onChange={(value) => updateSectionContent("custom_microgreens", "description1", value)}
                     />
                   </div>
                   <div>
                     <Label>Descrizione 2</Label>
-                    <Textarea
-                      value={sections.custom_microgreens.content.description2 || ""}
-                      onChange={(e) => updateSectionContent("custom_microgreens", "description2", e.target.value)}
-                      rows={3}
+                    <RichTextEditor
+                      content={sections.custom_microgreens.content.description2 || ""}
+                      onChange={(value) => updateSectionContent("custom_microgreens", "description2", value)}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -783,10 +777,9 @@ const Homepage = () => {
                   </div>
                   <div>
                     <Label>Sottotitolo</Label>
-                    <Textarea
-                      value={sections.blog.content.subtitle || ""}
-                      onChange={(e) => updateSectionContent("blog", "subtitle", e.target.value)}
-                      rows={2}
+                    <RichTextEditor
+                      content={sections.blog.content.subtitle || ""}
+                      onChange={(value) => updateSectionContent("blog", "subtitle", value)}
                     />
                   </div>
                   <div>
