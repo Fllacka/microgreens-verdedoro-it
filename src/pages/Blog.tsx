@@ -184,14 +184,20 @@ const Blog = () => {
       <div className="min-h-screen bg-background">
         {/* Hero Section */}
         {heroSection?.is_visible !== false && (
-          <section 
-            className="section-padding relative"
-            style={heroImageUrl ? { 
-              backgroundImage: `url(${heroImageUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
-            } : undefined}
-          >
+          <section className="section-padding relative overflow-hidden">
+            {/* Hero Background Image - Optimized for LCP */}
+            {heroImageUrl && (
+              <img
+                src={heroImageUrl}
+                alt={heroSection?.content?.background_image_alt || "Blog hero background"}
+                className="absolute inset-0 w-full h-full object-cover"
+                fetchPriority="high"
+                loading="eager"
+                width={1920}
+                height={600}
+                decoding="async"
+              />
+            )}
             {/* Overlay for background image */}
             {heroImageUrl && (
               <div className="absolute inset-0 bg-gradient-hero" />

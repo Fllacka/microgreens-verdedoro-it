@@ -11,7 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  // undefined = loading, null = no logo configured, string = logo URL
+  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(undefined);
   const location = useLocation();
   const { itemCount, openCart, lastAddedTimestamp } = useCart();
 
@@ -34,9 +35,12 @@ const Navigation = () => {
 
         if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
           setLogoUrl(data.media.file_path as string);
+        } else {
+          setLogoUrl(null); // No logo configured
         }
       } catch (error) {
         console.error("Error fetching logo:", error);
+        setLogoUrl(null); // Fallback to text logo on error
       }
     };
 
@@ -93,17 +97,24 @@ const Navigation = () => {
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container-width">
         <div className="flex h-20 items-center justify-between">
-          {/* Logo */}
+          {/* Logo - Fixed dimensions to prevent CLS */}
           <Link to="/" className="flex items-center hover-lift">
-            {logoUrl ? (
-              <img 
-                src={logoUrl} 
-                alt="Verde D'Oro - Microgreens" 
-                className="h-14 w-auto"
-              />
-            ) : (
-              <FallbackLogo />
-            )}
+            <div className="h-14 min-w-[140px] flex items-center">
+              {logoUrl === undefined ? (
+                // Loading state - skeleton with exact dimensions
+                <div className="h-14 w-36 bg-muted/30 rounded animate-pulse" />
+              ) : logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="Verde D'Oro - Microgreens" 
+                  className="h-14 w-auto"
+                  width={144}
+                  height={56}
+                />
+              ) : (
+                <FallbackLogo />
+              )}
+            </div>
           </Link>
 
           {/* Right side navigation */}
