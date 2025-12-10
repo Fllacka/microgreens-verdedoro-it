@@ -229,7 +229,7 @@ const Microgreens = () => {
             <p className="text-center text-muted-foreground">Nessun prodotto trovato in questa categoria.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProducts.map((product) => (
+              {filteredProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   name={product.name}
@@ -241,6 +241,7 @@ const Microgreens = () => {
                   rating={product.rating}
                   popular={product.popular}
                   onCardClick={() => navigate(`/microgreens/${product.slug}`)}
+                  priority={index < 3} // First 3 products load eagerly for mobile
                 />
               ))}
             </div>

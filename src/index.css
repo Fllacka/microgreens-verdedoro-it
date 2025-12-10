@@ -183,5 +183,35 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Font display optimization */
+    font-display: swap;
+    /* Prevent font-size adjustments on iOS */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Mobile performance optimizations */
+  img {
+    /* Prevent image dragging on mobile */
+    -webkit-user-drag: none;
+    user-select: none;
+    /* Enable GPU acceleration for images */
+    will-change: auto;
+  }
+
+  /* Optimize touch interactions */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
