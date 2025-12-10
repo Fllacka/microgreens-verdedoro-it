@@ -347,14 +347,18 @@ const Index = () => {
       </Helmet>
       {/* Hero Section */}
       {(sections.hero?.is_visible !== false) && (
-        <section
-          className="relative min-h-screen flex items-center justify-center overflow-hidden"
-          style={{
-            backgroundImage: `url(${getHeroImage()})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Hero Background Image - Optimized for LCP */}
+          <img
+            src={getHeroImage()}
+            alt={getHeroAlt()}
+            className="absolute inset-0 w-full h-full object-cover"
+            fetchPriority="high"
+            loading="eager"
+            width={1920}
+            height={1080}
+            decoding="async"
+          />
           <div className="absolute inset-0 bg-gradient-hero" />
 
           <div className="relative z-10 container-width text-left text-white">
