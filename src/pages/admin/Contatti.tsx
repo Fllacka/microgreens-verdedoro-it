@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { Search, MessageSquare, Phone, Mail, MapPin, Truck } from "lucide-react";
 
 interface SectionContent {
@@ -31,6 +33,11 @@ const AdminContatti = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges: hasChanges,
+  });
 
   useEffect(() => {
     fetchSections();
@@ -664,6 +671,12 @@ const AdminContatti = () => {
         onSave={handleSave}
         onPublish={async () => { await handleSave(); }}
         previewUrl="/preview/contatti"
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );

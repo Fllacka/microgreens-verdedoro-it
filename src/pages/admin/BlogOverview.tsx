@@ -11,6 +11,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Tag, Star, Clock, Mail, Plus, X, GripVertical, Image } from "lucide-react";
@@ -28,9 +30,17 @@ interface Section {
 
 const AdminBlogOverview = () => {
   const [sections, setSections] = useState<Record<string, Section>>({});
+  const [originalSections, setOriginalSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+
+  const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges,
+  });
 
   const [seoData, setSeoData] = useState({
     slug: "blog",
@@ -63,6 +73,7 @@ const AdminBlogOverview = () => {
         sectionsMap[section.id] = section as Section;
       });
       setSections(sectionsMap);
+      setOriginalSections(sectionsMap);
 
       // Load SEO data
       const seoSection = sectionsMap["seo"];
@@ -484,7 +495,14 @@ const AdminBlogOverview = () => {
           onPublish={handleSave}
           isSaving={saving}
           isPublished={true}
+          hasChanges={hasUnsavedChanges}
           previewUrl="/preview/blog-overview"
+        />
+
+        <UnsavedChangesDialog
+          isOpen={isBlocked}
+          onConfirm={() => proceed?.()}
+          onCancel={() => reset?.()}
         />
       </div>
     </AdminLayout>
