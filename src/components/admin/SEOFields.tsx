@@ -46,7 +46,7 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
   return (
     <Card>
       <CardHeader>
-        <CardTitle>SEO Settings</CardTitle>
+        <CardTitle>Impostazioni SEO</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* SERP Preview */}
@@ -58,18 +58,18 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="slug">URL Slug *</Label>
+            <Label htmlFor="slug">Slug URL *</Label>
             <Input
               id="slug"
               value={values.slug}
               onChange={(e) => onChange("slug", e.target.value)}
-              placeholder="url-slug"
+              placeholder="url-della-pagina"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="canonicalUrl">Canonical Path</Label>
+            <Label htmlFor="canonicalUrl">Percorso Canonico</Label>
             <Input
               id="canonicalUrl"
               value={values.canonicalUrl}
@@ -83,7 +83,7 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="metaTitle">Meta Title</Label>
+          <Label htmlFor="metaTitle">Titolo Meta</Label>
           <Input
             id="metaTitle"
             value={values.metaTitle}
@@ -97,7 +97,7 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="metaDescription">Meta Description</Label>
+          <Label htmlFor="metaDescription">Descrizione Meta</Label>
           <Textarea
             id="metaDescription"
             value={values.metaDescription}
@@ -112,62 +112,62 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="ogTitle">Open Graph Title</Label>
+          <Label htmlFor="ogTitle">Titolo Open Graph</Label>
           <Input
             id="ogTitle"
             value={values.ogTitle}
             onChange={(e) => onChange("ogTitle", e.target.value)}
-            placeholder="OG title for social media"
+            placeholder="Titolo per la condivisione sui social"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="ogDescription">Open Graph Description</Label>
+          <Label htmlFor="ogDescription">Descrizione Open Graph</Label>
           <Textarea
             id="ogDescription"
             value={values.ogDescription}
             onChange={(e) => onChange("ogDescription", e.target.value)}
-            placeholder="OG description for social media"
+            placeholder="Descrizione per la condivisione sui social"
             rows={3}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="robots">Robots</Label>
+            <Label htmlFor="robots">Indicizzazione</Label>
             <Select value={values.robots} onValueChange={(value) => onChange("robots", value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="index, follow">Index, Follow</SelectItem>
-                <SelectItem value="noindex, follow">NoIndex, Follow</SelectItem>
-                <SelectItem value="index, nofollow">Index, NoFollow</SelectItem>
-                <SelectItem value="noindex, nofollow">NoIndex, NoFollow</SelectItem>
+                <SelectItem value="index, follow">Indicizza e Segui</SelectItem>
+                <SelectItem value="noindex, follow">Non Indicizzare, Segui</SelectItem>
+                <SelectItem value="index, nofollow">Indicizza, Non Seguire</SelectItem>
+                <SelectItem value="noindex, nofollow">Non Indicizzare, Non Seguire</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="changeFrequency">Change Frequency</Label>
+            <Label htmlFor="changeFrequency">Frequenza Aggiornamento</Label>
             <Select value={values.changeFrequency} onValueChange={(value) => onChange("changeFrequency", value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="always">Always</SelectItem>
-                <SelectItem value="hourly">Hourly</SelectItem>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
-                <SelectItem value="never">Never</SelectItem>
+                <SelectItem value="always">Sempre</SelectItem>
+                <SelectItem value="hourly">Ogni Ora</SelectItem>
+                <SelectItem value="daily">Giornaliero</SelectItem>
+                <SelectItem value="weekly">Settimanale</SelectItem>
+                <SelectItem value="monthly">Mensile</SelectItem>
+                <SelectItem value="yearly">Annuale</SelectItem>
+                <SelectItem value="never">Mai</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="priority">Priority (0.0-1.0)</Label>
+            <Label htmlFor="priority">Priorità (0.0-1.0)</Label>
             <Input
               id="priority"
               type="number"
@@ -181,7 +181,7 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="structuredData">JSON-LD Structured Data (optional)</Label>
+          <Label htmlFor="structuredData">Dati Strutturati JSON-LD (opzionale)</Label>
           <Textarea
             id="structuredData"
             value={values.structuredData}

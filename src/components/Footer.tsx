@@ -207,9 +207,25 @@ const Footer = () => {
               <div className="flex space-x-4">
                 {visibleSocialLinks.map((link) => {
                   const IconComponent = socialIcons[link.platform] || MessageCircle;
+                  const platformNames: Record<string, string> = {
+                    instagram: "Instagram",
+                    facebook: "Facebook",
+                    youtube: "YouTube",
+                    pinterest: "Pinterest",
+                    tiktok: "TikTok",
+                    twitter: "X (Twitter)",
+                    linkedin: "LinkedIn",
+                    whatsapp: "WhatsApp",
+                    threads: "Threads",
+                  };
                   return (
                     <Button key={link.platform} variant="ghost" size="icon" asChild>
-                      <a href={link.url} aria-label={link.platform} target="_blank" rel="noopener noreferrer">
+                      <a 
+                        href={link.url} 
+                        aria-label={`Visita il nostro profilo ${platformNames[link.platform] || link.platform}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
                         <IconComponent className="h-5 w-5" />
                       </a>
                     </Button>

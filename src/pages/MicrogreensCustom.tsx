@@ -8,6 +8,7 @@ import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import heroImageFallback from "@/assets/microgreens-varieties.jpg";
 import chefImageFallback from "@/assets/chef-custom-microgreens.jpg";
+import { generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
 
 interface Category {
   id: string;
@@ -73,7 +74,7 @@ const MicrogreensCustom = () => {
   const introImage = introSection?.content.image_url || chefImageFallback;
 
   // Generate structured data
-  const structuredData = seoSection?.content.structured_data ? 
+  const serviceSchema = seoSection?.content.structured_data ? 
     JSON.parse(seoSection.content.structured_data) : {
       "@context": "https://schema.org",
       "@type": "Service",
@@ -84,6 +85,13 @@ const MicrogreensCustom = () => {
       },
       "description": seoSection?.content.meta_description || "Coltivazione su misura di microgreens per chef e ristoranti."
     };
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Microgreens su Misura", url: "/microgreens-su-misura" },
+  ]);
+
+  const structuredData = combineSchemas(serviceSchema, breadcrumbSchema);
 
   return (
     <Layout>
@@ -101,12 +109,16 @@ const MicrogreensCustom = () => {
 
       {/* Hero Section */}
       {heroSection?.is_visible && (
-        <section className="relative h-96 md:h-[500px] flex items-center justify-center">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${heroImage})` }}
-            role="img"
-            aria-label={heroSection.content.image_alt || 'Microgreens su Misura'}
+        <section className="relative h-96 md:h-[500px] flex items-center justify-center overflow-hidden">
+          <img
+            src={heroImage}
+            alt={heroSection.content.image_alt || 'Microgreens su Misura'}
+            className="absolute inset-0 w-full h-full object-cover"
+            fetchPriority="high"
+            loading="eager"
+            width={1920}
+            height={500}
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-hero-transparent" />
           <div className="relative z-10 text-center text-white">
@@ -122,15 +134,17 @@ const MicrogreensCustom = () => {
         <section className="section-padding bg-background">
           <div className="container-width">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="relative">
-                <div 
-                  className="h-96 rounded-2xl bg-cover bg-center shadow-soft"
-                  style={{ backgroundImage: `url(${introImage})` }}
-                  role="img"
-                  aria-label={introSection.content.image_alt || 'Chef con microgreens'}
-                >
-                  <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
-                </div>
+              <div className="relative h-96 rounded-2xl overflow-hidden shadow-soft">
+                <img
+                  src={introImage}
+                  alt={introSection.content.image_alt || 'Chef con microgreens'}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  width={600}
+                  height={384}
+                />
+                <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
               </div>
               <div>
                 <div 

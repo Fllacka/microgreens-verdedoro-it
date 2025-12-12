@@ -50,6 +50,9 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
                   alt={block.alt || ""}
                   className="w-full rounded-lg shadow-soft"
                   loading="lazy"
+                  decoding="async"
+                  width={800}
+                  height={450}
                 />
                 {block.alt && (
                   <p className="text-sm text-muted-foreground text-center mt-2">{block.alt}</p>
