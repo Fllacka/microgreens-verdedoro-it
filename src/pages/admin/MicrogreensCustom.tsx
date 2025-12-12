@@ -16,6 +16,8 @@ import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 interface Category {
   id: string;
@@ -43,6 +45,11 @@ const AdminMicrogreensCustom = () => {
   const [saving, setSaving] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges: hasChanges,
+  });
 
   useEffect(() => {
     if (!authLoading && (!user || (userRole !== 'admin' && userRole !== 'editor'))) {
@@ -584,6 +591,12 @@ const AdminMicrogreensCustom = () => {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl="/preview/microgreens-su-misura"
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );

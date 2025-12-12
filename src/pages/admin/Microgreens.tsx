@@ -15,6 +15,8 @@ import { MediaSelector } from "@/components/admin/MediaSelector";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 interface SectionContent {
   [key: string]: any;
@@ -29,9 +31,17 @@ interface Section {
 
 const AdminMicrogreens = () => {
   const [sections, setSections] = useState<Record<string, Section>>({});
+  const [originalSections, setOriginalSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
+
+  const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges,
+  });
 
   useEffect(() => {
     fetchSections();
@@ -51,6 +61,7 @@ const AdminMicrogreens = () => {
         sectionsMap[section.id] = section as Section;
       });
       setSections(sectionsMap);
+      setOriginalSections(sectionsMap);
     } catch (error) {
       console.error("Error fetching sections:", error);
       toast.error("Errore nel caricamento delle sezioni");
@@ -451,9 +462,16 @@ const AdminMicrogreens = () => {
       <PublishActionBar
         isPublished={isPublished}
         isSaving={saving}
+        hasChanges={hasUnsavedChanges}
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl="/preview/microgreens"
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );

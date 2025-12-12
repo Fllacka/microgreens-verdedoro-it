@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 
 interface ChiSiamoSection {
   id: string;
@@ -40,6 +42,11 @@ const ChiSiamoAdmin = () => {
   const { toast } = useToast();
 
   const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges,
+  });
 
   useEffect(() => {
     fetchSections();
@@ -527,6 +534,12 @@ const ChiSiamoAdmin = () => {
         onSave={handleSave}
         onPublish={async () => {}}
         previewUrl="/preview/chi-siamo"
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );
