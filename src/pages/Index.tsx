@@ -375,7 +375,7 @@ const Index = () => {
             height={1080}
             decoding="async"
           />
-          <div className="absolute inset-0 bg-gradient-hero" />
+          <div className="absolute inset-0 bg-black/30" />
 
           <div className="relative z-10 container-width text-left text-white">
             <div className="max-w-2xl">
