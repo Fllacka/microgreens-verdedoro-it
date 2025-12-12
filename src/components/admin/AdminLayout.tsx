@@ -244,19 +244,40 @@ const AdminSidebar = () => {
 const AdminHeader = () => {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const location = useLocation();
+
+  // Get page title based on current route
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === "/admin") return "Dashboard";
+    if (path.includes("/admin/products")) return path.includes("/edit") ? "Modifica Prodotto" : "Prodotti";
+    if (path.includes("/admin/blog-overview")) return "Blog";
+    if (path.includes("/admin/blog")) return path.includes("/edit") ? "Modifica Articolo" : "Articoli Blog";
+    if (path.includes("/admin/media")) return "Media Library";
+    if (path.includes("/admin/homepage")) return "Homepage";
+    if (path.includes("/admin/chi-siamo")) return "Chi Siamo";
+    if (path.includes("/admin/microgreens-su-misura")) return "Microgreens su Misura";
+    if (path.includes("/admin/microgreens")) return "Microgreens";
+    if (path.includes("/admin/contatti")) return "Contatti";
+    if (path.includes("/admin/pages")) return path.includes("/edit") ? "Modifica Pagina" : "Altre Pagine";
+    if (path.includes("/admin/users")) return "Utenti";
+    if (path.includes("/admin/redirects")) return "Redirect";
+    if (path.includes("/admin/settings")) return "Impostazioni";
+    return "CMS";
+  };
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b bg-background px-4">
+    <header className="sticky top-0 z-10 flex h-12 md:h-14 items-center gap-2 border-b bg-background px-3 md:px-4 shadow-sm">
       <Button 
         variant="ghost" 
         size="icon" 
         onClick={toggleSidebar}
-        className="h-9 w-9"
+        className="h-8 w-8 md:h-9 md:w-9 shrink-0"
         aria-label={isCollapsed ? "Espandi menu" : "Comprimi menu"}
       >
         {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
       </Button>
-      <span className="font-medium text-sm md:hidden">CMS Admin</span>
+      <span className="font-semibold text-sm truncate">{getPageTitle()}</span>
     </header>
   );
 };

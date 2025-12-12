@@ -180,40 +180,27 @@ export default function AdminMedia() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Media Library</h1>
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <h1 className="text-2xl md:text-3xl font-bold">Media Library</h1>
+          <Label
+            htmlFor="file-upload"
+            className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {uploading ? "Uploading..." : "Carica File"}
+          </Label>
+          <Input
+            id="file-upload"
+            type="file"
+            multiple
+            onChange={handleFileUpload}
+            disabled={uploading}
+            className="hidden"
+          />
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Files</CardTitle>
-            <CardDescription>
-              Upload images and files to your media library
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <Label
-                htmlFor="file-upload"
-                className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                {uploading ? "Uploading..." : "Choose Files"}
-              </Label>
-              <Input
-                id="file-upload"
-                type="file"
-                multiple
-                onChange={handleFileUpload}
-                disabled={uploading}
-                className="hidden"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
           {media.length === 0 ? (
             <Card className="col-span-full">
               <CardContent className="flex items-center justify-center min-h-[200px] text-muted-foreground">
@@ -231,35 +218,36 @@ export default function AdminMedia() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="text-4xl text-muted-foreground">📄</div>
+                    <div className="text-2xl md:text-4xl text-muted-foreground">📄</div>
                   )}
                 </div>
-                <CardContent className="p-4 space-y-2">
-                  <p className="font-medium text-sm truncate" title={file.file_name}>
+                <CardContent className="p-2 md:p-4 space-y-1 md:space-y-2">
+                  <p className="font-medium text-xs md:text-sm truncate" title={file.file_name}>
                     {file.file_name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {(file.file_size / 1024).toFixed(2)} KB
+                  <p className="text-[10px] md:text-xs text-muted-foreground">
+                    {(file.file_size / 1024).toFixed(0)} KB
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 md:gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1"
+                      className="flex-1 h-7 md:h-8 px-2"
                       onClick={() => copyToClipboard(file.file_path, file.id)}
                     >
                       {copiedId === file.id ? (
-                        <Check className="h-4 w-4" />
+                        <Check className="h-3 w-3 md:h-4 md:w-4" />
                       ) : (
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-3 w-3 md:h-4 md:w-4" />
                       )}
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 md:h-8 px-2"
                       onClick={() => setDeleteId(file.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </div>
                 </CardContent>
