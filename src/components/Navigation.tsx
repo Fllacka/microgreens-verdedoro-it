@@ -217,7 +217,7 @@ const Navigation = () => {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
-                  <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center mb-8">
                     {logoUrl ? (
                       <img 
                         src={logoUrl} 
@@ -227,9 +227,6 @@ const Navigation = () => {
                     ) : (
                       <FallbackLogo className="scale-90" />
                     )}
-                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} aria-label="Close menu">
-                      <X className="h-5 w-5" />
-                    </Button>
                   </div>
                   
                   <div className="flex flex-col space-y-4">
@@ -248,16 +245,6 @@ const Navigation = () => {
                         {item.name}
                       </Link>
                     ))}
-                    
-                    {ctaButton.visible && (
-                      <div className="pt-4 border-t border-border">
-                        <Button variant="oro" className="w-full" asChild>
-                          <Link to={ctaButton.url} onClick={() => setIsOpen(false)}>
-                            {ctaButton.text}
-                          </Link>
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </SheetContent>
               </Sheet>
