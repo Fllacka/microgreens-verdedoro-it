@@ -15,29 +15,29 @@
     /* Earthy Palette */
     --terra-warm: 25 30% 88%;          /* Warm cream background */
     --terra-neutral: 25 15% 75%;       /* Neutral earth tone */
-    --terra-dark: 25 20% 25%;          /* Dark earth for text */
+    --terra-dark: 0 0% 0%;              /* Black for text */
     
     /* Semantic Colors */
     --background: 25 30% 98%;          /* Soft warm white */
-    --foreground: 25 20% 15%;          /* Rich dark brown-black */
+    --foreground: 0 0% 0%;             /* Pure black */
 
     --card: 0 0% 100%;
-    --card-foreground: 25 20% 15%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 25 20% 15%;
+    --popover-foreground: 0 0% 0%;
 
     --primary: 140 42% 23%;            /* Verde primary */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 25 30% 88%;           /* Terra warm */
-    --secondary-foreground: 25 20% 15%;
+    --secondary-foreground: 0 0% 0%;
 
     --muted: 25 15% 92%;
-    --muted-foreground: 25 15% 45%;
+    --muted-foreground: 0 0% 35%;
 
     --accent: 45 75% 52%;              /* Oro primary */
-    --accent-foreground: 25 20% 15%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 98%;
