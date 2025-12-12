@@ -136,6 +136,7 @@ const Navigation = () => {
                   className="h-14 w-auto"
                   width={144}
                   height={56}
+                  decoding="async"
                 />
               ) : (
                 <FallbackLogo />

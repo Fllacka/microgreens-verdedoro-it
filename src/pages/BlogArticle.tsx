@@ -6,7 +6,7 @@ import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Clock, Share2, Heart } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
@@ -178,6 +178,7 @@ const BlogArticle = () => {
     description: post.excerpt || post.meta_description || "",
     slug: post.slug,
     publishedAt: post.published_at,
+    updatedAt: (post as any).updated_at || post.published_at,
     image: coverImageUrl || undefined,
     category: post.category,
     wordCount,
@@ -262,17 +263,6 @@ const BlogArticle = () => {
                 </p>
               )}
 
-              {/* Social Actions */}
-              <div className="flex items-center justify-center gap-4">
-                <Button variant="outline" size="sm" className="inline-flex items-center bg-white/10 border-white/20 text-white hover:bg-white/20">
-                  <Heart className="mr-2 w-4 h-4" />
-                  Mi piace
-                </Button>
-                <Button variant="outline" size="sm" className="inline-flex items-center bg-white/10 border-white/20 text-white hover:bg-white/20">
-                  <Share2 className="mr-2 w-4 h-4" />
-                  Condividi
-                </Button>
-              </div>
             </div>
           </div>
         </section>
@@ -322,10 +312,21 @@ const BlogArticle = () => {
                     const relatedCoverUrl = relatedPost.featured_image_id && relatedMediaMap[relatedPost.featured_image_id];
                     return (
                     <Card key={relatedPost.id} className="overflow-hidden hover-lift border-border/50 bg-card group">
-                      <div 
-                        className="h-48 bg-cover bg-center"
-                        style={relatedCoverUrl ? { backgroundImage: `url(${relatedCoverUrl})` } : { background: 'var(--gradient-hero)' }}
-                      />
+                      <div className="relative h-48 overflow-hidden bg-muted/30">
+                        {relatedCoverUrl ? (
+                          <img
+                            src={relatedCoverUrl}
+                            alt={`${relatedPost.title} - articolo correlato`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                            width={400}
+                            height={192}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-hero" />
+                        )}
+                      </div>
                       <div className="p-6">
                         {relatedPost.category && (
                           <Badge variant="outline" className="text-xs mb-3">

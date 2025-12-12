@@ -389,24 +389,6 @@ const Blog = () => {
           </section>
         )}
 
-        {/* Newsletter Signup */}
-        {newsletterSection?.is_visible !== false && (
-          <section className="section-padding bg-gradient-verde text-white">
-            <div className="container-width text-center">
-              <div className="max-w-2xl mx-auto">
-                <h2 className="font-display text-3xl font-bold mb-4">
-                  {newsletterSection?.content?.title || "Non Perdere Nessun Articolo"}
-                </h2>
-                <p className="font-body mb-8 text-white/90">
-                  {newsletterSection?.content?.subtitle || "Iscriviti alla nostra newsletter per ricevere le ultime novità, ricette esclusive e consigli pratici direttamente nella tua inbox."}
-                </p>
-                <Button variant="oro" size="lg" className="font-semibold">
-                  {newsletterSection?.content?.button_text || "Iscriviti alla Newsletter"}
-                </Button>
-              </div>
-            </div>
-          </section>
-        )}
       </div>
     </Layout>
   );

@@ -7,6 +7,7 @@ import { Leaf, Heart, Users, Award, ArrowRight, Shield, Sprout, Star } from "luc
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import chefImage from "@/assets/chef-microgreens.jpg";
+import { generateBreadcrumbSchema } from "@/lib/seo";
 
 interface ChiSiamoSection {
   id: string;
@@ -96,10 +97,15 @@ const ChiSiamo = () => {
   ];
   const certifications = storyContent.certifications || ["Agricoltura Biologica", "Produzione Sostenibile", "Qualità Italiana"];
 
-  const currentUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const currentUrl = typeof window !== 'undefined' ? window.location.origin : 'https://verdedoro.it';
   const canonicalUrl = seoContent.canonical_url 
     ? `${currentUrl}${seoContent.canonical_url}`
     : `${currentUrl}/chi-siamo`;
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Chi Siamo", url: "/chi-siamo" },
+  ]);
 
   return (
     <Layout>
@@ -115,6 +121,9 @@ const ChiSiamo = () => {
         {seoContent.structured_data && (
           <script type="application/ld+json">{seoContent.structured_data}</script>
         )}
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
       </Helmet>
 
       {/* Hero Section */}
@@ -137,13 +146,18 @@ const ChiSiamo = () => {
                   </Link>
                 </Button>
               </div>
-              <div className="relative">
-                <div 
-                  className="h-96 rounded-2xl bg-cover bg-center shadow-soft" 
-                  style={{ backgroundImage: `url(${heroImageUrl})` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
-                </div>
+              <div className="relative h-96 rounded-2xl overflow-hidden shadow-soft">
+                <img
+                  src={heroImageUrl}
+                  alt={heroContent.image_alt || "La nostra storia - Verde D'Oro Microgreens"}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  fetchPriority="high"
+                  loading="eager"
+                  width={600}
+                  height={384}
+                  decoding="async"
+                />
+                <div className="absolute inset-0 bg-gradient-verde/10 rounded-2xl" />
               </div>
             </div>
           </div>

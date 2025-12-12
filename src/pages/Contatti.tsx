@@ -10,6 +10,7 @@ import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart, X } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { generateBreadcrumbSchema } from "@/lib/seo";
 
 interface SectionContent {
   [key: string]: any;
@@ -140,7 +141,10 @@ const Contatti = () => {
     ? `${window.location.origin}${seoSection.content.canonical_url}`
     : currentUrl;
 
-  // Build contact info items based on visibility
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Contatti", url: "/contatti" },
+  ]);
   const contactInfoItems = [];
   if (contactInfoSection?.content?.phone_visible) {
     contactInfoItems.push({
@@ -191,6 +195,9 @@ const Contatti = () => {
         {seoSection?.content?.og_description && (
           <meta property="og:description" content={seoSection.content.og_description} />
         )}
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
       </Helmet>
 
       {/* Hero Section */}
