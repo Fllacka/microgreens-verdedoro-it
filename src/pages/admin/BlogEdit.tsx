@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBloc
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, PenSquare, Search } from "lucide-react";
@@ -24,6 +26,9 @@ const AdminBlogEdit = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const initialDataLoaded = useRef(false);
+
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -50,10 +55,24 @@ const AdminBlogEdit = () => {
     structuredData: "",
   });
 
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges: hasChanges,
+  });
+
+  // Track changes after initial load
+  useEffect(() => {
+    if (initialDataLoaded.current) {
+      setHasChanges(true);
+    }
+  }, [formData, contentBlocks, seoData]);
+
   useEffect(() => {
     fetchCategories();
     if (!isNew) {
       fetchPost();
+    } else {
+      initialDataLoaded.current = true;
     }
   }, [id]);
 
@@ -129,6 +148,7 @@ const AdminBlogEdit = () => {
       });
     } finally {
       setLoading(false);
+      initialDataLoaded.current = true;
     }
   };
 
@@ -185,6 +205,7 @@ const AdminBlogEdit = () => {
       });
     } finally {
       setSaving(false);
+      setHasChanges(false);
     }
   };
 
@@ -371,6 +392,12 @@ const AdminBlogEdit = () => {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl={previewUrl}
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );

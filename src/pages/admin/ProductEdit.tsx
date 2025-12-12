@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Search, Package } from "lucide-react";
@@ -31,6 +33,9 @@ const AdminProductEdit = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const initialDataLoaded = useRef(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -63,10 +68,24 @@ const AdminProductEdit = () => {
 
   const [availableCategories, setAvailableCategories] = useState<CategoryItem[]>([]);
 
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges: hasChanges,
+  });
+
+  // Track changes after initial load
+  useEffect(() => {
+    if (initialDataLoaded.current) {
+      setHasChanges(true);
+    }
+  }, [formData, seoData]);
+
   useEffect(() => {
     fetchCategories();
     if (!isNew) {
       fetchProduct();
+    } else {
+      initialDataLoaded.current = true;
     }
   }, [id]);
 
@@ -136,6 +155,7 @@ const AdminProductEdit = () => {
       });
     } finally {
       setLoading(false);
+      initialDataLoaded.current = true;
     }
   };
 
@@ -198,6 +218,7 @@ const AdminProductEdit = () => {
       });
     } finally {
       setSaving(false);
+      setHasChanges(false);
     }
   };
 
@@ -418,6 +439,12 @@ const AdminProductEdit = () => {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl={previewUrl}
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );
