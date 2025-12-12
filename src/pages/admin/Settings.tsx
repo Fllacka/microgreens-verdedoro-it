@@ -3,6 +3,8 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SettingsActionBar } from "@/components/admin/SettingsActionBar";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -190,6 +192,11 @@ const Settings = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const initialLoadComplete = useRef(false);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges: hasChanges,
+  });
 
   useEffect(() => {
     fetchSettings();
@@ -934,6 +941,12 @@ const Settings = () => {
         onSave={handleSave}
         hasChanges={hasChanges}
         lastSaved={lastSaved}
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );

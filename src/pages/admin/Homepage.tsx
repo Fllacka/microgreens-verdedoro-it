@@ -16,6 +16,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 interface HomepageSection {
   id: string;
   content: Record<string, any>;
@@ -50,6 +52,11 @@ const Homepage = () => {
   const { toast } = useToast();
 
   const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
+
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges,
+  });
 
   useEffect(() => {
     fetchSections();
@@ -834,6 +841,12 @@ const Homepage = () => {
         onSave={handleSave}
         onPublish={() => Promise.resolve()}
         previewUrl="/preview/homepage"
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );

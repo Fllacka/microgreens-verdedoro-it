@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
+import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { ArrowLeft, FileText, Search } from "lucide-react";
 
 export default function PageEdit() {
@@ -21,6 +23,8 @@ export default function PageEdit() {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -42,9 +46,23 @@ export default function PageEdit() {
     structuredData: "",
   });
 
+  // Unsaved changes warning
+  const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
+    hasUnsavedChanges: hasChanges,
+  });
+
+  // Track changes after initial load
+  useEffect(() => {
+    if (initialDataLoaded.current) {
+      setHasChanges(true);
+    }
+  }, [formData, seoData]);
+
   useEffect(() => {
     if (!isNew) {
       fetchPage();
+    } else {
+      initialDataLoaded.current = true;
     }
   }, [id]);
 
@@ -86,6 +104,7 @@ export default function PageEdit() {
       });
     } finally {
       setLoading(false);
+      initialDataLoaded.current = true;
     }
   };
 
@@ -143,6 +162,7 @@ export default function PageEdit() {
       });
     } finally {
       setSaving(false);
+      setHasChanges(false);
     }
   };
 
@@ -244,6 +264,12 @@ export default function PageEdit() {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl={previewUrl}
+      />
+
+      <UnsavedChangesDialog
+        isOpen={isBlocked}
+        onConfirm={() => proceed?.()}
+        onCancel={() => reset?.()}
       />
     </AdminLayout>
   );
