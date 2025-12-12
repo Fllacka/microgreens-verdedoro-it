@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -65,6 +65,70 @@ const queryClient = new QueryClient({
   },
 });
 
+// Root layout component that wraps all routes
+const RootLayout = () => (
+  <>
+    <ScrollToTop />
+    <CartDrawer />
+    <Suspense fallback={<PageLoading />}>
+      <Outlet />
+    </Suspense>
+  </>
+);
+
+// Create data router with routes configuration
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      { path: "/", element: <Index /> },
+      { path: "/chi-siamo", element: <ChiSiamo /> },
+      { path: "/microgreens", element: <Microgreens /> },
+      { path: "/microgreens-su-misura", element: <MicrogreensCustom /> },
+      { path: "/microgreens/:slug", element: <ProductDetail /> },
+      { path: "/blog", element: <Blog /> },
+      { path: "/blog/:slug", element: <BlogArticle /> },
+      { path: "/contatti", element: <Contatti /> },
+      
+      // Admin Routes
+      { path: "/admin/login", element: <AdminLogin /> },
+      { path: "/admin/email-confirmation", element: <AdminEmailConfirmation /> },
+      { path: "/admin/reset-password", element: <AdminResetPassword /> },
+      { path: "/admin", element: <AdminDashboard /> },
+      { path: "/admin/homepage", element: <AdminHomepage /> },
+      { path: "/admin/chi-siamo", element: <AdminChiSiamo /> },
+      { path: "/admin/microgreens", element: <AdminMicrogreensPage /> },
+      { path: "/admin/microgreens-su-misura", element: <AdminMicrogreensCustom /> },
+      { path: "/admin/contatti", element: <AdminContatti /> },
+      { path: "/admin/blog-overview", element: <AdminBlogOverview /> },
+      { path: "/admin/products", element: <AdminProducts /> },
+      { path: "/admin/products/:id", element: <AdminProductEdit /> },
+      { path: "/admin/blog", element: <AdminBlog /> },
+      { path: "/admin/blog/:id", element: <AdminBlogEdit /> },
+      { path: "/admin/pages", element: <AdminPages /> },
+      { path: "/admin/pages/:id", element: <AdminPageEdit /> },
+      { path: "/admin/media", element: <AdminMedia /> },
+      { path: "/admin/users", element: <AdminUsers /> },
+      { path: "/admin/redirects", element: <AdminRedirects /> },
+      { path: "/admin/settings", element: <AdminSettings /> },
+      
+      // Preview Routes (authenticated)
+      { path: "/preview/homepage", element: <HomepagePreview /> },
+      { path: "/preview/chi-siamo", element: <ChiSiamoPreview /> },
+      { path: "/preview/microgreens", element: <MicrogreensPreview /> },
+      { path: "/preview/microgreens-su-misura", element: <MicrogreensCustomPreview /> },
+      { path: "/preview/contatti", element: <ContattiPreview /> },
+      { path: "/preview/blog-overview", element: <BlogOverviewPreview /> },
+      { path: "/preview/microgreens/:slug", element: <ProductPreview /> },
+      { path: "/preview/blog/:slug", element: <BlogPreview /> },
+      { path: "/preview/page/:slug", element: <PagePreview /> },
+      
+      // Catch-all route
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+]);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -72,58 +136,7 @@ const App = () => (
         <CartProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
-            <ScrollToTop />
-            <CartDrawer />
-            <Suspense fallback={<PageLoading />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/chi-siamo" element={<ChiSiamo />} />
-                <Route path="/microgreens" element={<Microgreens />} />
-                <Route path="/microgreens-su-misura" element={<MicrogreensCustom />} />
-                <Route path="/microgreens/:slug" element={<ProductDetail />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogArticle />} />
-                <Route path="/contatti" element={<Contatti />} />
-                
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/email-confirmation" element={<AdminEmailConfirmation />} />
-                <Route path="/admin/reset-password" element={<AdminResetPassword />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/homepage" element={<AdminHomepage />} />
-                <Route path="/admin/chi-siamo" element={<AdminChiSiamo />} />
-                <Route path="/admin/microgreens" element={<AdminMicrogreensPage />} />
-                <Route path="/admin/microgreens-su-misura" element={<AdminMicrogreensCustom />} />
-                <Route path="/admin/contatti" element={<AdminContatti />} />
-                <Route path="/admin/blog-overview" element={<AdminBlogOverview />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/products/:id" element={<AdminProductEdit />} />
-                <Route path="/admin/blog" element={<AdminBlog />} />
-                <Route path="/admin/blog/:id" element={<AdminBlogEdit />} />
-                <Route path="/admin/pages" element={<AdminPages />} />
-                <Route path="/admin/pages/:id" element={<AdminPageEdit />} />
-                <Route path="/admin/media" element={<AdminMedia />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/redirects" element={<AdminRedirects />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                
-                {/* Preview Routes (authenticated) */}
-                <Route path="/preview/homepage" element={<HomepagePreview />} />
-                <Route path="/preview/chi-siamo" element={<ChiSiamoPreview />} />
-                <Route path="/preview/microgreens" element={<MicrogreensPreview />} />
-                <Route path="/preview/microgreens-su-misura" element={<MicrogreensCustomPreview />} />
-                <Route path="/preview/contatti" element={<ContattiPreview />} />
-                <Route path="/preview/blog-overview" element={<BlogOverviewPreview />} />
-                <Route path="/preview/microgreens/:slug" element={<ProductPreview />} />
-                <Route path="/preview/blog/:slug" element={<BlogPreview />} />
-                <Route path="/preview/page/:slug" element={<PagePreview />} />
-                
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
+          <RouterProvider router={router} />
         </CartProvider>
       </AuthProvider>
     </TooltipProvider>
