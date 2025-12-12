@@ -153,9 +153,9 @@ const Navigation = () => {
                   key={item.id} 
                   to={item.url} 
                   className={cn(
-                    "relative font-body font-medium transition-colors hover:text-primary",
-                    "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-gradient-verde after:transition-transform after:duration-300 hover:after:scale-x-100",
-                    isActive(item.url) ? "text-primary after:scale-x-100" : "text-muted-foreground"
+                    "relative font-body font-medium transition-colors hover:text-foreground",
+                    "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:after:scale-x-100",
+                    isActive(item.url) ? "text-foreground after:scale-x-100" : "text-muted-foreground"
                   )}
                 >
                   {item.name}
@@ -241,8 +241,8 @@ const Navigation = () => {
                         className={cn(
                           "block px-4 py-3 rounded-lg font-body font-medium transition-colors",
                           isActive(item.url) 
-                            ? "bg-secondary text-primary" 
-                            : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
+                            ? "bg-secondary text-foreground" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                         )}
                       >
                         {item.name}

@@ -243,7 +243,7 @@ const Footer = () => {
             <ul className="space-y-3">
               {visibleQuickLinks.map(link => (
                 <li key={link.id}>
-                  <Link to={link.url} className="text-muted-foreground font-body hover:text-primary transition-colors">
+                  <Link to={link.url} className="text-muted-foreground font-body hover:text-foreground transition-colors">
                     {link.name}
                   </Link>
                 </li>
@@ -268,7 +268,7 @@ const Footer = () => {
               {footerSettings.contact_info.phone && (
                 <li className="flex items-center space-x-3">
                   <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-                  <a href={`tel:${footerSettings.contact_info.phone.replace(/\s/g, '')}`} className="text-muted-foreground font-body text-sm hover:text-primary transition-colors">
+                  <a href={`tel:${footerSettings.contact_info.phone.replace(/\s/g, '')}`} className="text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
                     {footerSettings.contact_info.phone}
                   </a>
                 </li>
@@ -276,7 +276,7 @@ const Footer = () => {
               {footerSettings.contact_info.email && (
                 <li className="flex items-center space-x-3">
                   <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                  <a href={`mailto:${footerSettings.contact_info.email}`} className="text-muted-foreground font-body text-sm hover:text-primary transition-colors">
+                  <a href={`mailto:${footerSettings.contact_info.email}`} className="text-muted-foreground font-body text-sm hover:text-foreground transition-colors">
                     {footerSettings.contact_info.email}
                   </a>
                 </li>
@@ -305,7 +305,7 @@ const Footer = () => {
                   <Link 
                     key={link.id}
                     to={link.url} 
-                    className="text-sm text-muted-foreground font-body hover:text-primary transition-colors"
+                    className="text-sm text-muted-foreground font-body hover:text-foreground transition-colors"
                   >
                     {link.name}
                   </Link>
