@@ -383,7 +383,7 @@ const Index = () => {
                 {heroContent.badge_text}
               </div>
               <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">
-                {heroContent.title_part1} <span className="text-oro-primary">{heroContent.title_highlight}</span>
+                <span className="text-verde-primary">VERDE</span> <span className="text-oro-primary">D'ORO</span>
               </h1>
               <div 
                 className="font-body text-lg md:text-xl mb-8 text-white/90 leading-relaxed prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
