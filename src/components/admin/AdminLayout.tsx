@@ -246,15 +246,17 @@ const AdminHeader = () => {
   const isCollapsed = state === "collapsed";
 
   return (
-    <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b bg-background px-4">
+    <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b bg-background px-4">
       <Button 
         variant="ghost" 
         size="icon" 
         onClick={toggleSidebar}
-        className="h-8 w-8"
+        className="h-9 w-9"
+        aria-label={isCollapsed ? "Espandi menu" : "Comprimi menu"}
       >
-        {isCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
       </Button>
+      <span className="font-medium text-sm md:hidden">CMS Admin</span>
     </header>
   );
 };
@@ -292,9 +294,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
     >
       <div className="flex min-h-screen w-full">
         <AdminSidebar />
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col min-w-0">
           <AdminHeader />
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-3 md:p-6 overflow-x-hidden">
             {children}
           </main>
         </div>

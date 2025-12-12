@@ -154,7 +154,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 
   return (
     <div className="border rounded-lg">
-      <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
+      <div className="flex gap-1 p-2 border-b bg-muted/50 overflow-x-auto">
         <Button
           type="button"
           variant="ghost"
@@ -251,14 +251,14 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       </div>
       
       {isImageSelected && (
-        <div className="flex flex-wrap items-center gap-3 p-2 border-b bg-blue-50 dark:bg-blue-950/30">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:gap-3 p-2 border-b bg-blue-50 dark:bg-blue-950/30 overflow-x-auto">
+          <div className="flex items-center gap-2 shrink-0">
             <Label className="text-xs whitespace-nowrap">Alt:</Label>
             <Input
               type="text"
               value={imageAlt}
               onChange={(e) => updateImageAlt(e.target.value)}
-              className="h-7 w-40 text-xs"
+              className="h-7 w-28 md:w-40 text-xs"
               placeholder="Testo alternativo"
             />
           </div>
@@ -270,10 +270,10 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             </Button>
           </ImageDialog>
           
-          <div className="h-6 w-px bg-border" />
+          <div className="h-6 w-px bg-border shrink-0 hidden md:block" />
           
-          <span className="text-sm font-medium text-muted-foreground">Dimensioni:</span>
-          <div className="flex items-center gap-1">
+          <span className="text-xs md:text-sm font-medium text-muted-foreground whitespace-nowrap shrink-0 hidden md:inline">Dimensioni:</span>
+          <div className="flex items-center gap-1 shrink-0">
             <Button
               type="button"
               variant="outline"
@@ -314,7 +314,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
               Auto
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 hidden md:flex">
             <Label className="text-xs">W:</Label>
             <Input
               type="number"
@@ -333,10 +333,10 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             />
           </div>
           
-          <div className="h-6 w-px bg-border" />
+          <div className="h-6 w-px bg-border shrink-0 hidden md:block" />
           
-          <span className="text-sm font-medium text-muted-foreground">Allineamento:</span>
-          <div className="flex items-center gap-1">
+          <span className="text-xs md:text-sm font-medium text-muted-foreground whitespace-nowrap shrink-0 hidden md:inline">Allineamento:</span>
+          <div className="flex items-center gap-1 shrink-0">
             <Button
               type="button"
               variant="outline"
@@ -380,7 +380,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       
       <EditorContent 
         editor={editor} 
-        className="prose prose-sm max-w-none p-4 min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:pointer-events-auto [&_a]:cursor-text [&_.ProseMirror-selectednode]:outline [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-primary [&_.ProseMirror-selectednode]:outline-offset-2 [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2"
+        className="prose prose-sm max-w-none p-3 md:p-4 min-h-[200px] md:min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:pointer-events-auto [&_a]:cursor-text [&_.ProseMirror-selectednode]:outline [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-primary [&_.ProseMirror-selectednode]:outline-offset-2 [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2"
       />
     </div>
   );

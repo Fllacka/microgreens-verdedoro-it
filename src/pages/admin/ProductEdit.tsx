@@ -242,32 +242,33 @@ const AdminProductEdit = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-8 pb-24">
-        <div className="flex items-center gap-4">
-          <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/products")}>
+      <div className="space-y-6 md:space-y-8 pb-28 md:pb-24">
+        <div className="flex items-center gap-3 md:gap-4">
+          <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/products")} className="shrink-0">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold">{isNew ? "Nuovo Prodotto" : "Modifica Prodotto"}</h1>
-            <p className="text-muted-foreground">Crea e gestisci i dettagli del prodotto</p>
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-3xl font-bold truncate">{isNew ? "Nuovo Prodotto" : "Modifica Prodotto"}</h1>
+            <p className="text-muted-foreground text-sm hidden md:block">Crea e gestisci i dettagli del prodotto</p>
           </div>
         </div>
 
-        <Tabs defaultValue="content" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="content">
-              <Package className="h-4 w-4 mr-2" />
-              Contenuto
+        <Tabs defaultValue="content" className="space-y-4 md:space-y-6">
+          <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
+            <TabsTrigger value="content" className="text-xs md:text-sm">
+              <Package className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden xs:inline">Contenuto</span>
+              <span className="xs:hidden">Info</span>
             </TabsTrigger>
-            <TabsTrigger value="seo">
-              <Search className="h-4 w-4 mr-2" />
+            <TabsTrigger value="seo" className="text-xs md:text-sm">
+              <Search className="h-4 w-4 mr-1 md:mr-2" />
               SEO
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="content" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
+          <TabsContent value="content" className="space-y-4 md:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+              <div className="lg:col-span-2 space-y-4 md:space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Informazioni Prodotto</CardTitle>
@@ -301,7 +302,7 @@ const AdminProductEdit = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
                         <Select
