@@ -17,6 +17,7 @@ import ProductDetail from "./pages/ProductDetail";
 
 // Non-critical pages - lazy loaded
 const ChiSiamo = lazy(() => import("./pages/ChiSiamo"));
+const CosaSonoMicrogreens = lazy(() => import("./pages/CosaSonoMicrogreens"));
 const MicrogreensCustom = lazy(() => import("./pages/MicrogreensCustom"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
@@ -83,6 +84,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <Index /> },
       { path: "/chi-siamo", element: <ChiSiamo /> },
+      { path: "/cosa-sono-i-microgreens", element: <CosaSonoMicrogreens /> },
       { path: "/microgreens", element: <Microgreens /> },
       { path: "/microgreens-su-misura", element: <MicrogreensCustom /> },
       { path: "/microgreens/:slug", element: <ProductDetail /> },
