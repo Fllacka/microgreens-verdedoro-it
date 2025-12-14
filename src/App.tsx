@@ -45,6 +45,7 @@ const AdminMicrogreensPage = lazy(() => import("./pages/admin/Microgreens"));
 const AdminMicrogreensCustom = lazy(() => import("./pages/admin/MicrogreensCustom"));
 const AdminContatti = lazy(() => import("./pages/admin/Contatti"));
 const AdminBlogOverview = lazy(() => import("./pages/admin/BlogOverview"));
+const AdminCosaSonoMicrogreens = lazy(() => import("./pages/admin/CosaSonoMicrogreens"));
 
 // Preview pages - lazy loaded
 const ProductPreview = lazy(() => import("./pages/preview/ProductPreview"));
@@ -55,6 +56,7 @@ const ChiSiamoPreview = lazy(() => import("./pages/preview/ChiSiamoPreview"));
 const MicrogreensPreview = lazy(() => import("./pages/preview/MicrogreensPreview"));
 const MicrogreensCustomPreview = lazy(() => import("./pages/preview/MicrogreensCustomPreview"));
 const ContattiPreview = lazy(() => import("./pages/preview/ContattiPreview"));
+const CosaSonoMicrogreensPreview = lazy(() => import("./pages/preview/CosaSonoMicrogreensPreview"));
 const BlogOverviewPreview = lazy(() => import("./pages/preview/BlogOverviewPreview"));
 
 const queryClient = new QueryClient({
@@ -103,6 +105,7 @@ const router = createBrowserRouter([
       { path: "/admin/microgreens-su-misura", element: <AdminMicrogreensCustom /> },
       { path: "/admin/contatti", element: <AdminContatti /> },
       { path: "/admin/blog-overview", element: <AdminBlogOverview /> },
+      { path: "/admin/cosa-sono-i-microgreens", element: <AdminCosaSonoMicrogreens /> },
       { path: "/admin/products", element: <AdminProducts /> },
       { path: "/admin/products/:id", element: <AdminProductEdit /> },
       { path: "/admin/blog", element: <AdminBlog /> },
@@ -121,6 +124,7 @@ const router = createBrowserRouter([
       { path: "/preview/microgreens-su-misura", element: <MicrogreensCustomPreview /> },
       { path: "/preview/contatti", element: <ContattiPreview /> },
       { path: "/preview/blog-overview", element: <BlogOverviewPreview /> },
+      { path: "/preview/cosa-sono-i-microgreens", element: <CosaSonoMicrogreensPreview /> },
       { path: "/preview/microgreens/:slug", element: <ProductPreview /> },
       { path: "/preview/blog/:slug", element: <BlogPreview /> },
       { path: "/preview/page/:slug", element: <PagePreview /> },

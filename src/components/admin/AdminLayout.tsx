@@ -60,6 +60,7 @@ const AdminSidebar = () => {
     "/admin/microgreens-su-misura",
     "/admin/contatti",
     "/admin/blog-overview",
+    "/admin/cosa-sono-i-microgreens",
     "/admin/pages"
   ].some(path => location.pathname.startsWith(path));
 
@@ -84,7 +85,8 @@ const AdminSidebar = () => {
   const pageItems = [
     { title: "Homepage", url: "/admin/homepage", icon: Home },
     { title: "Chi Siamo", url: "/admin/chi-siamo", icon: Info },
-    { title: "Microgreens", url: "/admin/microgreens", icon: Sprout, checkFn: () => isActive("/admin/microgreens") && !location.pathname.includes("su-misura") },
+    { title: "Cosa sono i Microgreens", url: "/admin/cosa-sono-i-microgreens", icon: Sprout },
+    { title: "Microgreens", url: "/admin/microgreens", icon: Sprout, checkFn: () => isActive("/admin/microgreens") && !location.pathname.includes("su-misura") && !location.pathname.includes("cosa-sono") },
     { title: "Microgreens su Misura", url: "/admin/microgreens-su-misura", icon: Sparkles },
     { title: "Contatti", url: "/admin/contatti", icon: Mail },
     { title: "Blog", url: "/admin/blog-overview", icon: PenSquare },
@@ -256,6 +258,7 @@ const AdminHeader = () => {
     if (path.includes("/admin/media")) return "Media Library";
     if (path.includes("/admin/homepage")) return "Homepage";
     if (path.includes("/admin/chi-siamo")) return "Chi Siamo";
+    if (path.includes("/admin/cosa-sono-i-microgreens")) return "Cosa sono i Microgreens";
     if (path.includes("/admin/microgreens-su-misura")) return "Microgreens su Misura";
     if (path.includes("/admin/microgreens")) return "Microgreens";
     if (path.includes("/admin/contatti")) return "Contatti";
