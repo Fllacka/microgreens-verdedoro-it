@@ -1,10 +1,12 @@
 interface ContentBlock {
   id: string;
-  type: "heading" | "text" | "image";
+  type: "heading" | "text" | "image" | "text-image";
   level?: "h1" | "h2" | "h3";
   content?: string;
   url?: string;
   alt?: string;
+  imagePosition?: "top" | "bottom" | "left" | "right";
+  imageAspectRatio?: "1/1" | "4/3" | "16/9" | "3/4";
 }
 
 interface ContentBlockRendererProps {
@@ -16,8 +18,99 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     return null;
   }
 
+  const getAspectRatioClass = (ratio?: string) => {
+    switch (ratio) {
+      case "1/1": return "aspect-square";
+      case "4/3": return "aspect-[4/3]";
+      case "16/9": return "aspect-video";
+      case "3/4": return "aspect-[3/4]";
+      default: return "aspect-[4/3]";
+    }
+  };
+
+  const renderTextImageBlock = (block: ContentBlock) => {
+    const position = block.imagePosition || "right";
+    const aspectClass = getAspectRatioClass(block.imageAspectRatio);
+    
+    const imageElement = block.url && (
+      <div className={`w-full ${position === "left" || position === "right" ? "lg:w-1/2" : ""}`}>
+        <img
+          src={block.url}
+          alt={block.alt || ""}
+          className={`w-full ${aspectClass} object-cover rounded-xl shadow-lg`}
+          loading="lazy"
+          decoding="async"
+          width={600}
+          height={400}
+        />
+      </div>
+    );
+
+    const textElement = (
+      <div className={`w-full ${position === "left" || position === "right" ? "lg:w-1/2" : ""}`}>
+        <div
+          className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2"
+          dangerouslySetInnerHTML={{ __html: block.content || "" }}
+        />
+      </div>
+    );
+
+    // Top/Bottom layout (stacked)
+    if (position === "top" || position === "bottom") {
+      return (
+        <div key={block.id} className="space-y-6">
+          {position === "top" ? (
+            <>
+              {imageElement}
+              {textElement}
+            </>
+          ) : (
+            <>
+              {textElement}
+              {imageElement}
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // Left/Right layout (side by side on desktop, stacked on mobile)
+    return (
+      <div key={block.id} className="flex flex-col lg:flex-row gap-6 lg:gap-12 items-center">
+        {position === "left" ? (
+          <>
+            {imageElement}
+            {textElement}
+          </>
+        ) : (
+          <>
+            <div className="order-2 lg:order-1 w-full lg:w-1/2">
+              <div
+                className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2"
+                dangerouslySetInnerHTML={{ __html: block.content || "" }}
+              />
+            </div>
+            <div className="order-1 lg:order-2 w-full lg:w-1/2">
+              {block.url && (
+                <img
+                  src={block.url}
+                  alt={block.alt || ""}
+                  className={`w-full ${aspectClass} object-cover rounded-xl shadow-lg`}
+                  loading="lazy"
+                  decoding="async"
+                  width={600}
+                  height={400}
+                />
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {blocks.map((block) => {
         switch (block.type) {
           case "heading":
@@ -48,17 +141,20 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
                 <img
                   src={block.url}
                   alt={block.alt || ""}
-                  className="w-full rounded-lg shadow-soft"
+                  className="w-full rounded-xl shadow-lg"
                   loading="lazy"
                   decoding="async"
                   width={800}
                   height={450}
                 />
                 {block.alt && (
-                  <p className="text-sm text-muted-foreground text-center mt-2">{block.alt}</p>
+                  <p className="text-sm text-muted-foreground text-center mt-3">{block.alt}</p>
                 )}
               </div>
             );
+
+          case "text-image":
+            return renderTextImageBlock(block);
 
           default:
             return null;
