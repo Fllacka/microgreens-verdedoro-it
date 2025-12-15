@@ -17,6 +17,8 @@ export interface ContentBlock {
   alt?: string;
   imagePosition?: "top" | "bottom" | "left" | "right";
   imageAspectRatio?: "1/1" | "4/3" | "16/9" | "3/4";
+  title?: string;
+  titleLevel?: "h2" | "h3";
 }
 
 interface ContentBlockEditorProps {
@@ -131,6 +133,36 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
   const renderTextImageBlock = (block: ContentBlock, isMobile: boolean = false) => {
     return (
       <div className="space-y-4">
+        {/* Optional title */}
+        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3 items-end`}>
+          <div className={isMobile ? 'w-full' : 'w-24'}>
+            <Label className="text-xs text-muted-foreground">Titolo (opz.)</Label>
+            <Select
+              value={block.titleLevel || "none"}
+              onValueChange={(value) => updateBlock(block.id, { titleLevel: value === "none" ? undefined : value as "h2" | "h3" })}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="Nessuno" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nessuno</SelectItem>
+                <SelectItem value="h2">H2</SelectItem>
+                <SelectItem value="h3">H3</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {block.titleLevel && (
+            <div className="flex-1">
+              <Input
+                value={block.title || ""}
+                onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                placeholder="Inserisci titolo sezione"
+                className="h-8"
+              />
+            </div>
+          )}
+        </div>
+
         {/* Position and aspect ratio selectors */}
         <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3`}>
           <div className={isMobile ? 'w-full' : 'w-40'}>
@@ -306,12 +338,43 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                   )}
 
                   {block.type === "text" && (
-                    <div>
-                      <Label>Contenuto</Label>
-                      <RichTextEditor
-                        content={block.content || ""}
-                        onChange={(content) => updateBlock(block.id, { content })}
-                      />
+                    <div className="space-y-4">
+                      {/* Optional title */}
+                      <div className="flex gap-3 items-end">
+                        <div className="w-24">
+                          <Label className="text-xs text-muted-foreground">Titolo (opz.)</Label>
+                          <Select
+                            value={block.titleLevel || "none"}
+                            onValueChange={(value) => updateBlock(block.id, { titleLevel: value === "none" ? undefined : value as "h2" | "h3" })}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Nessuno" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Nessuno</SelectItem>
+                              <SelectItem value="h2">H2</SelectItem>
+                              <SelectItem value="h3">H3</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        {block.titleLevel && (
+                          <div className="flex-1">
+                            <Input
+                              value={block.title || ""}
+                              onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                              placeholder="Inserisci titolo sezione"
+                              className="h-8"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label>Contenuto</Label>
+                        <RichTextEditor
+                          content={block.content || ""}
+                          onChange={(content) => updateBlock(block.id, { content })}
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -369,12 +432,41 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                 )}
 
                 {block.type === "text" && (
-                  <div>
-                    <Label className="text-xs">Contenuto</Label>
-                    <RichTextEditor
-                      content={block.content || ""}
-                      onChange={(content) => updateBlock(block.id, { content })}
-                    />
+                  <div className="space-y-3">
+                    {/* Optional title */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Titolo (opzionale)</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={block.titleLevel || "none"}
+                          onValueChange={(value) => updateBlock(block.id, { titleLevel: value === "none" ? undefined : value as "h2" | "h3" })}
+                        >
+                          <SelectTrigger className="h-8 w-20">
+                            <SelectValue placeholder="No" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No</SelectItem>
+                            <SelectItem value="h2">H2</SelectItem>
+                            <SelectItem value="h3">H3</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {block.titleLevel && (
+                          <Input
+                            value={block.title || ""}
+                            onChange={(e) => updateBlock(block.id, { title: e.target.value })}
+                            placeholder="Titolo"
+                            className="h-8 flex-1"
+                          />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Contenuto</Label>
+                      <RichTextEditor
+                        content={block.content || ""}
+                        onChange={(content) => updateBlock(block.id, { content })}
+                      />
+                    </div>
                   </div>
                 )}
 
