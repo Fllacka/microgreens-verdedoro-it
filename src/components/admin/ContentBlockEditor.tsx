@@ -6,15 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageDialog } from "./ImageDialog";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Image as ImageIcon, Replace } from "lucide-react";
+import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Image as ImageIcon, Replace, LayoutTemplate, X } from "lucide-react";
 
 export interface ContentBlock {
   id: string;
-  type: "heading" | "text" | "image";
+  type: "heading" | "text" | "image" | "text-image";
   level?: "h1" | "h2" | "h3";
   content?: string;
   url?: string;
   alt?: string;
+  imagePosition?: "top" | "bottom" | "left" | "right";
+  imageAspectRatio?: "1/1" | "4/3" | "16/9" | "3/4";
 }
 
 interface ContentBlockEditorProps {
@@ -30,6 +32,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
       ...(type === "heading" && { level: "h2", content: "" }),
       ...(type === "text" && { content: "" }),
       ...(type === "image" && { url: "", alt: "" }),
+      ...(type === "text-image" && { content: "", url: "", alt: "", imagePosition: "right", imageAspectRatio: "4/3" }),
     };
     onChange([...blocks, newBlock]);
   };
@@ -58,21 +61,151 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     updateBlock(blockId, { url, alt });
   };
 
+  const getBlockTypeLabel = (type: ContentBlock["type"]) => {
+    switch (type) {
+      case "heading": return "Titolo";
+      case "text": return "Testo";
+      case "image": return "Immagine";
+      case "text-image": return "Testo + Immagine";
+      default: return type;
+    }
+  };
+
+  const renderImageControls = (block: ContentBlock, isMobile: boolean = false) => {
+    const sizeClasses = isMobile ? "w-16 h-16" : "w-20 h-20";
+    const inputClasses = isMobile ? "h-8 text-xs" : "h-9";
+    
+    if (block.url) {
+      return (
+        <div className="flex items-start gap-3">
+          {/* Compact thumbnail */}
+          <div className={`${sizeClasses} flex-shrink-0 relative group`}>
+            <img 
+              src={block.url} 
+              alt={block.alt || ""} 
+              className="w-full h-full object-cover rounded-lg border shadow-sm" 
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute -top-2 -right-2 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => updateBlock(block.id, { url: "", alt: "" })}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+          
+          {/* Alt text and replace inline */}
+          <div className="flex-1 space-y-2">
+            <Input
+              value={block.alt || ""}
+              onChange={(e) => updateBlock(block.id, { alt: e.target.value })}
+              placeholder="Alt: Descrizione per SEO"
+              className={inputClasses}
+            />
+            <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
+              <Button type="button" variant="outline" size="sm" className="h-7 text-xs">
+                <Replace className="h-3 w-3 mr-1" />
+                Sostituisci
+              </Button>
+            </ImageDialog>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="border-2 border-dashed rounded-lg p-4 text-center">
+        <ImageIcon className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+        <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
+          <Button type="button" variant="outline" size="sm">
+            <ImageIcon className="h-4 w-4 mr-1" />
+            Seleziona
+          </Button>
+        </ImageDialog>
+      </div>
+    );
+  };
+
+  const renderTextImageBlock = (block: ContentBlock, isMobile: boolean = false) => {
+    return (
+      <div className="space-y-4">
+        {/* Position and aspect ratio selectors */}
+        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3`}>
+          <div className={isMobile ? 'w-full' : 'w-40'}>
+            <Label className="text-xs text-muted-foreground">Posizione Immagine</Label>
+            <Select
+              value={block.imagePosition || "right"}
+              onValueChange={(value) => updateBlock(block.id, { imagePosition: value as ContentBlock["imagePosition"] })}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="left">A sinistra</SelectItem>
+                <SelectItem value="right">A destra</SelectItem>
+                <SelectItem value="top">In alto</SelectItem>
+                <SelectItem value="bottom">In basso</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className={isMobile ? 'w-full' : 'w-40'}>
+            <Label className="text-xs text-muted-foreground">Formato Immagine</Label>
+            <Select
+              value={block.imageAspectRatio || "4/3"}
+              onValueChange={(value) => updateBlock(block.id, { imageAspectRatio: value as ContentBlock["imageAspectRatio"] })}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1/1">Quadrato (1:1)</SelectItem>
+                <SelectItem value="4/3">Orizzontale (4:3)</SelectItem>
+                <SelectItem value="16/9">Widescreen (16:9)</SelectItem>
+                <SelectItem value="3/4">Verticale (3:4)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Compact image section */}
+        <div>
+          <Label className="text-xs text-muted-foreground mb-2 block">Immagine</Label>
+          {renderImageControls(block, isMobile)}
+        </div>
+
+        {/* Rich text content */}
+        <div>
+          <Label className="text-xs text-muted-foreground">Contenuto Testuale</Label>
+          <RichTextEditor
+            content={block.content || ""}
+            onChange={(content) => updateBlock(block.id, { content })}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-3 md:space-y-4">
       {/* Mobile-friendly add block buttons */}
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("heading")} className="flex-1 min-w-[80px] sm:flex-none">
-          <Plus className="h-4 w-4 mr-1 md:mr-2" />
-          <span className="text-xs md:text-sm">Titolo</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("heading")} className="flex-1 min-w-[70px] sm:flex-none">
+          <Plus className="h-4 w-4 mr-1" />
+          <span className="text-xs">Titolo</span>
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("text")} className="flex-1 min-w-[80px] sm:flex-none">
-          <Plus className="h-4 w-4 mr-1 md:mr-2" />
-          <span className="text-xs md:text-sm">Testo</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("text")} className="flex-1 min-w-[70px] sm:flex-none">
+          <Plus className="h-4 w-4 mr-1" />
+          <span className="text-xs">Testo</span>
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("image")} className="flex-1 min-w-[80px] sm:flex-none">
-          <Plus className="h-4 w-4 mr-1 md:mr-2" />
-          <span className="text-xs md:text-sm">Immagine</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("image")} className="flex-1 min-w-[70px] sm:flex-none">
+          <Plus className="h-4 w-4 mr-1" />
+          <span className="text-xs">Immagine</span>
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("text-image")} className="flex-1 min-w-[100px] sm:flex-none bg-verde-light/10 border-verde-primary/30 hover:bg-verde-light/20">
+          <LayoutTemplate className="h-4 w-4 mr-1" />
+          <span className="text-xs">Testo + Img</span>
         </Button>
       </div>
 
@@ -103,7 +236,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                   >
                     <MoveDown className="h-4 w-4" />
                   </Button>
-                  <span className="text-xs text-muted-foreground capitalize ml-2">{block.type}</span>
+                  <span className="text-xs text-muted-foreground ml-2">{getBlockTypeLabel(block.type)}</span>
                 </div>
                 <Button
                   type="button"
@@ -183,43 +316,13 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                   )}
 
                   {block.type === "image" && (
-                    <div className="space-y-4">
-                      {block.url ? (
-                        <div className="space-y-4">
-                          <img 
-                            src={block.url} 
-                            alt={block.alt || ""} 
-                            className="max-w-md rounded-lg border shadow-sm" 
-                          />
-                          <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
-                            <Button type="button" variant="outline" size="sm">
-                              <Replace className="h-4 w-4 mr-2" />
-                              Sostituisci Immagine
-                            </Button>
-                          </ImageDialog>
-                          <div>
-                            <Label>Testo Alternativo (Alt)</Label>
-                            <Input
-                              value={block.alt || ""}
-                              onChange={(e) => updateBlock(block.id, { alt: e.target.value })}
-                              placeholder="Descrizione dell'immagine per SEO e accessibilità"
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                          <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                          <p className="text-muted-foreground mb-4">Nessuna immagine selezionata</p>
-                          <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
-                            <Button type="button" variant="outline">
-                              <ImageIcon className="h-4 w-4 mr-2" />
-                              Seleziona Immagine
-                            </Button>
-                          </ImageDialog>
-                        </div>
-                      )}
+                    <div className="space-y-3">
+                      <Label className="text-xs text-muted-foreground">Immagine Singola</Label>
+                      {renderImageControls(block, false)}
                     </div>
                   )}
+
+                  {block.type === "text-image" && renderTextImageBlock(block, false)}
                 </div>
 
                 <Button
@@ -277,42 +380,11 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
 
                 {block.type === "image" && (
                   <div className="space-y-3">
-                    {block.url ? (
-                      <>
-                        <img 
-                          src={block.url} 
-                          alt={block.alt || ""} 
-                          className="w-full rounded-lg border shadow-sm" 
-                        />
-                        <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
-                          <Button type="button" variant="outline" size="sm" className="w-full">
-                            <Replace className="h-4 w-4 mr-2" />
-                            Sostituisci
-                          </Button>
-                        </ImageDialog>
-                        <div>
-                          <Label className="text-xs">Testo Alt</Label>
-                          <Input
-                            value={block.alt || ""}
-                            onChange={(e) => updateBlock(block.id, { alt: e.target.value })}
-                            placeholder="Descrizione immagine"
-                            className="h-9"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                        <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                        <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
-                          <Button type="button" variant="outline" size="sm">
-                            <ImageIcon className="h-4 w-4 mr-2" />
-                            Seleziona
-                          </Button>
-                        </ImageDialog>
-                      </div>
-                    )}
+                    {renderImageControls(block, true)}
                   </div>
                 )}
+
+                {block.type === "text-image" && renderTextImageBlock(block, true)}
               </div>
             </CardContent>
           </Card>
@@ -320,7 +392,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
 
         {blocks.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            <p>No content blocks yet. Add your first block above.</p>
+            <p>Nessun blocco di contenuto. Aggiungi il primo blocco sopra.</p>
           </div>
         )}
       </div>
