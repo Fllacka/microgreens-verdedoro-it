@@ -90,6 +90,10 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     }
 
     // Left/Right layout (side by side on desktop, stacked on mobile)
+    // For "right" position: text on left, image on right (but on mobile, image shows first)
+    const textOrder = position === "right" ? "order-2 lg:order-1" : "";
+    const imageOrder = position === "right" ? "order-1 lg:order-2" : "";
+
     return (
       <div key={block.id}>
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 items-start">
@@ -100,14 +104,14 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
             </>
           ) : (
             <>
-              <div className="order-2 lg:order-1 w-full lg:w-1/2">
+              <div className={`w-full lg:w-1/2 ${textOrder}`}>
                 {renderBlockTitle(block)}
                 <div
                   className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2"
                   dangerouslySetInnerHTML={{ __html: block.content || "" }}
                 />
               </div>
-              <div className="order-1 lg:order-2 w-full lg:w-1/2">
+              <div className={`w-full lg:w-1/2 ${imageOrder}`}>
                 {block.url && (
                   <img
                     src={block.url}
