@@ -60,8 +60,9 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
       </div>
     );
 
-    const textElement = (
+    const textWithTitle = (
       <div className={`w-full ${position === "left" || position === "right" ? "lg:w-1/2" : ""}`}>
+        {renderBlockTitle(block)}
         <div
           className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2"
           dangerouslySetInnerHTML={{ __html: block.content || "" }}
@@ -73,15 +74,14 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     if (position === "top" || position === "bottom") {
       return (
         <div key={block.id} className="space-y-6">
-          {renderBlockTitle(block)}
           {position === "top" ? (
             <>
               {imageElement}
-              {textElement}
+              {textWithTitle}
             </>
           ) : (
             <>
-              {textElement}
+              {textWithTitle}
               {imageElement}
             </>
           )}
@@ -92,16 +92,16 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     // Left/Right layout (side by side on desktop, stacked on mobile)
     return (
       <div key={block.id}>
-        {renderBlockTitle(block)}
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 items-center">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-12 items-start">
           {position === "left" ? (
             <>
               {imageElement}
-              {textElement}
+              {textWithTitle}
             </>
           ) : (
             <>
               <div className="order-2 lg:order-1 w-full lg:w-1/2">
+                {renderBlockTitle(block)}
                 <div
                   className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2"
                   dangerouslySetInnerHTML={{ __html: block.content || "" }}
