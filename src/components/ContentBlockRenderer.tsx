@@ -164,9 +164,6 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
                   width={800}
                   height={450}
                 />
-                {block.alt && (
-                  <p className="text-sm text-muted-foreground text-center mt-3">{block.alt}</p>
-                )}
               </div>
             );
 
