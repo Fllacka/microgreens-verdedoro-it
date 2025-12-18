@@ -426,6 +426,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          faq_items: Json | null
           id: string
           image_alt: string | null
           image_id: string | null
@@ -461,6 +462,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          faq_items?: Json | null
           id?: string
           image_alt?: string | null
           image_id?: string | null
@@ -496,6 +498,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          faq_items?: Json | null
           id?: string
           image_alt?: string | null
           image_id?: string | null
