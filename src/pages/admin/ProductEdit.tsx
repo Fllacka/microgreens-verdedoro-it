@@ -17,12 +17,18 @@ import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Search, Package } from "lucide-react";
+import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle } from "lucide-react";
 
 interface CategoryItem {
   id: string;
   name: string;
   slug: string;
+}
+
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 const AdminProductEdit = () => {
@@ -54,6 +60,7 @@ const AdminProductEdit = () => {
     published: false,
     image_id: null as string | null,
     image_alt: "",
+    faq_items: [] as FAQItem[],
   });
 
   const [seoData, setSeoData] = useState({
@@ -138,6 +145,7 @@ const AdminProductEdit = () => {
         published: data.published || false,
         image_id: data.image_id || null,
         image_alt: (data as any).image_alt || "",
+        faq_items: (data as any).faq_items || [],
       });
 
       setSeoData({
@@ -188,6 +196,7 @@ const AdminProductEdit = () => {
         published: publishState !== undefined ? publishState : formData.published,
         image_id: formData.image_id,
         image_alt: formData.image_alt,
+        faq_items: formData.faq_items as unknown as any,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
         og_title: seoData.ogTitle,
@@ -426,6 +435,75 @@ const AdminProductEdit = () => {
                         onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
                       />
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* FAQ Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <HelpCircle className="h-5 w-5" />
+                      Domande Frequenti (FAQ)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {formData.faq_items.map((faq, index) => (
+                      <div key={faq.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 space-y-2">
+                            <Label>Domanda {index + 1}</Label>
+                            <Input
+                              value={faq.question}
+                              onChange={(e) => {
+                                const updated = [...formData.faq_items];
+                                updated[index].question = e.target.value;
+                                setFormData({ ...formData, faq_items: updated });
+                              }}
+                              placeholder="Inserisci la domanda..."
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive mt-6"
+                            onClick={() => {
+                              const updated = formData.faq_items.filter((_, i) => i !== index);
+                              setFormData({ ...formData, faq_items: updated });
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Risposta</Label>
+                          <RichTextEditor
+                            content={faq.answer}
+                            onChange={(content) => {
+                              const updated = [...formData.faq_items];
+                              updated[index].answer = content;
+                              setFormData({ ...formData, faq_items: updated });
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const newFaq: FAQItem = {
+                          id: crypto.randomUUID(),
+                          question: "",
+                          answer: "",
+                        };
+                        setFormData({ ...formData, faq_items: [...formData.faq_items, newFaq] });
+                      }}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Aggiungi FAQ
+                    </Button>
                   </CardContent>
                 </Card>
 

@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingCart, Star, Leaf, FileText, Heart, ChefHat } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ShoppingCart, Star, Leaf, FileText, Heart, ChefHat, HelpCircle } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,12 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { generateProductSchema, generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
+
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
 
 interface Product {
   id: string;
@@ -42,6 +49,7 @@ interface Product {
   meta_title: string;
   meta_description: string;
   canonical_url?: string;
+  faq_items?: FAQItem[];
   media?: {
     file_path: string;
   };
@@ -80,7 +88,7 @@ const ProductDetail = () => {
         if (productError) throw productError;
 
         if (productData) {
-          setProduct(productData as Product);
+          setProduct(productData as unknown as Product);
 
           // Fetch related products (exclude current product)
           const { data: relatedData, error: relatedError } = await supabase
@@ -97,7 +105,7 @@ const ProductDetail = () => {
 
           if (relatedError) throw relatedError;
           if (relatedData) {
-            setRelatedProducts(relatedData as Product[]);
+            setRelatedProducts(relatedData as unknown as Product[]);
           }
         }
       } catch (error) {
@@ -364,6 +372,42 @@ const ProductDetail = () => {
                 />
               </CardContent>
             </Card>
+          </div>
+        </section>
+      )}
+
+      {/* FAQ Section */}
+      {product.faq_items && product.faq_items.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-5xl mx-auto">
+            {/* Section Divider */}
+            <div className="border-t border-border/30 mb-12" />
+            
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2.5 rounded-xl bg-verde-primary/10">
+                <HelpCircle className="h-6 w-6 text-verde-primary" />
+              </div>
+              <h2 className="font-display text-3xl font-bold text-primary">Domande Frequenti</h2>
+            </div>
+            <Accordion type="single" collapsible className="space-y-3">
+              {product.faq_items.map((faq, index) => (
+                <AccordionItem 
+                  key={faq.id || index} 
+                  value={`faq-${index}`}
+                  className="border border-border/30 rounded-lg px-6 bg-background"
+                >
+                  <AccordionTrigger className="text-left font-display text-lg font-semibold text-primary hover:no-underline py-5">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-5">
+                    <div 
+                      className={proseClasses}
+                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
         </section>
       )}
