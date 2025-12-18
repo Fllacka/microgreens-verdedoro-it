@@ -26,11 +26,14 @@ interface Product {
   slug: string;
   description: string;
   content: string;
+  content_title?: string;
   category: string;
   benefits: string[];
   uses: string[];
   benefits_content?: string;
+  benefits_title?: string;
   uses_content?: string;
+  uses_title?: string;
   image_alt?: string;
   rating: number;
   popular: boolean;
@@ -298,7 +301,7 @@ const ProductPreview = () => {
               <div className="p-2.5 rounded-xl bg-verde-primary/10">
                 <FileText className="h-6 w-6 text-verde-primary" />
               </div>
-              <h2 className="font-display text-3xl font-bold text-primary">Panoramica del Prodotto</h2>
+              <h2 className="font-display text-3xl font-bold text-primary">{product.content_title || "Panoramica del Prodotto"}</h2>
             </div>
             <div 
               className={proseClasses}
@@ -319,7 +322,7 @@ const ProductPreview = () => {
               <div className="p-2.5 rounded-xl bg-verde-primary/10">
                 <Heart className="h-6 w-6 text-verde-primary" />
               </div>
-              <h2 className="font-display text-3xl font-bold text-primary">Benefici</h2>
+              <h2 className="font-display text-3xl font-bold text-primary">{product.benefits_title || "Benefici"}</h2>
             </div>
             <Card className="border border-border/30 bg-gradient-to-br from-verde-primary/5 to-transparent">
               <CardContent className="p-8">
@@ -344,7 +347,7 @@ const ProductPreview = () => {
               <div className="p-2.5 rounded-xl bg-oro-primary/10">
                 <ChefHat className="h-6 w-6 text-oro-primary" />
               </div>
-              <h2 className="font-display text-3xl font-bold text-primary">Usi Culinari</h2>
+              <h2 className="font-display text-3xl font-bold text-primary">{product.uses_title || "Usi Culinari"}</h2>
             </div>
             <Card className="border border-border/30 bg-gradient-to-br from-oro-primary/5 to-transparent">
               <CardContent className="p-8">

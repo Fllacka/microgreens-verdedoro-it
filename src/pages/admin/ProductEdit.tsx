@@ -40,12 +40,15 @@ const AdminProductEdit = () => {
     name: "",
     description: "",
     content: "",
+    content_title: "Panoramica del Prodotto",
     category: "",
     price: "",
     benefits: "",
     uses: "",
     benefits_content: "",
+    benefits_title: "Benefici",
     uses_content: "",
+    uses_title: "Usi Culinari",
     rating: "",
     popular: false,
     published: false,
@@ -121,12 +124,15 @@ const AdminProductEdit = () => {
         name: data.name || "",
         description: data.description || "",
         content: data.content || "",
+        content_title: (data as any).content_title || "Panoramica del Prodotto",
         category: data.category || "",
         price: data.price?.toString() || "",
         benefits: data.benefits?.join(", ") || "",
         uses: data.uses?.join(", ") || "",
         benefits_content: (data as any).benefits_content || "",
+        benefits_title: (data as any).benefits_title || "Benefici",
         uses_content: (data as any).uses_content || "",
+        uses_title: (data as any).uses_title || "Usi Culinari",
         rating: data.rating?.toString() || "",
         popular: data.popular || false,
         published: data.published || false,
@@ -168,12 +174,15 @@ const AdminProductEdit = () => {
         slug: seoData.slug,
         description: formData.description,
         content: formData.content,
+        content_title: formData.content_title,
         category: formData.category,
         price: formData.price ? parseFloat(formData.price) : null,
         benefits: formData.benefits ? formData.benefits.split(",").map(b => b.trim()) : [],
         uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
         benefits_content: formData.benefits_content,
+        benefits_title: formData.benefits_title,
         uses_content: formData.uses_content,
+        uses_title: formData.uses_title,
         rating: formData.rating ? parseFloat(formData.rating) : null,
         popular: formData.popular,
         published: publishState !== undefined ? publishState : formData.published,
@@ -295,6 +304,16 @@ const AdminProductEdit = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="content_title">Titolo Sezione (Descrizione Completa)</Label>
+                      <Input
+                        id="content_title"
+                        value={formData.content_title}
+                        onChange={(e) => setFormData({ ...formData, content_title: e.target.value })}
+                        placeholder="Panoramica del Prodotto"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label htmlFor="content">Descrizione Completa</Label>
                       <RichTextEditor
                         content={formData.content}
@@ -348,6 +367,16 @@ const AdminProductEdit = () => {
                     </div>
 
                     <div className="space-y-2">
+                      <Label htmlFor="benefits_title">Titolo Sezione (Benefici)</Label>
+                      <Input
+                        id="benefits_title"
+                        value={formData.benefits_title}
+                        onChange={(e) => setFormData({ ...formData, benefits_title: e.target.value })}
+                        placeholder="Benefici"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
                       <Label>Benefici (contenuto dettagliato)</Label>
                       <RichTextEditor
                         content={formData.benefits_content}
@@ -365,6 +394,16 @@ const AdminProductEdit = () => {
                         rows={2}
                       />
                       <p className="text-xs text-muted-foreground">Questi appariranno come badge nelle card prodotto</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="uses_title">Titolo Sezione (Usi Culinari)</Label>
+                      <Input
+                        id="uses_title"
+                        value={formData.uses_title}
+                        onChange={(e) => setFormData({ ...formData, uses_title: e.target.value })}
+                        placeholder="Usi Culinari"
+                      />
                     </div>
 
                     <div className="space-y-2">
