@@ -416,11 +416,13 @@ export type Database = {
         Row: {
           benefits: string[] | null
           benefits_content: string | null
+          benefits_title: string | null
           canonical_url: string | null
           category: string | null
           change_frequency: string | null
           content: string | null
           content_blocks: Json | null
+          content_title: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -444,15 +446,18 @@ export type Database = {
           updated_at: string | null
           uses: string[] | null
           uses_content: string | null
+          uses_title: string | null
         }
         Insert: {
           benefits?: string[] | null
           benefits_content?: string | null
+          benefits_title?: string | null
           canonical_url?: string | null
           category?: string | null
           change_frequency?: string | null
           content?: string | null
           content_blocks?: Json | null
+          content_title?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -476,15 +481,18 @@ export type Database = {
           updated_at?: string | null
           uses?: string[] | null
           uses_content?: string | null
+          uses_title?: string | null
         }
         Update: {
           benefits?: string[] | null
           benefits_content?: string | null
+          benefits_title?: string | null
           canonical_url?: string | null
           category?: string | null
           change_frequency?: string | null
           content?: string | null
           content_blocks?: Json | null
+          content_title?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -508,6 +516,7 @@ export type Database = {
           updated_at?: string | null
           uses?: string[] | null
           uses_content?: string | null
+          uses_title?: string | null
         }
         Relationships: [
           {
