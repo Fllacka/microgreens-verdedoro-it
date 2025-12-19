@@ -82,6 +82,12 @@ const AdminSidebar = () => {
   const isActive = (path: string) => location.pathname.startsWith(path);
   const isExactMatch = (path: string) => location.pathname === path;
 
+  const topLevelItems = [
+    { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
+    { title: "Prodotti", url: "/admin/products", icon: ShoppingBag },
+    { title: "Articoli Blog", url: "/admin/blog", icon: PenSquare, excludeCheck: "/admin/blog-overview" },
+  ];
+
   const pageItems = [
     { title: "Homepage", url: "/admin/homepage", icon: Home },
     { title: "Chi Siamo", url: "/admin/chi-siamo", icon: Info },
@@ -100,14 +106,16 @@ const AdminSidebar = () => {
     { title: "Logo & Generali", url: "/admin/settings", icon: Palette, adminOnly: true },
   ];
 
+  const filteredSettingsItems = settingsItems.filter(item => !item.adminOnly || userRole === "admin");
+
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarHeader className="border-b p-4">
+      <SidebarHeader className="border-b p-3 md:p-4">
         <div className={cn("flex items-center gap-2", isCollapsed && "justify-center")}>
-          <LayoutDashboard className="h-6 w-6 text-primary shrink-0" />
+          <LayoutDashboard className="h-5 w-5 md:h-6 md:w-6 text-primary shrink-0" />
           {!isCollapsed && (
             <div className="flex flex-col min-w-0">
-              <span className="font-bold text-lg truncate">CMS Admin</span>
+              <span className="font-bold text-base md:text-lg truncate">CMS Admin</span>
               <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
             </div>
           )}
@@ -115,104 +123,106 @@ const AdminSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent className="px-2">
-        {/* Dashboard - Top Level */}
+        {/* Top Level Items */}
         <SidebarGroup className="py-2">
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isExactMatch("/admin")} tooltip="Dashboard">
-                <Link to="/admin">
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {topLevelItems.map((item) => {
+              const active = item.exact 
+                ? isExactMatch(item.url) 
+                : item.excludeCheck 
+                  ? isActive(item.url) && !isActive(item.excludeCheck)
+                  : isActive(item.url);
+              return (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Products - Top Level */}
-        <SidebarGroup className="py-0">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/products")} tooltip="Prodotti">
-                <Link to="/admin/products">
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>Prodotti</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Blog Posts - Top Level */}
-        <SidebarGroup className="py-0">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/admin/blog") && !isActive("/admin/blog-overview")} tooltip="Articoli Blog">
-                <Link to="/admin/blog">
-                  <PenSquare className="h-4 w-4" />
-                  <span>Articoli Blog</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Pages Section - Collapsible */}
+        {/* Pages Section */}
         <SidebarGroup className="py-2">
-          <Collapsible open={!isCollapsed && pagesOpen} onOpenChange={setPagesOpen}>
-            <SidebarGroupLabel asChild className="px-2">
-              <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-sidebar-accent rounded-md transition-colors">
-                <span className="flex items-center gap-2">
-                  <Files className="h-4 w-4" />
-                  {!isCollapsed && <span>Pagine</span>}
-                </span>
-                {!isCollapsed && (
+          {isCollapsed ? (
+            // When collapsed, show all page items as icon-only buttons
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Pagine" isActive={isPagesRoute}>
+                  <Link to="/admin/homepage">
+                    <Files className="h-4 w-4" />
+                    <span>Pagine</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          ) : (
+            <Collapsible open={pagesOpen} onOpenChange={setPagesOpen}>
+              <SidebarGroupLabel asChild className="px-2">
+                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-sidebar-accent rounded-md transition-colors">
+                  <span className="flex items-center gap-2">
+                    <Files className="h-4 w-4" />
+                    <span>Pagine</span>
+                  </span>
                   <ChevronDown className={cn("h-4 w-4 transition-transform", !pagesOpen && "-rotate-90")} />
-                )}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {pageItems.map((item) => {
-                    const active = item.checkFn ? item.checkFn() : isActive(item.url);
-                    return (
-                      <SidebarMenuItem key={item.url}>
-                        <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                          <Link to={item.url}>
-                            <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
+                </CollapsibleTrigger>
+              </SidebarGroupLabel>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {pageItems.map((item) => {
+                      const active = item.checkFn ? item.checkFn() : isActive(item.url);
+                      return (
+                        <SidebarMenuItem key={item.url}>
+                          <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+                            <Link to={item.url}>
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </SidebarGroup>
 
-        {/* Settings Section - Collapsible */}
+        {/* Settings Section */}
         <SidebarGroup className="py-2">
-          <Collapsible open={!isCollapsed && settingsOpen} onOpenChange={setSettingsOpen}>
-            <SidebarGroupLabel asChild className="px-2">
-              <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-sidebar-accent rounded-md transition-colors">
-                <span className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  {!isCollapsed && <span>Impostazioni</span>}
-                </span>
-                {!isCollapsed && (
+          {isCollapsed ? (
+            // When collapsed, show settings as single icon link
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Impostazioni" isActive={isSettingsRoute}>
+                  <Link to="/admin/media">
+                    <Settings className="h-4 w-4" />
+                    <span>Impostazioni</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          ) : (
+            <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
+              <SidebarGroupLabel asChild className="px-2">
+                <CollapsibleTrigger className="flex w-full items-center justify-between hover:bg-sidebar-accent rounded-md transition-colors">
+                  <span className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    <span>Impostazioni</span>
+                  </span>
                   <ChevronDown className={cn("h-4 w-4 transition-transform", !settingsOpen && "-rotate-90")} />
-                )}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {settingsItems
-                    .filter(item => !item.adminOnly || userRole === "admin")
-                    .map((item) => (
+                </CollapsibleTrigger>
+              </SidebarGroupLabel>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {filteredSettingsItems.map((item) => (
                       <SidebarMenuItem key={item.url}>
                         <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                           <Link to={item.url}>
@@ -222,10 +232,11 @@ const AdminSidebar = () => {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
         </SidebarGroup>
       </SidebarContent>
 
