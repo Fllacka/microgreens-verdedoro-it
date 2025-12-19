@@ -17,7 +17,7 @@ import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle } from "lucide-react";
+import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle, GripVertical } from "lucide-react";
 
 interface CategoryItem {
   id: string;
@@ -448,8 +448,41 @@ const AdminProductEdit = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {formData.faq_items.map((faq, index) => (
-                      <div key={faq.id} className="border rounded-lg p-4 space-y-3">
+                      <div 
+                        key={faq.id} 
+                        className="border rounded-lg p-4 space-y-3 bg-background"
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("text/plain", index.toString());
+                          e.currentTarget.classList.add("opacity-50");
+                        }}
+                        onDragEnd={(e) => {
+                          e.currentTarget.classList.remove("opacity-50");
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.add("border-verde-primary", "border-2");
+                        }}
+                        onDragLeave={(e) => {
+                          e.currentTarget.classList.remove("border-verde-primary", "border-2");
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.classList.remove("border-verde-primary", "border-2");
+                          const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                          const toIndex = index;
+                          if (fromIndex !== toIndex) {
+                            const updated = [...formData.faq_items];
+                            const [movedItem] = updated.splice(fromIndex, 1);
+                            updated.splice(toIndex, 0, movedItem);
+                            setFormData({ ...formData, faq_items: updated });
+                          }
+                        }}
+                      >
                         <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing mt-6">
+                            <GripVertical className="h-5 w-5 text-muted-foreground" />
+                          </div>
                           <div className="flex-1 space-y-2">
                             <Label>Domanda {index + 1}</Label>
                             <Input
@@ -475,7 +508,7 @@ const AdminProductEdit = () => {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 pl-7">
                           <Label>Risposta</Label>
                           <RichTextEditor
                             content={faq.answer}
