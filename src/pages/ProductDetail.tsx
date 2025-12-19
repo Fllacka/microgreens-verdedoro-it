@@ -389,21 +389,23 @@ const ProductDetail = () => {
               </div>
               <h2 className="font-display text-3xl font-bold text-primary">Domande Frequenti</h2>
             </div>
-            <Accordion type="single" collapsible className="space-y-3">
+            <Accordion type="single" collapsible className="space-y-4">
               {product.faq_items.map((faq, index) => (
                 <AccordionItem 
                   key={faq.id || index} 
                   value={`faq-${index}`}
-                  className="border border-border/30 rounded-lg px-6 bg-background"
+                  className="border-2 border-verde-primary/20 rounded-xl px-6 bg-gradient-to-br from-verde-primary/5 to-transparent shadow-sm hover:shadow-md hover:border-verde-primary/30 transition-all duration-300"
                 >
-                  <AccordionTrigger className="text-left font-display text-lg font-semibold text-primary hover:no-underline py-5">
+                  <AccordionTrigger className="text-left font-display text-lg font-semibold text-primary hover:no-underline py-5 [&[data-state=open]]:text-verde-primary">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="pb-5">
-                    <div 
-                      className={proseClasses}
-                      dangerouslySetInnerHTML={{ __html: faq.answer }}
-                    />
+                  <AccordionContent className="pb-6">
+                    <div className="border-t border-verde-primary/10 pt-4">
+                      <div 
+                        className={proseClasses}
+                        dangerouslySetInnerHTML={{ __html: faq.answer }}
+                      />
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
               ))}
