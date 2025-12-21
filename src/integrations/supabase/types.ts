@@ -254,6 +254,8 @@ export type Database = {
           file_size: number | null
           file_type: string
           id: string
+          is_optimized: boolean | null
+          optimized_urls: Json | null
           storage_path: string
           updated_at: string | null
           uploaded_by: string | null
@@ -266,6 +268,8 @@ export type Database = {
           file_size?: number | null
           file_type: string
           id?: string
+          is_optimized?: boolean | null
+          optimized_urls?: Json | null
           storage_path: string
           updated_at?: string | null
           uploaded_by?: string | null
@@ -278,6 +282,8 @@ export type Database = {
           file_size?: number | null
           file_type?: string
           id?: string
+          is_optimized?: boolean | null
+          optimized_urls?: Json | null
           storage_path?: string
           updated_at?: string | null
           uploaded_by?: string | null

@@ -8,17 +8,31 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+
+interface OptimizedUrls {
+  thumbnail?: string;
+  medium?: string;
+  large?: string;
+  original?: string;
+  webp_thumbnail?: string;
+  webp_medium?: string;
+  webp_large?: string;
+}
 
 interface MediaFile {
   id: string;
   file_name: string;
   file_path: string;
   file_type: string;
+  storage_path: string;
+  is_optimized: boolean;
+  optimized_urls: OptimizedUrls | null;
 }
 
 interface ImageDialogProps {
   children: React.ReactNode;
-  onSelectImage: (url: string, alt: string) => void;
+  onSelectImage: (url: string, alt: string, optimizedUrls?: OptimizedUrls | null) => void;
 }
 
 export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
@@ -26,6 +40,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
   const [altText, setAltText] = useState("");
   const { toast } = useToast();
@@ -46,7 +61,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setMedia(data || []);
+      setMedia((data || []) as MediaFile[]);
     } catch (error: any) {
       toast({
         title: "Errore",
@@ -55,6 +70,34 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const processImage = async (mediaId: string, storagePath: string) => {
+    setProcessingId(mediaId);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('process-image', {
+        body: { storagePath, mediaId },
+      });
+
+      if (error) throw error;
+      
+      if (data.success) {
+        toast({
+          title: "Successo",
+          description: "Immagine ottimizzata",
+        });
+        await fetchMedia();
+        return data.optimizedUrls;
+      } else {
+        throw new Error(data.error || 'Processing failed');
+      }
+    } catch (error: any) {
+      console.error('Image processing error:', error);
+      return null;
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -87,20 +130,26 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
         .from("cms-media")
         .getPublicUrl(storagePath);
 
-      const { error: dbError } = await supabase.from("media").insert({
+      const { data: mediaData, error: dbError } = await supabase.from("media").insert({
         file_name: file.name,
         file_path: urlData.publicUrl,
         file_type: file.type,
         file_size: file.size,
         storage_path: storagePath,
-      });
+        is_optimized: false,
+      }).select().single();
 
       if (dbError) throw dbError;
 
       toast({
         title: "Successo",
-        description: "Immagine caricata con successo",
+        description: "Immagine caricata. Ottimizzazione in corso...",
       });
+
+      // Process image
+      if (mediaData) {
+        await processImage(mediaData.id, storagePath);
+      }
 
       await fetchMedia();
     } catch (error: any) {
@@ -121,7 +170,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
 
   const handleInsert = () => {
     if (selectedImage) {
-      onSelectImage(selectedImage.file_path, altText);
+      onSelectImage(selectedImage.file_path, altText, selectedImage.optimized_urls);
       setOpen(false);
       setSelectedImage(null);
       setAltText("");
@@ -163,7 +212,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
                       onClick={() => handleSelect(file)}
                     >
                       <img
-                        src={file.file_path}
+                        src={file.optimized_urls?.thumbnail || file.file_path}
                         alt={file.file_name}
                         className="w-full h-full object-cover"
                       />
@@ -171,6 +220,16 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
                         <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                           <Check className="h-8 w-8 text-primary" />
                         </div>
+                      )}
+                      {processingId === file.id && (
+                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      )}
+                      {file.is_optimized && (
+                        <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">
+                          <Check className="h-3 w-3" />
+                        </Badge>
                       )}
                     </div>
                   ))}
@@ -205,7 +264,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
           <div className="space-y-3 pt-4 border-t">
             <div className="flex items-center gap-4">
               <img
-                src={selectedImage.file_path}
+                src={selectedImage.optimized_urls?.thumbnail || selectedImage.file_path}
                 alt={selectedImage.file_name}
                 className="w-16 h-16 object-cover rounded"
               />

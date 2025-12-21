@@ -8,17 +8,31 @@ import { Image, Check, Upload, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+
+interface OptimizedUrls {
+  thumbnail?: string;
+  medium?: string;
+  large?: string;
+  original?: string;
+  webp_thumbnail?: string;
+  webp_medium?: string;
+  webp_large?: string;
+}
 
 interface MediaFile {
   id: string;
   file_name: string;
   file_path: string;
   file_type: string;
+  storage_path: string;
+  is_optimized: boolean;
+  optimized_urls: OptimizedUrls | null;
 }
 
 interface MediaSelectorProps {
   value: string | null;
-  onChange: (imageId: string | null, imageUrl: string | null) => void;
+  onChange: (imageId: string | null, imageUrl: string | null, optimizedUrls?: OptimizedUrls | null) => void;
   altText?: string;
   onAltTextChange?: (altText: string) => void;
   showAltText?: boolean;
@@ -29,7 +43,8 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; name: string; optimizedUrls?: OptimizedUrls | null } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -44,13 +59,17 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
     try {
       const { data, error } = await supabase
         .from("media")
-        .select("file_path, file_name")
+        .select("file_path, file_name, optimized_urls, is_optimized")
         .eq("id", value)
         .single();
 
       if (error) throw error;
       if (data) {
-        setSelectedImage({ url: data.file_path, name: data.file_name });
+        setSelectedImage({ 
+          url: data.file_path, 
+          name: data.file_name,
+          optimizedUrls: data.optimized_urls as OptimizedUrls | null,
+        });
       }
     } catch (error) {
       console.error("Error fetching selected image:", error);
@@ -67,7 +86,7 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setMedia(data || []);
+      setMedia((data || []) as MediaFile[]);
     } catch (error: any) {
       toast({
         title: "Errore",
@@ -79,17 +98,50 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
     }
   };
 
-  const handleSelect = (imageId: string, imageUrl: string) => {
-    onChange(imageId, imageUrl);
-    const selectedMedia = media.find(m => m.id === imageId);
-    if (selectedMedia) {
-      setSelectedImage({ url: imageUrl, name: selectedMedia.file_name });
+  const processImage = async (mediaId: string, storagePath: string) => {
+    setProcessingId(mediaId);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('process-image', {
+        body: { storagePath, mediaId },
+      });
+
+      if (error) throw error;
+      
+      if (data.success) {
+        toast({
+          title: "Successo",
+          description: "Immagine ottimizzata",
+        });
+        await fetchMedia();
+        return data.optimizedUrls;
+      } else {
+        throw new Error(data.error || 'Processing failed');
+      }
+    } catch (error: any) {
+      console.error('Image processing error:', error);
+      toast({
+        title: "Avviso",
+        description: "Immagine caricata, ottimizzazione in background",
+      });
+      return null;
+    } finally {
+      setProcessingId(null);
     }
+  };
+
+  const handleSelect = (file: MediaFile) => {
+    onChange(file.id, file.file_path, file.optimized_urls);
+    setSelectedImage({ 
+      url: file.file_path, 
+      name: file.file_name,
+      optimizedUrls: file.optimized_urls,
+    });
     setOpen(false);
   };
 
   const handleRemove = () => {
-    onChange(null, null);
+    onChange(null, null, null);
     setSelectedImage(null);
   };
 
@@ -109,7 +161,8 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const filePath = `${Math.random()}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `uploads/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("cms-media")
@@ -129,6 +182,7 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
           file_type: file.type,
           file_size: file.size,
           storage_path: filePath,
+          is_optimized: false,
         })
         .select()
         .single();
@@ -137,12 +191,24 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
 
       toast({
         title: "Successo",
-        description: "Immagine caricata con successo",
+        description: "Immagine caricata. Ottimizzazione in corso...",
       });
+
+      // Process image and get optimized URLs
+      let optimizedUrls: OptimizedUrls | null = null;
+      if (mediaData) {
+        optimizedUrls = await processImage(mediaData.id, filePath);
+      }
 
       // Auto-select the uploaded image
       if (mediaData) {
-        handleSelect(mediaData.id, mediaData.file_path);
+        onChange(mediaData.id, mediaData.file_path, optimizedUrls);
+        setSelectedImage({ 
+          url: mediaData.file_path, 
+          name: mediaData.file_name,
+          optimizedUrls,
+        });
+        setOpen(false);
       }
     } catch (error: any) {
       toast({
@@ -172,10 +238,10 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
             <div
               key={file.id}
               className="relative cursor-pointer group aspect-square rounded-lg overflow-hidden border hover:border-primary transition-colors"
-              onClick={() => handleSelect(file.id, file.file_path)}
+              onClick={() => handleSelect(file)}
             >
               <img
-                src={file.file_path}
+                src={file.optimized_urls?.thumbnail || file.file_path}
                 alt={file.file_name}
                 className="w-full h-full object-cover"
               />
@@ -183,6 +249,16 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
                 <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                   <Check className="h-8 w-8 text-primary" />
                 </div>
+              )}
+              {processingId === file.id && (
+                <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              )}
+              {file.is_optimized && (
+                <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">
+                  <Check className="h-3 w-3" />
+                </Badge>
               )}
             </div>
           ))}
@@ -233,7 +309,7 @@ export const MediaSelector = ({ value, onChange, altText = "", onAltTextChange, 
         <div className="space-y-4">
           <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border">
             <img
-              src={selectedImage.url}
+              src={selectedImage.optimizedUrls?.medium || selectedImage.url}
               alt={altText || selectedImage.name}
               className="w-full h-full object-cover"
             />
