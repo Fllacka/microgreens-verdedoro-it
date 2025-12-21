@@ -5,13 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, Copy, Check } from "lucide-react";
+import { Upload, Trash2, Copy, Check, Loader2, ImageIcon } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -23,6 +20,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+
+interface OptimizedUrls {
+  thumbnail?: string;
+  medium?: string;
+  large?: string;
+  original?: string;
+  webp_thumbnail?: string;
+  webp_medium?: string;
+  webp_large?: string;
+}
 
 interface MediaFile {
   id: string;
@@ -33,12 +41,15 @@ interface MediaFile {
   file_size: number;
   alt_text: string | null;
   created_at: string;
+  is_optimized: boolean;
+  optimized_urls: OptimizedUrls | null;
 }
 
 export default function AdminMedia() {
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -51,7 +62,7 @@ export default function AdminMedia() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setMedia(data || []);
+      setMedia((data || []) as MediaFile[]);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -67,6 +78,41 @@ export default function AdminMedia() {
     fetchMedia();
   }, []);
 
+  const processImage = async (mediaId: string, storagePath: string) => {
+    setProcessingIds(prev => new Set(prev).add(mediaId));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('process-image', {
+        body: { storagePath, mediaId },
+      });
+
+      if (error) throw error;
+      
+      if (data.success) {
+        toast({
+          title: "Successo",
+          description: "Immagine ottimizzata con successo",
+        });
+        fetchMedia();
+      } else {
+        throw new Error(data.error || 'Processing failed');
+      }
+    } catch (error: any) {
+      console.error('Image processing error:', error);
+      toast({
+        title: "Errore",
+        description: `Ottimizzazione fallita: ${error.message}`,
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(mediaId);
+        return newSet;
+      });
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -79,8 +125,8 @@ export default function AdminMedia() {
 
       for (const file of Array.from(files)) {
         const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${fileName}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `uploads/${fileName}`;
 
         // Upload to storage
         const { error: uploadError } = await supabase.storage
@@ -95,7 +141,7 @@ export default function AdminMedia() {
           .getPublicUrl(filePath);
 
         // Save to database
-        const { error: dbError } = await supabase.from("media").insert([
+        const { data: mediaData, error: dbError } = await supabase.from("media").insert([
           {
             file_name: file.name,
             file_type: file.type,
@@ -103,15 +149,21 @@ export default function AdminMedia() {
             storage_path: filePath,
             file_size: file.size,
             uploaded_by: user.id,
+            is_optimized: false,
           },
-        ]);
+        ]).select().single();
 
         if (dbError) throw dbError;
+
+        // Process image in background if it's an image
+        if (file.type.startsWith("image/") && mediaData) {
+          processImage(mediaData.id, filePath);
+        }
       }
 
       toast({
         title: "Success",
-        description: "Files uploaded successfully",
+        description: "Files uploaded successfully. Optimization in progress...",
       });
       fetchMedia();
     } catch (error: any) {
@@ -128,12 +180,28 @@ export default function AdminMedia() {
 
   const handleDelete = async (id: string, storagePath: string) => {
     try {
+      // Get optimized URLs to delete those too
+      const file = media.find(f => f.id === id);
+      const pathsToDelete = [storagePath];
+      
+      if (file?.optimized_urls) {
+        // Extract storage paths from optimized URLs
+        const baseDir = storagePath.split('/').slice(0, -1).join('/');
+        const prefix = baseDir ? `${baseDir}/` : '';
+        const baseName = storagePath.split('/').pop()?.replace(/\.[^.]+$/, '') || '';
+        
+        ['thumbnail', 'medium', 'large'].forEach(size => {
+          pathsToDelete.push(`${prefix}optimized/${baseName}_${size}.jpg`);
+          pathsToDelete.push(`${prefix}optimized/${baseName}_${size}.webp`);
+        });
+      }
+
       // Delete from storage
       const { error: storageError } = await supabase.storage
         .from("cms-media")
-        .remove([storagePath]);
+        .remove(pathsToDelete);
 
-      if (storageError) throw storageError;
+      if (storageError) console.warn('Storage delete warning:', storageError);
 
       // Delete from database
       const { error: dbError } = await supabase
@@ -210,15 +278,38 @@ export default function AdminMedia() {
           ) : (
             media.map((file) => (
               <Card key={file.id} className="overflow-hidden">
-                <div className="aspect-square bg-muted flex items-center justify-center">
+                <div className="aspect-square bg-muted flex items-center justify-center relative">
                   {file.file_type.startsWith("image/") ? (
                     <img
-                      src={file.file_path}
+                      src={file.optimized_urls?.thumbnail || file.file_path}
                       alt={file.alt_text || file.file_name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="text-2xl md:text-4xl text-muted-foreground">📄</div>
+                  )}
+                  
+                  {/* Processing indicator */}
+                  {processingIds.has(file.id) && (
+                    <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  )}
+                  
+                  {/* Optimization badge */}
+                  {file.file_type.startsWith("image/") && (
+                    <div className="absolute top-1 right-1">
+                      {file.is_optimized ? (
+                        <Badge variant="secondary" className="text-[10px] px-1 py-0">
+                          <Check className="h-3 w-3 mr-0.5" />
+                          Opt
+                        </Badge>
+                      ) : !processingIds.has(file.id) && (
+                        <Badge variant="outline" className="text-[10px] px-1 py-0 bg-background/80">
+                          <ImageIcon className="h-3 w-3" />
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </div>
                 <CardContent className="p-2 md:p-4 space-y-1 md:space-y-2">
