@@ -15,6 +15,19 @@ interface RichTextEditorProps {
   onChange: (content: string) => void;
 }
 
+const sanitizeRichTextHtml = (html: string) => {
+  if (!html) return "";
+
+  // Remove the literal sequence "\00a0" if it ever gets pasted/saved as text.
+  const withoutLiteral = html.replace(/\\00a0/g, "");
+
+  // Normalize paragraphs that only contain a non‑breaking space to an empty paragraph.
+  return withoutLiteral.replace(
+    /<p>\s*(?:&nbsp;|\u00a0)\s*<\/p>/g,
+    "<p></p>"
+  );
+};
+
 export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const [isLinkActive, setIsLinkActive] = useState(false);
   const [isImageSelected, setIsImageSelected] = useState(false);
@@ -55,9 +68,9 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
         },
       }),
     ],
-    content,
+    content: sanitizeRichTextHtml(content),
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      onChange(sanitizeRichTextHtml(editor.getHTML()));
       updateToolbarState(editor);
     },
     onSelectionUpdate: ({ editor }) => {
@@ -67,6 +80,8 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       updateToolbarState(editor);
     },
     editorProps: {
+      transformPastedText: (text) => text.replace(/\\00a0/g, ""),
+      transformPastedHTML: (html) => sanitizeRichTextHtml(html),
       handleClick: (view, pos, event) => {
         const target = event.target as HTMLElement;
         if (target.tagName === 'A' || target.closest('a')) {
