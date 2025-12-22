@@ -8,10 +8,12 @@ import ProductCard from "@/components/ProductCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ShoppingCart, Star, Leaf, FileText, Heart, ChefHat, HelpCircle } from "lucide-react";
+import OptimizedImage from "@/components/ui/optimized-image";
 import { Helmet } from "react-helmet";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { OptimizedUrls } from "@/components/ui/optimized-image";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -52,6 +54,7 @@ interface Product {
   faq_items?: FAQItem[];
   media?: {
     file_path: string;
+    optimized_urls?: OptimizedUrls | null;
   };
 }
 
@@ -78,7 +81,8 @@ const ProductDetail = () => {
           .select(`
             *,
             media:media!products_image_id_fkey (
-              file_path
+              file_path,
+              optimized_urls
             )
           `)
           .eq("slug", slug)
@@ -96,7 +100,8 @@ const ProductDetail = () => {
             .select(`
               *,
               media:media!products_image_id_fkey (
-                file_path
+                file_path,
+                optimized_urls
               )
             `)
             .eq("published", true)
@@ -212,14 +217,16 @@ const ProductDetail = () => {
 
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Product Image */}
-            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square bg-muted">
-              <img 
-                src={product.media?.file_path || "/placeholder.svg"} 
-                alt={product.image_alt || product.name} 
-                className="w-full h-full object-cover" 
-                loading="eager"
-                width={600}
-                height={600}
+            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square">
+              <OptimizedImage
+                src={product.media?.file_path || "/placeholder.svg"}
+                alt={product.image_alt || product.name}
+                className="w-full h-full"
+                containerClassName="w-full h-full"
+                priority={true}
+                objectFit="cover"
+                optimizedUrls={product.media?.optimized_urls}
+                size="large"
               />
             </div>
 
@@ -443,6 +450,7 @@ const ProductDetail = () => {
                     rating={relatedProduct.rating}
                     popular={relatedProduct.popular}
                     onCardClick={() => navigate(`/microgreens/${relatedProduct.slug}`)}
+                    optimizedUrls={relatedProduct.media?.optimized_urls}
                   />
                 ))}
               </div>

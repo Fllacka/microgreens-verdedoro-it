@@ -1,3 +1,5 @@
+import OptimizedImage, { OptimizedUrls } from "@/components/ui/optimized-image";
+
 interface ContentBlock {
   id: string;
   type: "heading" | "text" | "image" | "text-image";
@@ -9,6 +11,7 @@ interface ContentBlock {
   imageAspectRatio?: "1/1" | "4/3" | "16/9" | "3/4";
   title?: string;
   titleLevel?: "h2" | "h3";
+  optimizedUrls?: OptimizedUrls | null;
 }
 
 interface ContentBlockRendererProps {
@@ -57,14 +60,14 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     const aspectClass = getAspectRatioClass(block.imageAspectRatio);
     
     const imageElement = (
-      <img
-        src={block.url}
+      <OptimizedImage
+        src={block.url || ""}
         alt={block.alt || ""}
-        className={`w-full ${aspectClass} object-cover rounded-xl shadow-lg`}
-        loading="lazy"
-        decoding="async"
-        width={600}
-        height={400}
+        className="w-full h-full"
+        containerClassName={`w-full ${aspectClass} rounded-xl shadow-lg overflow-hidden`}
+        objectFit="cover"
+        optimizedUrls={block.optimizedUrls}
+        size="large"
       />
     );
 
@@ -165,14 +168,14 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
           case "image":
             return (
               <div key={block.id} className="my-8">
-                <img
-                  src={block.url}
+                <OptimizedImage
+                  src={block.url || ""}
                   alt={block.alt || ""}
-                  className="w-full rounded-xl shadow-lg"
-                  loading="lazy"
-                  decoding="async"
-                  width={800}
-                  height={450}
+                  className="w-full h-full"
+                  containerClassName="w-full aspect-video rounded-xl shadow-lg overflow-hidden"
+                  objectFit="cover"
+                  optimizedUrls={block.optimizedUrls}
+                  size="large"
                 />
               </div>
             );

@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { Helmet } from "react-helmet";
 import { generateBreadcrumbSchema } from "@/lib/seo";
 
+import { OptimizedUrls } from "@/components/ui/optimized-image";
+
 interface Product {
   id: string;
   name: string;
@@ -24,6 +26,7 @@ interface Product {
   popular: boolean;
   media?: {
     file_path: string;
+    optimized_urls: OptimizedUrls | null;
   };
 }
 
@@ -70,7 +73,8 @@ const Microgreens = () => {
               rating,
               popular,
               media:media!products_image_id_fkey (
-                file_path
+                file_path,
+                optimized_urls
               )
             `)
             .eq("published", true)
@@ -247,7 +251,8 @@ const Microgreens = () => {
                   rating={product.rating}
                   popular={product.popular}
                   onCardClick={() => navigate(`/microgreens/${product.slug}`)}
-                  priority={index < 3} // First 3 products load eagerly for mobile
+                  priority={index < 3}
+                  optimizedUrls={product.media?.optimized_urls}
                 />
               ))}
             </div>
