@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, Zap, Shield } from "lucide-react";
-import { useState } from "react";
+import OptimizedImage, { OptimizedUrls } from "@/components/ui/optimized-image";
 
 interface ProductCardProps {
   name: string;
@@ -14,6 +14,7 @@ interface ProductCardProps {
   popular?: boolean;
   onCardClick?: () => void;
   priority?: boolean;
+  optimizedUrls?: OptimizedUrls | null;
 }
 
 const ProductCard = ({
@@ -27,33 +28,24 @@ const ProductCard = ({
   popular,
   onCardClick,
   priority = false,
+  optimizedUrls,
 }: ProductCardProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [hasError, setHasError] = useState(false);
-
   return (
     <Card 
       className="product-card overflow-hidden border-border/50 relative cursor-pointer group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex flex-col"
       onClick={onCardClick}
     >
-      {/* Product Image - Optimized for mobile */}
-      <div className="relative h-48 overflow-hidden bg-muted/30">
-        {/* Skeleton placeholder */}
-        {!isLoaded && !hasError && (
-          <div className="absolute inset-0 animate-pulse bg-muted/50" />
-        )}
-        
-        <img
+      {/* Product Image - Optimized with WebP support */}
+      <div className="relative h-48 overflow-hidden">
+        <OptimizedImage
           src={image}
           alt={`${name} - microgreen fresco`}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-          width={400}
-          height={192}
-          loading={priority ? "eager" : "lazy"}
-          decoding={priority ? "sync" : "async"}
-          fetchPriority={priority ? "high" : "auto"}
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setHasError(true)}
+          className="w-full h-full"
+          containerClassName="w-full h-full"
+          priority={priority}
+          objectFit="cover"
+          optimizedUrls={optimizedUrls}
+          size="medium"
         />
         
         {/* Gradient overlay for better text readability */}
