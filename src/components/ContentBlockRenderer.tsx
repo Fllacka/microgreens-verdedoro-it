@@ -1,4 +1,4 @@
-import OptimizedImage, { OptimizedUrls } from "@/components/ui/optimized-image";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 interface ContentBlock {
   id: string;
@@ -11,7 +11,6 @@ interface ContentBlock {
   imageAspectRatio?: "1/1" | "4/3" | "16/9" | "3/4";
   title?: string;
   titleLevel?: "h2" | "h3";
-  optimizedUrls?: OptimizedUrls | null;
 }
 
 interface ContentBlockRendererProps {
@@ -66,8 +65,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
         className="w-full h-full"
         containerClassName={`w-full ${aspectClass} rounded-xl shadow-lg overflow-hidden`}
         objectFit="cover"
-        optimizedUrls={block.optimizedUrls}
         size="large"
+        context="full"
       />
     );
 
@@ -174,8 +173,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
                   className="w-full h-full"
                   containerClassName="w-full aspect-video rounded-xl shadow-lg overflow-hidden"
                   objectFit="cover"
-                  optimizedUrls={block.optimizedUrls}
                   size="large"
+                  context="full"
                 />
               </div>
             );

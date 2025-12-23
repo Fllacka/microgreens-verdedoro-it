@@ -12,7 +12,7 @@ import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import OptimizedImage, { OptimizedUrls } from "@/components/ui/optimized-image";
+import OptimizedImage from "@/components/ui/optimized-image";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -51,7 +51,6 @@ interface Product {
   faq_items?: FAQItem[];
   media?: {
     file_path: string;
-    optimized_urls?: OptimizedUrls | null;
   };
 }
 
@@ -216,8 +215,8 @@ const ProductPreview = () => {
                 containerClassName="w-full h-full"
                 priority={true}
                 objectFit="cover"
-                optimizedUrls={product.media?.optimized_urls}
                 size="large"
+                context="hero"
               />
             </div>
 

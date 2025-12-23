@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, Zap, Shield } from "lucide-react";
-import OptimizedImage, { OptimizedUrls } from "@/components/ui/optimized-image";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 interface ProductCardProps {
   name: string;
@@ -14,7 +14,6 @@ interface ProductCardProps {
   popular?: boolean;
   onCardClick?: () => void;
   priority?: boolean;
-  optimizedUrls?: OptimizedUrls | null;
 }
 
 const ProductCard = ({
@@ -28,7 +27,6 @@ const ProductCard = ({
   popular,
   onCardClick,
   priority = false,
-  optimizedUrls,
 }: ProductCardProps) => {
   return (
     <Card 
@@ -44,8 +42,8 @@ const ProductCard = ({
           containerClassName="w-full h-full"
           priority={priority}
           objectFit="cover"
-          optimizedUrls={optimizedUrls}
-          size="medium"
+          size="card"
+          context="card"
         />
         
         {/* Gradient overlay for better text readability */}
