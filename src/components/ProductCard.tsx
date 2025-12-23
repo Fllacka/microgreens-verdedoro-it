@@ -42,8 +42,8 @@ const ProductCard = ({
           containerClassName="w-full h-full"
           priority={priority}
           objectFit="cover"
-          size="card"
-          context="card"
+          size="productCard"
+          context="productCard"
         />
         
         {/* Gradient overlay for better text readability */}

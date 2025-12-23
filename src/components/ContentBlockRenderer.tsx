@@ -65,8 +65,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
         className="w-full h-full"
         containerClassName={`w-full ${aspectClass} rounded-xl shadow-lg overflow-hidden`}
         objectFit="cover"
-        size="large"
-        context="full"
+        size="textImageBlock"
+        context="textImageBlock"
       />
     );
 
@@ -173,8 +173,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
                   className="w-full h-full"
                   containerClassName="w-full aspect-video rounded-xl shadow-lg overflow-hidden"
                   objectFit="cover"
-                  size="large"
-                  context="full"
+                  size="contentImage"
+                  context="contentImage"
                 />
               </div>
             );

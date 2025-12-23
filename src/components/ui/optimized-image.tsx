@@ -5,7 +5,8 @@ import {
   getResponsiveSrcSet, 
   getImageSizes, 
   isSupabaseStorageUrl,
-  type ImageSizeKey 
+  type ImageSizeKey,
+  type ImageContext
 } from "@/lib/image-utils";
 
 // Legacy interface for backwards compatibility
@@ -34,10 +35,10 @@ interface OptimizedImageProps {
   onError?: () => void;
   /** @deprecated Use size prop instead - Supabase transforms images on-the-fly */
   optimizedUrls?: OptimizedUrls | null;
-  /** Size preset: thumbnail (150px), card (400px), medium (600px), large (1200px), hero (1920px) */
+  /** Size preset for image optimization */
   size?: ImageSizeKey;
-  /** Layout context for responsive sizing */
-  context?: 'card' | 'hero' | 'thumbnail' | 'full';
+  /** Layout context for responsive sizing - determines the sizes attribute */
+  context?: ImageSizeKey;
 }
 
 /**
@@ -63,7 +64,7 @@ const OptimizedImage = ({
   onError,
   optimizedUrls, // Legacy - ignored now, kept for backwards compatibility
   size = "medium",
-  context = "full",
+  context,
 }: OptimizedImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
