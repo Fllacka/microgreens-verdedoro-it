@@ -14,14 +14,45 @@ export interface ImageTransformOptions {
   format?: 'origin' | 'avif' | 'webp'; // Not yet fully supported, but browser auto-negotiation works
 }
 
-// Predefined size configurations for consistent usage
+/**
+ * Predefined size configurations optimized for each use case
+ * Sizes are based on actual display dimensions with 2x for retina
+ */
 export const IMAGE_SIZES = {
-  thumbnail: { width: 150, height: 150, quality: 70 },
-  card: { width: 400, height: 300, quality: 75 },
-  medium: { width: 600, height: 600, quality: 80 },
-  large: { width: 1200, height: 900, quality: 85 },
-  hero: { width: 1920, height: 1080, quality: 85 },
-  original: { quality: 90 }, // No resize, just quality reduction
+  // Product cards: 400x192 display → 800x384 for retina
+  productCard: { width: 800, height: 384, quality: 75, resize: 'cover' as const },
+  
+  // Blog article cards: 400x192 display → 800x384 for retina  
+  articleCard: { width: 800, height: 384, quality: 75, resize: 'cover' as const },
+  
+  // Featured article: 600x400 display → 1200x800 for retina
+  featuredArticle: { width: 1200, height: 800, quality: 80, resize: 'cover' as const },
+  
+  // Content block images in articles: max 768px wide → 1536 for retina
+  contentImage: { width: 1536, height: 1024, quality: 80, resize: 'cover' as const },
+  
+  // Text-image blocks: half width ~384px → 768 for retina
+  textImageBlock: { width: 768, height: 576, quality: 80, resize: 'cover' as const },
+  
+  // Section images (what are microgreens, custom, etc): 600x320 → 1200x640 retina
+  sectionImage: { width: 1200, height: 640, quality: 80, resize: 'cover' as const },
+  
+  // Hero backgrounds: full width, critical for LCP
+  hero: { width: 1920, height: 1080, quality: 85, resize: 'cover' as const },
+  
+  // Thumbnails for media library
+  thumbnail: { width: 300, height: 300, quality: 70, resize: 'cover' as const },
+  
+  // Medium size for general use
+  medium: { width: 600, height: 600, quality: 80, resize: 'cover' as const },
+  
+  // Large for full-width content
+  large: { width: 1200, height: 900, quality: 85, resize: 'cover' as const },
+  
+  // Original quality, no resize (for downloads)
+  original: { quality: 90 },
+  // Full-width fallback
+  full: { width: 1200, height: 800, quality: 85, resize: 'cover' as const },
 } as const;
 
 export type ImageSizeKey = keyof typeof IMAGE_SIZES;
@@ -115,12 +146,26 @@ export function getResponsiveSrcSet(url: string): string {
 /**
  * Generate sizes attribute for responsive images based on layout context
  */
-export function getImageSizes(context: 'card' | 'hero' | 'thumbnail' | 'full'): string {
+export function getImageSizes(context: ImageContext): string {
   switch (context) {
     case 'thumbnail':
       return '150px';
-    case 'card':
+    case 'productCard':
+    case 'articleCard':
+      // Cards: full width on mobile, 50% on tablet, ~400px on desktop
       return '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px';
+    case 'featuredArticle':
+      // Featured: full width on mobile, 50% on desktop (in 2-col grid)
+      return '(max-width: 768px) 100vw, 50vw';
+    case 'contentImage':
+      // Content images in articles: max ~768px container
+      return '(max-width: 768px) 100vw, 768px';
+    case 'textImageBlock':
+      // Text-image blocks: full on mobile, half on desktop
+      return '(max-width: 1024px) 100vw, 50vw';
+    case 'sectionImage':
+      // Section images: full on mobile, half on desktop grid
+      return '(max-width: 1024px) 100vw, 50vw';
     case 'hero':
       return '100vw';
     case 'full':
@@ -128,3 +173,6 @@ export function getImageSizes(context: 'card' | 'hero' | 'thumbnail' | 'full'): 
       return '(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1200px';
   }
 }
+
+// ImageContext is the same as ImageSizeKey for consistency
+export type ImageContext = ImageSizeKey;

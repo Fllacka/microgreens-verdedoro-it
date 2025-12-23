@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
+import OptimizedImage from "@/components/ui/optimized-image";
 import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
@@ -18,6 +19,7 @@ import {
   generateLocalBusinessSchema,
   combineSchemas 
 } from "@/lib/seo";
+import { getImageUrl, isSupabaseStorageUrl } from "@/lib/image-utils";
 
 interface BlogPost {
   id: string;
@@ -272,24 +274,25 @@ const Index = () => {
 
   // Get images from CMS or use defaults
   const getHeroImage = () => {
-    if (heroContent.background_image_id && mediaMap[heroContent.background_image_id]) {
-      return mediaMap[heroContent.background_image_id];
-    }
-    return heroImage;
+    const url = heroContent.background_image_id && mediaMap[heroContent.background_image_id]
+      ? mediaMap[heroContent.background_image_id]
+      : heroImage;
+    // Apply transformation for Supabase images
+    return isSupabaseStorageUrl(url) ? getImageUrl(url, 'hero') : url;
   };
 
   const getWhatAreMicrogreensImage = () => {
-    if (whatAreMicrogreensContent.image_id && mediaMap[whatAreMicrogreensContent.image_id]) {
-      return mediaMap[whatAreMicrogreensContent.image_id];
-    }
-    return varietiesImage;
+    const url = whatAreMicrogreensContent.image_id && mediaMap[whatAreMicrogreensContent.image_id]
+      ? mediaMap[whatAreMicrogreensContent.image_id]
+      : varietiesImage;
+    return isSupabaseStorageUrl(url) ? getImageUrl(url, 'sectionImage') : url;
   };
 
   const getCustomMicrogreensImage = () => {
-    if (customMicrogreensContent.image_id && mediaMap[customMicrogreensContent.image_id]) {
-      return mediaMap[customMicrogreensContent.image_id];
-    }
-    return chefImage;
+    const url = customMicrogreensContent.image_id && mediaMap[customMicrogreensContent.image_id]
+      ? mediaMap[customMicrogreensContent.image_id]
+      : chefImage;
+    return isSupabaseStorageUrl(url) ? getImageUrl(url, 'sectionImage') : url;
   };
 
   // Alt text getters
@@ -631,16 +634,16 @@ const Index = () => {
                   <Link key={post.id} to={`/blog/${post.slug}`}>
                     <Card className="overflow-hidden hover-lift border-border/50 h-full">
                       <div className="relative h-48 overflow-hidden bg-muted/30">
-                        <img
+                        <OptimizedImage
                           src={imageUrl}
                           alt={`${post.title} - articolo blog`}
-                          className="w-full h-full object-cover"
-                          width={400}
-                          height={192}
-                          loading="lazy"
-                          decoding="async"
+                          className="w-full h-full"
+                          containerClassName="w-full h-full"
+                          objectFit="cover"
+                          size="articleCard"
+                          context="articleCard"
                         />
-                        <div className="absolute inset-0 bg-gradient-hero/20" />
+                        <div className="absolute inset-0 bg-gradient-hero/20 pointer-events-none" />
                       </div>
                       <CardContent className="p-6 text-left">
                         <h3 className="font-display text-xl font-semibold text-primary mb-2 line-clamp-2">

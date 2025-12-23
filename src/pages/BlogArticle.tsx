@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { generateArticleSchema, generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
+import OptimizedImage from "@/components/ui/optimized-image";
+import { getImageUrl } from "@/lib/image-utils";
 
 interface ContentBlock {
   id: string;
@@ -213,7 +215,7 @@ const BlogArticle = () => {
         <section 
           className="relative min-h-[60vh] flex items-center justify-center"
           style={coverImageUrl ? { 
-            backgroundImage: `url(${coverImageUrl})`,
+            backgroundImage: `url(${getImageUrl(coverImageUrl, 'hero')})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           } : {}}
@@ -314,14 +316,14 @@ const BlogArticle = () => {
                     <Card key={relatedPost.id} className="overflow-hidden hover-lift border-border/50 bg-card group">
                       <div className="relative h-48 overflow-hidden bg-muted/30">
                         {relatedCoverUrl ? (
-                          <img
+                          <OptimizedImage
                             src={relatedCoverUrl}
                             alt={`${relatedPost.title} - articolo correlato`}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                            decoding="async"
-                            width={400}
-                            height={192}
+                            className="w-full h-full"
+                            containerClassName="w-full h-full"
+                            objectFit="cover"
+                            size="articleCard"
+                            context="articleCard"
                           />
                         ) : (
                           <div className="w-full h-full bg-gradient-hero" />

@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import { generateBreadcrumbSchema } from "@/lib/seo";
+import OptimizedImage from "@/components/ui/optimized-image";
+import { getImageUrl } from "@/lib/image-utils";
 
 interface BlogPost {
   id: string;
@@ -193,7 +195,7 @@ const Blog = () => {
             {/* Hero Background Image - Optimized for LCP */}
             {heroImageUrl && (
               <img
-                src={heroImageUrl}
+                src={getImageUrl(heroImageUrl, 'hero')}
                 alt={heroSection?.content?.background_image_alt || "Blog hero background"}
                 className="absolute inset-0 w-full h-full object-cover"
                 fetchPriority="high"
@@ -273,14 +275,14 @@ const Blog = () => {
               <Card className="overflow-hidden hover-lift border-border/50 bg-card max-w-4xl mx-auto">
                 <div className="grid md:grid-cols-2 gap-0">
                   <div className="relative h-64 md:h-full overflow-hidden bg-muted/30">
-                    <img
+                    <OptimizedImage
                       src={featuredPost.featured_image_id && mediaMap[featuredPost.featured_image_id] ? mediaMap[featuredPost.featured_image_id] : varietiesImage}
                       alt={`${featuredPost.title} - articolo blog`}
-                      className="w-full h-full object-cover"
-                      width={600}
-                      height={400}
-                      loading="lazy"
-                      decoding="async"
+                      className="w-full h-full"
+                      containerClassName="w-full h-full"
+                      objectFit="cover"
+                      size="featuredArticle"
+                      context="featuredArticle"
                     />
                   </div>
                   <CardContent className="p-8 flex flex-col justify-center">
@@ -337,14 +339,14 @@ const Blog = () => {
                     {latestPosts.map((article) => (
                       <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card">
                         <div className="relative h-48 overflow-hidden bg-muted/30">
-                          <img
+                          <OptimizedImage
                             src={article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage}
                             alt={`${article.title} - articolo blog`}
-                            className="w-full h-full object-cover"
-                            width={400}
-                            height={192}
-                            loading="lazy"
-                            decoding="async"
+                            className="w-full h-full"
+                            containerClassName="w-full h-full"
+                            objectFit="cover"
+                            size="articleCard"
+                            context="articleCard"
                           />
                         </div>
                         <CardContent className="p-6">
