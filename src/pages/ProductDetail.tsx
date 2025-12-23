@@ -13,7 +13,7 @@ import { Helmet } from "react-helmet";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { OptimizedUrls } from "@/components/ui/optimized-image";
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -54,7 +54,6 @@ interface Product {
   faq_items?: FAQItem[];
   media?: {
     file_path: string;
-    optimized_urls?: OptimizedUrls | null;
   };
 }
 
@@ -225,8 +224,8 @@ const ProductDetail = () => {
                 containerClassName="w-full h-full"
                 priority={true}
                 objectFit="cover"
-                optimizedUrls={product.media?.optimized_urls}
                 size="large"
+                context="hero"
               />
             </div>
 
@@ -450,7 +449,6 @@ const ProductDetail = () => {
                     rating={relatedProduct.rating}
                     popular={relatedProduct.popular}
                     onCardClick={() => navigate(`/microgreens/${relatedProduct.slug}`)}
-                    optimizedUrls={relatedProduct.media?.optimized_urls}
                   />
                 ))}
               </div>

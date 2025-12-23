@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
 import { useAuth } from "@/contexts/AuthContext";
-import { OptimizedUrls } from "@/components/ui/optimized-image";
 
 interface Product {
   id: string;
@@ -24,7 +23,6 @@ interface Product {
   popular: boolean;
   media?: {
     file_path: string;
-    optimized_urls?: OptimizedUrls | null;
   };
 }
 
@@ -168,7 +166,6 @@ const MicrogreensPreview = () => {
                   popular={product.popular}
                   onCardClick={() => navigate(`/microgreens/${product.slug}`)}
                   priority={index < 3}
-                  optimizedUrls={product.media?.optimized_urls}
                 />
               ))}
             </div>

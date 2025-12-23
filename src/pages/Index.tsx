@@ -545,7 +545,6 @@ const Index = () => {
                     image={productImage}
                     onCardClick={() => navigate(`/microgreens/${product.slug}`)}
                     priority={index < 3}
-                    optimizedUrls={mediaInfo?.optimized_urls}
                   />
                 );
               })}
