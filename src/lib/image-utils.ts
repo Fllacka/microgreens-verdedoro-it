@@ -19,11 +19,11 @@ export interface ImageTransformOptions {
  * Sizes are based on actual display dimensions with 2x for retina
  */
 export const IMAGE_SIZES = {
-  // Product cards: 400x192 display → 800x384 for retina
-  productCard: { width: 800, height: 384, quality: 75, resize: 'cover' as const },
+  // Product cards: 400x192 display → 800x384 for retina - higher quality for crisp visuals
+  productCard: { width: 800, height: 384, quality: 85, resize: 'cover' as const },
   
   // Blog article cards: 400x192 display → 800x384 for retina  
-  articleCard: { width: 800, height: 384, quality: 75, resize: 'cover' as const },
+  articleCard: { width: 800, height: 384, quality: 85, resize: 'cover' as const },
   
   // Featured article: 600x400 display → 1200x800 for retina
   featuredArticle: { width: 1200, height: 800, quality: 80, resize: 'cover' as const },
