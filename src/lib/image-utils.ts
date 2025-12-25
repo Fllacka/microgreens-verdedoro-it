@@ -19,40 +19,41 @@ export interface ImageTransformOptions {
  * Sizes are based on actual display dimensions with 2x for retina
  */
 export const IMAGE_SIZES = {
-  // Product cards: 400x192 display → 800x384 for retina - higher quality for crisp visuals
-  productCard: { width: 800, height: 384, quality: 85, resize: 'cover' as const },
+  // Product cards: width-only for file size optimization, CSS handles display cropping
+  productCard: { width: 800, quality: 85 },
   
-  // Blog article cards: 400x192 display → 800x384 for retina  
-  articleCard: { width: 800, height: 384, quality: 85, resize: 'cover' as const },
+  // Blog article cards
+  articleCard: { width: 800, quality: 85 },
   
-  // Featured article: 600x400 display → 1200x800 for retina
-  featuredArticle: { width: 1200, height: 800, quality: 80, resize: 'cover' as const },
+  // Featured article
+  featuredArticle: { width: 1200, quality: 80 },
   
-  // Content block images in articles: max 768px wide → 1536 for retina
-  contentImage: { width: 1536, height: 1024, quality: 80, resize: 'cover' as const },
+  // Content block images in articles
+  contentImage: { width: 1536, quality: 80 },
   
-  // Text-image blocks: half width ~384px → 768 for retina
-  textImageBlock: { width: 768, height: 576, quality: 80, resize: 'cover' as const },
+  // Text-image blocks
+  textImageBlock: { width: 768, quality: 80 },
   
-  // Section images (what are microgreens, custom, etc): 600x320 → 1200x640 retina
-  sectionImage: { width: 1200, height: 640, quality: 80, resize: 'cover' as const },
+  // Section images
+  sectionImage: { width: 1200, quality: 80 },
   
-  // Hero backgrounds: full width, critical for LCP
-  hero: { width: 1920, height: 1080, quality: 85, resize: 'cover' as const },
+  // Hero backgrounds
+  hero: { width: 1920, quality: 85 },
   
   // Thumbnails for media library
-  thumbnail: { width: 300, height: 300, quality: 70, resize: 'cover' as const },
+  thumbnail: { width: 300, quality: 70 },
   
   // Medium size for general use
-  medium: { width: 600, height: 600, quality: 80, resize: 'cover' as const },
+  medium: { width: 600, quality: 80 },
   
   // Large for full-width content
-  large: { width: 1200, height: 900, quality: 85, resize: 'cover' as const },
+  large: { width: 1200, quality: 85 },
   
-  // Original quality, no resize (for downloads)
+  // Original quality, no resize
   original: { quality: 90 },
+  
   // Full-width fallback
-  full: { width: 1200, height: 800, quality: 85, resize: 'cover' as const },
+  full: { width: 1200, quality: 85 },
 } as const;
 
 export type ImageSizeKey = keyof typeof IMAGE_SIZES;
@@ -137,7 +138,7 @@ export function getResponsiveSrcSet(url: string): string {
   
   return sizes
     .map(({ width, quality }) => {
-      const transformedUrl = getTransformedImageUrl(url, { width, quality, resize: 'cover' });
+      const transformedUrl = getTransformedImageUrl(url, { width, quality });
       return `${transformedUrl} ${width}w`;
     })
     .join(', ');
