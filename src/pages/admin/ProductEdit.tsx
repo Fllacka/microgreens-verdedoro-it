@@ -40,6 +40,7 @@ const AdminProductEdit = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
@@ -208,16 +209,21 @@ const AdminProductEdit = () => {
         structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
       };
 
-      if (isNew) {
+      // Use createdId if we just created this product (prevents race condition on re-save before navigation)
+      const shouldInsert = isNew && !createdId;
+      const productId = createdId || id;
+
+      if (shouldInsert) {
         const { data, error } = await supabase.from("products").insert(productData).select().single();
         if (error) throw error;
+        setCreatedId(data.id);
         toast({
           title: "Successo",
           description: "Prodotto creato con successo",
         });
         navigate(`/admin/products/${data.id}`);
       } else {
-        const { error } = await supabase.from("products").update(productData).eq("id", id);
+        const { error } = await supabase.from("products").update(productData).eq("id", productId);
         if (error) throw error;
         if (publishState !== undefined) {
           setFormData(prev => ({ ...prev, published: publishState }));

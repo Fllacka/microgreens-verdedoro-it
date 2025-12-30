@@ -27,6 +27,7 @@ const AdminBlogEdit = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
@@ -177,16 +178,21 @@ const AdminBlogEdit = () => {
         structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
       };
 
-      if (isNew) {
+      // Use createdId if we just created this post (prevents race condition on re-save before navigation)
+      const shouldInsert = isNew && !createdId;
+      const postId = createdId || id;
+
+      if (shouldInsert) {
         const { data, error } = await supabase.from("blog_posts").insert(postData).select().single();
         if (error) throw error;
+        setCreatedId(data.id);
         toast({
           title: "Successo",
           description: "Articolo creato con successo",
         });
         navigate(`/admin/blog/${data.id}`);
       } else {
-        const { error } = await supabase.from("blog_posts").update(postData).eq("id", id);
+        const { error } = await supabase.from("blog_posts").update(postData).eq("id", postId);
         if (error) throw error;
         if (publishState !== undefined) {
           setFormData(prev => ({ ...prev, published: publishState }));

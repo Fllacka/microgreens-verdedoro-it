@@ -24,6 +24,7 @@ export default function PageEdit() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
@@ -132,9 +133,14 @@ export default function PageEdit() {
         created_by: user?.id,
       };
 
-      if (isNew) {
+      // Use createdId if we just created this page (prevents race condition on re-save before navigation)
+      const shouldInsert = isNew && !createdId;
+      const pageId = createdId || id;
+
+      if (shouldInsert) {
         const { data, error } = await supabase.from("pages").insert([pageData]).select().single();
         if (error) throw error;
+        setCreatedId(data.id);
         toast({
           title: "Successo",
           description: "Pagina creata con successo",
@@ -144,7 +150,7 @@ export default function PageEdit() {
         const { error } = await supabase
           .from("pages")
           .update(pageData)
-          .eq("id", id);
+          .eq("id", pageId);
         if (error) throw error;
         if (publishState !== undefined) {
           setFormData(prev => ({ ...prev, published: publishState }));
