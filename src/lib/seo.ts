@@ -11,9 +11,9 @@ const ORGANIZATION = {
   url: SITE_URL,
   logo: {
     "@type": "ImageObject",
-    url: `${SITE_URL}/logo.png`,
+    url: `${SITE_URL}/logo.webp`,
     width: 400,
-    height: 100,
+    height: 156,
   },
   description: "Microgreens freschi e nutrienti coltivati nel cuore dell'Emilia-Romagna",
   address: {
