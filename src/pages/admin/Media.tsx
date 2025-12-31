@@ -128,10 +128,12 @@ export default function AdminMedia() {
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `uploads/${fileName}`;
 
-        // Upload to storage
+        // Upload to storage with 1-year cache (images are immutable with unique filenames)
         const { error: uploadError } = await supabase.storage
           .from("cms-media")
-          .upload(filePath, file);
+          .upload(filePath, file, {
+            cacheControl: '31536000', // 1 year cache
+          });
 
         if (uploadError) throw uploadError;
 
