@@ -138,7 +138,8 @@ const Footer = () => {
             logo_id,
             footer_settings,
             media:logo_id (
-              file_path
+              file_path,
+              optimized_urls
             )
           `)
           .eq("id", "default")
@@ -147,7 +148,10 @@ const Footer = () => {
         if (error) throw error;
 
         if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
-          setLogoUrl(data.media.file_path as string);
+          const mediaData = data.media as { file_path: string; optimized_urls?: { webp_medium?: string; webp_thumbnail?: string } };
+          // Use optimized WebP version if available (much smaller file size)
+          const optimizedUrl = mediaData.optimized_urls?.webp_medium || mediaData.optimized_urls?.webp_thumbnail;
+          setLogoUrl(optimizedUrl || mediaData.file_path);
         }
 
         if (data?.footer_settings) {
@@ -182,6 +186,9 @@ const Footer = () => {
                   src={logoUrl} 
                   alt="Verde D'Oro - Microgreens" 
                   className="h-14 w-auto"
+                  width={144}
+                  height={56}
+                  decoding="async"
                 />
               ) : (
                 <>
