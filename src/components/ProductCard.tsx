@@ -33,8 +33,8 @@ const ProductCard = ({
       className="product-card overflow-hidden border-border/50 relative cursor-pointer group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex flex-col"
       onClick={onCardClick}
     >
-      {/* Product Image - Optimized with WebP support */}
-      <div className="relative h-48 overflow-hidden">
+      {/* Product Image - Optimized with WebP support and fixed 4:3 aspect ratio */}
+      <div className="relative aspect-[4/3] overflow-hidden">
         <OptimizedImage
           src={image}
           alt={`${name} - microgreen fresco`}
@@ -42,6 +42,7 @@ const ProductCard = ({
           containerClassName="w-full h-full"
           priority={priority}
           objectFit="cover"
+          aspectRatio="4/3"
           size="productCard"
           context="productCard"
         />
