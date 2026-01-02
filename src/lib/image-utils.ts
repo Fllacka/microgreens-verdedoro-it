@@ -19,8 +19,8 @@ export interface ImageTransformOptions {
  * Sizes are based on actual display dimensions with 2x for retina
  */
 export const IMAGE_SIZES = {
-  // Product cards: 4:3 aspect ratio with server-side cropping for consistency
-  productCard: { width: 800, height: 600, quality: 85, resize: 'cover' },
+  // Product cards: 1:1 square aspect ratio for consistency across card and detail views
+  productCard: { width: 800, height: 800, quality: 85, resize: 'cover' },
   
   // Blog article cards
   articleCard: { width: 800, quality: 85 },
