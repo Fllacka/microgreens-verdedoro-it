@@ -15,8 +15,16 @@ interface QuoteRequestData {
   telefono?: string;
   indirizzo: string;
   messaggio: string;
-  prodotti: Array<{ name: string; quantity: number }>;
+  prodotti: Array<{ name: string; quantity: number; price?: number }>;
 }
+
+// Format price in euros
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(price);
+};
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -29,6 +37,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { nome, cognome, email, telefono, indirizzo, messaggio, prodotti } = data;
 
+    // Calculate total if prices are available
+    const hasAnyPrices = prodotti.some(p => p.price !== undefined && p.price > 0);
+    const totalPrice = prodotti.reduce((sum, p) => sum + (p.price || 0), 0);
+
     // Build products HTML for business email
     const productsHtml = prodotti.length > 0
       ? `
@@ -37,6 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
             <tr style="background: linear-gradient(135deg, #2d5016, #4a7c23);">
               <th style="padding: 12px 15px; text-align: left; color: white; font-weight: 600;">Prodotto</th>
               <th style="padding: 12px 15px; text-align: right; color: white; font-weight: 600;">Quantità</th>
+              ${hasAnyPrices ? '<th style="padding: 12px 15px; text-align: right; color: white; font-weight: 600;">Prezzo</th>' : ''}
             </tr>
           </thead>
           <tbody>
@@ -44,8 +57,15 @@ const handler = async (req: Request): Promise<Response> => {
               <tr style="background: ${i % 2 === 0 ? '#f9faf8' : '#ffffff'};">
                 <td style="padding: 12px 15px; border-bottom: 1px solid #e8ebe5;">${p.name}</td>
                 <td style="padding: 12px 15px; text-align: right; border-bottom: 1px solid #e8ebe5; font-weight: 500;">${p.quantity}g</td>
+                ${hasAnyPrices ? `<td style="padding: 12px 15px; text-align: right; border-bottom: 1px solid #e8ebe5; font-weight: 600; color: #4a7c23;">${p.price ? formatPrice(p.price) : '-'}</td>` : ''}
               </tr>
             `).join('')}
+            ${hasAnyPrices ? `
+            <tr style="background: #f0f4ed;">
+              <td colspan="2" style="padding: 12px 15px; text-align: right; font-weight: 600;">Totale Stimato:</td>
+              <td style="padding: 12px 15px; text-align: right; font-weight: 700; color: #2d5016; font-size: 1.1em;">${formatPrice(totalPrice)}</td>
+            </tr>
+            ` : ''}
           </tbody>
         </table>
       `
@@ -203,6 +223,7 @@ const handler = async (req: Request): Promise<Response> => {
                         <tr style="background: #f0f4ed;">
                           <th style="padding: 12px 15px; text-align: left; color: #2d5016; font-weight: 600; border-bottom: 2px solid #d4af37;">Prodotto</th>
                           <th style="padding: 12px 15px; text-align: right; color: #2d5016; font-weight: 600; border-bottom: 2px solid #d4af37;">Quantità</th>
+                          ${hasAnyPrices ? '<th style="padding: 12px 15px; text-align: right; color: #2d5016; font-weight: 600; border-bottom: 2px solid #d4af37;">Prezzo</th>' : ''}
                         </tr>
                       </thead>
                       <tbody>
@@ -210,8 +231,15 @@ const handler = async (req: Request): Promise<Response> => {
                           <tr style="background: ${i % 2 === 0 ? '#ffffff' : '#f9faf8'};">
                             <td style="padding: 12px 15px; border-bottom: 1px solid #e8ebe5; color: #333;">${p.name}</td>
                             <td style="padding: 12px 15px; text-align: right; border-bottom: 1px solid #e8ebe5; color: #4a7c23; font-weight: 600;">${p.quantity}g</td>
+                            ${hasAnyPrices ? `<td style="padding: 12px 15px; text-align: right; border-bottom: 1px solid #e8ebe5; color: #4a7c23; font-weight: 600;">${p.price ? formatPrice(p.price) : '-'}</td>` : ''}
                           </tr>
                         `).join('')}
+                        ${hasAnyPrices ? `
+                        <tr style="background: #f0f4ed;">
+                          <td colspan="2" style="padding: 12px 15px; text-align: right; font-weight: 600;">Totale Stimato:</td>
+                          <td style="padding: 12px 15px; text-align: right; font-weight: 700; color: #2d5016; font-size: 1.1em;">${formatPrice(totalPrice)}</td>
+                        </tr>
+                        ` : ''}
                       </tbody>
                     </table>
                     ` : ''}

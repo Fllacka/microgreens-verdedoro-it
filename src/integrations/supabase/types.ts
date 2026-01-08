@@ -444,6 +444,7 @@ export type Database = {
           og_title: string | null
           popular: boolean | null
           price: number | null
+          price_tiers: Json | null
           priority: number | null
           published: boolean | null
           rating: number | null
@@ -480,6 +481,7 @@ export type Database = {
           og_title?: string | null
           popular?: boolean | null
           price?: number | null
+          price_tiers?: Json | null
           priority?: number | null
           published?: boolean | null
           rating?: number | null
@@ -516,6 +518,7 @@ export type Database = {
           og_title?: string | null
           popular?: boolean | null
           price?: number | null
+          price_tiers?: Json | null
           priority?: number | null
           published?: boolean | null
           rating?: number | null

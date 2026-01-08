@@ -8,7 +8,15 @@ import Layout from "@/components/Layout";
 import { useToast } from "@/hooks/use-toast";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart, X } from "lucide-react";
+import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, ShoppingCart, X, Info } from "lucide-react";
+
+// Format price in euros
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(price);
+};
 import { Helmet } from "react-helmet";
 import { generateBreadcrumbSchema } from "@/lib/seo";
 
@@ -87,7 +95,7 @@ const Contatti = () => {
           telefono: formData.telefono,
           indirizzo: formData.indirizzo,
           messaggio: formData.messaggio,
-          prodotti: cartItems.map(item => ({ name: item.name, quantity: item.quantity }))
+          prodotti: cartItems.map(item => ({ name: item.name, quantity: item.quantity, price: item.price }))
         }
       });
 
@@ -247,21 +255,44 @@ const Contatti = () => {
                                   {item.quantity}g
                                 </span>
                               </div>
-                              <button
-                                type="button"
-                                onClick={() => removeItem(item.id)}
-                                className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                aria-label={`Rimuovi ${item.name}`}
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
+                              <div className="flex items-center gap-3">
+                                {item.price !== undefined && item.price > 0 && (
+                                  <span className="font-semibold text-verde-primary">
+                                    {formatPrice(item.price)}
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => removeItem(item.id)}
+                                  className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                                  aria-label={`Rimuovi ${item.name}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
                             </div>
                           ))}
-                          <div className="border-t pt-3 mt-3">
-                            <p className="text-sm text-muted-foreground">
-                              Riceverai un preventivo dettagliato via email
-                            </p>
-                          </div>
+                          {cartItems.some(item => item.price !== undefined && item.price > 0) && (
+                            <>
+                              <div className="border-t pt-3 mt-3 flex justify-between items-center">
+                                <span className="font-semibold">Totale stimato</span>
+                                <span className="text-lg font-bold text-verde-primary">
+                                  {formatPrice(cartItems.reduce((sum, item) => sum + (item.price || 0), 0))}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Info className="h-3 w-3" />
+                                Il prezzo finale sarà confermato nel preventivo
+                              </p>
+                            </>
+                          )}
+                          {!cartItems.some(item => item.price !== undefined && item.price > 0) && (
+                            <div className="border-t pt-3 mt-3">
+                              <p className="text-sm text-muted-foreground">
+                                Riceverai un preventivo dettagliato via email
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
