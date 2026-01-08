@@ -5,6 +5,7 @@ export interface CartItem {
   id: string;
   name: string;
   quantity: number;
+  price?: number; // Price for this weight tier (optional for backward compatibility)
   image: string;
 }
 
@@ -14,6 +15,7 @@ interface CartContextType {
   removeItem: (id: string) => void;
   clearCart: () => void;
   totalItems: number;
+  totalPrice: number; // Sum of all item prices
   itemCount: number;
   isOpen: boolean;
   openCart: () => void;
@@ -77,6 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = items.reduce((sum, item) => sum + (item.price || 0), 0);
   const itemCount = items.length;
 
   return (
@@ -86,6 +89,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem,
       clearCart,
       totalItems,
+      totalPrice,
       itemCount,
       isOpen,
       openCart,

@@ -30,6 +30,11 @@ interface FAQItem {
   answer: string;
 }
 
+interface PriceTier {
+  weight: number;
+  price: number;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -52,10 +57,19 @@ interface Product {
   meta_description: string;
   canonical_url?: string;
   faq_items?: FAQItem[];
+  price_tiers?: PriceTier[];
   media?: {
     file_path: string;
   };
 }
+
+// Format price in euros
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(price);
+};
 
 // Reusable prose styling constant
 const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=center]]:float-none [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
@@ -143,13 +157,28 @@ const ProductDetail = () => {
     );
   }
 
+  // Get available weight options based on price tiers or defaults
+  const defaultWeights = [100, 200, 300, 400, 500, 750, 1000];
+  const priceTiers = product?.price_tiers || [];
+  const hasPriceTiers = priceTiers.length > 0;
+  
+  // If price tiers are configured, only show those weights; otherwise show all defaults
+  const availableWeights = hasPriceTiers 
+    ? priceTiers.map(t => t.weight).sort((a, b) => a - b)
+    : defaultWeights;
+  
+  // Get price for current quantity
+  const currentPriceTier = priceTiers.find(t => t.weight === quantity);
+  const currentPrice = currentPriceTier?.price;
+
   const handleAddToCart = () => {
     if (!product) return;
 
     addItem({
-      id: product.slug,
+      id: `${product.slug}-${quantity}`, // Unique ID per weight
       name: product.name,
       quantity,
+      price: currentPrice,
       image: product.media?.file_path || "/placeholder.svg",
     });
   };
@@ -267,20 +296,33 @@ const ProductDetail = () => {
                         <SelectValue placeholder="Seleziona quantità" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="100">100 gr</SelectItem>
-                        <SelectItem value="200">200 gr</SelectItem>
-                        <SelectItem value="300">300 gr</SelectItem>
-                        <SelectItem value="400">400 gr</SelectItem>
-                        <SelectItem value="500">500 gr</SelectItem>
-                        <SelectItem value="750">750 gr</SelectItem>
-                        <SelectItem value="1000">1 kg</SelectItem>
+                        {availableWeights.map((weight) => {
+                          const tier = priceTiers.find(t => t.weight === weight);
+                          const priceLabel = tier?.price ? ` - ${formatPrice(tier.price)}` : '';
+                          const weightLabel = weight >= 1000 ? `${weight / 1000} kg` : `${weight} gr`;
+                          return (
+                            <SelectItem key={weight} value={weight.toString()}>
+                              {weightLabel}{priceLabel}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     
                     <p className="text-xs text-muted-foreground mt-2">
-                      Ordine minimo: 100 gr
+                      Ordine minimo: {availableWeights[0] >= 1000 ? `${availableWeights[0] / 1000} kg` : `${availableWeights[0]} gr`}
                     </p>
                   </div>
+
+                  {/* Price Display */}
+                  {currentPrice !== undefined && currentPrice > 0 && (
+                    <div className="mb-5 p-3 bg-verde-primary/5 rounded-lg border border-verde-primary/20">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Prezzo</span>
+                        <span className="text-2xl font-bold text-verde-primary">{formatPrice(currentPrice)}</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Add to Cart Button */}
                   <Button 
@@ -291,6 +333,7 @@ const ProductDetail = () => {
                   >
                     <ShoppingCart className="mr-2 h-5 w-5" />
                     Aggiungi al Carrello
+                    {currentPrice !== undefined && currentPrice > 0 && ` - ${formatPrice(currentPrice)}`}
                   </Button>
 
                   <p className="text-sm text-muted-foreground text-center mb-3">

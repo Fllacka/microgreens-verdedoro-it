@@ -17,7 +17,7 @@ import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle, GripVertical } from "lucide-react";
+import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle, GripVertical, Euro } from "lucide-react";
 
 interface CategoryItem {
   id: string;
@@ -29,6 +29,11 @@ interface FAQItem {
   id: string;
   question: string;
   answer: string;
+}
+
+interface PriceTier {
+  weight: number;
+  price: number;
 }
 
 const AdminProductEdit = () => {
@@ -50,6 +55,7 @@ const AdminProductEdit = () => {
     content_title: "Panoramica del Prodotto",
     category: "",
     price: "",
+    price_tiers: [] as PriceTier[],
     benefits: "",
     uses: "",
     benefits_content: "",
@@ -135,6 +141,7 @@ const AdminProductEdit = () => {
         content_title: (data as any).content_title || "Panoramica del Prodotto",
         category: data.category || "",
         price: data.price?.toString() || "",
+        price_tiers: (data as any).price_tiers || [],
         benefits: data.benefits?.join(", ") || "",
         uses: data.uses?.join(", ") || "",
         benefits_content: (data as any).benefits_content || "",
@@ -186,6 +193,7 @@ const AdminProductEdit = () => {
         content_title: formData.content_title,
         category: formData.category,
         price: formData.price ? parseFloat(formData.price) : null,
+        price_tiers: formData.price_tiers as unknown as any,
         benefits: formData.benefits ? formData.benefits.split(",").map(b => b.trim()) : [],
         uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
         benefits_content: formData.benefits_content,
@@ -336,7 +344,6 @@ const AdminProductEdit = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
                         <Select
@@ -356,17 +363,138 @@ const AdminProductEdit = () => {
                           </SelectContent>
                         </Select>
                       </div>
+                    </CardContent>
+                  </Card>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="price">Prezzo (€)</Label>
-                        <Input
-                          id="price"
-                          type="number"
-                          step="0.01"
-                          value={formData.price}
-                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        />
-                      </div>
+                {/* Price Tiers Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Euro className="h-5 w-5" />
+                      Prezzi per Quantità
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Configura i prezzi per ogni quantità. Le quantità senza prezzo non saranno disponibili per l'acquisto.
+                    </p>
+                    
+                    {/* Price Tiers Table */}
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-muted/50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Peso (g)</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Prezzo (€)</th>
+                            <th className="px-4 py-3 w-12"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {formData.price_tiers.map((tier, index) => (
+                            <tr key={index} className="bg-background">
+                              <td className="px-4 py-2">
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  value={tier.weight}
+                                  onChange={(e) => {
+                                    const updated = [...formData.price_tiers];
+                                    updated[index].weight = parseInt(e.target.value) || 0;
+                                    setFormData({ ...formData, price_tiers: updated });
+                                  }}
+                                  className="w-24"
+                                />
+                              </td>
+                              <td className="px-4 py-2">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={tier.price || ""}
+                                  onChange={(e) => {
+                                    const updated = [...formData.price_tiers];
+                                    updated[index].price = parseFloat(e.target.value) || 0;
+                                    setFormData({ ...formData, price_tiers: updated });
+                                  }}
+                                  placeholder="0.00"
+                                  className="w-28"
+                                />
+                              </td>
+                              <td className="px-4 py-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive hover:text-destructive"
+                                  onClick={() => {
+                                    const updated = formData.price_tiers.filter((_, i) => i !== index);
+                                    setFormData({ ...formData, price_tiers: updated });
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                          {formData.price_tiers.length === 0 && (
+                            <tr>
+                              <td colSpan={3} className="px-4 py-6 text-center text-muted-foreground text-sm">
+                                Nessun prezzo configurato. Aggiungi un peso per iniziare.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Quick Add Buttons */}
+                    <div className="flex flex-wrap gap-2">
+                      {[100, 200, 300, 400, 500, 750, 1000].map((weight) => {
+                        const exists = formData.price_tiers.some(t => t.weight === weight);
+                        if (exists) return null;
+                        return (
+                          <Button
+                            key={weight}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setFormData({
+                                ...formData,
+                                price_tiers: [...formData.price_tiers, { weight, price: 0 }].sort((a, b) => a.weight - b.weight)
+                              });
+                            }}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            {weight}g
+                          </Button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Custom Weight Input */}
+                    <div className="flex items-center gap-2 pt-2 border-t">
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="Peso personalizzato (g)"
+                        className="w-48"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const input = e.currentTarget;
+                            const weight = parseInt(input.value);
+                            if (weight > 0 && !formData.price_tiers.some(t => t.weight === weight)) {
+                              setFormData({
+                                ...formData,
+                                price_tiers: [...formData.price_tiers, { weight, price: 0 }].sort((a, b) => a.weight - b.weight)
+                              });
+                              input.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <span className="text-sm text-muted-foreground">Premi Invio per aggiungere</span>
                     </div>
 
                     <div className="space-y-2">
