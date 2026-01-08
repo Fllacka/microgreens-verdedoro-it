@@ -314,16 +314,6 @@ const ProductDetail = () => {
                     </p>
                   </div>
 
-                  {/* Price Display */}
-                  {currentPrice !== undefined && currentPrice > 0 && (
-                    <div className="mb-5 p-3 bg-verde-primary/5 rounded-lg border border-verde-primary/20">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Prezzo</span>
-                        <span className="text-2xl font-bold text-verde-primary">{formatPrice(currentPrice)}</span>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Add to Cart Button */}
                   <Button 
                     variant="oro" 
