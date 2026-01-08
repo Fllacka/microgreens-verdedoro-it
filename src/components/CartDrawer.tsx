@@ -108,9 +108,8 @@ export function CartDrawer() {
                 </Button>
                 
                 <Button 
-                  variant="outline" 
                   size="sm" 
-                  className="w-full border-verde-primary text-verde-primary hover:bg-verde-primary/10 hover:text-verde-primary" 
+                  className="w-full bg-verde-primary text-white hover:bg-verde-primary/90" 
                   onClick={closeCart} 
                   asChild
                 >
