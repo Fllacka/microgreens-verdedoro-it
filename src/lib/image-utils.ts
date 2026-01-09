@@ -19,6 +19,9 @@ export interface ImageTransformOptions {
  * Sizes are based on actual display dimensions with 2x for retina
  */
 export const IMAGE_SIZES = {
+  // Logo: small, high quality for crisp text/graphics (header/footer)
+  logo: { width: 200, height: 80, quality: 85, resize: 'contain' },
+  
   // Product cards: 1:1 square aspect ratio for consistency across card and detail views
   productCard: { width: 800, height: 800, quality: 85, resize: 'cover' },
   
