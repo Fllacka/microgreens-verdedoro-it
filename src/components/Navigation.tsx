@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Microgreens submenu items - hardcoded for design grouping
 const microgreensSubItems = [
-  { name: "Cosa sono i microgreens", url: "/cosa-sono-i-microgreens" },
+  { name: "Cosa sono i microgreens", url: "/cosa-sono-microgreens" },
   { name: "I nostri microgreens", url: "/microgreens" },
   { name: "Microgreens su misura", url: "/microgreens-su-misura" },
 ];
