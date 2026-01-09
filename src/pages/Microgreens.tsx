@@ -4,7 +4,8 @@ import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { Leaf, Star } from "lucide-react";
+import { Leaf, Star, ArrowRight, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,6 +132,7 @@ const Microgreens = () => {
   const heroSection = sections["hero"];
   const infoSection = sections["info"];
   const categoriesSection = sections["categories"];
+  const ctaSection = sections["cta"];
 
   // Filter products by selected category
   const filteredProducts = selectedCategory
@@ -255,6 +257,48 @@ const Microgreens = () => {
           )}
         </div>
       </section>
+
+      {/* CTA Section */}
+      {ctaSection?.is_visible !== false && (
+        <section className="section-padding bg-gradient-verde">
+          <div className="container-width text-center">
+            <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
+              {ctaSection?.content?.title || "Non Trovi la Varietà che Cerchi?"}
+            </h2>
+            <div 
+              className="font-body text-lg text-primary-foreground/90 max-w-3xl mx-auto mb-8 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+              dangerouslySetInnerHTML={{ 
+                __html: ctaSection?.content?.description || 
+                  "<p>La nostra selezione è in continua crescita, ma sappiamo che le tue esigenze possono essere uniche. Scopri le nostre coltivazioni personalizzate o contattaci direttamente per discutere le tue necessità.</p>" 
+              }}
+            />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                asChild
+                variant="oro"
+                size="lg"
+                className="group"
+              >
+                <Link to={ctaSection?.content?.primary_button_link || "/microgreens-su-misura"}>
+                  {ctaSection?.content?.primary_button_text || "Esplora Microgreens su Misura"}
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              >
+                <Link to={ctaSection?.content?.secondary_button_link || "/contatti"}>
+                  <Mail className="mr-2 h-5 w-5" />
+                  {ctaSection?.content?.secondary_button_text || "Contattaci Direttamente"}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Info Section */}
       {infoSection?.is_visible !== false && (
