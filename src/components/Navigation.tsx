@@ -180,7 +180,7 @@ const Navigation = () => {
                         <NavigationMenuItem key={item.id}>
                           <NavigationMenuTrigger 
                             className={cn(
-                              "font-body font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent",
+                              "font-body font-medium text-base bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent",
                               microgreensUrls.some(url => isActive(url)) 
                                 ? "text-foreground" 
                                 : "text-muted-foreground hover:text-foreground"
