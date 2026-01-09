@@ -300,21 +300,56 @@ const Navigation = () => {
                   </div>
                   
                   <div className="flex flex-col space-y-4">
-                    {visibleNavItems.map(item => (
-                      <Link 
-                        key={item.id} 
-                        to={item.url} 
-                        onClick={() => setIsOpen(false)} 
-                        className={cn(
-                          "block px-4 py-3 rounded-lg font-body font-medium transition-colors",
-                          isActive(item.url) 
-                            ? "bg-secondary text-foreground" 
-                            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    ))}
+                    {visibleNavItems
+                      .filter(item => !microgreensUrls.includes(item.url))
+                      .map(item => {
+                        // Check if this is the dropdown placeholder
+                        if (item.url === DROPDOWN_MARKER) {
+                          return (
+                            <div key={item.id} className="space-y-2">
+                              {/* Section header */}
+                              <div className="px-4 py-2 font-body font-medium text-foreground">
+                                {item.name}
+                              </div>
+                              {/* Sub-items with indentation */}
+                              <div className="pl-4 space-y-1">
+                                {microgreensSubItems.map((subItem) => (
+                                  <Link
+                                    key={subItem.url}
+                                    to={subItem.url}
+                                    onClick={() => setIsOpen(false)}
+                                    className={cn(
+                                      "block px-4 py-2 rounded-lg font-body transition-colors",
+                                      isActive(subItem.url)
+                                        ? "bg-secondary text-foreground font-medium"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                    )}
+                                  >
+                                    {subItem.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // Regular link
+                        return (
+                          <Link 
+                            key={item.id} 
+                            to={item.url} 
+                            onClick={() => setIsOpen(false)} 
+                            className={cn(
+                              "block px-4 py-3 rounded-lg font-body font-medium transition-colors",
+                              isActive(item.url) 
+                                ? "bg-secondary text-foreground" 
+                                : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                            )}
+                          >
+                            {item.name}
+                          </Link>
+                        );
+                      })}
                   </div>
                 </SheetContent>
               </Sheet>
