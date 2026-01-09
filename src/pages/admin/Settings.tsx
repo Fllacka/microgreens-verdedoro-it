@@ -4,6 +4,7 @@ import { MediaSelector } from "@/components/admin/MediaSelector";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { SettingsActionBar } from "@/components/admin/SettingsActionBar";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { SortableItem } from "@/components/admin/SortableItem";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Save, Image, Info, Navigation, LayoutGrid, Plus, Trash2, GripVertical, Leaf, Instagram, Facebook, Youtube, Linkedin, MessageCircle, ChevronDown } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 // Custom SVG icons for social platforms
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -200,6 +216,14 @@ const Settings = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const initialLoadComplete = useRef(false);
 
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
     hasUnsavedChanges: hasChanges,
@@ -353,6 +377,58 @@ const Settings = () => {
     const navItem = headerSettings.navigation_items.find(item => item.id === navItemId);
     const updatedSubItems = (navItem?.dropdown_items || []).filter(subItem => subItem.id !== subItemId);
     updateNavItem(navItemId, 'dropdown_items', updatedSubItems);
+  };
+
+  // Drag and drop handlers
+  const handleNavDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = headerSettings.navigation_items.findIndex(item => item.id === active.id);
+      const newIndex = headerSettings.navigation_items.findIndex(item => item.id === over.id);
+      const newItems = arrayMove(headerSettings.navigation_items, oldIndex, newIndex).map((item, index) => ({
+        ...item,
+        order: index
+      }));
+      setHeaderSettings({ ...headerSettings, navigation_items: newItems });
+    }
+  };
+
+  const handleDropdownSubItemDragEnd = (navItemId: string) => (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const navItem = headerSettings.navigation_items.find(item => item.id === navItemId);
+      const items = navItem?.dropdown_items || [];
+      const oldIndex = items.findIndex(item => item.id === active.id);
+      const newIndex = items.findIndex(item => item.id === over.id);
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      updateNavItem(navItemId, 'dropdown_items', newItems);
+    }
+  };
+
+  const handleQuickLinksDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = footerSettings.quick_links.items.findIndex(item => item.id === active.id);
+      const newIndex = footerSettings.quick_links.items.findIndex(item => item.id === over.id);
+      const newItems = arrayMove(footerSettings.quick_links.items, oldIndex, newIndex).map((item, index) => ({
+        ...item,
+        order: index
+      }));
+      setFooterSettings({
+        ...footerSettings,
+        quick_links: { ...footerSettings.quick_links, items: newItems }
+      });
+    }
+  };
+
+  const handleLegalLinksDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = footerSettings.legal_links.findIndex(item => item.id === active.id);
+      const newIndex = footerSettings.legal_links.findIndex(item => item.id === over.id);
+      const newItems = arrayMove(footerSettings.legal_links, oldIndex, newIndex);
+      setFooterSettings({ ...footerSettings, legal_links: newItems });
+    }
   };
 
   // Quick links handlers
@@ -526,86 +602,111 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {headerSettings.navigation_items
-                  .sort((a, b) => a.order - b.order)
-                  .map((item, index) => (
-                  <div key={item.id} className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                      <div className="flex-1 grid grid-cols-2 gap-3">
-                        <Input
-                          value={item.name}
-                          onChange={(e) => updateNavItem(item.id, 'name', e.target.value)}
-                          placeholder="Nome"
-                        />
-                        <Input
-                          value={item.url}
-                          onChange={(e) => updateNavItem(item.id, 'url', e.target.value)}
-                          placeholder="URL (usa #microgreens-dropdown per dropdown)"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={item.visible}
-                          onCheckedChange={(checked) => updateNavItem(item.id, 'visible', checked)}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeNavItem(item.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {/* Dropdown sub-items editor */}
-                    {item.url === '#microgreens-dropdown' && (
-                      <div className="ml-8 p-4 bg-muted/30 rounded-lg border border-dashed space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                          <ChevronDown className="h-4 w-4" />
-                          Voci del Dropdown
-                        </div>
-                        {(item.dropdown_items || []).map((subItem) => (
-                          <div key={subItem.id} className="flex items-center gap-3 p-2 bg-background rounded border">
-                            <div className="flex-1 grid grid-cols-2 gap-2">
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleNavDragEnd}
+                >
+                  <SortableContext
+                    items={headerSettings.navigation_items.map(item => item.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {headerSettings.navigation_items
+                      .sort((a, b) => a.order - b.order)
+                      .map((item) => (
+                      <div key={item.id} className="space-y-3">
+                        <SortableItem id={item.id} className="p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 grid grid-cols-2 gap-3">
                               <Input
-                                value={subItem.name}
-                                onChange={(e) => updateDropdownSubItem(item.id, subItem.id, 'name', e.target.value)}
-                                placeholder="Nome sottomenu"
-                                className="h-8 text-sm"
+                                value={item.name}
+                                onChange={(e) => updateNavItem(item.id, 'name', e.target.value)}
+                                placeholder="Nome"
                               />
                               <Input
-                                value={subItem.url}
-                                onChange={(e) => updateDropdownSubItem(item.id, subItem.id, 'url', e.target.value)}
-                                placeholder="URL"
-                                className="h-8 text-sm"
+                                value={item.url}
+                                onChange={(e) => updateNavItem(item.id, 'url', e.target.value)}
+                                placeholder="URL (usa #microgreens-dropdown per dropdown)"
                               />
                             </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeDropdownSubItem(item.id, subItem.id)}
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={item.visible}
+                                onCheckedChange={(checked) => updateNavItem(item.id, 'visible', checked)}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeNavItem(item.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </SortableItem>
+                        
+                        {/* Dropdown sub-items editor */}
+                        {item.url === '#microgreens-dropdown' && (
+                          <div className="ml-8 p-4 bg-muted/30 rounded-lg border border-dashed space-y-3">
+                            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                              <ChevronDown className="h-4 w-4" />
+                              Voci del Dropdown (trascina per riordinare)
+                            </div>
+                            <DndContext
+                              sensors={sensors}
+                              collisionDetection={closestCenter}
+                              onDragEnd={handleDropdownSubItemDragEnd(item.id)}
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <SortableContext
+                                items={(item.dropdown_items || []).map(sub => sub.id)}
+                                strategy={verticalListSortingStrategy}
+                              >
+                                {(item.dropdown_items || []).map((subItem) => (
+                                  <SortableItem key={subItem.id} id={subItem.id} className="p-2 bg-background rounded border">
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex-1 grid grid-cols-2 gap-2">
+                                        <Input
+                                          value={subItem.name}
+                                          onChange={(e) => updateDropdownSubItem(item.id, subItem.id, 'name', e.target.value)}
+                                          placeholder="Nome sottomenu"
+                                          className="h-8 text-sm"
+                                        />
+                                        <Input
+                                          value={subItem.url}
+                                          onChange={(e) => updateDropdownSubItem(item.id, subItem.id, 'url', e.target.value)}
+                                          placeholder="URL"
+                                          className="h-8 text-sm"
+                                        />
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => removeDropdownSubItem(item.id, subItem.id)}
+                                        className="h-8 w-8 text-destructive hover:text-destructive"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </SortableItem>
+                                ))}
+                              </SortableContext>
+                            </DndContext>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => addDropdownSubItem(item.id)} 
+                              className="w-full"
+                            >
+                              <Plus className="h-3 w-3 mr-1" />
+                              Aggiungi Voce Dropdown
                             </Button>
                           </div>
-                        ))}
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => addDropdownSubItem(item.id)} 
-                          className="w-full"
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Aggiungi Voce Dropdown
-                        </Button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+                    ))}
+                  </SortableContext>
+                </DndContext>
                 <Button variant="outline" onClick={addNavItem} className="w-full">
                   <Plus className="h-4 w-4 mr-2" />
                   Aggiungi Voce
@@ -720,41 +821,53 @@ const Settings = () => {
                       })}
                     />
                   </div>
-                  <div className="space-y-3">
-                    {footerSettings.quick_links.items
-                      .sort((a, b) => a.order - b.order)
-                      .map((item) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                        <div className="flex-1 grid grid-cols-2 gap-3">
-                          <Input
-                            value={item.name}
-                            onChange={(e) => updateQuickLink(item.id, 'name', e.target.value)}
-                            placeholder="Nome"
-                          />
-                          <Input
-                            value={item.url}
-                            onChange={(e) => updateQuickLink(item.id, 'url', e.target.value)}
-                            placeholder="URL"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={item.visible}
-                            onCheckedChange={(checked) => updateQuickLink(item.id, 'visible', checked)}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeQuickLink(item.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleQuickLinksDragEnd}
+                  >
+                    <SortableContext
+                      items={footerSettings.quick_links.items.map(item => item.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-3">
+                        {footerSettings.quick_links.items
+                          .sort((a, b) => a.order - b.order)
+                          .map((item) => (
+                          <SortableItem key={item.id} id={item.id} className="p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 grid grid-cols-2 gap-3">
+                                <Input
+                                  value={item.name}
+                                  onChange={(e) => updateQuickLink(item.id, 'name', e.target.value)}
+                                  placeholder="Nome"
+                                />
+                                <Input
+                                  value={item.url}
+                                  onChange={(e) => updateQuickLink(item.id, 'url', e.target.value)}
+                                  placeholder="URL"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Switch
+                                  checked={item.visible}
+                                  onCheckedChange={(checked) => updateQuickLink(item.id, 'visible', checked)}
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeQuickLink(item.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </SortableItem>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </SortableContext>
+                  </DndContext>
                   <Button variant="outline" onClick={addQuickLink} className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
                     Aggiungi Link
@@ -869,37 +982,50 @@ const Settings = () => {
                     </p>
                   </div>
                   <div className="space-y-3">
-                    <Label>Link Legali</Label>
-                    {footerSettings.legal_links.map((link) => (
-                      <div key={link.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                        <div className="flex-1 grid grid-cols-2 gap-3">
-                          <Input
-                            value={link.name}
-                            onChange={(e) => updateLegalLink(link.id, 'name', e.target.value)}
-                            placeholder="Nome"
-                          />
-                          <Input
-                            value={link.url}
-                            onChange={(e) => updateLegalLink(link.id, 'url', e.target.value)}
-                            placeholder="URL"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={link.visible}
-                            onCheckedChange={(checked) => updateLegalLink(link.id, 'visible', checked)}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeLegalLink(link.id)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
+                    <Label>Link Legali (trascina per riordinare)</Label>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleLegalLinksDragEnd}
+                    >
+                      <SortableContext
+                        items={footerSettings.legal_links.map(link => link.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {footerSettings.legal_links.map((link) => (
+                          <SortableItem key={link.id} id={link.id} className="p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 grid grid-cols-2 gap-3">
+                                <Input
+                                  value={link.name}
+                                  onChange={(e) => updateLegalLink(link.id, 'name', e.target.value)}
+                                  placeholder="Nome"
+                                />
+                                <Input
+                                  value={link.url}
+                                  onChange={(e) => updateLegalLink(link.id, 'url', e.target.value)}
+                                  placeholder="URL"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Switch
+                                  checked={link.visible}
+                                  onCheckedChange={(checked) => updateLegalLink(link.id, 'visible', checked)}
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeLegalLink(link.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </SortableItem>
+                        ))}
+                      </SortableContext>
+                    </DndContext>
                     <Button variant="outline" onClick={addLegalLink} className="w-full">
                       <Plus className="h-4 w-4 mr-2" />
                       Aggiungi Link Legale
