@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info, Image } from "lucide-react";
+import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info, Image, MousePointerClick } from "lucide-react";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -147,6 +147,7 @@ const AdminMicrogreens = () => {
   const heroSection = sections["hero"];
   const infoSection = sections["info"];
   const categoriesSection = sections["categories"];
+  const ctaSection = sections["cta"];
 
   const seoValues = {
     slug: "/microgreens",
@@ -206,7 +207,7 @@ const AdminMicrogreens = () => {
           </TabsList>
 
           <TabsContent value="content" className="space-y-6">
-            <Accordion type="multiple" defaultValue={["hero", "categories", "info"]} className="space-y-4">
+            <Accordion type="multiple" defaultValue={["hero", "categories", "cta", "info"]} className="space-y-4">
               {/* Hero Section */}
               <AccordionItem value="hero" className="border rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline">
@@ -342,6 +343,90 @@ const AdminMicrogreens = () => {
                         ))}
                       </div>
                     )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* CTA Section */}
+              <AccordionItem value="cta" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2">
+                    <MousePointerClick className="h-5 w-5 text-primary" />
+                    <span className="font-semibold">Call to Action</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <Label>Sezione visibile</Label>
+                    <Switch
+                      checked={ctaSection?.is_visible ?? true}
+                      onCheckedChange={(checked) => updateSectionVisibility("cta", checked)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Titolo</Label>
+                    <Input
+                      value={ctaSection?.content?.title || ""}
+                      onChange={(e) => updateSectionContent("cta", "title", e.target.value)}
+                      placeholder="Non Trovi la Varietà che Cerchi?"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Descrizione</Label>
+                    <RichTextEditor
+                      content={ctaSection?.content?.description || ""}
+                      onChange={(value) => updateSectionContent("cta", "description", value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Pulsante Primario</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Testo</Label>
+                          <Input
+                            value={ctaSection?.content?.primary_button_text || ""}
+                            onChange={(e) => updateSectionContent("cta", "primary_button_text", e.target.value)}
+                            placeholder="Esplora Microgreens su Misura"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Link</Label>
+                          <Input
+                            value={ctaSection?.content?.primary_button_link || ""}
+                            onChange={(e) => updateSectionContent("cta", "primary_button_link", e.target.value)}
+                            placeholder="/microgreens-su-misura"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Pulsante Secondario</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                          <Label>Testo</Label>
+                          <Input
+                            value={ctaSection?.content?.secondary_button_text || ""}
+                            onChange={(e) => updateSectionContent("cta", "secondary_button_text", e.target.value)}
+                            placeholder="Contattaci Direttamente"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Link</Label>
+                          <Input
+                            value={ctaSection?.content?.secondary_button_link || ""}
+                            onChange={(e) => updateSectionContent("cta", "secondary_button_link", e.target.value)}
+                            placeholder="/contatti"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
                 </AccordionContent>
               </AccordionItem>
