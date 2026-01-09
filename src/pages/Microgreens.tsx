@@ -288,7 +288,7 @@ const Microgreens = () => {
                 asChild
                 variant="outline"
                 size="lg"
-                className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                className="border-white text-white hover:bg-white/20 hover:text-white"
               >
                 <Link to={ctaSection?.content?.secondary_button_link || "/contatti"}>
                   <Mail className="mr-2 h-5 w-5" />
