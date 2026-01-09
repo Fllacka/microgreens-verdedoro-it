@@ -3,10 +3,27 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, ShoppingBasket, Leaf } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Menu, ShoppingBasket, Leaf, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
+
+// Microgreens submenu items - hardcoded for design grouping
+const microgreensSubItems = [
+  { name: "Cosa sono i microgreens", url: "/cosa-sono-microgreens" },
+  { name: "I nostri microgreens", url: "/microgreens" },
+  { name: "Microgreens su misura", url: "/microgreens-su-misura" },
+];
+
+const microgreensUrls = microgreensSubItems.map(item => item.url);
 
 interface NavigationItem {
   id: string;
@@ -151,21 +168,70 @@ const Navigation = () => {
           {/* Right side navigation */}
           <div className="flex items-center space-x-8">
             {/* Desktop Navigation */}
-            <div className="hidden md:flex md:items-center md:space-x-8">
-              {visibleNavItems.map(item => (
-                <Link 
-                  key={item.id} 
-                  to={item.url} 
-                  className={cn(
-                    "relative font-body font-medium transition-colors hover:text-foreground",
-                    "after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:after:scale-x-100",
-                    isActive(item.url) ? "text-foreground after:scale-x-100" : "text-muted-foreground"
-                  )}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
+            <NavigationMenu className="hidden md:flex">
+              <NavigationMenuList className="space-x-6">
+                {visibleNavItems
+                  .filter(item => !microgreensUrls.includes(item.url))
+                  .map((item, index, filteredItems) => {
+                    // Insert the Microgreens dropdown after "Chi Siamo" (order 1)
+                    const showMicrogreensDropdown = item.order === 1;
+                    
+                    return (
+                      <>
+                        <NavigationMenuItem key={item.id}>
+                          <Link 
+                            to={item.url} 
+                            className={cn(
+                              "relative font-body font-medium transition-colors hover:text-foreground px-3 py-2",
+                              "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:scale-x-0 after:bg-foreground after:transition-transform after:duration-300 hover:after:scale-x-100",
+                              isActive(item.url) ? "text-foreground after:scale-x-100" : "text-muted-foreground"
+                            )}
+                          >
+                            {item.name}
+                          </Link>
+                        </NavigationMenuItem>
+                        
+                        {showMicrogreensDropdown && (
+                          <NavigationMenuItem key="microgreens-dropdown">
+                            <NavigationMenuTrigger 
+                              className={cn(
+                                "font-body font-medium bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent",
+                                microgreensUrls.some(url => isActive(url)) 
+                                  ? "text-foreground" 
+                                  : "text-muted-foreground hover:text-foreground"
+                              )}
+                            >
+                              Microgreens
+                            </NavigationMenuTrigger>
+                            <NavigationMenuContent>
+                              <ul className="grid w-[280px] gap-1 p-3 bg-background border border-border rounded-lg shadow-lg">
+                                {microgreensSubItems.map((subItem) => (
+                                  <li key={subItem.url}>
+                                    <NavigationMenuLink asChild>
+                                      <Link
+                                        to={subItem.url}
+                                        className={cn(
+                                          "block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors",
+                                          "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                          isActive(subItem.url) 
+                                            ? "bg-accent text-accent-foreground font-medium" 
+                                            : "text-foreground"
+                                        )}
+                                      >
+                                        {subItem.name}
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  </li>
+                                ))}
+                              </ul>
+                            </NavigationMenuContent>
+                          </NavigationMenuItem>
+                        )}
+                      </>
+                    );
+                  })}
+              </NavigationMenuList>
+            </NavigationMenu>
 
             {/* Desktop Cart */}
             <div className="hidden md:flex md:items-center md:gap-2">
