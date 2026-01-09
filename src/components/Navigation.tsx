@@ -70,6 +70,7 @@ const defaultCtaButton: CtaButton = {
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null | undefined>(undefined);
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(defaultNavigationItems);
   const [ctaButton, setCtaButton] = useState<CtaButton>(defaultCtaButton);
@@ -115,6 +116,8 @@ const Navigation = () => {
       } catch (error) {
         console.error("Error fetching settings:", error);
         setLogoUrl(null);
+      } finally {
+        setIsLoaded(true);
       }
     };
 
@@ -178,8 +181,14 @@ const Navigation = () => {
             {/* Desktop Navigation */}
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList className="space-x-6">
-                {visibleNavItems
-                  .map((item) => {
+                {!isLoaded ? (
+                  // Skeleton loader for navigation
+                  <div className="flex space-x-6">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-4 w-16 bg-muted/30 rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : visibleNavItems.map((item) => {
                     // Check if this is the dropdown placeholder
                     if (item.url === DROPDOWN_MARKER) {
                       const dropdownItems = item.dropdown_items || defaultDropdownItems;
@@ -308,8 +317,12 @@ const Navigation = () => {
                   </div>
                   
                   <div className="flex flex-col space-y-4">
-                    {visibleNavItems
-                      .map(item => {
+                    {!isLoaded ? (
+                      // Skeleton loader for mobile menu
+                      [1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-10 bg-muted/30 rounded-lg animate-pulse" />
+                      ))
+                    ) : visibleNavItems.map(item => {
                         // Check if this is the dropdown placeholder
                         if (item.url === DROPDOWN_MARKER) {
                           const dropdownItems = item.dropdown_items || defaultDropdownItems;
