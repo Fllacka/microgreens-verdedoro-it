@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
 import { useAuth } from "@/contexts/AuthContext";
+import { isCtaButtonVisible } from "@/lib/cta-utils";
 
 interface Product {
   id: string;
@@ -191,28 +192,40 @@ const MicrogreensPreview = () => {
               }}
             />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                asChild
-                variant="oro"
-                size="lg"
-                className="group"
-              >
-                <Link to={ctaSection?.content?.primary_button_link || "/microgreens-su-misura"}>
-                  {ctaSection?.content?.primary_button_text || "Esplora Microgreens su Misura"}
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="bg-background text-primary border-transparent hover:bg-background/95 hover:text-primary"
-              >
-                <Link to={ctaSection?.content?.secondary_button_link || "/contatti"}>
-                  <Mail className="mr-2 h-5 w-5" />
-                  {ctaSection?.content?.secondary_button_text || "Contattaci Direttamente"}
-                </Link>
-              </Button>
+              {isCtaButtonVisible(
+                ctaSection?.content?.primary_button_visible,
+                ctaSection?.content?.primary_button_text,
+                ctaSection?.content?.primary_button_link
+              ) && (
+                <Button
+                  asChild
+                  variant="oro"
+                  size="lg"
+                  className="group"
+                >
+                  <Link to={ctaSection?.content?.primary_button_link || "/microgreens-su-misura"}>
+                    {ctaSection?.content?.primary_button_text || "Esplora Microgreens su Misura"}
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </Button>
+              )}
+              {isCtaButtonVisible(
+                ctaSection?.content?.secondary_button_visible,
+                ctaSection?.content?.secondary_button_text,
+                ctaSection?.content?.secondary_button_link
+              ) && (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="bg-background text-primary border-transparent hover:bg-background/95 hover:text-primary"
+                >
+                  <Link to={ctaSection?.content?.secondary_button_link || "/contatti"}>
+                    <Mail className="mr-2 h-5 w-5" />
+                    {ctaSection?.content?.secondary_button_text || "Contattaci Direttamente"}
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </section>

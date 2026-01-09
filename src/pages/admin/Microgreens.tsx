@@ -385,6 +385,13 @@ const AdminMicrogreens = () => {
                         <CardTitle className="text-base">Pulsante Primario</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label>Mostra pulsante</Label>
+                          <Switch
+                            checked={ctaSection?.content?.primary_button_visible ?? true}
+                            onCheckedChange={(checked) => updateSectionContent("cta", "primary_button_visible", checked)}
+                          />
+                        </div>
                         <div className="space-y-2">
                           <Label>Testo</Label>
                           <Input
@@ -409,6 +416,13 @@ const AdminMicrogreens = () => {
                         <CardTitle className="text-base">Pulsante Secondario</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label>Mostra pulsante</Label>
+                          <Switch
+                            checked={ctaSection?.content?.secondary_button_visible ?? true}
+                            onCheckedChange={(checked) => updateSectionContent("cta", "secondary_button_visible", checked)}
+                          />
+                        </div>
                         <div className="space-y-2">
                           <Label>Testo</Label>
                           <Input
