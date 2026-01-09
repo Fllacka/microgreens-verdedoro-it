@@ -15,6 +15,7 @@ import { Menu, ShoppingBasket, Leaf, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
+import { getImageUrl, isSupabaseStorageUrl } from "@/lib/image-utils";
 
 // Marker for dropdown items in navigation
 const DROPDOWN_MARKER = "#microgreens-dropdown";
@@ -96,10 +97,12 @@ const Navigation = () => {
         if (error) throw error;
 
         if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
-          const mediaData = data.media as { file_path: string; optimized_urls?: { webp_medium?: string; webp_thumbnail?: string } };
-          // Use optimized WebP version if available (much smaller file size)
-          const optimizedUrl = mediaData.optimized_urls?.webp_medium || mediaData.optimized_urls?.webp_thumbnail;
-          setLogoUrl(optimizedUrl || mediaData.file_path);
+          const mediaData = data.media as { file_path: string };
+          // Use on-the-fly transformation for optimal logo size
+          const optimizedUrl = isSupabaseStorageUrl(mediaData.file_path)
+            ? getImageUrl(mediaData.file_path, 'logo')
+            : mediaData.file_path;
+          setLogoUrl(optimizedUrl);
         } else {
           setLogoUrl(null);
         }
@@ -168,6 +171,7 @@ const Navigation = () => {
                   className="h-14 w-auto"
                   width={144}
                   height={56}
+                  fetchPriority="high"
                   decoding="async"
                 />
               ) : (
