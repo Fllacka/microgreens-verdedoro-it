@@ -16,15 +16,21 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 
-// Microgreens submenu items - hardcoded for design grouping
-const microgreensSubItems = [
-  { name: "Cosa sono i microgreens", url: "/cosa-sono-i-microgreens" },
-  { name: "I nostri microgreens", url: "/microgreens" },
-  { name: "Microgreens su misura", url: "/microgreens-su-misura" },
+// Marker for dropdown items in navigation
+const DROPDOWN_MARKER = "#microgreens-dropdown";
+
+// Default dropdown items (fallback)
+const defaultDropdownItems = [
+  { id: "1", name: "Cosa sono i microgreens", url: "/cosa-sono-i-microgreens" },
+  { id: "2", name: "I nostri microgreens", url: "/microgreens" },
+  { id: "3", name: "Microgreens su misura", url: "/microgreens-su-misura" },
 ];
 
-const microgreensUrls = microgreensSubItems.map(item => item.url);
-const DROPDOWN_MARKER = "#microgreens-dropdown";
+interface DropdownSubItem {
+  id: string;
+  name: string;
+  url: string;
+}
 
 interface NavigationItem {
   id: string;
@@ -32,6 +38,7 @@ interface NavigationItem {
   url: string;
   visible: boolean;
   order: number;
+  dropdown_items?: DropdownSubItem[];
 }
 
 interface CtaButton {
@@ -172,16 +179,18 @@ const Navigation = () => {
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList className="space-x-6">
                 {visibleNavItems
-                  .filter(item => !microgreensUrls.includes(item.url))
+                  .filter(item => item.url === DROPDOWN_MARKER || !item.dropdown_items?.some(sub => sub.url === item.url))
                   .map((item) => {
                     // Check if this is the dropdown placeholder
                     if (item.url === DROPDOWN_MARKER) {
+                      const dropdownItems = item.dropdown_items || defaultDropdownItems;
+                      const dropdownUrls = dropdownItems.map(sub => sub.url);
                       return (
                         <NavigationMenuItem key={item.id}>
                           <NavigationMenuTrigger 
                             className={cn(
                               "font-body font-medium text-base bg-transparent hover:bg-transparent focus:bg-transparent data-[state=open]:bg-transparent",
-                              microgreensUrls.some(url => isActive(url)) 
+                              dropdownUrls.some(url => isActive(url)) 
                                 ? "text-foreground" 
                                 : "text-muted-foreground hover:text-foreground"
                             )}
@@ -190,7 +199,7 @@ const Navigation = () => {
                           </NavigationMenuTrigger>
                           <NavigationMenuContent>
                             <ul className="grid w-[280px] gap-1 p-3 bg-background border border-border rounded-lg shadow-lg">
-                              {microgreensSubItems.map((subItem) => (
+                              {dropdownItems.map((subItem) => (
                                 <li key={subItem.url}>
                                   <NavigationMenuLink asChild>
                                     <Link
@@ -301,10 +310,17 @@ const Navigation = () => {
                   
                   <div className="flex flex-col space-y-4">
                     {visibleNavItems
-                      .filter(item => !microgreensUrls.includes(item.url))
+                      .filter(item => {
+                        // Show dropdown items and regular items, but not items that are sub-items of a dropdown
+                        const allDropdownUrls = visibleNavItems
+                          .filter(i => i.url === DROPDOWN_MARKER)
+                          .flatMap(i => (i.dropdown_items || defaultDropdownItems).map(sub => sub.url));
+                        return !allDropdownUrls.includes(item.url);
+                      })
                       .map(item => {
                         // Check if this is the dropdown placeholder
                         if (item.url === DROPDOWN_MARKER) {
+                          const dropdownItems = item.dropdown_items || defaultDropdownItems;
                           return (
                             <div key={item.id} className="space-y-2">
                               {/* Section header */}
@@ -313,7 +329,7 @@ const Navigation = () => {
                               </div>
                               {/* Sub-items with indentation */}
                               <div className="pl-4 space-y-1">
-                                {microgreensSubItems.map((subItem) => (
+                                {dropdownItems.map((subItem) => (
                                   <Link
                                     key={subItem.url}
                                     to={subItem.url}

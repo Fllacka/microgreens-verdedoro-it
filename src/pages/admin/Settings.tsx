@@ -16,7 +16,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Save, Image, Info, Navigation, LayoutGrid, Plus, Trash2, GripVertical, Leaf, Instagram, Facebook, Youtube, Linkedin, MessageCircle } from "lucide-react";
+import { Save, Image, Info, Navigation, LayoutGrid, Plus, Trash2, GripVertical, Leaf, Instagram, Facebook, Youtube, Linkedin, MessageCircle, ChevronDown } from "lucide-react";
 
 // Custom SVG icons for social platforms
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -61,12 +61,19 @@ const socialIcons: Record<string, React.ComponentType<{ className?: string }>> =
   threads: ThreadsIcon,
 };
 
+interface DropdownSubItem {
+  id: string;
+  name: string;
+  url: string;
+}
+
 interface NavigationItem {
   id: string;
   name: string;
   url: string;
   visible: boolean;
   order: number;
+  dropdown_items?: DropdownSubItem[];
 }
 
 interface CtaButton {
@@ -306,7 +313,7 @@ const Settings = () => {
     });
   };
 
-  const updateNavItem = (id: string, field: keyof NavigationItem, value: string | boolean | number) => {
+  const updateNavItem = (id: string, field: keyof NavigationItem, value: string | boolean | number | DropdownSubItem[]) => {
     setHeaderSettings({
       ...headerSettings,
       navigation_items: headerSettings.navigation_items.map(item =>
@@ -320,6 +327,32 @@ const Settings = () => {
       ...headerSettings,
       navigation_items: headerSettings.navigation_items.filter(item => item.id !== id)
     });
+  };
+
+  // Dropdown sub-item handlers
+  const addDropdownSubItem = (navItemId: string) => {
+    const navItem = headerSettings.navigation_items.find(item => item.id === navItemId);
+    const currentItems = navItem?.dropdown_items || [];
+    const newSubItem: DropdownSubItem = {
+      id: Date.now().toString(),
+      name: "Nuovo Sottomenu",
+      url: "/"
+    };
+    updateNavItem(navItemId, 'dropdown_items', [...currentItems, newSubItem]);
+  };
+
+  const updateDropdownSubItem = (navItemId: string, subItemId: string, field: keyof DropdownSubItem, value: string) => {
+    const navItem = headerSettings.navigation_items.find(item => item.id === navItemId);
+    const updatedSubItems = (navItem?.dropdown_items || []).map(subItem =>
+      subItem.id === subItemId ? { ...subItem, [field]: value } : subItem
+    );
+    updateNavItem(navItemId, 'dropdown_items', updatedSubItems);
+  };
+
+  const removeDropdownSubItem = (navItemId: string, subItemId: string) => {
+    const navItem = headerSettings.navigation_items.find(item => item.id === navItemId);
+    const updatedSubItems = (navItem?.dropdown_items || []).filter(subItem => subItem.id !== subItemId);
+    updateNavItem(navItemId, 'dropdown_items', updatedSubItems);
   };
 
   // Quick links handlers
@@ -496,34 +529,81 @@ const Settings = () => {
                 {headerSettings.navigation_items
                   .sort((a, b) => a.order - b.order)
                   .map((item, index) => (
-                  <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                    <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                    <div className="flex-1 grid grid-cols-2 gap-3">
-                      <Input
-                        value={item.name}
-                        onChange={(e) => updateNavItem(item.id, 'name', e.target.value)}
-                        placeholder="Nome"
-                      />
-                      <Input
-                        value={item.url}
-                        onChange={(e) => updateNavItem(item.id, 'url', e.target.value)}
-                        placeholder="URL"
-                      />
+                  <div key={item.id} className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 border rounded-lg">
+                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                      <div className="flex-1 grid grid-cols-2 gap-3">
+                        <Input
+                          value={item.name}
+                          onChange={(e) => updateNavItem(item.id, 'name', e.target.value)}
+                          placeholder="Nome"
+                        />
+                        <Input
+                          value={item.url}
+                          onChange={(e) => updateNavItem(item.id, 'url', e.target.value)}
+                          placeholder="URL (usa #microgreens-dropdown per dropdown)"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={item.visible}
+                          onCheckedChange={(checked) => updateNavItem(item.id, 'visible', checked)}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeNavItem(item.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={item.visible}
-                        onCheckedChange={(checked) => updateNavItem(item.id, 'visible', checked)}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeNavItem(item.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    
+                    {/* Dropdown sub-items editor */}
+                    {item.url === '#microgreens-dropdown' && (
+                      <div className="ml-8 p-4 bg-muted/30 rounded-lg border border-dashed space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                          <ChevronDown className="h-4 w-4" />
+                          Voci del Dropdown
+                        </div>
+                        {(item.dropdown_items || []).map((subItem) => (
+                          <div key={subItem.id} className="flex items-center gap-3 p-2 bg-background rounded border">
+                            <div className="flex-1 grid grid-cols-2 gap-2">
+                              <Input
+                                value={subItem.name}
+                                onChange={(e) => updateDropdownSubItem(item.id, subItem.id, 'name', e.target.value)}
+                                placeholder="Nome sottomenu"
+                                className="h-8 text-sm"
+                              />
+                              <Input
+                                value={subItem.url}
+                                onChange={(e) => updateDropdownSubItem(item.id, subItem.id, 'url', e.target.value)}
+                                placeholder="URL"
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeDropdownSubItem(item.id, subItem.id)}
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => addDropdownSubItem(item.id)} 
+                          className="w-full"
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          Aggiungi Voce Dropdown
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
                 <Button variant="outline" onClick={addNavItem} className="w-full">
