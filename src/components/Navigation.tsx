@@ -179,7 +179,6 @@ const Navigation = () => {
             <NavigationMenu className="hidden md:flex">
               <NavigationMenuList className="space-x-6">
                 {visibleNavItems
-                  .filter(item => item.url === DROPDOWN_MARKER || !item.dropdown_items?.some(sub => sub.url === item.url))
                   .map((item) => {
                     // Check if this is the dropdown placeholder
                     if (item.url === DROPDOWN_MARKER) {
@@ -310,13 +309,6 @@ const Navigation = () => {
                   
                   <div className="flex flex-col space-y-4">
                     {visibleNavItems
-                      .filter(item => {
-                        // Show dropdown items and regular items, but not items that are sub-items of a dropdown
-                        const allDropdownUrls = visibleNavItems
-                          .filter(i => i.url === DROPDOWN_MARKER)
-                          .flatMap(i => (i.dropdown_items || defaultDropdownItems).map(sub => sub.url));
-                        return !allDropdownUrls.includes(item.url);
-                      })
                       .map(item => {
                         // Check if this is the dropdown placeholder
                         if (item.url === DROPDOWN_MARKER) {
