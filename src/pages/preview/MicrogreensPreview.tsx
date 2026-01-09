@@ -142,10 +142,13 @@ const MicrogreensPreview = () => {
             <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
               {heroSection?.content?.title || "I Nostri Microgreens"}
             </h1>
-            <p className="font-body text-xl text-muted-foreground max-w-4xl mx-auto mb-8">
-              {heroSection?.content?.subtitle ||
-                "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna."}
-            </p>
+            <div 
+              className="font-body text-xl text-muted-foreground max-w-4xl mx-auto mb-8 prose prose-xl max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+              dangerouslySetInnerHTML={{ 
+                __html: heroSection?.content?.subtitle || 
+                  "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna." 
+              }}
+            />
           </div>
         </section>
       )}
