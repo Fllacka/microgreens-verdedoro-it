@@ -134,9 +134,10 @@ const ChiSiamoPreview = () => {
                     <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
                       {heroContent.title || "La Nostra Storia"}
                     </h1>
-                    <p className="font-body text-xl text-muted-foreground mb-8 leading-relaxed">
-                      {heroContent.description}
-                    </p>
+                    <div 
+                      className="font-body text-xl text-muted-foreground mb-8 leading-relaxed prose prose-xl max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+                      dangerouslySetInnerHTML={{ __html: heroContent.description || '' }}
+                    />
                     {heroContent.button_text && (
                       <Button variant="oro" size="lg" asChild>
                         <Link to={heroContent.button_link || "/microgreens"}>
@@ -167,9 +168,10 @@ const ChiSiamoPreview = () => {
                   <h2 className="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
                     {missionContent.title || "La Nostra Missione"}
                   </h2>
-                  <p className="font-body text-xl text-muted-foreground leading-relaxed">
-                    {missionContent.description}
-                  </p>
+                  <div 
+                    className="font-body text-xl text-muted-foreground leading-relaxed prose prose-xl max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+                    dangerouslySetInnerHTML={{ __html: missionContent.description || '' }}
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -250,9 +252,10 @@ const ChiSiamoPreview = () => {
                 <h2 className="font-display text-4xl md:text-5xl font-bold mb-6">
                   {ctaContent.title || "Unisciti alla Rivoluzione Verde"}
                 </h2>
-                <p className="font-body text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto">
-                  {ctaContent.description}
-                </p>
+                <div 
+                  className="font-body text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto prose prose-xl prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+                  dangerouslySetInnerHTML={{ __html: ctaContent.description || '' }}
+                />
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   {ctaContent.primary_button_text && (
                     <Button variant="oro" size="lg" asChild>

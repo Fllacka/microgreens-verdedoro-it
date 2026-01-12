@@ -212,9 +212,10 @@ const BlogPreview = () => {
               </h1>
 
               {post.excerpt && (
-                <p className="font-body text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
-                  {post.excerpt}
-                </p>
+                <div 
+                  className="font-body text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto prose prose-xl prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+                  dangerouslySetInnerHTML={{ __html: post.excerpt }}
+                />
               )}
             </div>
           </div>

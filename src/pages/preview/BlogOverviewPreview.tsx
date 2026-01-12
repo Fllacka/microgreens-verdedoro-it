@@ -172,9 +172,10 @@ const BlogOverviewPreview = () => {
                   {heroSection?.content?.title?.split("Microgreens")[0] || "Blog di "}
                   <span className="text-primary">Microgreens</span>
                 </h1>
-                <p className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in">
-                  {heroSection?.content?.subtitle || ""}
-                </p>
+                <div 
+                  className="font-body text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto animate-fade-in prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+                  dangerouslySetInnerHTML={{ __html: heroSection?.content?.subtitle || '' }}
+                />
               </div>
             </div>
           </section>
@@ -306,9 +307,10 @@ const BlogOverviewPreview = () => {
                 <h2 className="font-display text-3xl font-bold mb-4">
                   {newsletterSection?.content?.title || "Non Perdere Nessun Articolo"}
                 </h2>
-                <p className="font-body mb-8 text-white/90">
-                  {newsletterSection?.content?.subtitle || ""}
-                </p>
+                <div 
+                  className="font-body mb-8 text-white/90 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+                  dangerouslySetInnerHTML={{ __html: newsletterSection?.content?.subtitle || '' }}
+                />
                 <Button variant="oro" size="lg" className="font-semibold">
                   {newsletterSection?.content?.button_text || "Iscriviti alla Newsletter"}
                 </Button>
