@@ -174,9 +174,10 @@ const CosaSonoMicrogreensPreview = () => {
                 {heroData.title}
               </h1>
               {heroData.subtitle && (
-                <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
-                  {heroData.subtitle}
-                </p>
+                <div 
+                  className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+                  dangerouslySetInnerHTML={{ __html: heroData.subtitle }}
+                />
               )}
             </div>
           </>
@@ -196,9 +197,10 @@ const CosaSonoMicrogreensPreview = () => {
                 {heroData.title}
               </h1>
               {heroData.subtitle && (
-                <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
-                  {heroData.subtitle}
-                </p>
+                <div 
+                  className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+                  dangerouslySetInnerHTML={{ __html: heroData.subtitle }}
+                />
               )}
             </div>
           </>

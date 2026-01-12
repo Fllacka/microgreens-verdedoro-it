@@ -164,9 +164,10 @@ const ContattiPreview = () => {
             <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
               {heroSection?.content?.title || "Contattaci"}
             </h1>
-            <p className="font-body text-xl text-muted-foreground max-w-4xl mx-auto">
-              {heroSection?.content?.subtitle || ""}
-            </p>
+            <div 
+              className="font-body text-xl text-muted-foreground max-w-4xl mx-auto prose prose-xl max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+              dangerouslySetInnerHTML={{ __html: heroSection?.content?.subtitle || '' }}
+            />
           </div>
         </section>
       )}

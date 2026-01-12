@@ -129,9 +129,10 @@ const MicrogreensCustomPreview = () => {
                 </div>
               </div>
               <div>
-                <p className="font-body text-xl text-muted-foreground leading-relaxed">
-                  {introSection.content.text || ''}
-                </p>
+              <div 
+                className="font-body text-xl text-muted-foreground leading-relaxed prose prose-xl max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+                dangerouslySetInnerHTML={{ __html: introSection.content.text || '' }}
+              />
               </div>
             </div>
           </div>
@@ -146,9 +147,10 @@ const MicrogreensCustomPreview = () => {
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
                 {varietiesSection.content.title || 'Varietà Disponibili su Ordinazione'}
               </h2>
-              <p className="font-body text-lg text-muted-foreground max-w-3xl mx-auto">
-                {varietiesSection.content.description || ''}
-              </p>
+              <div 
+                className="font-body text-lg text-muted-foreground max-w-3xl mx-auto prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline [&_p]:my-2"
+                dangerouslySetInnerHTML={{ __html: varietiesSection.content.description || '' }}
+              />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -185,9 +187,10 @@ const MicrogreensCustomPreview = () => {
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-6">
               {ctaSection.content.title || 'Inizia il Tuo Progetto su Misura'}
             </h2>
-            <p className="font-body text-lg mb-8 leading-relaxed max-w-2xl mx-auto text-white/90">
-              {ctaSection.content.description || ''}
-            </p>
+            <div 
+              className="font-body text-lg mb-8 leading-relaxed max-w-2xl mx-auto text-white/90 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
+              dangerouslySetInnerHTML={{ __html: ctaSection.content.description || '' }}
+            />
             <Button variant="oro" size="lg" className="px-8 py-4 text-lg" asChild>
               <Link to={ctaSection.content.button_link || '/contatti'}>
                 <Mail className="w-5 h-5 mr-2" />
