@@ -96,7 +96,15 @@ export function generateLocalBusinessSchema() {
 }
 
 /**
+ * Strip HTML tags from text (for structured data)
+ */
+export function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
  * Generate Product schema for product pages
+ * Now supports price tiers with AggregateOffer
  */
 export function generateProductSchema(product: {
   name: string;
@@ -105,14 +113,24 @@ export function generateProductSchema(product: {
   image?: string;
   rating?: number;
   category?: string;
+  priceTiers?: Array<{ weight: number; price: number }>;
 }) {
+  // Format product name with "Microgreens di" prefix
+  const productName = `Microgreens di ${product.name}`;
+  
+  // Format category with hierarchy
+  const productCategory = product.category 
+    ? `Microgreens / ${product.category}`
+    : "Microgreens";
+
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     "@id": `${SITE_URL}/microgreens/${product.slug}#product`,
-    name: product.name,
+    name: productName,
     description: product.description,
     url: `${SITE_URL}/microgreens/${product.slug}`,
+    category: productCategory,
     brand: {
       "@type": "Brand",
       name: "Verde D'Oro",
@@ -120,18 +138,43 @@ export function generateProductSchema(product: {
     manufacturer: {
       "@id": `${SITE_URL}/#organization`,
     },
-    offers: {
+  };
+
+  // Generate AggregateOffer when price tiers exist
+  const validTiers = (product.priceTiers || []).filter(t => t.price > 0);
+  if (validTiers.length > 0) {
+    const prices = validTiers.map(t => t.price);
+    schema.offers = {
+      "@type": "AggregateOffer",
+      priceCurrency: "EUR",
+      lowPrice: Math.min(...prices),
+      highPrice: Math.max(...prices),
+      offerCount: validTiers.length,
+      availability: "https://schema.org/InStock",
+      seller: {
+        "@id": `${SITE_URL}/#organization`,
+      },
+    };
+  } else {
+    schema.offers = {
       "@type": "Offer",
       availability: "https://schema.org/InStock",
       priceCurrency: "EUR",
       seller: {
         "@id": `${SITE_URL}/#organization`,
       },
-    },
-  };
+    };
+  }
 
+  // Ensure image is an ImageObject with absolute URL
   if (product.image) {
-    schema.image = product.image;
+    const imageUrl = product.image.startsWith('http') 
+      ? product.image 
+      : `${SITE_URL}${product.image}`;
+    schema.image = {
+      "@type": "ImageObject",
+      url: imageUrl,
+    };
   }
 
   if (product.rating && product.rating > 0) {
@@ -142,10 +185,6 @@ export function generateProductSchema(product: {
       worstRating: 1,
       ratingCount: 1,
     };
-  }
-
-  if (product.category) {
-    schema.category = product.category;
   }
 
   return schema;

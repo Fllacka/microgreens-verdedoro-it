@@ -22,7 +22,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { generateProductSchema, generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
+import { generateProductSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
 
 interface FAQItem {
   id: string;
@@ -191,27 +191,43 @@ const ProductDetail = () => {
     image: product.media?.file_path,
     rating: product.rating,
     category: product.category,
+    priceTiers: product.price_tiers,
   });
 
   const breadcrumbSchema = generateBreadcrumbSchema([
     { name: "Home", url: "/" },
     { name: "Microgreens", url: "/microgreens" },
-    { name: product.name, url: `/microgreens/${product.slug}` },
+    { name: `Microgreens di ${product.name}`, url: `/microgreens/${product.slug}` },
   ]);
+
+  // Generate FAQ schema if FAQs exist
+  const faqSchema = product.faq_items && product.faq_items.length > 0
+    ? generateFAQSchema(
+        product.faq_items.map(faq => ({
+          question: faq.question,
+          answer: stripHtmlTags(faq.answer),
+        }))
+      )
+    : null;
+
+  // Combine all schemas
+  const allSchemas = faqSchema 
+    ? [productSchema, breadcrumbSchema, faqSchema]
+    : [productSchema, breadcrumbSchema];
 
   return (
     <Layout>
       <Helmet>
-        <title>{product.meta_title || `${product.name} - Verde D'Oro Microgreens`}</title>
+        <title>{product.meta_title || `Microgreens di ${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="description" content={product.meta_description || product.description} />
         <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`} />
-        <meta property="og:title" content={product.meta_title || product.name} />
+        <meta property="og:title" content={product.meta_title || `Microgreens di ${product.name}`} />
         <meta property="og:description" content={product.meta_description || product.description} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={`${window.location.origin}/microgreens/${product.slug}`} />
         {product.media?.file_path && <meta property="og:image" content={product.media.file_path} />}
         <script type="application/ld+json">
-          {JSON.stringify(combineSchemas(productSchema, breadcrumbSchema))}
+          {JSON.stringify(combineSchemas(...allSchemas))}
         </script>
       </Helmet>
 
