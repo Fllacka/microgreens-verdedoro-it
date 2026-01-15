@@ -21,6 +21,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { generateProductSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
 
 interface FAQItem {
   id: string;
@@ -181,11 +182,47 @@ const ProductPreview = () => {
     });
   };
 
+  // Generate structured data for preview validation
+  const productSchema = generateProductSchema({
+    name: product.name,
+    description: product.description || product.content || "",
+    slug: product.slug,
+    image: product.media?.file_path,
+    rating: product.rating,
+    category: product.category,
+    priceTiers: product.price_tiers,
+  });
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Microgreens", url: "/microgreens" },
+    { name: `Microgreens di ${product.name}`, url: `/microgreens/${product.slug}` },
+  ]);
+
+  // Generate FAQ schema if FAQs exist
+  const faqSchema = product.faq_items && product.faq_items.length > 0
+    ? generateFAQSchema(
+        product.faq_items.map(faq => ({
+          question: faq.question,
+          answer: stripHtmlTags(faq.answer),
+        }))
+      )
+    : null;
+
+  // Combine all schemas
+  const allSchemas = faqSchema 
+    ? [productSchema, breadcrumbSchema, faqSchema]
+    : [productSchema, breadcrumbSchema];
+
   return (
     <Layout>
       <Helmet>
-        <title>Anteprima: {product.meta_title || `${product.name} - Verde D'Oro Microgreens`}</title>
+        <title>Anteprima: {product.meta_title || `Microgreens di ${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="robots" content="noindex, nofollow" />
+        {/* Include structured data in preview for validation */}
+        <script type="application/ld+json">
+          {JSON.stringify(combineSchemas(...allSchemas))}
+        </script>
       </Helmet>
 
       {/* Preview Banner */}
