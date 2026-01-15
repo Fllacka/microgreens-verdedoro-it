@@ -18,6 +18,13 @@ import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle, GripVertical, Euro } from "lucide-react";
+import { 
+  generateProductSchema, 
+  generateBreadcrumbSchema, 
+  generateFAQSchema, 
+  combineSchemas,
+  stripHtmlTags 
+} from "@/lib/seo";
 
 interface CategoryItem {
   id: string;
@@ -84,6 +91,7 @@ const AdminProductEdit = () => {
   });
 
   const [availableCategories, setAvailableCategories] = useState<CategoryItem[]>([]);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -168,6 +176,19 @@ const AdminProductEdit = () => {
         priority: data.priority?.toString() || "0.5",
         structuredData: data.structured_data ? JSON.stringify(data.structured_data, null, 2) : "",
       });
+
+      // Fetch image URL if image_id exists
+      if (data.image_id) {
+        const { data: mediaData } = await supabase
+          .from("media")
+          .select("file_path")
+          .eq("id", data.image_id)
+          .single();
+        
+        if (mediaData) {
+          setImageUrl(mediaData.file_path);
+        }
+      }
     } catch (error) {
       console.error("Error fetching product:", error);
       toast({
@@ -260,6 +281,58 @@ const AdminProductEdit = () => {
 
   const handlePublish = async (publish: boolean) => {
     await saveProduct(publish);
+  };
+
+  // Generate structured data for the product
+  const generateStructuredData = (): string | null => {
+    if (!formData.name || !seoData.slug) {
+      toast({
+        title: "Dati mancanti",
+        description: "Inserisci almeno il nome e lo slug del prodotto",
+        variant: "destructive",
+      });
+      return null;
+    }
+
+    // Generate Product schema
+    const productSchema = generateProductSchema({
+      name: formData.name,
+      description: stripHtmlTags(formData.description || formData.content || ""),
+      slug: seoData.slug,
+      image: imageUrl || undefined,
+      rating: formData.rating ? parseFloat(formData.rating) : undefined,
+      category: formData.category || undefined,
+      priceTiers: formData.price_tiers,
+    });
+
+    // Generate Breadcrumb schema
+    const breadcrumbSchema = generateBreadcrumbSchema([
+      { name: "Home", url: "/" },
+      { name: "Microgreens", url: "/microgreens" },
+      { name: formData.name, url: `/microgreens/${seoData.slug}` },
+    ]);
+
+    // Build schemas array
+    const schemas: Record<string, unknown>[] = [productSchema, breadcrumbSchema];
+
+    // Generate FAQ schema if there are FAQs
+    if (formData.faq_items && formData.faq_items.length > 0) {
+      const validFaqs = formData.faq_items.filter(faq => faq.question && faq.answer);
+      if (validFaqs.length > 0) {
+        const faqSchema = generateFAQSchema(
+          validFaqs.map(faq => ({
+            question: faq.question,
+            answer: stripHtmlTags(faq.answer),
+          }))
+        );
+        schemas.push(faqSchema);
+      }
+    }
+
+    // Combine all schemas
+    const combinedSchema = combineSchemas(...schemas);
+    
+    return JSON.stringify(combinedSchema, null, 2);
   };
 
   if (loading && !isNew) {
@@ -681,7 +754,10 @@ const AdminProductEdit = () => {
                   <CardContent>
                     <MediaSelector
                       value={formData.image_id}
-                      onChange={(imageId) => setFormData({ ...formData, image_id: imageId })}
+                      onChange={(imageId, imageUrlValue) => {
+                        setFormData({ ...formData, image_id: imageId });
+                        setImageUrl(imageUrlValue);
+                      }}
                       altText={formData.image_alt}
                       onAltTextChange={(altText) => setFormData({ ...formData, image_alt: altText })}
                     />
@@ -713,6 +789,9 @@ const AdminProductEdit = () => {
             <SEOFields
               values={seoData}
               onChange={(field, value) => setSeoData({ ...seoData, [field]: value })}
+              baseUrl="verdedoro.it/microgreens"
+              onGenerateStructuredData={generateStructuredData}
+              generateButtonLabel="Genera Dati Strutturati"
             />
           </TabsContent>
         </Tabs>

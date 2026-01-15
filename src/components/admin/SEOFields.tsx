@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { SERPPreview } from "./SERPPreview";
 import { cn } from "@/lib/utils";
+import { Wand2 } from "lucide-react";
 
 interface SEOFieldsProps {
   values: {
@@ -21,6 +24,8 @@ interface SEOFieldsProps {
   };
   onChange: (field: string, value: string) => void;
   baseUrl?: string;
+  onGenerateStructuredData?: () => string | null;
+  generateButtonLabel?: string;
 }
 
 const CharacterCounter = ({ current, max, optimal }: { current: number; max: number; optimal?: number }) => {
@@ -40,8 +45,38 @@ const CharacterCounter = ({ current, max, optimal }: { current: number; max: num
   );
 };
 
-export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFieldsProps) => {
+export const SEOFields = ({ 
+  values, 
+  onChange, 
+  baseUrl = "verdedoro.it",
+  onGenerateStructuredData,
+  generateButtonLabel = "Genera"
+}: SEOFieldsProps) => {
   const previewUrl = values.slug ? `${baseUrl}/${values.slug}` : baseUrl;
+  const [jsonError, setJsonError] = useState<string | null>(null);
+
+  const validateJson = (value: string) => {
+    if (!value.trim()) {
+      setJsonError(null);
+      return;
+    }
+    try {
+      JSON.parse(value);
+      setJsonError(null);
+    } catch (e) {
+      setJsonError("JSON non valido");
+    }
+  };
+
+  const handleGenerateClick = () => {
+    if (onGenerateStructuredData) {
+      const generated = onGenerateStructuredData();
+      if (generated) {
+        onChange("structuredData", generated);
+        setJsonError(null);
+      }
+    }
+  };
 
   return (
     <Card>
@@ -181,15 +216,41 @@ export const SEOFields = ({ values, onChange, baseUrl = "verdedoro.it" }: SEOFie
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="structuredData">Dati Strutturati JSON-LD (opzionale)</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="structuredData">Dati Strutturati JSON-LD (opzionale)</Label>
+            {onGenerateStructuredData && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateClick}
+              >
+                <Wand2 className="h-4 w-4 mr-2" />
+                {generateButtonLabel}
+              </Button>
+            )}
+          </div>
           <Textarea
             id="structuredData"
             value={values.structuredData}
-            onChange={(e) => onChange("structuredData", e.target.value)}
+            onChange={(e) => {
+              onChange("structuredData", e.target.value);
+              validateJson(e.target.value);
+            }}
             placeholder='{"@context": "https://schema.org", "@type": "Product", ...}'
-            rows={6}
-            className="font-mono text-sm"
+            rows={12}
+            className={cn(
+              "font-mono text-sm",
+              jsonError && "border-destructive focus-visible:ring-destructive"
+            )}
           />
+          {jsonError ? (
+            <span className="text-xs text-destructive">{jsonError}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">
+              Clicca "Genera" per creare automaticamente i dati strutturati basati sul contenuto.
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>
