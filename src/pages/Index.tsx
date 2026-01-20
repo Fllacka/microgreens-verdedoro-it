@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
+import { FeatureTitle } from "@/components/FeatureTitle";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
@@ -439,7 +440,7 @@ const Index = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => (
                     <div key={index}>
-                      <h3 className="font-display font-semibold text-primary mb-3">{feature.title}</h3>
+                      <FeatureTitle title={feature.title} />
                       <p className="font-body text-sm text-muted-foreground">{feature.description}</p>
                     </div>
                   ))}
