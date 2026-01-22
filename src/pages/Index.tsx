@@ -6,7 +6,7 @@ import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 
 import OptimizedImage from "@/components/ui/optimized-image";
-import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star } from "lucide-react";
+import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -407,47 +407,93 @@ const Index = () => {
         </section>
       )}
 
-      {/* Cosa sono i microgreens Section */}
+      {/* Cosa sono i microgreens Section - Premium Design */}
       {(sections.what_are_microgreens?.is_visible !== false) && (
-        <section className="section-padding bg-background">
-          <div className="container-width">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="order-2 lg:order-1">
-                <div className="relative w-full h-80 overflow-hidden rounded-lg shadow-elegant bg-muted/30">
+        <section className="py-20 lg:py-32 bg-background">
+          <div className="container mx-auto px-4 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              {/* Image Column with Decorative Elements */}
+              <div className="relative order-2 lg:order-1">
+                {/* Gold decorative circle - top right */}
+                <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full border-2 border-oro-primary/30 -z-10 hidden lg:block" />
+                
+                {/* Main image */}
+                <div className="relative overflow-hidden rounded-2xl shadow-xl">
                   <img
                     src={getWhatAreMicrogreensImage()}
                     alt={getWhatAreMicrogreensAlt()}
-                    className="w-full h-full object-cover"
+                    className="w-full h-[350px] lg:h-[480px] object-cover"
                     width={600}
-                    height={320}
+                    height={480}
                     loading="lazy"
                     decoding="async"
                   />
                 </div>
+                
+                {/* Small gold accent - bottom left */}
+                <div className="absolute -bottom-3 -left-3 w-16 h-16 rounded-full bg-oro-primary/20 -z-10 hidden lg:block" />
               </div>
+
+              {/* Content Column */}
               <div className="order-1 lg:order-2">
-                <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+                {/* Scopri Label with Gold Accent */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-px bg-oro-primary" />
+                  <span className="text-sm font-medium uppercase tracking-widest text-oro-primary">
+                    Scopri
+                  </span>
+                </div>
+
+                {/* Elegant Title */}
+                <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-6">
                   {whatAreMicrogreensContent.heading}
                 </h2>
+
+                {/* Description - comfortable to read */}
                 <div 
-                  className="font-body text-muted-foreground mb-6 leading-relaxed prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                  className="font-body text-muted-foreground leading-relaxed prose prose-lg max-w-xl mb-10 [&_a]:text-primary [&_a]:underline"
                   dangerouslySetInnerHTML={{ __html: whatAreMicrogreensContent.description }}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => (
-                    <div key={index}>
-                      <h3 className="font-display font-semibold text-primary mb-3">{feature.title}</h3>
-                      <p className="font-body text-sm text-muted-foreground">{feature.description}</p>
-                    </div>
-                  ))}
+                {/* Premium Feature Cards - 2x2 Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-10">
+                  {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => {
+                    const featureIcons = [Sparkles, Flame, Sun, ChefHat];
+                    const IconComponent = featureIcons[index % featureIcons.length];
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className="bg-card rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-border"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-verde-primary/10 flex items-center justify-center">
+                            <IconComponent className="w-5 h-5 text-verde-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="font-display font-semibold text-primary text-sm mb-1 leading-tight">
+                              {feature.title}
+                            </h3>
+                            <p className="font-body text-xs text-muted-foreground leading-relaxed">
+                              {feature.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="text-center">
-                  <Button variant="verde" className="inline-flex items-center" asChild>
-                    <Link to={whatAreMicrogreensContent.cta_link}>{whatAreMicrogreensContent.cta_text}</Link>
-                  </Button>
-                </div>
+                {/* Premium Pill CTA */}
+                <Button 
+                  asChild 
+                  className="group bg-verde-primary hover:bg-verde-primary/90 text-white rounded-full px-8 py-3 font-medium transition-all duration-300"
+                >
+                  <Link to={whatAreMicrogreensContent.cta_link}>
+                    {whatAreMicrogreensContent.cta_text || "Leggi la guida completa"}
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
@@ -574,7 +620,7 @@ const Index = () => {
                   dangerouslySetInnerHTML={{ __html: customMicrogreensContent.description1 }}
                 />
                 <div 
-                  className="font-body mb-8 text-base text-slate-50 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
+                  className="font-body mb-8 text-base text-primary-foreground/90 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline"
                   dangerouslySetInnerHTML={{ __html: customMicrogreensContent.description2 }}
                 />
                 <Button variant="oro" size="lg" asChild>
