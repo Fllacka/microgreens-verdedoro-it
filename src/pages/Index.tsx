@@ -533,33 +533,52 @@ const Index = () => {
               {/* Desktop Timeline - Horizontal */}
               <div className="hidden lg:block">
                 <div className="relative">
-                  {/* Connecting dashed line */}
-                  <div className="absolute top-12 left-[12.5%] right-[12.5%] h-px border-t-2 border-dashed border-verde-primary/30" />
+                  {/* Connecting line - solid, elegant */}
+                  <div className="absolute top-[100px] left-[12.5%] right-[12.5%] flex items-center">
+                    <div className="h-[2px] bg-verde-primary/20 w-full" />
+                  </div>
                   
-                  <div className="grid grid-cols-4 gap-8">
+                  {/* Connection dots between cards */}
+                  <div className="absolute top-[99px] left-[37.5%] w-2.5 h-2.5 rounded-full bg-verde-primary/30 -translate-x-1/2" />
+                  <div className="absolute top-[99px] left-1/2 w-2.5 h-2.5 rounded-full bg-verde-primary/30 -translate-x-1/2" />
+                  <div className="absolute top-[99px] left-[62.5%] w-2.5 h-2.5 rounded-full bg-verde-primary/30 -translate-x-1/2" />
+                  
+                  <div className="grid grid-cols-4 gap-6">
                     {journeySteps.map((step, index) => {
                       const IconComponent = step.icon;
                       return (
                         <div key={index} className="relative text-center">
-                          {/* Gold step number */}
-                          <span className="inline-block font-display text-sm font-semibold text-oro-primary mb-3">
-                            {step.number}
-                          </span>
-                          
-                          {/* Icon circle with gradient progression */}
-                          <div className={`relative z-10 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${greenProgression[index]} shadow-lg mb-5`}>
-                            <IconComponent className="h-9 w-9 text-primary-foreground" />
+                          {/* White card container */}
+                          <div className="bg-white rounded-2xl p-6 pt-5 shadow-sm border border-gray-100/50 
+                                          hover:shadow-md transition-shadow duration-300">
+                            {/* Gold step number */}
+                            <span className="inline-block font-display text-sm font-semibold text-oro-primary mb-4">
+                              {step.number}
+                            </span>
+                            
+                            {/* Premium icon with gold ring */}
+                            <div className="relative inline-flex mb-5">
+                              {/* Outer gold ring */}
+                              <div className="absolute inset-[-4px] rounded-full border-2 border-oro-primary/20" />
+                              
+                              {/* Icon circle with gradient + shadow */}
+                              <div className={`relative z-10 flex h-16 w-16 items-center justify-center 
+                                               rounded-full bg-gradient-to-br ${greenProgression[index]} 
+                                               shadow-lg shadow-verde-primary/25`}>
+                                <IconComponent className="h-7 w-7 text-primary-foreground stroke-[2.5]" />
+                              </div>
+                            </div>
+                            
+                            {/* Title */}
+                            <h3 className="font-display text-lg font-bold text-primary mb-2">
+                              {step.title}
+                            </h3>
+                            
+                            {/* Description */}
+                            <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                              {step.description}
+                            </p>
                           </div>
-                          
-                          {/* Title */}
-                          <h3 className="font-display text-lg font-bold text-primary mb-2">
-                            {step.title}
-                          </h3>
-                          
-                          {/* Description */}
-                          <p className="font-body text-sm text-muted-foreground leading-relaxed max-w-[200px] mx-auto">
-                            {step.description}
-                          </p>
                         </div>
                       );
                     })}
@@ -569,23 +588,38 @@ const Index = () => {
 
               {/* Mobile Timeline - Vertical */}
               <div className="lg:hidden">
-                <div className="relative pl-8">
-                  {/* Vertical connecting dashed line */}
-                  <div className="absolute left-4 top-8 bottom-8 w-px border-l-2 border-dashed border-verde-primary/30" />
+                <div className="relative">
+                  {/* Vertical connecting line - solid */}
+                  <div className="absolute left-7 top-8 bottom-8 w-[2px] bg-verde-primary/20" />
                   
-                  <div className="space-y-8">
+                  <div className="space-y-5">
                     {journeySteps.map((step, index) => {
                       const IconComponent = step.icon;
+                      const isLast = index === journeySteps.length - 1;
+                      
                       return (
-                        <div key={index} className="relative flex items-start gap-5">
-                          {/* Icon circle positioned on the timeline */}
-                          <div className={`relative z-10 flex-shrink-0 -ml-8 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br ${greenProgression[index]} shadow-lg`}>
-                            <IconComponent className="h-6 w-6 text-primary-foreground" />
+                        <div key={index} className="relative flex items-start gap-4">
+                          {/* Premium icon with gold ring */}
+                          <div className="relative flex-shrink-0">
+                            {/* Outer gold ring */}
+                            <div className="absolute inset-[-3px] rounded-full border-2 border-oro-primary/20" />
+                            
+                            {/* Icon circle with gradient + shadow */}
+                            <div className={`relative z-10 flex h-14 w-14 items-center justify-center 
+                                             rounded-full bg-gradient-to-br ${greenProgression[index]} 
+                                             shadow-lg shadow-verde-primary/25`}>
+                              <IconComponent className="h-6 w-6 text-primary-foreground stroke-[2.5]" />
+                            </div>
                           </div>
                           
-                          {/* Content */}
-                          <div className="flex-1 pt-1">
-                            {/* Gold step number + Title */}
+                          {/* Connection dot between steps */}
+                          {!isLast && (
+                            <div className="absolute left-[27px] top-[72px] w-2 h-2 rounded-full 
+                                            bg-verde-primary/30 -translate-x-1/2" />
+                          )}
+                          
+                          {/* White card with content */}
+                          <div className="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100/50">
                             <div className="flex items-baseline gap-2 mb-1">
                               <span className="font-display text-xs font-semibold text-oro-primary">
                                 {step.number}
@@ -594,8 +628,6 @@ const Index = () => {
                                 {step.title}
                               </h3>
                             </div>
-                            
-                            {/* Description */}
                             <p className="font-body text-sm text-muted-foreground leading-relaxed">
                               {step.description}
                             </p>
