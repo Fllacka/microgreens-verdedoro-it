@@ -455,8 +455,8 @@ const Index = () => {
                   dangerouslySetInnerHTML={{ __html: whatAreMicrogreensContent.description }}
                 />
 
-                {/* Premium Feature Cards - 2x2 Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-10">
+                {/* Premium Feature Cards - Single column on mobile, 2x2 on desktop */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
                   {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => {
                     const featureIcons = [Sparkles, Flame, Sun, ChefHat];
                     const IconComponent = featureIcons[index % featureIcons.length];
@@ -464,20 +464,18 @@ const Index = () => {
                     return (
                       <div 
                         key={index}
-                        className="bg-card rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-border"
+                        className="bg-card rounded-xl p-4 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 border border-border flex items-center gap-4"
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-verde-primary/10 flex items-center justify-center">
-                            <IconComponent className="w-5 h-5 text-verde-primary" />
-                          </div>
-                          <div className="min-w-0">
-                            <h3 className="font-display font-semibold text-primary text-sm mb-1 leading-tight">
-                              {feature.title}
-                            </h3>
-                            <p className="font-body text-xs text-muted-foreground leading-relaxed">
-                              {feature.description}
-                            </p>
-                          </div>
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-verde-primary/10 flex items-center justify-center">
+                          <IconComponent className="w-5 h-5 text-verde-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-display font-semibold text-primary text-sm mb-0.5">
+                            {feature.title}
+                          </h3>
+                          <p className="font-body text-xs text-muted-foreground leading-snug">
+                            {feature.description}
+                          </p>
                         </div>
                       </div>
                     );
@@ -487,7 +485,8 @@ const Index = () => {
                 {/* Premium Pill CTA */}
                 <Button 
                   asChild 
-                  className="group bg-verde-primary hover:bg-verde-primary/90 text-white rounded-full px-8 py-3 font-medium transition-all duration-300"
+                  size="lg"
+                  className="group bg-verde-primary hover:bg-verde-primary/90 text-white rounded-full px-6 sm:px-8 font-medium transition-all duration-300 w-full sm:w-auto"
                 >
                   <Link to={whatAreMicrogreensContent.cta_link}>
                     {whatAreMicrogreensContent.cta_text || "Leggi la guida completa"}
