@@ -387,9 +387,6 @@ const Index = () => {
 
           <div className="relative z-10 container-width text-left text-white">
             <div className="max-w-2xl">
-              <div className="inline-block bg-oro-primary text-accent-foreground px-4 py-2 rounded-full text-sm font-body font-medium mb-6">
-                {heroContent.badge_text}
-              </div>
               <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">
                 <span className="text-verde-primary">VERDE</span> <span className="text-oro-primary">D'ORO</span>
               </h1>
