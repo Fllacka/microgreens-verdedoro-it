@@ -6,7 +6,7 @@ import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 
 import OptimizedImage from "@/components/ui/optimized-image";
-import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat } from "lucide-react";
+import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -499,45 +499,117 @@ const Index = () => {
         </section>
       )}
 
-      {/* Come Funziona Section */}
-      {(sections.how_it_works?.is_visible !== false) && (
-        <section className="section-padding bg-gradient-subtle">
-          <div className="container-width">
-            <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
-                {howItWorksContent.heading}
-              </h2>
-              <div 
-                className="font-body text-lg text-muted-foreground max-w-2xl mx-auto prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
-                dangerouslySetInnerHTML={{ __html: howItWorksContent.subtitle }}
-              />
-            </div>
+      {/* Come Funziona Section - Journey Timeline */}
+      {(sections.how_it_works?.is_visible !== false) && (() => {
+        // Fixed journey steps with growth progression
+        const journeySteps = [
+          { number: "01", icon: ShoppingBag, title: "Ordine", description: "Scegli le varietà e attiviamo la semina dedicata a te." },
+          { number: "02", icon: Sprout, title: "Semina", description: "Coltiviamo in ambiente controllato per qualità perfetta." },
+          { number: "03", icon: Scissors, title: "Raccolta", description: "Tagliamo a mano solo quando è il momento giusto." },
+          { number: "04", icon: Bike, title: "Consegna", description: "A casa tua a Reggio Emilia, poche ore dal taglio." },
+        ];
+        
+        // Green progression - lighter to darker (symbolizing growth)
+        const greenProgression = [
+          "from-verde-primary/70 to-verde-primary/80",
+          "from-verde-primary/80 to-verde-primary/90", 
+          "from-verde-primary/90 to-verde-primary",
+          "from-verde-primary to-verde-light",
+        ];
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {(howItWorksContent.steps || []).map((step: any, index: number) => {
-                const IconComponent = ICON_MAP[step.icon] || Leaf;
-                return (
-                  <div key={index} className="relative text-center">
-                    <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-verde mb-6">
-                      <IconComponent className="h-10 w-10 text-primary-foreground" />
-                    </div>
-                    <h3 className="font-display text-xl font-semibold text-primary mb-4">
-                      {step.number}. {step.title}
-                    </h3>
-                    <p className="font-body text-muted-foreground text-sm">{step.description}</p>
+        return (
+          <section className="section-padding bg-gradient-subtle">
+            <div className="container-width">
+              {/* Header */}
+              <div className="text-center mb-12 lg:mb-16">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+                  {howItWorksContent.heading || "Come Funziona?"}
+                </h2>
+                <p className="font-body text-lg text-muted-foreground max-w-xl mx-auto">
+                  Dal tuo ordine alla tua tavola, in pochi semplici passi
+                </p>
+              </div>
 
-                    {index < (howItWorksContent.steps?.length || 0) - 1 && (
-                      <div className="hidden lg:block absolute top-10 -right-4 w-8">
-                        <ArrowRight className="h-6 w-6 text-oro-primary" />
-                      </div>
-                    )}
+              {/* Desktop Timeline - Horizontal */}
+              <div className="hidden lg:block">
+                <div className="relative">
+                  {/* Connecting dashed line */}
+                  <div className="absolute top-12 left-[12.5%] right-[12.5%] h-px border-t-2 border-dashed border-verde-primary/30" />
+                  
+                  <div className="grid grid-cols-4 gap-8">
+                    {journeySteps.map((step, index) => {
+                      const IconComponent = step.icon;
+                      return (
+                        <div key={index} className="relative text-center">
+                          {/* Gold step number */}
+                          <span className="inline-block font-display text-sm font-semibold text-oro-primary mb-3">
+                            {step.number}
+                          </span>
+                          
+                          {/* Icon circle with gradient progression */}
+                          <div className={`relative z-10 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${greenProgression[index]} shadow-lg mb-5`}>
+                            <IconComponent className="h-9 w-9 text-primary-foreground" />
+                          </div>
+                          
+                          {/* Title */}
+                          <h3 className="font-display text-lg font-bold text-primary mb-2">
+                            {step.title}
+                          </h3>
+                          
+                          {/* Description */}
+                          <p className="font-body text-sm text-muted-foreground leading-relaxed max-w-[200px] mx-auto">
+                            {step.description}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
+                </div>
+              </div>
+
+              {/* Mobile Timeline - Vertical */}
+              <div className="lg:hidden">
+                <div className="relative pl-8">
+                  {/* Vertical connecting dashed line */}
+                  <div className="absolute left-4 top-8 bottom-8 w-px border-l-2 border-dashed border-verde-primary/30" />
+                  
+                  <div className="space-y-8">
+                    {journeySteps.map((step, index) => {
+                      const IconComponent = step.icon;
+                      return (
+                        <div key={index} className="relative flex items-start gap-5">
+                          {/* Icon circle positioned on the timeline */}
+                          <div className={`relative z-10 flex-shrink-0 -ml-8 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br ${greenProgression[index]} shadow-lg`}>
+                            <IconComponent className="h-6 w-6 text-primary-foreground" />
+                          </div>
+                          
+                          {/* Content */}
+                          <div className="flex-1 pt-1">
+                            {/* Gold step number + Title */}
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="font-display text-xs font-semibold text-oro-primary">
+                                {step.number}
+                              </span>
+                              <h3 className="font-display text-base font-bold text-primary">
+                                {step.title}
+                              </h3>
+                            </div>
+                            
+                            {/* Description */}
+                            <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                              {step.description}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        );
+      })()}
 
       {/* Ordini e Consegne Section */}
       {(sections.orders_delivery?.is_visible !== false) && (
