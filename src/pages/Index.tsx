@@ -407,58 +407,48 @@ const Index = () => {
         </section>
       )}
 
-      {/* Cosa sono i microgreens Section - Editorial Layout */}
+      {/* Cosa sono i microgreens Section */}
       {(sections.what_are_microgreens?.is_visible !== false) && (
         <section className="section-padding bg-background">
           <div className="container-width">
-            {/* Header centrato */}
-            <div className="text-center mb-12">
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
-                {whatAreMicrogreensContent.heading}
-              </h2>
-              <div 
-                className="font-body text-lg text-muted-foreground max-w-3xl mx-auto prose prose-lg [&_a]:text-primary [&_a]:underline"
-                dangerouslySetInnerHTML={{ __html: whatAreMicrogreensContent.description }}
-              />
-            </div>
-
-            {/* Immagine Full-Width 16:9 */}
-            <div className="mb-12">
-              <div className="aspect-video rounded-xl overflow-hidden shadow-lg">
-                <img
-                  src={getWhatAreMicrogreensImage()}
-                  alt={getWhatAreMicrogreensAlt()}
-                  className="w-full h-full object-cover"
-                  width={1200}
-                  height={675}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            </div>
-
-            {/* Feature Cards - 4 colonne */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => (
-                <div key={index} className="text-center p-6 rounded-xl bg-card hover:shadow-md transition-shadow">
-                  <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-gradient-verde mb-4">
-                    <Leaf className="h-7 w-7 text-primary-foreground" />
-                  </div>
-                  <h3 className="font-display font-semibold text-primary mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="font-body text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="order-2 lg:order-1">
+                <div className="relative w-full h-80 overflow-hidden rounded-lg shadow-elegant bg-muted/30">
+                  <img
+                    src={getWhatAreMicrogreensImage()}
+                    alt={getWhatAreMicrogreensAlt()}
+                    className="w-full h-full object-cover"
+                    width={600}
+                    height={320}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
-              ))}
-            </div>
+              </div>
+              <div className="order-1 lg:order-2">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
+                  {whatAreMicrogreensContent.heading}
+                </h2>
+                <div 
+                  className="font-body text-muted-foreground mb-6 leading-relaxed prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
+                  dangerouslySetInnerHTML={{ __html: whatAreMicrogreensContent.description }}
+                />
 
-            {/* CTA Centrato */}
-            <div className="text-center">
-              <Button variant="verde" size="lg" asChild>
-                <Link to={whatAreMicrogreensContent.cta_link}>{whatAreMicrogreensContent.cta_text}</Link>
-              </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  {(whatAreMicrogreensContent.features || []).map((feature: any, index: number) => (
+                    <div key={index}>
+                      <h3 className="font-display font-semibold text-primary mb-3">{feature.title}</h3>
+                      <p className="font-body text-sm text-muted-foreground">{feature.description}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center">
+                  <Button variant="verde" className="inline-flex items-center" asChild>
+                    <Link to={whatAreMicrogreensContent.cta_link}>{whatAreMicrogreensContent.cta_text}</Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </section>
