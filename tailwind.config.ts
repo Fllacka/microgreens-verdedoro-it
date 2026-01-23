@@ -114,6 +114,14 @@ export default {
           "75%": { transform: "scale(1.15)" },
           "100%": { transform: "scale(1)" },
         },
+        "cart-shake": {
+          "0%, 100%": { transform: "scale(1) rotate(0deg)" },
+          "15%": { transform: "scale(1.2) rotate(-8deg)" },
+          "30%": { transform: "scale(1.15) rotate(8deg)" },
+          "45%": { transform: "scale(1.1) rotate(-5deg)" },
+          "60%": { transform: "scale(1.05) rotate(3deg)" },
+          "75%": { transform: "scale(1.02) rotate(-2deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -123,6 +131,7 @@ export default {
         "scale-in": "scale-in 0.4s ease-out",
         "float": "float 3s ease-in-out infinite",
         "cart-bounce": "cart-bounce 0.5s ease-out",
+        "cart-shake": "cart-shake 0.6s ease-out",
       },
     },
   },
