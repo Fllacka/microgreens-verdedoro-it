@@ -5,35 +5,34 @@ interface SeedingHandIconProps {
 }
 
 /**
- * Custom icon showing a hand sowing/scattering seeds downward
- * Designed to match Lucide icon style (24x24 viewBox, stroke-based)
+ * Custom icon showing a hand sowing/dropping seeds
+ * Filled style matching the reference - hand silhouette with seed drops
  */
 const SeedingHandIcon: React.FC<SeedingHandIconProps> = ({ className }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      fill="currentColor"
+      stroke="none"
       className={className}
     >
-      {/* Hand palm facing down, fingers slightly curved */}
-      <path d="M6 8c0-1.5 1-3 3-3h1c1.5 0 2.5.8 3 2" />
-      <path d="M13 7c.5-1.2 1.5-2 3-2h.5c1.5 0 2.5 1 2.5 2.5v1" />
-      <path d="M19 8.5v2c0 1.5-1 2.5-2.5 2.5H8c-2 0-3-1.5-3-3V8" />
+      {/* Hand silhouette - tilted, palm facing down-left */}
+      <path d="M4 6.5C4 5.67 4.67 5 5.5 5h1C7.33 5 8 5.67 8 6.5V7h1V5.5C9 4.67 9.67 4 10.5 4h1c.83 0 1.5.67 1.5 1.5V7h1V5c0-.55.45-1 1-1h1c.83 0 1.5.67 1.5 1.5V7h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 2.5-1.5 4-4 4H11l-3 3c-.5.5-1.5.5-2 0l-1-1c-.5-.5-.5-1.5 0-2l2-2H5.5C4.67 12.5 4 11.83 4 11V6.5z" />
       
-      {/* Wrist/arm */}
-      <path d="M5 10v-1c0-1 .5-2 1.5-2" />
+      {/* Curved line detail on palm */}
+      <path 
+        d="M9 8.5c1.5.5 3 1 4.5.5" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="0.5"
+        opacity="0.3"
+      />
       
-      {/* Seeds falling - 4 seeds at different positions */}
-      <circle cx="8" cy="16" r="1" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" />
-      <circle cx="16" cy="16.5" r="1" fill="currentColor" stroke="none" />
-      <circle cx="10" cy="21" r="1" fill="currentColor" stroke="none" />
-      <circle cx="14" cy="22" r="1" fill="currentColor" stroke="none" />
+      {/* Seeds dropping - teardrop/oval shapes */}
+      <ellipse cx="13" cy="17" rx="1.2" ry="1.6" />
+      <ellipse cx="16.5" cy="19" rx="1" ry="1.3" />
+      <ellipse cx="10" cy="20" rx="0.9" ry="1.2" />
     </svg>
   );
 };
