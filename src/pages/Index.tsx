@@ -513,7 +513,7 @@ const Index = () => {
                         <div className="flex justify-center mb-4">
                           <div className={`flex h-16 w-16 items-center justify-center rounded-full ${iconColors[index].bg} 
                                           ring-2 ${iconColors[index].ring} shadow-lg`}>
-                            <IconComponent className="h-7 w-7 text-white stroke-[2.5]" />
+                            <IconComponent className={`h-7 w-7 text-white stroke-[2.5] ${step.icon === HandCoins ? 'rotate-180' : ''}`} />
                           </div>
                         </div>
                         
@@ -559,7 +559,7 @@ const Index = () => {
                         <div className="flex justify-center mb-4">
                           <div className={`flex h-14 w-14 items-center justify-center rounded-full ${iconColors[index].bg} 
                                           ring-2 ${iconColors[index].ring} shadow-lg`}>
-                            <IconComponent className="h-6 w-6 text-white stroke-[2.5]" />
+                            <IconComponent className={`h-6 w-6 text-white stroke-[2.5] ${step.icon === HandCoins ? 'rotate-180' : ''}`} />
                           </div>
                         </div>
                         
@@ -598,7 +598,7 @@ const Index = () => {
                           {/* Icon with ring */}
                           <div className={`flex h-12 w-12 items-center justify-center rounded-full ${iconColors[index].bg} 
                                           ring-2 ${iconColors[index].ring} shadow-lg flex-shrink-0`}>
-                            <IconComponent className="h-5 w-5 text-white stroke-[2.5]" />
+                            <IconComponent className={`h-5 w-5 text-white stroke-[2.5] ${step.icon === HandCoins ? 'rotate-180' : ''}`} />
                           </div>
                           
                           <div className="flex-1">
