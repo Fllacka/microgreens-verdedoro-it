@@ -17,22 +17,13 @@ const SeedingHandIcon: React.FC<SeedingHandIconProps> = ({ className }) => {
       stroke="none"
       className={className}
     >
-      {/* Hand silhouette - tilted, palm facing down-left */}
-      <path d="M4 6.5C4 5.67 4.67 5 5.5 5h1C7.33 5 8 5.67 8 6.5V7h1V5.5C9 4.67 9.67 4 10.5 4h1c.83 0 1.5.67 1.5 1.5V7h1V5c0-.55.45-1 1-1h1c.83 0 1.5.67 1.5 1.5V7h1V5.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 2.5-1.5 4-4 4H11l-3 3c-.5.5-1.5.5-2 0l-1-1c-.5-.5-.5-1.5 0-2l2-2H5.5C4.67 12.5 4 11.83 4 11V6.5z" />
+      {/* Hand silhouette - palm open, fingers together pointing right */}
+      <path d="M3 9.5C3 8.67 3.5 8 4.2 8h.6c.7 0 1.2.67 1.2 1.5v.5h.5V8.5c0-.83.5-1.5 1.2-1.5h.6c.7 0 1.2.67 1.2 1.5V10h.5V7.5c0-.83.5-1.5 1.2-1.5h.6c.7 0 1.2.67 1.2 1.5V10h.5V8c0-.55.4-1 .9-1h.6c.7 0 1.2.67 1.2 1.5V10h.5V8.5c0-.83.5-1.5 1.2-1.5.7 0 1.2.67 1.2 1.5v4c0 2-1.2 3.5-3.5 3.5H10L7.5 18c-.4.4-1 .4-1.4 0L5 17c-.4-.4-.4-1 0-1.4L7 14H4.2c-.7 0-1.2-.67-1.2-1.5V9.5z" />
       
-      {/* Curved line detail on palm */}
-      <path 
-        d="M9 8.5c1.5.5 3 1 4.5.5" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="0.5"
-        opacity="0.3"
-      />
-      
-      {/* Seeds dropping - teardrop/oval shapes */}
-      <ellipse cx="13" cy="17" rx="1.2" ry="1.6" />
-      <ellipse cx="16.5" cy="19" rx="1" ry="1.3" />
-      <ellipse cx="10" cy="20" rx="0.9" ry="1.2" />
+      {/* Seeds dropping - teardrop shapes falling */}
+      <ellipse cx="14" cy="18.5" rx="1.3" ry="1.7" />
+      <ellipse cx="17.5" cy="20.5" rx="1.1" ry="1.4" />
+      <ellipse cx="11" cy="21" rx="1" ry="1.3" />
     </svg>
   );
 };
