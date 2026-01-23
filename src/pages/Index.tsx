@@ -43,6 +43,7 @@ interface Product {
   uses: string[] | null;
   image_id?: string | null;
 }
+// Icon map for dynamic CMS-driven icons
 const ICON_MAP: Record<string, React.ComponentType<{
   className?: string;
 }>> = {
@@ -53,7 +54,15 @@ const ICON_MAP: Record<string, React.ComponentType<{
   Sprout,
   Package,
   UtensilsCrossed,
-  Star
+  Star,
+  ShoppingBag,
+  Scissors,
+  Bike,
+  Sparkles,
+  Flame,
+  Sun,
+  ChefHat,
+  ArrowRight,
 };
 const Index = () => {
   const navigate = useNavigate();
@@ -439,28 +448,21 @@ const Index = () => {
 
       {/* Come Funziona Section - Journey Timeline */}
       {sections.how_it_works?.is_visible !== false && (() => {
-        // Fixed journey steps with growth progression
-        const journeySteps = [{
-          number: 1,
-          icon: ShoppingBag,
-          title: "Ordine",
-          description: "Scegli le varietà e attiviamo la semina dedicata a te."
-        }, {
-          number: 2,
-          icon: Sprout,
-          title: "Semina",
-          description: "Coltiviamo in ambiente controllato per qualità perfetta."
-        }, {
-          number: 3,
-          icon: Scissors,
-          title: "Raccolta",
-          description: "Tagliamo a mano solo quando è il momento giusto."
-        }, {
-          number: 4,
-          icon: Bike,
-          title: "Consegna",
-          description: "A casa tua a Reggio Emilia, poche ore dal taglio."
-        }];
+        // Get journey steps from CMS or use defaults
+        const cmsSteps = howItWorksContent.steps || [];
+        const journeySteps = cmsSteps.length > 0 
+          ? cmsSteps.map((step: any, index: number) => ({
+              number: index + 1,
+              icon: ICON_MAP[step.icon] || ShoppingBag,
+              title: step.title || "",
+              description: step.description || "",
+            }))
+          : [
+              { number: 1, icon: ShoppingBag, title: "Ordine", description: "Scegli le varietà e attiviamo la semina dedicata a te." },
+              { number: 2, icon: Sprout, title: "Semina", description: "Coltiviamo in ambiente controllato per qualità perfetta." },
+              { number: 3, icon: Scissors, title: "Raccolta", description: "Tagliamo a mano solo quando è il momento giusto." },
+              { number: 4, icon: Bike, title: "Consegna", description: "A casa tua a Reggio Emilia, poche ore dal taglio." },
+            ];
 
         // Green progression - lighter to darker (symbolizing growth)
         const iconColors = [
@@ -479,7 +481,7 @@ const Index = () => {
                   {howItWorksContent.heading || "Come Funziona?"}
                 </h2>
                 <p className="font-body text-lg text-muted-foreground max-w-xl mx-auto">
-                  Dal tuo ordine alla tua tavola, in pochi semplici passi
+                  {howItWorksContent.subtitle || "Dal tuo ordine alla tua tavola, in pochi semplici passi"}
                 </p>
               </div>
 
