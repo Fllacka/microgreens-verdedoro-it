@@ -39,6 +39,7 @@ interface Product {
   name: string;
   slug: string;
   description: string | null;
+  grid_description?: string | null;
   category: string | null;
   benefits: string[] | null;
   uses: string[] | null;
@@ -138,7 +139,7 @@ const Index = () => {
     const {
       data: products,
       error
-    } = await supabase.from("products").select("id, name, slug, description, category, benefits, uses, image_id").in("slug", slugs).eq("published", true);
+    } = await supabase.from("products").select("id, name, slug, description, grid_description, category, benefits, uses, image_id").in("slug", slugs).eq("published", true);
     if (!error && products) {
       // Maintain the order from slugs array
       const orderedProducts = slugs.map(slug => products.find(p => p.slug === slug)).filter((p): p is typeof products[number] => p !== undefined) as Product[];
@@ -657,7 +658,8 @@ const Index = () => {
             const imageId = 'image_id' in product ? product.image_id as string | null : null;
             const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
             const productImage = mediaInfo?.file_path || (hasDefaultProducts ? index === 1 ? varietiesImage : chefImage : chefImage);
-            return <ProductCard key={product.id} name={product.name} category={product.category || ""} description={product.description || ""} benefits={product.benefits || []} uses={product.uses || []} image={productImage} onCardClick={() => navigate(`/microgreens/${product.slug}`)} priority={index < 3} />;
+            const gridDesc = 'grid_description' in product ? (product as Product).grid_description : undefined;
+            return <ProductCard key={product.id} name={product.name} category={product.category || ""} description={product.description || ""} gridDescription={gridDesc || undefined} benefits={product.benefits || []} uses={product.uses || []} image={productImage} onCardClick={() => navigate(`/microgreens/${product.slug}`)} priority={index < 3} />;
           })}
             </div>
 

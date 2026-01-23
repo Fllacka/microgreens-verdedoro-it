@@ -19,6 +19,7 @@ interface Product {
   name: string;
   slug: string;
   description: string;
+  grid_description?: string;
   category: string;
   benefits: string[];
   uses: string[];
@@ -66,6 +67,7 @@ const Microgreens = () => {
               name,
               slug,
               description,
+              grid_description,
               category,
               benefits,
               uses,
@@ -245,6 +247,7 @@ const Microgreens = () => {
                   name={product.name}
                   category={product.category}
                   description={product.description}
+                  gridDescription={product.grid_description}
                   benefits={product.benefits}
                   uses={product.uses}
                   image={product.media?.file_path || chefImage}

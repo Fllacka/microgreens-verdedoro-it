@@ -58,6 +58,7 @@ const AdminProductEdit = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    grid_description: "",
     content: "",
     content_title: "Panoramica del Prodotto",
     category: "",
@@ -145,6 +146,7 @@ const AdminProductEdit = () => {
       setFormData({
         name: data.name || "",
         description: data.description || "",
+        grid_description: (data as any).grid_description || "",
         content: data.content || "",
         content_title: (data as any).content_title || "Panoramica del Prodotto",
         category: data.category || "",
@@ -210,6 +212,7 @@ const AdminProductEdit = () => {
         name: formData.name,
         slug: seoData.slug,
         description: formData.description,
+        grid_description: formData.grid_description,
         content: formData.content,
         content_title: formData.content_title,
         category: formData.category,
@@ -397,6 +400,26 @@ const AdminProductEdit = () => {
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         rows={3}
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="grid_description">Descrizione Product Grid</Label>
+                        <span className={`text-xs ${formData.grid_description.length > 120 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                          {formData.grid_description.length}/120
+                        </span>
+                      </div>
+                      <Textarea
+                        id="grid_description"
+                        value={formData.grid_description}
+                        onChange={(e) => setFormData({ ...formData, grid_description: e.target.value })}
+                        rows={2}
+                        maxLength={150}
+                        placeholder="Descrizione breve per le card del product grid (max 120 caratteri)"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Questa descrizione appare nelle card dei prodotti. Consigliato: max 120 caratteri per evitare troncamenti.
+                      </p>
                     </div>
 
                     <div className="space-y-2">
