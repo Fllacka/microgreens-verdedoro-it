@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import OptimizedImage from "@/components/ui/optimized-image";
-import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand } from "lucide-react";
+import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand, HandCoins } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -53,8 +53,8 @@ const stripHtmlTags = (html: string): string => {
 const ICON_MAP: Record<string, React.ComponentType<{
   className?: string;
 }>> = {
-  Leaf,
   Hand,
+  HandCoins,
   Heart,
   Truck,
   Shield,
@@ -493,15 +493,15 @@ const Index = () => {
               </div>
 
               {/* Desktop: 4 columns with chevrons */}
-              <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4 items-stretch">
+              <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-stretch gap-2">
                 {journeySteps.map((step, index) => {
                   const IconComponent = step.icon;
                   const isLast = index === journeySteps.length - 1;
                   
                   return (
-                    <div key={index} className="relative flex items-stretch h-full">
+                    <>
                       {/* Card */}
-                      <div className="relative flex-1 bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
+                      <div key={`card-${index}`} className="relative bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
                                       hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[220px] flex flex-col">
                         {/* Gold badge - top left */}
                         <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-gradient-to-br from-oro-primary to-oro-light 
@@ -528,13 +528,13 @@ const Index = () => {
                         </p>
                       </div>
                       
-                      {/* Chevron between cards - desktop only */}
+                      {/* Chevron between cards */}
                       {!isLast && (
-                        <div className="flex items-center justify-center w-8 flex-shrink-0">
+                        <div key={`chevron-${index}`} className="flex items-center justify-center">
                           <span className="text-2xl font-light text-oro-primary/50 select-none">›</span>
                         </div>
                       )}
-                    </div>
+                    </>
                   );
                 })}
               </div>
