@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import OptimizedImage from "@/components/ui/optimized-image";
-import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike } from "lucide-react";
+import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand } from "lucide-react";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -43,11 +43,18 @@ interface Product {
   uses: string[] | null;
   image_id?: string | null;
 }
+// Helper function to strip HTML tags from rich text content
+const stripHtmlTags = (html: string): string => {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
 // Icon map for dynamic CMS-driven icons
 const ICON_MAP: Record<string, React.ComponentType<{
   className?: string;
 }>> = {
   Leaf,
+  Hand,
   Heart,
   Truck,
   Shield,
@@ -481,18 +488,18 @@ const Index = () => {
                   {howItWorksContent.heading || "Come Funziona?"}
                 </h2>
                 <p className="font-body text-lg text-muted-foreground max-w-xl mx-auto">
-                  {howItWorksContent.subtitle || "Dal tuo ordine alla tua tavola, in pochi semplici passi"}
+                  {stripHtmlTags(howItWorksContent.subtitle) || "Dal tuo ordine alla tua tavola, in pochi semplici passi"}
                 </p>
               </div>
 
               {/* Desktop: 4 columns with chevrons */}
-              <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4">
+              <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4 items-stretch">
                 {journeySteps.map((step, index) => {
                   const IconComponent = step.icon;
                   const isLast = index === journeySteps.length - 1;
                   
                   return (
-                    <div key={index} className="relative flex items-stretch">
+                    <div key={index} className="relative flex items-stretch h-full">
                       {/* Card */}
                       <div className="relative flex-1 bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
                                       hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[220px] flex flex-col">
@@ -533,15 +540,15 @@ const Index = () => {
               </div>
 
               {/* Tablet: 2 columns */}
-              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-6">
+              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-6 items-stretch">
                 {journeySteps.map((step, index) => {
                   const IconComponent = step.icon;
                   
                   return (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative h-full">
                       {/* Card */}
                       <div className="relative bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
-                                      hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[200px] flex flex-col">
+                                      hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[200px] flex flex-col h-full">
                         {/* Gold badge - top left */}
                         <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-gradient-to-br from-oro-primary to-oro-light 
                                         flex items-center justify-center shadow-md z-10">

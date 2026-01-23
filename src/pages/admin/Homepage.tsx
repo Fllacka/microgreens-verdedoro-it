@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Eye, EyeOff, Home, Search, Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star, ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, type LucideIcon } from "lucide-react";
+import { Loader2, Eye, EyeOff, Home, Search, Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star, ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, Hand, type LucideIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -35,13 +35,14 @@ interface Product {
 // Icon map for visual preview in selector
 const ICON_COMPONENTS: Record<string, LucideIcon> = {
   Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star,
-  ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight,
+  ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, Hand,
 };
 
 const ICON_OPTIONS = [
   // Primary "Come Funziona" icons
   { value: "ShoppingBag", label: "Carrello (Ordine)" },
-  { value: "Sprout", label: "Germoglio (Semina)" },
+  { value: "Hand", label: "Mano (Semina)" },
+  { value: "Sprout", label: "Germoglio" },
   { value: "Scissors", label: "Forbici (Raccolta)" },
   { value: "Bike", label: "Bicicletta (Consegna)" },
   // Additional icons
