@@ -7,6 +7,7 @@ interface ProductCardProps {
   name: string;
   category: string;
   description: string;
+  gridDescription?: string;
   benefits: string[];
   uses: string[];
   image: string;
@@ -20,6 +21,7 @@ const ProductCard = ({
   name,
   category,
   description,
+  gridDescription,
   benefits,
   uses,
   image,
@@ -67,9 +69,9 @@ const ProductCard = ({
           {name}
         </h3>
         
-        {/* Description - limited to 2 lines with ellipsis */}
+        {/* Description - uses gridDescription if available, otherwise falls back to description */}
         <p className="font-body text-muted-foreground mb-4 text-sm leading-relaxed line-clamp-2">
-          {description}
+          {gridDescription || description}
         </p>
         
         {/* Benefits - horizontal pills with icons, max 3 */}

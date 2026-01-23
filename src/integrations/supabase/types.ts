@@ -433,6 +433,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           faq_items: Json | null
+          grid_description: string | null
           id: string
           image_alt: string | null
           image_id: string | null
@@ -470,6 +471,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           faq_items?: Json | null
+          grid_description?: string | null
           id?: string
           image_alt?: string | null
           image_id?: string | null
@@ -507,6 +509,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           faq_items?: Json | null
+          grid_description?: string | null
           id?: string
           image_alt?: string | null
           image_id?: string | null

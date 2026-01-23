@@ -19,6 +19,7 @@ interface Product {
   name: string;
   slug: string;
   description: string;
+  grid_description?: string;
   category: string;
   benefits: string[];
   uses: string[];
@@ -60,11 +61,12 @@ const MicrogreensPreview = () => {
       const [productsRes, sectionsRes] = await Promise.all([
         supabase
           .from("products")
-          .select(`
+            .select(`
             id,
             name,
             slug,
             description,
+            grid_description,
             category,
             benefits,
             uses,
@@ -166,6 +168,7 @@ const MicrogreensPreview = () => {
                   name={product.name}
                   category={product.category}
                   description={product.description}
+                  gridDescription={product.grid_description}
                   benefits={product.benefits}
                   uses={product.uses}
                   image={product.media?.file_path || chefImage}
