@@ -6,6 +6,7 @@ import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand, HandCoins } from "lucide-react";
+import SeedingHandIcon from "@/components/icons/SeedingHandIcon";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -53,6 +54,7 @@ const stripHtmlTags = (html: string): string => {
 const ICON_MAP: Record<string, React.ComponentType<{
   className?: string;
 }>> = {
+  SeedingHand: SeedingHandIcon,
   Hand,
   HandCoins,
   Heart,
@@ -513,7 +515,7 @@ const Index = () => {
                         <div className="flex justify-center mb-4">
                           <div className={`flex h-16 w-16 items-center justify-center rounded-full ${iconColors[index].bg} 
                                           ring-2 ${iconColors[index].ring} shadow-lg`}>
-                            <IconComponent className={`h-7 w-7 text-white stroke-[2.5] ${step.icon === HandCoins ? 'rotate-180' : ''}`} />
+                            <IconComponent className="h-7 w-7 text-white stroke-[2.5]" />
                           </div>
                         </div>
                         
@@ -559,7 +561,7 @@ const Index = () => {
                         <div className="flex justify-center mb-4">
                           <div className={`flex h-14 w-14 items-center justify-center rounded-full ${iconColors[index].bg} 
                                           ring-2 ${iconColors[index].ring} shadow-lg`}>
-                            <IconComponent className={`h-6 w-6 text-white stroke-[2.5] ${step.icon === HandCoins ? 'rotate-180' : ''}`} />
+                            <IconComponent className="h-6 w-6 text-white stroke-[2.5]" />
                           </div>
                         </div>
                         
@@ -598,7 +600,7 @@ const Index = () => {
                           {/* Icon with ring */}
                           <div className={`flex h-12 w-12 items-center justify-center rounded-full ${iconColors[index].bg} 
                                           ring-2 ${iconColors[index].ring} shadow-lg flex-shrink-0`}>
-                            <IconComponent className={`h-5 w-5 text-white stroke-[2.5] ${step.icon === HandCoins ? 'rotate-180' : ''}`} />
+                            <IconComponent className="h-5 w-5 text-white stroke-[2.5]" />
                           </div>
                           
                           <div className="flex-1">

@@ -41,11 +41,12 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
 const ICON_OPTIONS = [
   // Primary "Come Funziona" icons
   { value: "ShoppingBag", label: "Carrello (Ordine)" },
-  { value: "HandCoins", label: "Mano con Semi (Semina)" },
+  { value: "SeedingHand", label: "🌱 Mano che Semina" },
+  { value: "HandCoins", label: "Mano con Oggetti" },
   { value: "Hand", label: "Mano" },
   { value: "Scissors", label: "Forbici (Raccolta)" },
   { value: "Bike", label: "Bicicletta (Consegna)" },
-  // Additional icons
+  { value: "Sprout", label: "Germoglio" },
   { value: "Leaf", label: "Foglia" },
   { value: "Heart", label: "Cuore" },
   { value: "Truck", label: "Camion" },
