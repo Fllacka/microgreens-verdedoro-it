@@ -211,10 +211,10 @@ const Navigation = () => {
       )}
     >
       <div className="container-width">
-        {/* Desktop: 3-column grid layout */}
-        <div className="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-8">
+        {/* Desktop: 3-column grid layout with true center */}
+        <div className="hidden md:grid md:grid-cols-[1fr_auto_1fr] md:items-center">
           {/* Logo - Left */}
-          <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center justify-self-start">
             <div className="h-14 min-w-[140px] flex items-center">
               {logoUrl === undefined ? (
                 <div className="h-14 w-36 bg-muted/30 rounded animate-pulse" />
@@ -234,8 +234,8 @@ const Navigation = () => {
             </div>
           </Link>
 
-          {/* Navigation - Center */}
-          <NavigationMenu className="justify-center">
+          {/* Navigation - True Center */}
+          <NavigationMenu className="justify-self-center">
             <NavigationMenuList className="gap-12">
               {!isLoaded ? (
                 <div className="flex gap-12">
@@ -306,7 +306,7 @@ const Navigation = () => {
           </NavigationMenu>
 
           {/* Cart - Right */}
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-self-end">
             <CartButton />
           </div>
         </div>
