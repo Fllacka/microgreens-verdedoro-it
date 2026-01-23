@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Eye, EyeOff, Home, Search } from "lucide-react";
+import { Loader2, Eye, EyeOff, Home, Search, Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star, ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, type LucideIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -32,15 +32,30 @@ interface Product {
   published: boolean;
 }
 
+// Icon map for visual preview in selector
+const ICON_COMPONENTS: Record<string, LucideIcon> = {
+  Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star,
+  ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight,
+};
+
 const ICON_OPTIONS = [
+  // Primary "Come Funziona" icons
+  { value: "ShoppingBag", label: "Carrello (Ordine)" },
+  { value: "Sprout", label: "Germoglio (Semina)" },
+  { value: "Scissors", label: "Forbici (Raccolta)" },
+  { value: "Bike", label: "Bicicletta (Consegna)" },
+  // Additional icons
   { value: "Leaf", label: "Foglia" },
   { value: "Heart", label: "Cuore" },
   { value: "Truck", label: "Camion" },
   { value: "Shield", label: "Scudo" },
-  { value: "Sprout", label: "Germoglio" },
   { value: "Package", label: "Pacco" },
   { value: "UtensilsCrossed", label: "Posate" },
   { value: "Star", label: "Stella" },
+  { value: "Sparkles", label: "Scintille" },
+  { value: "Flame", label: "Fiamma" },
+  { value: "Sun", label: "Sole" },
+  { value: "ChefHat", label: "Cappello Chef" },
 ];
 
 const Homepage = () => {
@@ -485,17 +500,19 @@ const Homepage = () => {
 
                   <div className="space-y-4">
                     <Label className="text-base font-semibold">Steps (4 Passi)</Label>
-                    {(sections.how_it_works.content.steps || []).map((step: any, index: number) => (
-                      <Card key={index}>
-                        <CardContent className="pt-4 space-y-3">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label>Numero</Label>
-                              <Input
-                                value={step.number || ""}
-                                onChange={(e) => updateNestedContent("how_it_works", "steps", index, "number", e.target.value)}
-                              />
-                            </div>
+                    {(sections.how_it_works.content.steps || []).map((step: any, index: number) => {
+                      const IconComponent = ICON_COMPONENTS[step.icon] || Sprout;
+                      return (
+                        <Card key={index}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-verde-primary/20">
+                                <span className="text-xs font-bold text-verde-primary">{index + 1}</span>
+                              </div>
+                              Step {index + 1}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
                             <div>
                               <Label>Icona</Label>
                               <Select
@@ -503,36 +520,49 @@ const Homepage = () => {
                                 onValueChange={(value) => updateNestedContent("how_it_works", "steps", index, "icon", value)}
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Seleziona icona" />
+                                  <SelectValue placeholder="Seleziona icona">
+                                    {step.icon && (
+                                      <div className="flex items-center gap-2">
+                                        <IconComponent className="h-4 w-4 text-verde-primary" />
+                                        <span>{ICON_OPTIONS.find(i => i.value === step.icon)?.label || step.icon}</span>
+                                      </div>
+                                    )}
+                                  </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {ICON_OPTIONS.map((icon) => (
-                                    <SelectItem key={icon.value} value={icon.value}>
-                                      {icon.label}
-                                    </SelectItem>
-                                  ))}
+                                  {ICON_OPTIONS.map((icon) => {
+                                    const OptionIcon = ICON_COMPONENTS[icon.value];
+                                    return (
+                                      <SelectItem key={icon.value} value={icon.value}>
+                                        <div className="flex items-center gap-2">
+                                          <OptionIcon className="h-4 w-4 text-verde-primary" />
+                                          <span>{icon.label}</span>
+                                        </div>
+                                      </SelectItem>
+                                    );
+                                  })}
                                 </SelectContent>
                               </Select>
                             </div>
-                          </div>
-                          <div>
-                            <Label>Titolo</Label>
-                            <Input
-                              value={step.title || ""}
-                              onChange={(e) => updateNestedContent("how_it_works", "steps", index, "title", e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Descrizione</Label>
-                            <Textarea
-                              value={step.description || ""}
-                              onChange={(e) => updateNestedContent("how_it_works", "steps", index, "description", e.target.value)}
-                              rows={2}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                            <div>
+                              <Label>Titolo</Label>
+                              <Input
+                                value={step.title || ""}
+                                onChange={(e) => updateNestedContent("how_it_works", "steps", index, "title", e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <Label>Descrizione</Label>
+                              <Textarea
+                                value={step.description || ""}
+                                onChange={(e) => updateNestedContent("how_it_works", "steps", index, "description", e.target.value)}
+                                rows={2}
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
               </AccordionContent>
