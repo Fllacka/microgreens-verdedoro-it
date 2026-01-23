@@ -439,32 +439,39 @@ const Index = () => {
 
       {/* Come Funziona Section - Journey Timeline */}
       {sections.how_it_works?.is_visible !== false && (() => {
-      // Fixed journey steps with growth progression
-      const journeySteps = [{
-        number: "01",
-        icon: ShoppingBag,
-        title: "Ordine",
-        description: "Scegli le varietà e attiviamo la semina dedicata a te."
-      }, {
-        number: "02",
-        icon: Sprout,
-        title: "Semina",
-        description: "Coltiviamo in ambiente controllato per qualità perfetta."
-      }, {
-        number: "03",
-        icon: Scissors,
-        title: "Raccolta",
-        description: "Tagliamo a mano solo quando è il momento giusto."
-      }, {
-        number: "04",
-        icon: Bike,
-        title: "Consegna",
-        description: "A casa tua a Reggio Emilia, poche ore dal taglio."
-      }];
+        // Fixed journey steps with growth progression
+        const journeySteps = [{
+          number: 1,
+          icon: ShoppingBag,
+          title: "Ordine",
+          description: "Scegli le varietà e attiviamo la semina dedicata a te."
+        }, {
+          number: 2,
+          icon: Sprout,
+          title: "Semina",
+          description: "Coltiviamo in ambiente controllato per qualità perfetta."
+        }, {
+          number: 3,
+          icon: Scissors,
+          title: "Raccolta",
+          description: "Tagliamo a mano solo quando è il momento giusto."
+        }, {
+          number: 4,
+          icon: Bike,
+          title: "Consegna",
+          description: "A casa tua a Reggio Emilia, poche ore dal taglio."
+        }];
 
-      // Green progression - lighter to darker (symbolizing growth)
-      const greenProgression = ["from-verde-primary/70 to-verde-primary/80", "from-verde-primary/80 to-verde-primary/90", "from-verde-primary/90 to-verde-primary", "from-verde-primary to-verde-light"];
-      return <section className="section-padding bg-gradient-subtle">
+        // Green progression - lighter to darker (symbolizing growth)
+        const iconColors = [
+          { bg: "bg-verde-primary/60", ring: "ring-verde-primary/40" },
+          { bg: "bg-verde-primary/75", ring: "ring-verde-primary/50" },
+          { bg: "bg-verde-primary/90", ring: "ring-verde-primary/60" },
+          { bg: "bg-verde-primary", ring: "ring-verde-primary/70" },
+        ];
+
+        return (
+          <section className="section-padding bg-gradient-subtle">
             <div className="container-width">
               {/* Header */}
               <div className="text-center mb-12 lg:mb-16">
@@ -476,46 +483,118 @@ const Index = () => {
                 </p>
               </div>
 
-              {/* Desktop Timeline - Horizontal */}
-              <div className="hidden lg:block">
-                <div className="relative">
-                  {/* Connecting line - solid, elegant */}
-                  <div className="absolute top-[100px] left-[12.5%] right-[12.5%] flex items-center">
-                    <div className="h-[2px] bg-verde-primary/20 w-full" />
-                  </div>
-                  
-                  {/* Connection dots between cards */}
-                  <div className="absolute top-[99px] left-[37.5%] w-2.5 h-2.5 rounded-full bg-verde-primary/30 -translate-x-1/2" />
-                  
-                  <div className="absolute top-[99px] left-[62.5%] w-2.5 h-2.5 rounded-full bg-verde-primary/30 -translate-x-1/2" />
-                  
-                  <div className="grid grid-cols-4 gap-6">
-                    {journeySteps.map((step, index) => {
+              {/* Desktop: 4 columns with chevrons */}
+              <div className="hidden lg:grid lg:grid-cols-4 lg:gap-4">
+                {journeySteps.map((step, index) => {
                   const IconComponent = step.icon;
-                  return <div key={index} className="relative text-center">
-                          {/* White card container */}
-                          <div className="bg-white rounded-2xl p-6 pt-5 shadow-sm border border-gray-100/50 
-                                          hover:shadow-md transition-shadow duration-300">
-                            {/* Gold step number */}
-                            <span className="inline-block font-display text-sm font-semibold text-oro-primary mb-4">
-                              {step.number}
-                            </span>
-                            
-                            {/* Premium icon with gold ring */}
-                            <div className="relative inline-flex mb-5">
-                              {/* Outer gold ring */}
-                              <div className="absolute inset-[-4px] rounded-full border-2 border-oro-primary/20" />
-                              
-                              {/* Icon circle with gradient + shadow */}
-                              <div className={`relative z-10 flex h-16 w-16 items-center justify-center 
-                                               rounded-full bg-gradient-to-br ${greenProgression[index]} 
-                                               shadow-lg shadow-verde-primary/25`}>
-                                <IconComponent className="h-7 w-7 text-primary-foreground stroke-[2.5]" />
-                              </div>
-                            </div>
-                            
+                  const isLast = index === journeySteps.length - 1;
+                  
+                  return (
+                    <div key={index} className="relative flex items-stretch">
+                      {/* Card */}
+                      <div className="relative flex-1 bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
+                                      hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[220px] flex flex-col">
+                        {/* Gold badge - top left */}
+                        <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-gradient-to-br from-oro-primary to-oro-light 
+                                        flex items-center justify-center shadow-md z-10">
+                          <span className="font-display text-base font-bold text-white">{step.number}</span>
+                        </div>
+                        
+                        {/* Icon with ring */}
+                        <div className="flex justify-center mb-4">
+                          <div className={`flex h-16 w-16 items-center justify-center rounded-full ${iconColors[index].bg} 
+                                          ring-2 ${iconColors[index].ring} shadow-lg`}>
+                            <IconComponent className="h-7 w-7 text-white stroke-[2.5]" />
+                          </div>
+                        </div>
+                        
+                        {/* Title */}
+                        <h3 className="font-display text-lg font-bold text-primary mb-2 text-center">
+                          {step.title}
+                        </h3>
+                        
+                        {/* Description */}
+                        <p className="font-body text-sm text-muted-foreground leading-relaxed text-center flex-1">
+                          {step.description}
+                        </p>
+                      </div>
+                      
+                      {/* Chevron between cards - desktop only */}
+                      {!isLast && (
+                        <div className="flex items-center justify-center w-8 flex-shrink-0">
+                          <span className="text-2xl font-light text-oro-primary/50 select-none">›</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Tablet: 2 columns */}
+              <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-6">
+                {journeySteps.map((step, index) => {
+                  const IconComponent = step.icon;
+                  
+                  return (
+                    <div key={index} className="relative">
+                      {/* Card */}
+                      <div className="relative bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
+                                      hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[200px] flex flex-col">
+                        {/* Gold badge - top left */}
+                        <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-gradient-to-br from-oro-primary to-oro-light 
+                                        flex items-center justify-center shadow-md z-10">
+                          <span className="font-display text-base font-bold text-white">{step.number}</span>
+                        </div>
+                        
+                        {/* Icon with ring */}
+                        <div className="flex justify-center mb-4">
+                          <div className={`flex h-14 w-14 items-center justify-center rounded-full ${iconColors[index].bg} 
+                                          ring-2 ${iconColors[index].ring} shadow-lg`}>
+                            <IconComponent className="h-6 w-6 text-white stroke-[2.5]" />
+                          </div>
+                        </div>
+                        
+                        {/* Title */}
+                        <h3 className="font-display text-base font-bold text-primary mb-2 text-center">
+                          {step.title}
+                        </h3>
+                        
+                        {/* Description */}
+                        <p className="font-body text-sm text-muted-foreground leading-relaxed text-center flex-1">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Mobile: 1 column */}
+              <div className="grid grid-cols-1 md:hidden gap-5">
+                {journeySteps.map((step, index) => {
+                  const IconComponent = step.icon;
+                  
+                  return (
+                    <div key={index} className="relative">
+                      {/* Card */}
+                      <div className="relative bg-white rounded-[1.25rem] p-5 pt-8 shadow-sm border border-gray-100/50 
+                                      hover:shadow-lg transition-shadow duration-300">
+                        {/* Gold badge - top left */}
+                        <div className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-gradient-to-br from-oro-primary to-oro-light 
+                                        flex items-center justify-center shadow-md z-10">
+                          <span className="font-display text-sm font-bold text-white">{step.number}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          {/* Icon with ring */}
+                          <div className={`flex h-12 w-12 items-center justify-center rounded-full ${iconColors[index].bg} 
+                                          ring-2 ${iconColors[index].ring} shadow-lg flex-shrink-0`}>
+                            <IconComponent className="h-5 w-5 text-white stroke-[2.5]" />
+                          </div>
+                          
+                          <div className="flex-1">
                             {/* Title */}
-                            <h3 className="font-display text-lg font-bold text-primary mb-2">
+                            <h3 className="font-display text-base font-bold text-primary mb-1">
                               {step.title}
                             </h3>
                             
@@ -524,61 +603,16 @@ const Index = () => {
                               {step.description}
                             </p>
                           </div>
-                        </div>;
+                        </div>
+                      </div>
+                    </div>
+                  );
                 })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Mobile Timeline - Vertical */}
-              <div className="lg:hidden">
-                <div className="relative">
-                  {/* Vertical connecting line - solid */}
-                  <div className="absolute left-7 top-8 bottom-8 w-[2px] bg-verde-primary/20" />
-                  
-                  <div className="space-y-5">
-                    {journeySteps.map((step, index) => {
-                  const IconComponent = step.icon;
-                  const isLast = index === journeySteps.length - 1;
-                  return <div key={index} className="relative flex items-start gap-4">
-                          {/* Premium icon with gold ring */}
-                          <div className="relative flex-shrink-0">
-                            {/* Outer gold ring */}
-                            <div className="absolute inset-[-3px] rounded-full border-2 border-oro-primary/20" />
-                            
-                            {/* Icon circle with gradient + shadow */}
-                            <div className={`relative z-10 flex h-14 w-14 items-center justify-center 
-                                             rounded-full bg-gradient-to-br ${greenProgression[index]} 
-                                             shadow-lg shadow-verde-primary/25`}>
-                              <IconComponent className="h-6 w-6 text-primary-foreground stroke-[2.5]" />
-                            </div>
-                          </div>
-                          
-                          {/* Connection dot between steps */}
-                          {!isLast}
-                          
-                          {/* White card with content */}
-                          <div className="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100/50">
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="font-display text-xs font-semibold text-oro-primary">
-                                {step.number}
-                              </span>
-                              <h3 className="font-display text-base font-bold text-primary">
-                                {step.title}
-                              </h3>
-                            </div>
-                            <p className="font-body text-sm text-muted-foreground leading-relaxed">
-                              {step.description}
-                            </p>
-                          </div>
-                        </div>;
-                })}
-                  </div>
-                </div>
               </div>
             </div>
-          </section>;
-    })()}
+          </section>
+        );
+      })()}
 
       {/* Ordini e Consegne Section */}
       {sections.orders_delivery?.is_visible !== false && <section className="section-padding bg-background">
