@@ -18,6 +18,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -26,6 +29,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -34,6 +40,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -50,8 +59,27 @@ export type Database = {
           content: string | null
           content_blocks: Json | null
           created_at: string | null
+          draft_canonical_url: string | null
+          draft_category: string | null
+          draft_change_frequency: string | null
+          draft_content: string | null
+          draft_content_blocks: Json | null
+          draft_excerpt: string | null
+          draft_featured_image_id: string | null
+          draft_meta_description: string | null
+          draft_meta_title: string | null
+          draft_og_description: string | null
+          draft_og_image_id: string | null
+          draft_og_title: string | null
+          draft_priority: number | null
+          draft_robots: string | null
+          draft_slug: string | null
+          draft_structured_data: Json | null
+          draft_tags: string[] | null
+          draft_title: string | null
           excerpt: string | null
           featured_image_id: string | null
+          has_draft_changes: boolean | null
           id: string
           meta_description: string | null
           meta_title: string | null
@@ -76,8 +104,27 @@ export type Database = {
           content?: string | null
           content_blocks?: Json | null
           created_at?: string | null
+          draft_canonical_url?: string | null
+          draft_category?: string | null
+          draft_change_frequency?: string | null
+          draft_content?: string | null
+          draft_content_blocks?: Json | null
+          draft_excerpt?: string | null
+          draft_featured_image_id?: string | null
+          draft_meta_description?: string | null
+          draft_meta_title?: string | null
+          draft_og_description?: string | null
+          draft_og_image_id?: string | null
+          draft_og_title?: string | null
+          draft_priority?: number | null
+          draft_robots?: string | null
+          draft_slug?: string | null
+          draft_structured_data?: Json | null
+          draft_tags?: string[] | null
+          draft_title?: string | null
           excerpt?: string | null
           featured_image_id?: string | null
+          has_draft_changes?: boolean | null
           id?: string
           meta_description?: string | null
           meta_title?: string | null
@@ -102,8 +149,27 @@ export type Database = {
           content?: string | null
           content_blocks?: Json | null
           created_at?: string | null
+          draft_canonical_url?: string | null
+          draft_category?: string | null
+          draft_change_frequency?: string | null
+          draft_content?: string | null
+          draft_content_blocks?: Json | null
+          draft_excerpt?: string | null
+          draft_featured_image_id?: string | null
+          draft_meta_description?: string | null
+          draft_meta_title?: string | null
+          draft_og_description?: string | null
+          draft_og_image_id?: string | null
+          draft_og_title?: string | null
+          draft_priority?: number | null
+          draft_robots?: string | null
+          draft_slug?: string | null
+          draft_structured_data?: Json | null
+          draft_tags?: string[] | null
+          draft_title?: string | null
           excerpt?: string | null
           featured_image_id?: string | null
+          has_draft_changes?: boolean | null
           id?: string
           meta_description?: string | null
           meta_title?: string | null
@@ -141,6 +207,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -149,6 +218,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -157,6 +229,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -168,6 +243,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -176,6 +254,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -184,6 +265,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -195,6 +279,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -203,6 +290,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -211,6 +301,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -222,6 +315,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -230,6 +326,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -238,6 +337,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -294,6 +396,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -302,6 +407,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -310,6 +418,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -321,6 +432,9 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          draft_content: Json | null
+          draft_is_visible: boolean | null
+          has_draft_changes: boolean | null
           id: string
           is_visible: boolean
           sort_order: number
@@ -329,6 +443,9 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id: string
           is_visible?: boolean
           sort_order?: number
@@ -337,6 +454,9 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          draft_content?: Json | null
+          draft_is_visible?: boolean | null
+          has_draft_changes?: boolean | null
           id?: string
           is_visible?: boolean
           sort_order?: number
@@ -351,6 +471,21 @@ export type Database = {
           content: string | null
           created_at: string | null
           created_by: string | null
+          draft_canonical_url: string | null
+          draft_change_frequency: string | null
+          draft_content: string | null
+          draft_meta_description: string | null
+          draft_meta_title: string | null
+          draft_og_description: string | null
+          draft_og_image_id: string | null
+          draft_og_title: string | null
+          draft_priority: number | null
+          draft_robots: string | null
+          draft_slug: string | null
+          draft_structured_data: Json | null
+          draft_template: string | null
+          draft_title: string | null
+          has_draft_changes: boolean | null
           id: string
           meta_description: string | null
           meta_title: string | null
@@ -372,6 +507,21 @@ export type Database = {
           content?: string | null
           created_at?: string | null
           created_by?: string | null
+          draft_canonical_url?: string | null
+          draft_change_frequency?: string | null
+          draft_content?: string | null
+          draft_meta_description?: string | null
+          draft_meta_title?: string | null
+          draft_og_description?: string | null
+          draft_og_image_id?: string | null
+          draft_og_title?: string | null
+          draft_priority?: number | null
+          draft_robots?: string | null
+          draft_slug?: string | null
+          draft_structured_data?: Json | null
+          draft_template?: string | null
+          draft_title?: string | null
+          has_draft_changes?: boolean | null
           id?: string
           meta_description?: string | null
           meta_title?: string | null
@@ -393,6 +543,21 @@ export type Database = {
           content?: string | null
           created_at?: string | null
           created_by?: string | null
+          draft_canonical_url?: string | null
+          draft_change_frequency?: string | null
+          draft_content?: string | null
+          draft_meta_description?: string | null
+          draft_meta_title?: string | null
+          draft_og_description?: string | null
+          draft_og_image_id?: string | null
+          draft_og_title?: string | null
+          draft_priority?: number | null
+          draft_robots?: string | null
+          draft_slug?: string | null
+          draft_structured_data?: Json | null
+          draft_template?: string | null
+          draft_title?: string | null
+          has_draft_changes?: boolean | null
           id?: string
           meta_description?: string | null
           meta_title?: string | null
@@ -432,8 +597,37 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          draft_benefits: string[] | null
+          draft_benefits_content: string | null
+          draft_benefits_title: string | null
+          draft_canonical_url: string | null
+          draft_category: string | null
+          draft_change_frequency: string | null
+          draft_content: string | null
+          draft_content_title: string | null
+          draft_description: string | null
+          draft_faq_items: Json | null
+          draft_grid_description: string | null
+          draft_image_alt: string | null
+          draft_image_id: string | null
+          draft_meta_description: string | null
+          draft_meta_title: string | null
+          draft_name: string | null
+          draft_og_description: string | null
+          draft_og_image_id: string | null
+          draft_og_title: string | null
+          draft_price: number | null
+          draft_price_tiers: Json | null
+          draft_priority: number | null
+          draft_robots: string | null
+          draft_slug: string | null
+          draft_structured_data: Json | null
+          draft_uses: string[] | null
+          draft_uses_content: string | null
+          draft_uses_title: string | null
           faq_items: Json | null
           grid_description: string | null
+          has_draft_changes: boolean | null
           id: string
           image_alt: string | null
           image_id: string | null
@@ -470,8 +664,37 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          draft_benefits?: string[] | null
+          draft_benefits_content?: string | null
+          draft_benefits_title?: string | null
+          draft_canonical_url?: string | null
+          draft_category?: string | null
+          draft_change_frequency?: string | null
+          draft_content?: string | null
+          draft_content_title?: string | null
+          draft_description?: string | null
+          draft_faq_items?: Json | null
+          draft_grid_description?: string | null
+          draft_image_alt?: string | null
+          draft_image_id?: string | null
+          draft_meta_description?: string | null
+          draft_meta_title?: string | null
+          draft_name?: string | null
+          draft_og_description?: string | null
+          draft_og_image_id?: string | null
+          draft_og_title?: string | null
+          draft_price?: number | null
+          draft_price_tiers?: Json | null
+          draft_priority?: number | null
+          draft_robots?: string | null
+          draft_slug?: string | null
+          draft_structured_data?: Json | null
+          draft_uses?: string[] | null
+          draft_uses_content?: string | null
+          draft_uses_title?: string | null
           faq_items?: Json | null
           grid_description?: string | null
+          has_draft_changes?: boolean | null
           id?: string
           image_alt?: string | null
           image_id?: string | null
@@ -508,8 +731,37 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          draft_benefits?: string[] | null
+          draft_benefits_content?: string | null
+          draft_benefits_title?: string | null
+          draft_canonical_url?: string | null
+          draft_category?: string | null
+          draft_change_frequency?: string | null
+          draft_content?: string | null
+          draft_content_title?: string | null
+          draft_description?: string | null
+          draft_faq_items?: Json | null
+          draft_grid_description?: string | null
+          draft_image_alt?: string | null
+          draft_image_id?: string | null
+          draft_meta_description?: string | null
+          draft_meta_title?: string | null
+          draft_name?: string | null
+          draft_og_description?: string | null
+          draft_og_image_id?: string | null
+          draft_og_title?: string | null
+          draft_price?: number | null
+          draft_price_tiers?: Json | null
+          draft_priority?: number | null
+          draft_robots?: string | null
+          draft_slug?: string | null
+          draft_structured_data?: Json | null
+          draft_uses?: string[] | null
+          draft_uses_content?: string | null
+          draft_uses_title?: string | null
           faq_items?: Json | null
           grid_description?: string | null
+          has_draft_changes?: boolean | null
           id?: string
           image_alt?: string | null
           image_id?: string | null

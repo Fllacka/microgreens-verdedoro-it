@@ -27,6 +27,7 @@ const AdminBlogEdit = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const initialDataLoaded = useRef(false);
 
@@ -106,18 +107,29 @@ const AdminBlogEdit = () => {
 
       if (error) throw error;
 
+      // Check if there are draft changes
+      const hasDraft = (data as any).has_draft_changes || false;
+      setHasDraftChanges(hasDraft);
+
+      // Load draft values if they exist, otherwise use published values
       setFormData({
-        title: data.title || "",
-        excerpt: data.excerpt || "",
-        category: data.category || "",
-        tags: data.tags?.join(", ") || "",
-        published: data.published || false,
+        title: (data as any).draft_title ?? data.title ?? "",
+        excerpt: (data as any).draft_excerpt ?? data.excerpt ?? "",
+        category: (data as any).draft_category ?? data.category ?? "",
+        tags: ((data as any).draft_tags ?? data.tags)?.join(", ") ?? "",
+        published: data.published ?? false,
         publishedAt: data.published_at ? data.published_at.split("T")[0] : "",
-        featuredImageId: data.featured_image_id || null,
+        featuredImageId: (data as any).draft_featured_image_id ?? data.featured_image_id ?? null,
       });
 
-      if (data.content_blocks && Array.isArray(data.content_blocks) && data.content_blocks.length > 0) {
-        setContentBlocks(data.content_blocks as unknown as ContentBlock[]);
+      // Load draft content blocks if they exist
+      const draftBlocks = (data as any).draft_content_blocks;
+      const publishedBlocks = data.content_blocks;
+      
+      if (draftBlocks && Array.isArray(draftBlocks) && draftBlocks.length > 0) {
+        setContentBlocks(draftBlocks as unknown as ContentBlock[]);
+      } else if (publishedBlocks && Array.isArray(publishedBlocks) && publishedBlocks.length > 0) {
+        setContentBlocks(publishedBlocks as unknown as ContentBlock[]);
       } else if (data.content) {
         setContentBlocks([
           {
@@ -129,16 +141,16 @@ const AdminBlogEdit = () => {
       }
 
       setSeoData({
-        slug: data.slug || "",
-        metaTitle: data.meta_title || "",
-        metaDescription: data.meta_description || "",
-        ogTitle: data.og_title || "",
-        ogDescription: data.og_description || "",
-        canonicalUrl: data.canonical_url || "",
-        robots: data.robots || "index, follow",
-        changeFrequency: data.change_frequency || "monthly",
-        priority: data.priority?.toString() || "0.5",
-        structuredData: data.structured_data ? JSON.stringify(data.structured_data, null, 2) : "",
+        slug: (data as any).draft_slug ?? data.slug ?? "",
+        metaTitle: (data as any).draft_meta_title ?? data.meta_title ?? "",
+        metaDescription: (data as any).draft_meta_description ?? data.meta_description ?? "",
+        ogTitle: (data as any).draft_og_title ?? data.og_title ?? "",
+        ogDescription: (data as any).draft_og_description ?? data.og_description ?? "",
+        canonicalUrl: (data as any).draft_canonical_url ?? data.canonical_url ?? "",
+        robots: (data as any).draft_robots ?? data.robots ?? "index, follow",
+        changeFrequency: (data as any).draft_change_frequency ?? data.change_frequency ?? "monthly",
+        priority: ((data as any).draft_priority ?? data.priority)?.toString() ?? "0.5",
+        structuredData: ((data as any).draft_structured_data ?? data.structured_data) ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2) : "",
       });
     } catch (error) {
       console.error("Error fetching blog post:", error);
@@ -153,19 +165,87 @@ const AdminBlogEdit = () => {
     }
   };
 
-  const savePost = async (publishState?: boolean) => {
+  // Save as draft only - does not publish
+  const saveDraft = async () => {
+    setSaving(true);
+
+    try {
+      const draftData = {
+        draft_title: formData.title,
+        draft_slug: seoData.slug,
+        draft_excerpt: formData.excerpt,
+        draft_content_blocks: contentBlocks as any,
+        draft_category: formData.category,
+        draft_tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
+        draft_featured_image_id: formData.featuredImageId,
+        draft_meta_title: seoData.metaTitle,
+        draft_meta_description: seoData.metaDescription,
+        draft_og_title: seoData.ogTitle,
+        draft_og_description: seoData.ogDescription,
+        draft_canonical_url: seoData.canonicalUrl,
+        draft_robots: seoData.robots,
+        draft_change_frequency: seoData.changeFrequency,
+        draft_priority: parseFloat(seoData.priority),
+        draft_structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
+        has_draft_changes: true,
+      };
+
+      const shouldInsert = isNew && !createdId;
+      const postId = createdId || id;
+
+      if (shouldInsert) {
+        const insertData = {
+          ...draftData,
+          title: formData.title,
+          slug: seoData.slug,
+          published: false,
+        };
+        const { data, error } = await supabase.from("blog_posts").insert(insertData).select().single();
+        if (error) throw error;
+        setCreatedId(data.id);
+        setHasDraftChanges(true);
+        toast({
+          title: "Bozza salvata",
+          description: "Articolo salvato come bozza",
+        });
+        navigate(`/admin/blog/${data.id}`);
+      } else {
+        const { error } = await supabase.from("blog_posts").update(draftData).eq("id", postId);
+        if (error) throw error;
+        setHasDraftChanges(true);
+        toast({
+          title: "Bozza salvata",
+          description: "Le modifiche sono state salvate come bozza",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error saving draft:", error);
+      toast({
+        title: "Errore",
+        description: error.message || "Impossibile salvare la bozza",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+      setHasChanges(false);
+    }
+  };
+
+  // Publish - copies draft to published fields
+  const publishPost = async (publish: boolean, scheduledDate?: string) => {
     setSaving(true);
 
     try {
       const postData = {
+        // Published fields
         title: formData.title,
         slug: seoData.slug,
         excerpt: formData.excerpt,
         content_blocks: contentBlocks as any,
         category: formData.category,
         tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
-        published: publishState !== undefined ? publishState : formData.published,
-        published_at: formData.publishedAt ? new Date(formData.publishedAt).toISOString() : null,
+        published: publish,
+        published_at: scheduledDate ? new Date(scheduledDate).toISOString() : (formData.publishedAt ? new Date(formData.publishedAt).toISOString() : new Date().toISOString()),
         featured_image_id: formData.featuredImageId,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
@@ -176,9 +256,26 @@ const AdminBlogEdit = () => {
         change_frequency: seoData.changeFrequency,
         priority: parseFloat(seoData.priority),
         structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
+        // Clear draft fields
+        draft_title: null,
+        draft_slug: null,
+        draft_excerpt: null,
+        draft_content_blocks: null,
+        draft_category: null,
+        draft_tags: null,
+        draft_featured_image_id: null,
+        draft_meta_title: null,
+        draft_meta_description: null,
+        draft_og_title: null,
+        draft_og_description: null,
+        draft_canonical_url: null,
+        draft_robots: null,
+        draft_change_frequency: null,
+        draft_priority: null,
+        draft_structured_data: null,
+        has_draft_changes: false,
       };
 
-      // Use createdId if we just created this post (prevents race condition on re-save before navigation)
       const shouldInsert = isNew && !createdId;
       const postId = createdId || id;
 
@@ -186,27 +283,28 @@ const AdminBlogEdit = () => {
         const { data, error } = await supabase.from("blog_posts").insert(postData).select().single();
         if (error) throw error;
         setCreatedId(data.id);
+        setFormData(prev => ({ ...prev, published: publish }));
+        setHasDraftChanges(false);
         toast({
           title: "Successo",
-          description: "Articolo creato con successo",
+          description: publish ? "Articolo pubblicato con successo" : "Articolo rimosso dalla pubblicazione",
         });
         navigate(`/admin/blog/${data.id}`);
       } else {
         const { error } = await supabase.from("blog_posts").update(postData).eq("id", postId);
         if (error) throw error;
-        if (publishState !== undefined) {
-          setFormData(prev => ({ ...prev, published: publishState }));
-        }
+        setFormData(prev => ({ ...prev, published: publish }));
+        setHasDraftChanges(false);
         toast({
           title: "Successo",
-          description: "Articolo aggiornato con successo",
+          description: publish ? "Articolo pubblicato con successo" : "Articolo rimosso dalla pubblicazione",
         });
       }
     } catch (error: any) {
-      console.error("Error saving blog post:", error);
+      console.error("Error publishing post:", error);
       toast({
         title: "Errore",
-        description: error.message || "Impossibile salvare l'articolo",
+        description: error.message || "Impossibile pubblicare l'articolo",
         variant: "destructive",
       });
     } finally {
@@ -216,14 +314,11 @@ const AdminBlogEdit = () => {
   };
 
   const handleSave = async () => {
-    await savePost();
+    await saveDraft();
   };
 
   const handlePublish = async (publish: boolean, scheduledDate?: string) => {
-    if (scheduledDate) {
-      setFormData(prev => ({ ...prev, publishedAt: scheduledDate.split("T")[0] }));
-    }
-    await savePost(publish);
+    await publishPost(publish, scheduledDate);
   };
 
   if (loading && !isNew) {
@@ -399,6 +494,8 @@ const AdminBlogEdit = () => {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl={previewUrl}
+        hasChanges={hasChanges}
+        hasDraftChanges={hasDraftChanges}
       />
 
       <UnsavedChangesDialog

@@ -13,6 +13,7 @@ interface PublishActionBarProps {
   onPublish: (publish: boolean, scheduledDate?: string) => Promise<void>;
   previewUrl?: string;
   hasChanges?: boolean;
+  hasDraftChanges?: boolean;
 }
 
 export const PublishActionBar = ({
@@ -22,6 +23,7 @@ export const PublishActionBar = ({
   onPublish,
   previewUrl,
   hasChanges = false,
+  hasDraftChanges = false,
 }: PublishActionBarProps) => {
   const [showPublishDialog, setShowPublishDialog] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
@@ -63,7 +65,7 @@ export const PublishActionBar = ({
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t shadow-lg">
         <div className="container max-w-6xl mx-auto px-3 md:px-4 py-2 md:py-3">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4">
-            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground flex-wrap">
               {isPublished ? (
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-green-500" />
@@ -74,6 +76,9 @@ export const PublishActionBar = ({
                   <span className="h-2 w-2 rounded-full bg-yellow-500" />
                   Bozza
                 </span>
+              )}
+              {hasDraftChanges && isPublished && (
+                <span className="text-orange-600 text-xs font-medium">• Modifiche non pubblicate</span>
               )}
               {hasChanges && (
                 <span className="text-yellow-600 text-xs">• Modifiche non salvate</span>
