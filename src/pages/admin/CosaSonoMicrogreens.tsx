@@ -35,6 +35,16 @@ interface SeoContent {
   structuredData: string;
 }
 
+interface DatabaseSection {
+  id: string;
+  content: Record<string, any>;
+  is_visible: boolean;
+  sort_order: number;
+  draft_content?: Record<string, any> | null;
+  draft_is_visible?: boolean | null;
+  has_draft_changes?: boolean;
+}
+
 const AdminCosaSonoMicrogreens = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,6 +53,7 @@ const AdminCosaSonoMicrogreens = () => {
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const initialDataLoaded = useRef(false);
 
   const [heroData, setHeroData] = useState<HeroContent>({
@@ -91,10 +102,15 @@ const AdminCosaSonoMicrogreens = () => {
 
       if (error) throw error;
 
+      let anyDraftChanges = false;
       if (data) {
         data.forEach((section) => {
-          const content = section.content as Record<string, any>;
-          switch (section.id) {
+          const dbSection = section as unknown as DatabaseSection;
+          // Prioritize draft content if available
+          const content = (dbSection.draft_content ?? dbSection.content) as Record<string, any>;
+          if (dbSection.has_draft_changes) anyDraftChanges = true;
+          
+          switch (dbSection.id) {
             case "hero":
               setHeroData({
                 title: content.title || "",
@@ -125,6 +141,7 @@ const AdminCosaSonoMicrogreens = () => {
           }
         });
       }
+      setHasDraftChanges(anyDraftChanges);
     } catch (error) {
       console.error("Error fetching content:", error);
       toast({
@@ -142,62 +159,113 @@ const AdminCosaSonoMicrogreens = () => {
     setSaving(true);
 
     try {
-      // Save hero section
-      const { error: heroError } = await supabase
-        .from("cosa_sono_microgreens_sections")
-        .upsert([{
-          id: "hero",
-          content: {
-            title: heroData.title,
-            subtitle: heroData.subtitle,
-            imageId: heroData.imageId,
-          },
-          sort_order: 1,
-        }] as any);
-      if (heroError) throw heroError;
-
-      // Save content section
-      const { error: contentError } = await supabase
-        .from("cosa_sono_microgreens_sections")
-        .upsert([{
-          id: "content",
-          content: {
-            blocks: contentBlocks,
-          },
-          sort_order: 2,
-        }] as any);
-      if (contentError) throw contentError;
-
-      // Save SEO section
-      const { error: seoError } = await supabase
-        .from("cosa_sono_microgreens_sections")
-        .upsert([{
-          id: "seo",
-          content: {
-            metaTitle: seoData.metaTitle,
-            metaDescription: seoData.metaDescription,
-            ogTitle: seoData.ogTitle,
-            ogDescription: seoData.ogDescription,
-            ogImageId: seoData.ogImageId,
-            canonicalUrl: seoData.canonicalUrl,
-            robots: seoData.robots,
-            changeFrequency: seoData.changeFrequency,
-            priority: seoData.priority,
-            structuredData: seoData.structuredData,
-            published: publishState !== undefined ? publishState : isPublished,
-          },
-          sort_order: 0,
-        }] as any);
-      if (seoError) throw seoError;
+      const heroContent = {
+        title: heroData.title,
+        subtitle: heroData.subtitle,
+        imageId: heroData.imageId,
+      };
+      
+      const contentContent = {
+        blocks: contentBlocks,
+      };
+      
+      const seoContent = {
+        metaTitle: seoData.metaTitle,
+        metaDescription: seoData.metaDescription,
+        ogTitle: seoData.ogTitle,
+        ogDescription: seoData.ogDescription,
+        ogImageId: seoData.ogImageId,
+        canonicalUrl: seoData.canonicalUrl,
+        robots: seoData.robots,
+        changeFrequency: seoData.changeFrequency,
+        priority: seoData.priority,
+        structuredData: seoData.structuredData,
+        published: publishState !== undefined ? publishState : isPublished,
+      };
 
       if (publishState !== undefined) {
+        // Publishing: copy to live columns
+        const { error: heroError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "hero",
+            content: heroContent,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+            sort_order: 1,
+          }] as any);
+        if (heroError) throw heroError;
+
+        const { error: contentError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "content",
+            content: contentContent,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+            sort_order: 2,
+          }] as any);
+        if (contentError) throw contentError;
+
+        const { error: seoError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "seo",
+            content: seoContent,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+            sort_order: 0,
+          }] as any);
+        if (seoError) throw seoError;
+
         setIsPublished(publishState);
+        setHasDraftChanges(false);
+        toast({
+          title: "Pubblicato",
+          description: "Contenuto pubblicato con successo",
+        });
+      } else {
+        // Saving as draft
+        const { error: heroError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "hero",
+            draft_content: heroContent,
+            has_draft_changes: true,
+            sort_order: 1,
+          }] as any);
+        if (heroError) throw heroError;
+
+        const { error: contentError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "content",
+            draft_content: contentContent,
+            has_draft_changes: true,
+            sort_order: 2,
+          }] as any);
+        if (contentError) throw contentError;
+
+        const { error: seoError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "seo",
+            draft_content: seoContent,
+            has_draft_changes: true,
+            sort_order: 0,
+          }] as any);
+        if (seoError) throw seoError;
+
+        setHasDraftChanges(true);
+        toast({
+          title: "Bozza salvata",
+          description: "Le modifiche sono state salvate come bozza",
+        });
       }
 
-      toast({
-        title: "Successo",
-        description: "Contenuto salvato con successo",
-      });
       setHasChanges(false);
     } catch (error: any) {
       console.error("Error saving content:", error);
@@ -352,6 +420,7 @@ const AdminCosaSonoMicrogreens = () => {
       <PublishActionBar
         isPublished={isPublished}
         isSaving={saving}
+        hasDraftChanges={hasDraftChanges || hasChanges}
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl="/preview/cosa-sono-i-microgreens"

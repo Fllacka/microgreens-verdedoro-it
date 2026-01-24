@@ -27,12 +27,24 @@ interface Section {
   sort_order: number;
 }
 
+interface DatabaseSection {
+  id: string;
+  content: SectionContent;
+  is_visible: boolean;
+  sort_order: number;
+  draft_content?: SectionContent | null;
+  draft_is_visible?: boolean | null;
+  has_draft_changes?: boolean;
+}
+
 const AdminContatti = () => {
   const navigate = useNavigate();
   const [sections, setSections] = useState<Record<string, Section>>({});
+  const [originalSections, setOriginalSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -53,10 +65,21 @@ const AdminContatti = () => {
       if (error) throw error;
 
       const sectionsMap: Record<string, Section> = {};
+      let anyDraftChanges = false;
       data?.forEach((section) => {
-        sectionsMap[section.id] = section as Section;
+        const dbSection = section as unknown as DatabaseSection;
+        // Prioritize draft content if available
+        sectionsMap[dbSection.id] = {
+          id: dbSection.id,
+          content: (dbSection.draft_content ?? dbSection.content) as SectionContent,
+          is_visible: dbSection.draft_is_visible ?? dbSection.is_visible,
+          sort_order: dbSection.sort_order,
+        };
+        if (dbSection.has_draft_changes) anyDraftChanges = true;
       });
       setSections(sectionsMap);
+      setOriginalSections(sectionsMap);
+      setHasDraftChanges(anyDraftChanges);
     } catch (error) {
       console.error("Error fetching sections:", error);
       toast.error("Errore nel caricamento delle sezioni");
@@ -93,23 +116,58 @@ const AdminContatti = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Save to draft columns only
       for (const section of Object.values(sections)) {
         const { error } = await supabase
           .from("contatti_sections")
           .update({
-            content: section.content,
-            is_visible: section.is_visible,
+            draft_content: section.content,
+            draft_is_visible: section.is_visible,
+            has_draft_changes: true,
           })
           .eq("id", section.id);
 
         if (error) throw error;
       }
 
-      toast.success("Modifiche salvate con successo");
+      setOriginalSections(sections);
+      setHasDraftChanges(true);
+      toast.success("Bozza salvata con successo");
       setHasChanges(false);
     } catch (error) {
       console.error("Error saving sections:", error);
       toast.error("Errore nel salvataggio");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setSaving(true);
+    try {
+      // Copy draft to live columns
+      for (const section of Object.values(sections)) {
+        const { error } = await supabase
+          .from("contatti_sections")
+          .update({
+            content: section.content,
+            is_visible: section.is_visible,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+          })
+          .eq("id", section.id);
+
+        if (error) throw error;
+      }
+
+      setOriginalSections(sections);
+      setHasDraftChanges(false);
+      toast.success("Pagina pubblicata con successo");
+      setHasChanges(false);
+    } catch (error) {
+      console.error("Error publishing:", error);
+      toast.error("Errore nella pubblicazione");
     } finally {
       setSaving(false);
     }
@@ -666,10 +724,10 @@ const AdminContatti = () => {
 
       <PublishActionBar
         isPublished={true}
-        hasChanges={hasChanges}
+        hasDraftChanges={hasDraftChanges || hasChanges}
         isSaving={saving}
         onSave={handleSave}
-        onPublish={async () => { await handleSave(); }}
+        onPublish={handlePublish}
         previewUrl="/preview/contatti"
       />
 
