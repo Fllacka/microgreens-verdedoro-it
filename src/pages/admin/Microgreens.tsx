@@ -29,12 +29,23 @@ interface Section {
   sort_order: number;
 }
 
+interface DatabaseSection {
+  id: string;
+  content: SectionContent;
+  is_visible: boolean;
+  sort_order: number;
+  draft_content?: SectionContent | null;
+  draft_is_visible?: boolean | null;
+  has_draft_changes?: boolean;
+}
+
 const AdminMicrogreens = () => {
   const [sections, setSections] = useState<Record<string, Section>>({});
   const [originalSections, setOriginalSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
 
   const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
 
@@ -57,11 +68,21 @@ const AdminMicrogreens = () => {
       if (error) throw error;
 
       const sectionsMap: Record<string, Section> = {};
+      let anyDraftChanges = false;
       data?.forEach((section) => {
-        sectionsMap[section.id] = section as Section;
+        const dbSection = section as unknown as DatabaseSection;
+        // Prioritize draft content if available
+        sectionsMap[dbSection.id] = {
+          id: dbSection.id,
+          content: (dbSection.draft_content ?? dbSection.content) as SectionContent,
+          is_visible: dbSection.draft_is_visible ?? dbSection.is_visible,
+          sort_order: dbSection.sort_order,
+        };
+        if (dbSection.has_draft_changes) anyDraftChanges = true;
       });
       setSections(sectionsMap);
       setOriginalSections(sectionsMap);
+      setHasDraftChanges(anyDraftChanges);
     } catch (error) {
       console.error("Error fetching sections:", error);
       toast.error("Errore nel caricamento delle sezioni");
@@ -96,6 +117,7 @@ const AdminMicrogreens = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Save to draft columns only
       for (const [id, section] of Object.entries(sections)) {
         let contentToSave = section.content;
         
@@ -110,15 +132,18 @@ const AdminMicrogreens = () => {
         const { error } = await supabase
           .from("microgreens_sections")
           .update({
-            content: contentToSave,
-            is_visible: section.is_visible,
+            draft_content: contentToSave,
+            draft_is_visible: section.is_visible,
+            has_draft_changes: true,
             updated_at: new Date().toISOString(),
           })
           .eq("id", id);
 
         if (error) throw error;
       }
-      toast.success("Modifiche salvate con successo");
+      setOriginalSections(sections);
+      setHasDraftChanges(true);
+      toast.success("Bozza salvata con successo");
     } catch (error) {
       console.error("Error saving sections:", error);
       toast.error("Errore nel salvataggio delle modifiche");
@@ -128,9 +153,43 @@ const AdminMicrogreens = () => {
   };
 
   const handlePublish = async (publish: boolean) => {
-    await handleSave();
-    setIsPublished(publish);
-    toast.success(publish ? "Pagina pubblicata con successo" : "Pagina rimossa dalla pubblicazione");
+    setSaving(true);
+    try {
+      // Copy draft to live columns
+      for (const [id, section] of Object.entries(sections)) {
+        let contentToSave = section.content;
+        
+        if (id === "categories" && section.content?.items) {
+          contentToSave = {
+            ...section.content,
+            items: section.content.items.filter((cat: { name: string }) => cat.name?.trim()),
+          };
+        }
+        
+        const { error } = await supabase
+          .from("microgreens_sections")
+          .update({
+            content: contentToSave,
+            is_visible: section.is_visible,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", id);
+
+        if (error) throw error;
+      }
+      setOriginalSections(sections);
+      setHasDraftChanges(false);
+      setIsPublished(publish);
+      toast.success(publish ? "Pagina pubblicata con successo" : "Pagina rimossa dalla pubblicazione");
+    } catch (error) {
+      console.error("Error publishing:", error);
+      toast.error("Errore nella pubblicazione");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -561,7 +620,7 @@ const AdminMicrogreens = () => {
       <PublishActionBar
         isPublished={isPublished}
         isSaving={saving}
-        hasChanges={hasUnsavedChanges}
+        hasDraftChanges={hasDraftChanges || hasUnsavedChanges}
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl="/preview/microgreens"

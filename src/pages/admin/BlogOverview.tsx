@@ -28,11 +28,22 @@ interface Section {
   sort_order: number;
 }
 
+interface DatabaseSection {
+  id: string;
+  content: SectionContent;
+  is_visible: boolean;
+  sort_order: number;
+  draft_content?: SectionContent | null;
+  draft_is_visible?: boolean | null;
+  has_draft_changes?: boolean;
+}
+
 const AdminBlogOverview = () => {
   const [sections, setSections] = useState<Record<string, Section>>({});
   const [originalSections, setOriginalSections] = useState<Record<string, Section>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const { toast } = useToast();
 
   const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
@@ -69,11 +80,21 @@ const AdminBlogOverview = () => {
       if (error) throw error;
 
       const sectionsMap: Record<string, Section> = {};
+      let anyDraftChanges = false;
       data?.forEach((section) => {
-        sectionsMap[section.id] = section as Section;
+        const dbSection = section as unknown as DatabaseSection;
+        // Prioritize draft content if available
+        sectionsMap[dbSection.id] = {
+          id: dbSection.id,
+          content: (dbSection.draft_content ?? dbSection.content) as SectionContent,
+          is_visible: dbSection.draft_is_visible ?? dbSection.is_visible,
+          sort_order: dbSection.sort_order,
+        };
+        if (dbSection.has_draft_changes) anyDraftChanges = true;
       });
       setSections(sectionsMap);
       setOriginalSections(sectionsMap);
+      setHasDraftChanges(anyDraftChanges);
 
       // Load SEO data
       const seoSection = sectionsMap["seo"];
@@ -142,7 +163,7 @@ const AdminBlogOverview = () => {
         structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
       };
 
-      // Update all sections
+      // Save to draft columns only
       for (const [id, section] of Object.entries(sections)) {
         let contentToSave = section.content;
         
@@ -157,25 +178,108 @@ const AdminBlogOverview = () => {
         if (id === "seo") {
           await supabase
             .from("blog_overview_sections")
-            .update({ content: seoContent, is_visible: section.is_visible, updated_at: new Date().toISOString() })
+            .update({ 
+              draft_content: seoContent, 
+              draft_is_visible: section.is_visible,
+              has_draft_changes: true,
+              updated_at: new Date().toISOString() 
+            })
             .eq("id", id);
         } else {
           await supabase
             .from("blog_overview_sections")
-            .update({ content: contentToSave, is_visible: section.is_visible, updated_at: new Date().toISOString() })
+            .update({ 
+              draft_content: contentToSave, 
+              draft_is_visible: section.is_visible,
+              has_draft_changes: true,
+              updated_at: new Date().toISOString() 
+            })
             .eq("id", id);
         }
       }
 
+      setOriginalSections(sections);
+      setHasDraftChanges(true);
       toast({
-        title: "Salvato",
-        description: "Le modifiche sono state salvate con successo",
+        title: "Bozza salvata",
+        description: "Le modifiche sono state salvate come bozza",
       });
     } catch (error) {
       console.error("Error saving:", error);
       toast({
         title: "Errore",
         description: "Impossibile salvare le modifiche",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setSaving(true);
+    try {
+      const seoContent = {
+        meta_title: seoData.metaTitle,
+        meta_description: seoData.metaDescription,
+        og_title: seoData.ogTitle,
+        og_description: seoData.ogDescription,
+        canonical_url: seoData.canonicalUrl,
+        robots: seoData.robots,
+        change_frequency: seoData.changeFrequency,
+        priority: seoData.priority,
+        structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
+      };
+
+      // Copy draft to live columns
+      for (const [id, section] of Object.entries(sections)) {
+        let contentToSave = section.content;
+        
+        if (id === "categories" && section.content?.items) {
+          contentToSave = {
+            ...section.content,
+            items: section.content.items.filter((cat: { name: string }) => cat.name?.trim()),
+          };
+        }
+        
+        if (id === "seo") {
+          await supabase
+            .from("blog_overview_sections")
+            .update({ 
+              content: seoContent, 
+              is_visible: section.is_visible,
+              draft_content: null,
+              draft_is_visible: null,
+              has_draft_changes: false,
+              updated_at: new Date().toISOString() 
+            })
+            .eq("id", id);
+        } else {
+          await supabase
+            .from("blog_overview_sections")
+            .update({ 
+              content: contentToSave, 
+              is_visible: section.is_visible,
+              draft_content: null,
+              draft_is_visible: null,
+              has_draft_changes: false,
+              updated_at: new Date().toISOString() 
+            })
+            .eq("id", id);
+        }
+      }
+
+      setOriginalSections(sections);
+      setHasDraftChanges(false);
+      toast({
+        title: "Pubblicato",
+        description: "Blog pubblicato con successo",
+      });
+    } catch (error) {
+      console.error("Error publishing:", error);
+      toast({
+        title: "Errore",
+        description: "Impossibile pubblicare",
         variant: "destructive",
       });
     } finally {
@@ -492,10 +596,10 @@ const AdminBlogOverview = () => {
 
         <PublishActionBar
           onSave={handleSave}
-          onPublish={handleSave}
+          onPublish={handlePublish}
           isSaving={saving}
           isPublished={true}
-          hasChanges={hasUnsavedChanges}
+          hasDraftChanges={hasDraftChanges || hasUnsavedChanges}
           previewUrl="/preview/blog-overview"
         />
 

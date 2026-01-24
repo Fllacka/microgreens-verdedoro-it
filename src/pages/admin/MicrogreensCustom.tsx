@@ -37,14 +37,26 @@ interface Section {
   sort_order: number;
 }
 
+interface DatabaseSection {
+  id: string;
+  content: SectionContent;
+  is_visible: boolean;
+  sort_order: number;
+  draft_content?: SectionContent | null;
+  draft_is_visible?: boolean | null;
+  has_draft_changes?: boolean;
+}
+
 const AdminMicrogreensCustom = () => {
   const navigate = useNavigate();
   const { user, userRole, loading: authLoading } = useAuth();
   const [sections, setSections] = useState<Section[]>([]);
+  const [originalSections, setOriginalSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -69,8 +81,23 @@ const AdminMicrogreensCustom = () => {
         .order('sort_order');
       
       if (error) throw error;
-      const typedData = (data || []) as unknown as Section[];
+      
+      let anyDraftChanges = false;
+      const typedData = (data || []).map((section) => {
+        const dbSection = section as unknown as DatabaseSection;
+        if (dbSection.has_draft_changes) anyDraftChanges = true;
+        // Prioritize draft content if available
+        return {
+          id: dbSection.id,
+          content: (dbSection.draft_content ?? dbSection.content) as SectionContent,
+          is_visible: dbSection.draft_is_visible ?? dbSection.is_visible,
+          sort_order: dbSection.sort_order,
+        };
+      });
+      
       setSections(typedData);
+      setOriginalSections(typedData);
+      setHasDraftChanges(anyDraftChanges);
       
       const seoSection = typedData.find(s => s.id === 'seo');
       setIsPublished(seoSection?.content?.published || false);
@@ -198,19 +225,23 @@ const AdminMicrogreensCustom = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Save to draft columns only
       for (const section of sections) {
         const { error } = await supabase
           .from('microgreens_custom_sections')
           .update({
-            content: section.content,
-            is_visible: section.is_visible
+            draft_content: section.content,
+            draft_is_visible: section.is_visible,
+            has_draft_changes: true,
           })
           .eq('id', section.id);
         
         if (error) throw error;
       }
       
-      toast.success('Modifiche salvate con successo');
+      setOriginalSections(sections);
+      setHasDraftChanges(true);
+      toast.success('Bozza salvata con successo');
       setHasChanges(false);
     } catch (error) {
       console.error('Error saving:', error);
@@ -223,22 +254,31 @@ const AdminMicrogreensCustom = () => {
   const handlePublish = async (publish: boolean) => {
     setSaving(true);
     try {
-      await handleSave();
-      
-      const seoSection = getSection('seo');
-      if (seoSection) {
+      // Copy draft to live columns
+      for (const section of sections) {
+        const contentToSave = section.id === 'seo' 
+          ? { ...section.content, published: publish }
+          : section.content;
+          
         const { error } = await supabase
           .from('microgreens_custom_sections')
           .update({
-            content: { ...seoSection.content, published: publish }
+            content: contentToSave,
+            is_visible: section.is_visible,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
           })
-          .eq('id', 'seo');
+          .eq('id', section.id);
         
         if (error) throw error;
       }
       
+      setOriginalSections(sections);
+      setHasDraftChanges(false);
       setIsPublished(publish);
       toast.success(publish ? 'Pagina pubblicata' : 'Pagina rimossa dalla pubblicazione');
+      setHasChanges(false);
     } catch (error) {
       console.error('Error publishing:', error);
       toast.error('Errore nella pubblicazione');
@@ -587,7 +627,7 @@ const AdminMicrogreensCustom = () => {
       <PublishActionBar
         isPublished={isPublished}
         isSaving={saving}
-        hasChanges={hasChanges}
+        hasDraftChanges={hasDraftChanges || hasChanges}
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl="/preview/microgreens-su-misura"

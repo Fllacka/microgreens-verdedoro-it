@@ -24,6 +24,16 @@ interface ChiSiamoSection {
   sort_order: number;
 }
 
+interface DatabaseSection {
+  id: string;
+  content: Record<string, any>;
+  is_visible: boolean;
+  sort_order: number;
+  draft_content?: Record<string, any> | null;
+  draft_is_visible?: boolean | null;
+  has_draft_changes?: boolean;
+}
+
 const ICON_OPTIONS = [
   { value: "Leaf", label: "Foglia" },
   { value: "Heart", label: "Cuore" },
@@ -39,6 +49,7 @@ const ChiSiamoAdmin = () => {
   const [originalSections, setOriginalSections] = useState<Record<string, ChiSiamoSection>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const { toast } = useToast();
 
   const hasUnsavedChanges = JSON.stringify(sections) !== JSON.stringify(originalSections);
@@ -62,14 +73,21 @@ const ChiSiamoAdmin = () => {
       if (error) throw error;
 
       const sectionsMap: Record<string, ChiSiamoSection> = {};
+      let anyDraftChanges = false;
       data?.forEach((section) => {
-        sectionsMap[section.id] = {
-          ...section,
-          content: section.content as Record<string, any>,
+        const dbSection = section as unknown as DatabaseSection;
+        // Prioritize draft content if available
+        sectionsMap[dbSection.id] = {
+          id: dbSection.id,
+          content: (dbSection.draft_content ?? dbSection.content) as Record<string, any>,
+          is_visible: dbSection.draft_is_visible ?? dbSection.is_visible,
+          sort_order: dbSection.sort_order,
         };
+        if (dbSection.has_draft_changes) anyDraftChanges = true;
       });
       setSections(sectionsMap);
       setOriginalSections(sectionsMap);
+      setHasDraftChanges(anyDraftChanges);
     } catch (error: any) {
       toast({
         title: "Errore",
@@ -125,22 +143,61 @@ const ChiSiamoAdmin = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Save to draft columns only
       const updates = Object.values(sections).map((section) =>
         supabase
           .from("chi_siamo_sections")
           .update({
-            content: section.content,
-            is_visible: section.is_visible,
+            draft_content: section.content,
+            draft_is_visible: section.is_visible,
+            has_draft_changes: true,
           })
           .eq("id", section.id)
       );
 
       await Promise.all(updates);
       setOriginalSections(sections);
+      setHasDraftChanges(true);
 
       toast({
-        title: "Salvato",
-        description: "Pagina Chi Siamo aggiornata con successo",
+        title: "Bozza salvata",
+        description: "Le modifiche sono state salvate come bozza",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setSaving(true);
+    try {
+      // Copy draft to live columns
+      const updates = Object.values(sections).map((section) =>
+        supabase
+          .from("chi_siamo_sections")
+          .update({
+            content: section.content,
+            is_visible: section.is_visible,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+          })
+          .eq("id", section.id)
+      );
+
+      await Promise.all(updates);
+      setOriginalSections(sections);
+      setHasDraftChanges(false);
+
+      toast({
+        title: "Pubblicato",
+        description: "Pagina Chi Siamo pubblicata con successo",
       });
     } catch (error: any) {
       toast({
@@ -529,10 +586,10 @@ const ChiSiamoAdmin = () => {
 
       <PublishActionBar
         isPublished={true}
-        hasChanges={hasUnsavedChanges}
+        hasDraftChanges={hasDraftChanges || hasUnsavedChanges}
         isSaving={saving}
         onSave={handleSave}
-        onPublish={async () => {}}
+        onPublish={handlePublish}
         previewUrl="/preview/chi-siamo"
       />
 
