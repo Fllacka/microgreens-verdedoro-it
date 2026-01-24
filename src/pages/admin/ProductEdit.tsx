@@ -52,6 +52,7 @@ const AdminProductEdit = () => {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const initialDataLoaded = useRef(false);
 
@@ -143,48 +144,54 @@ const AdminProductEdit = () => {
 
       if (error) throw error;
 
+      // Check if there are draft changes - prioritize draft values
+      const hasDraft = (data as any).has_draft_changes || false;
+      setHasDraftChanges(hasDraft);
+
+      // Load draft values if they exist, otherwise use published values
       setFormData({
-        name: data.name || "",
-        description: data.description || "",
-        grid_description: (data as any).grid_description || "",
-        content: data.content || "",
-        content_title: (data as any).content_title || "Panoramica del Prodotto",
-        category: data.category || "",
-        price: data.price?.toString() || "",
-        price_tiers: (data as any).price_tiers || [],
-        benefits: data.benefits?.join(", ") || "",
-        uses: data.uses?.join(", ") || "",
-        benefits_content: (data as any).benefits_content || "",
-        benefits_title: (data as any).benefits_title || "Benefici",
-        uses_content: (data as any).uses_content || "",
-        uses_title: (data as any).uses_title || "Usi Culinari",
-        rating: data.rating?.toString() || "",
-        popular: data.popular || false,
-        published: data.published || false,
-        image_id: data.image_id || null,
-        image_alt: (data as any).image_alt || "",
-        faq_items: (data as any).faq_items || [],
+        name: (data as any).draft_name ?? data.name ?? "",
+        description: (data as any).draft_description ?? data.description ?? "",
+        grid_description: (data as any).draft_grid_description ?? (data as any).grid_description ?? "",
+        content: (data as any).draft_content ?? data.content ?? "",
+        content_title: (data as any).draft_content_title ?? (data as any).content_title ?? "Panoramica del Prodotto",
+        category: (data as any).draft_category ?? data.category ?? "",
+        price: ((data as any).draft_price ?? data.price)?.toString() ?? "",
+        price_tiers: (data as any).draft_price_tiers ?? (data as any).price_tiers ?? [],
+        benefits: ((data as any).draft_benefits ?? data.benefits)?.join(", ") ?? "",
+        uses: ((data as any).draft_uses ?? data.uses)?.join(", ") ?? "",
+        benefits_content: (data as any).draft_benefits_content ?? (data as any).benefits_content ?? "",
+        benefits_title: (data as any).draft_benefits_title ?? (data as any).benefits_title ?? "Benefici",
+        uses_content: (data as any).draft_uses_content ?? (data as any).uses_content ?? "",
+        uses_title: (data as any).draft_uses_title ?? (data as any).uses_title ?? "Usi Culinari",
+        rating: data.rating?.toString() ?? "",
+        popular: data.popular ?? false,
+        published: data.published ?? false,
+        image_id: (data as any).draft_image_id ?? data.image_id ?? null,
+        image_alt: (data as any).draft_image_alt ?? (data as any).image_alt ?? "",
+        faq_items: (data as any).draft_faq_items ?? (data as any).faq_items ?? [],
       });
 
       setSeoData({
-        slug: data.slug || "",
-        metaTitle: data.meta_title || "",
-        metaDescription: data.meta_description || "",
-        ogTitle: data.og_title || "",
-        ogDescription: data.og_description || "",
-        canonicalUrl: data.canonical_url || "",
-        robots: data.robots || "index, follow",
-        changeFrequency: data.change_frequency || "weekly",
-        priority: data.priority?.toString() || "0.5",
-        structuredData: data.structured_data ? JSON.stringify(data.structured_data, null, 2) : "",
+        slug: (data as any).draft_slug ?? data.slug ?? "",
+        metaTitle: (data as any).draft_meta_title ?? data.meta_title ?? "",
+        metaDescription: (data as any).draft_meta_description ?? data.meta_description ?? "",
+        ogTitle: (data as any).draft_og_title ?? data.og_title ?? "",
+        ogDescription: (data as any).draft_og_description ?? data.og_description ?? "",
+        canonicalUrl: (data as any).draft_canonical_url ?? data.canonical_url ?? "",
+        robots: (data as any).draft_robots ?? data.robots ?? "index, follow",
+        changeFrequency: (data as any).draft_change_frequency ?? data.change_frequency ?? "weekly",
+        priority: ((data as any).draft_priority ?? data.priority)?.toString() ?? "0.5",
+        structuredData: ((data as any).draft_structured_data ?? data.structured_data) ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2) : "",
       });
 
       // Fetch image URL if image_id exists
-      if (data.image_id) {
+      const imageId = (data as any).draft_image_id ?? data.image_id;
+      if (imageId) {
         const { data: mediaData } = await supabase
           .from("media")
           .select("file_path")
-          .eq("id", data.image_id)
+          .eq("id", imageId)
           .single();
         
         if (mediaData) {
@@ -204,11 +211,92 @@ const AdminProductEdit = () => {
     }
   };
 
-  const saveProduct = async (publishState?: boolean) => {
+  // Save as draft only - does not publish
+  const saveDraft = async () => {
+    setSaving(true);
+
+    try {
+      const draftData = {
+        draft_name: formData.name,
+        draft_slug: seoData.slug,
+        draft_description: formData.description,
+        draft_grid_description: formData.grid_description,
+        draft_content: formData.content,
+        draft_content_title: formData.content_title,
+        draft_category: formData.category,
+        draft_price: formData.price ? parseFloat(formData.price) : null,
+        draft_price_tiers: formData.price_tiers as unknown as any,
+        draft_benefits: formData.benefits ? formData.benefits.split(",").map(b => b.trim()) : [],
+        draft_uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
+        draft_benefits_content: formData.benefits_content,
+        draft_benefits_title: formData.benefits_title,
+        draft_uses_content: formData.uses_content,
+        draft_uses_title: formData.uses_title,
+        draft_image_id: formData.image_id,
+        draft_image_alt: formData.image_alt,
+        draft_faq_items: formData.faq_items as unknown as any,
+        draft_meta_title: seoData.metaTitle,
+        draft_meta_description: seoData.metaDescription,
+        draft_og_title: seoData.ogTitle,
+        draft_og_description: seoData.ogDescription,
+        draft_canonical_url: seoData.canonicalUrl,
+        draft_robots: seoData.robots,
+        draft_change_frequency: seoData.changeFrequency,
+        draft_priority: parseFloat(seoData.priority),
+        draft_structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
+        has_draft_changes: true,
+      };
+
+      // For new products, we need to create with both draft and published fields
+      const shouldInsert = isNew && !createdId;
+      const productId = createdId || id;
+
+      if (shouldInsert) {
+        // For new products, save everything as draft but also set minimal required published fields
+        const insertData = {
+          ...draftData,
+          name: formData.name,
+          slug: seoData.slug,
+          published: false,
+        };
+        const { data, error } = await supabase.from("products").insert(insertData).select().single();
+        if (error) throw error;
+        setCreatedId(data.id);
+        setHasDraftChanges(true);
+        toast({
+          title: "Bozza salvata",
+          description: "Prodotto salvato come bozza",
+        });
+        navigate(`/admin/products/${data.id}`);
+      } else {
+        const { error } = await supabase.from("products").update(draftData).eq("id", productId);
+        if (error) throw error;
+        setHasDraftChanges(true);
+        toast({
+          title: "Bozza salvata",
+          description: "Le modifiche sono state salvate come bozza",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error saving draft:", error);
+      toast({
+        title: "Errore",
+        description: error.message || "Impossibile salvare la bozza",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+      setHasChanges(false);
+    }
+  };
+
+  // Publish - copies draft to published fields
+  const publishProduct = async (publish: boolean) => {
     setSaving(true);
 
     try {
       const productData = {
+        // Published fields
         name: formData.name,
         slug: seoData.slug,
         description: formData.description,
@@ -226,7 +314,7 @@ const AdminProductEdit = () => {
         uses_title: formData.uses_title,
         rating: formData.rating ? parseFloat(formData.rating) : null,
         popular: formData.popular,
-        published: publishState !== undefined ? publishState : formData.published,
+        published: publish,
         image_id: formData.image_id,
         image_alt: formData.image_alt,
         faq_items: formData.faq_items as unknown as any,
@@ -239,9 +327,37 @@ const AdminProductEdit = () => {
         change_frequency: seoData.changeFrequency,
         priority: parseFloat(seoData.priority),
         structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
+        // Clear draft fields
+        draft_name: null,
+        draft_slug: null,
+        draft_description: null,
+        draft_grid_description: null,
+        draft_content: null,
+        draft_content_title: null,
+        draft_category: null,
+        draft_price: null,
+        draft_price_tiers: null,
+        draft_benefits: null,
+        draft_uses: null,
+        draft_benefits_content: null,
+        draft_benefits_title: null,
+        draft_uses_content: null,
+        draft_uses_title: null,
+        draft_image_id: null,
+        draft_image_alt: null,
+        draft_faq_items: null,
+        draft_meta_title: null,
+        draft_meta_description: null,
+        draft_og_title: null,
+        draft_og_description: null,
+        draft_canonical_url: null,
+        draft_robots: null,
+        draft_change_frequency: null,
+        draft_priority: null,
+        draft_structured_data: null,
+        has_draft_changes: false,
       };
 
-      // Use createdId if we just created this product (prevents race condition on re-save before navigation)
       const shouldInsert = isNew && !createdId;
       const productId = createdId || id;
 
@@ -249,27 +365,28 @@ const AdminProductEdit = () => {
         const { data, error } = await supabase.from("products").insert(productData).select().single();
         if (error) throw error;
         setCreatedId(data.id);
+        setFormData(prev => ({ ...prev, published: publish }));
+        setHasDraftChanges(false);
         toast({
           title: "Successo",
-          description: "Prodotto creato con successo",
+          description: publish ? "Prodotto pubblicato con successo" : "Prodotto rimosso dalla pubblicazione",
         });
         navigate(`/admin/products/${data.id}`);
       } else {
         const { error } = await supabase.from("products").update(productData).eq("id", productId);
         if (error) throw error;
-        if (publishState !== undefined) {
-          setFormData(prev => ({ ...prev, published: publishState }));
-        }
+        setFormData(prev => ({ ...prev, published: publish }));
+        setHasDraftChanges(false);
         toast({
           title: "Successo",
-          description: "Prodotto aggiornato con successo",
+          description: publish ? "Prodotto pubblicato con successo" : "Prodotto rimosso dalla pubblicazione",
         });
       }
     } catch (error: any) {
-      console.error("Error saving product:", error);
+      console.error("Error publishing product:", error);
       toast({
         title: "Errore",
-        description: error.message || "Impossibile salvare il prodotto",
+        description: error.message || "Impossibile pubblicare il prodotto",
         variant: "destructive",
       });
     } finally {
@@ -279,11 +396,11 @@ const AdminProductEdit = () => {
   };
 
   const handleSave = async () => {
-    await saveProduct();
+    await saveDraft();
   };
 
   const handlePublish = async (publish: boolean) => {
-    await saveProduct(publish);
+    await publishProduct(publish);
   };
 
   // Generate structured data for the product
@@ -826,6 +943,8 @@ const AdminProductEdit = () => {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl={previewUrl}
+        hasChanges={hasChanges}
+        hasDraftChanges={hasDraftChanges}
       />
 
       <UnsavedChangesDialog

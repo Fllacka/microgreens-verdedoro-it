@@ -24,6 +24,7 @@ export default function PageEdit() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const initialDataLoaded = useRef(false);
 
@@ -77,24 +78,29 @@ export default function PageEdit() {
 
       if (error) throw error;
       if (data) {
+        // Check if there are draft changes
+        const hasDraft = (data as any).has_draft_changes || false;
+        setHasDraftChanges(hasDraft);
+
+        // Load draft values if they exist, otherwise use published values
         setFormData({
-          title: data.title || "",
-          content: data.content || "",
-          published: data.published || false,
-          template: data.template || "default",
+          title: (data as any).draft_title ?? data.title ?? "",
+          content: (data as any).draft_content ?? data.content ?? "",
+          published: data.published ?? false,
+          template: (data as any).draft_template ?? data.template ?? "default",
         });
 
         setSeoData({
-          slug: data.slug || "",
-          metaTitle: data.meta_title || "",
-          metaDescription: data.meta_description || "",
-          ogTitle: data.og_title || "",
-          ogDescription: data.og_description || "",
-          canonicalUrl: data.canonical_url || "",
-          robots: data.robots || "index, follow",
-          changeFrequency: data.change_frequency || "monthly",
-          priority: data.priority?.toString() || "0.5",
-          structuredData: data.structured_data ? JSON.stringify(data.structured_data, null, 2) : "",
+          slug: (data as any).draft_slug ?? data.slug ?? "",
+          metaTitle: (data as any).draft_meta_title ?? data.meta_title ?? "",
+          metaDescription: (data as any).draft_meta_description ?? data.meta_description ?? "",
+          ogTitle: (data as any).draft_og_title ?? data.og_title ?? "",
+          ogDescription: (data as any).draft_og_description ?? data.og_description ?? "",
+          canonicalUrl: (data as any).draft_canonical_url ?? data.canonical_url ?? "",
+          robots: (data as any).draft_robots ?? data.robots ?? "index, follow",
+          changeFrequency: (data as any).draft_change_frequency ?? data.change_frequency ?? "monthly",
+          priority: ((data as any).draft_priority ?? data.priority)?.toString() ?? "0.5",
+          structuredData: ((data as any).draft_structured_data ?? data.structured_data) ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2) : "",
         });
       }
     } catch (error: any) {
@@ -109,31 +115,72 @@ export default function PageEdit() {
     }
   };
 
-  const savePage = async (publishState?: boolean) => {
+  // Save as draft only
+  const saveDraft = async () => {
     setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const draftData = {
+        draft_title: formData.title,
+        draft_slug: seoData.slug,
+        draft_content: formData.content,
+        draft_template: formData.template,
+        draft_meta_title: seoData.metaTitle,
+        draft_meta_description: seoData.metaDescription,
+        draft_og_title: seoData.ogTitle,
+        draft_og_description: seoData.ogDescription,
+        draft_canonical_url: seoData.canonicalUrl,
+        draft_robots: seoData.robots,
+        draft_change_frequency: seoData.changeFrequency,
+        draft_priority: parseFloat(seoData.priority),
+        draft_structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
+        has_draft_changes: true,
+      };
 
+      const shouldInsert = isNew && !createdId;
+      const pageId = createdId || id;
+
+      if (shouldInsert) {
+        const insertData = { ...draftData, title: formData.title, slug: seoData.slug, published: false, created_by: user?.id };
+        const { data, error } = await supabase.from("pages").insert([insertData]).select().single();
+        if (error) throw error;
+        setCreatedId(data.id);
+        setHasDraftChanges(true);
+        toast({ title: "Bozza salvata", description: "Pagina salvata come bozza" });
+        navigate(`/admin/pages/${data.id}`);
+      } else {
+        const { error } = await supabase.from("pages").update(draftData).eq("id", pageId);
+        if (error) throw error;
+        setHasDraftChanges(true);
+        toast({ title: "Bozza salvata", description: "Le modifiche sono state salvate come bozza" });
+      }
+    } catch (error: any) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+      setHasChanges(false);
+    }
+  };
+
+  // Publish - copies draft to published fields
+  const publishPage = async (publish: boolean) => {
+    setSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
       const pageData = {
-        title: formData.title,
-        slug: seoData.slug,
-        content: formData.content,
-        published: publishState !== undefined ? publishState : formData.published,
-        template: formData.template,
-        meta_title: seoData.metaTitle,
-        meta_description: seoData.metaDescription,
-        og_title: seoData.ogTitle,
-        og_description: seoData.ogDescription,
-        canonical_url: seoData.canonicalUrl,
-        robots: seoData.robots,
-        change_frequency: seoData.changeFrequency,
-        priority: parseFloat(seoData.priority),
-        structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null,
-        created_by: user?.id,
+        title: formData.title, slug: seoData.slug, content: formData.content, published: publish,
+        template: formData.template, meta_title: seoData.metaTitle, meta_description: seoData.metaDescription,
+        og_title: seoData.ogTitle, og_description: seoData.ogDescription, canonical_url: seoData.canonicalUrl,
+        robots: seoData.robots, change_frequency: seoData.changeFrequency, priority: parseFloat(seoData.priority),
+        structured_data: seoData.structuredData ? JSON.parse(seoData.structuredData) : null, created_by: user?.id,
+        draft_title: null, draft_slug: null, draft_content: null, draft_template: null,
+        draft_meta_title: null, draft_meta_description: null, draft_og_title: null, draft_og_description: null,
+        draft_canonical_url: null, draft_robots: null, draft_change_frequency: null, draft_priority: null,
+        draft_structured_data: null, has_draft_changes: false,
       };
 
-      // Use createdId if we just created this page (prevents race condition on re-save before navigation)
       const shouldInsert = isNew && !createdId;
       const pageId = createdId || id;
 
@@ -141,44 +188,27 @@ export default function PageEdit() {
         const { data, error } = await supabase.from("pages").insert([pageData]).select().single();
         if (error) throw error;
         setCreatedId(data.id);
-        toast({
-          title: "Successo",
-          description: "Pagina creata con successo",
-        });
+        setFormData(prev => ({ ...prev, published: publish }));
+        setHasDraftChanges(false);
+        toast({ title: "Successo", description: publish ? "Pagina pubblicata" : "Pubblicazione rimossa" });
         navigate(`/admin/pages/${data.id}`);
       } else {
-        const { error } = await supabase
-          .from("pages")
-          .update(pageData)
-          .eq("id", pageId);
+        const { error } = await supabase.from("pages").update(pageData).eq("id", pageId);
         if (error) throw error;
-        if (publishState !== undefined) {
-          setFormData(prev => ({ ...prev, published: publishState }));
-        }
-        toast({
-          title: "Successo",
-          description: "Pagina aggiornata con successo",
-        });
+        setFormData(prev => ({ ...prev, published: publish }));
+        setHasDraftChanges(false);
+        toast({ title: "Successo", description: publish ? "Pagina pubblicata" : "Pubblicazione rimossa" });
       }
     } catch (error: any) {
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
       setSaving(false);
       setHasChanges(false);
     }
   };
 
-  const handleSave = async () => {
-    await savePage();
-  };
-
-  const handlePublish = async (publish: boolean) => {
-    await savePage(publish);
-  };
+  const handleSave = async () => { await saveDraft(); };
+  const handlePublish = async (publish: boolean) => { await publishPage(publish); };
 
   if (loading) {
     return (
@@ -270,6 +300,8 @@ export default function PageEdit() {
         onSave={handleSave}
         onPublish={handlePublish}
         previewUrl={previewUrl}
+        hasChanges={hasChanges}
+        hasDraftChanges={hasDraftChanges}
       />
 
       <UnsavedChangesDialog
