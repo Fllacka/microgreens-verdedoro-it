@@ -104,11 +104,16 @@ const ProductPreview = () => {
 
       try {
         // Fetch product WITHOUT published filter for preview
+        // Also fetch draft image media if different from published
         const { data: productData, error: productError } = await supabase
           .from("products")
           .select(`
             *,
             media:media!products_image_id_fkey (
+              file_path,
+              optimized_urls
+            ),
+            draft_media:media!products_draft_image_id_fkey (
               file_path,
               optimized_urls
             )
@@ -119,7 +124,35 @@ const ProductPreview = () => {
         if (productError) throw productError;
 
         if (productData) {
-          setProduct(productData as unknown as Product);
+          // Transform data to use draft values with fallback to published
+          const data = productData as any;
+          const transformedProduct: Product = {
+            id: data.id,
+            // Use draft values with fallback to published values
+            name: data.draft_name ?? data.name,
+            slug: data.draft_slug ?? data.slug,
+            description: data.draft_description ?? data.description ?? "",
+            content: data.draft_content ?? data.content ?? "",
+            content_title: data.draft_content_title ?? data.content_title,
+            category: data.draft_category ?? data.category ?? "",
+            benefits: data.draft_benefits ?? data.benefits ?? [],
+            uses: data.draft_uses ?? data.uses ?? [],
+            benefits_content: data.draft_benefits_content ?? data.benefits_content,
+            benefits_title: data.draft_benefits_title ?? data.benefits_title,
+            uses_content: data.draft_uses_content ?? data.uses_content,
+            uses_title: data.draft_uses_title ?? data.uses_title,
+            image_alt: data.draft_image_alt ?? data.image_alt,
+            rating: data.rating,
+            popular: data.popular,
+            published: data.published,
+            meta_title: data.draft_meta_title ?? data.meta_title,
+            meta_description: data.draft_meta_description ?? data.meta_description,
+            faq_items: data.draft_faq_items ?? data.faq_items ?? [],
+            price_tiers: data.draft_price_tiers ?? data.price_tiers ?? [],
+            // Use draft image if available, otherwise published image
+            media: data.draft_media ?? data.media,
+          };
+          setProduct(transformedProduct);
         }
       } catch (error) {
         console.error("Error fetching product:", error);
