@@ -104,16 +104,11 @@ const ProductPreview = () => {
 
       try {
         // Fetch product WITHOUT published filter for preview
-        // Also fetch draft image media if different from published
         const { data: productData, error: productError } = await supabase
           .from("products")
           .select(`
             *,
             media:media!products_image_id_fkey (
-              file_path,
-              optimized_urls
-            ),
-            draft_media:media!products_draft_image_id_fkey (
               file_path,
               optimized_urls
             )
@@ -124,8 +119,20 @@ const ProductPreview = () => {
         if (productError) throw productError;
 
         if (productData) {
-          // Transform data to use draft values with fallback to published
           const data = productData as any;
+          
+          // If there's a draft_image_id, fetch the draft media separately
+          let draftMedia = null;
+          if (data.draft_image_id) {
+            const { data: mediaData } = await supabase
+              .from("media")
+              .select("file_path, optimized_urls")
+              .eq("id", data.draft_image_id)
+              .maybeSingle();
+            draftMedia = mediaData;
+          }
+
+          // Transform data to use draft values with fallback to published
           const transformedProduct: Product = {
             id: data.id,
             // Use draft values with fallback to published values
@@ -150,7 +157,7 @@ const ProductPreview = () => {
             faq_items: data.draft_faq_items ?? data.faq_items ?? [],
             price_tiers: data.draft_price_tiers ?? data.price_tiers ?? [],
             // Use draft image if available, otherwise published image
-            media: data.draft_media ?? data.media,
+            media: draftMedia ?? data.media,
           };
           setProduct(transformedProduct);
         }
