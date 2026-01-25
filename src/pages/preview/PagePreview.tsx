@@ -55,7 +55,17 @@ const PagePreview = () => {
 
         if (pageError) throw pageError;
         if (pageData) {
-          setPage(pageData as Page);
+          // Use draft values with fallback to published values
+          const transformedPage: Page = {
+            id: pageData.id,
+            title: pageData.draft_title ?? pageData.title,
+            slug: pageData.draft_slug ?? pageData.slug,
+            content: pageData.draft_content ?? pageData.content ?? "",
+            published: pageData.published ?? false,
+            meta_title: pageData.draft_meta_title ?? pageData.meta_title,
+            meta_description: pageData.draft_meta_description ?? pageData.meta_description,
+          };
+          setPage(transformedPage);
         }
       } catch (error) {
         console.error("Error fetching page:", error);

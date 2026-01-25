@@ -93,7 +93,12 @@ const MicrogreensPreview = () => {
 
       const sectionsMap: Record<string, Section> = {};
       sectionsRes.data?.forEach((section) => {
-        sectionsMap[section.id] = section as Section;
+        // Use draft content with fallback to published content
+        sectionsMap[section.id] = {
+          id: section.id,
+          content: (section.draft_content ?? section.content) as SectionContent,
+          is_visible: section.draft_is_visible ?? section.is_visible,
+        };
       });
       setSections(sectionsMap);
     } catch (error) {

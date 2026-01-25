@@ -69,20 +69,26 @@ const ChiSiamoPreview = () => {
 
       const sectionsMap: Record<string, ChiSiamoSection> = {};
       data?.forEach((section) => {
+        // Use draft content with fallback to published content
+        const content = (section.draft_content ?? section.content) as Record<string, any>;
+        const isVisible = section.draft_is_visible ?? section.is_visible;
         sectionsMap[section.id] = {
-          ...section,
-          content: section.content as Record<string, any>,
+          id: section.id,
+          content,
+          is_visible: isVisible,
         };
       });
       setSections(sectionsMap);
 
-      // Fetch hero image if exists
-      if (sectionsMap.hero?.content?.image_id) {
+      // Fetch hero image if exists - prioritize draft image
+      const heroContent = sectionsMap.hero?.content;
+      const heroImageId = heroContent?.image_id;
+      if (heroImageId) {
         const { data: mediaData } = await supabase
           .from("media")
           .select("file_path")
-          .eq("id", sectionsMap.hero.content.image_id)
-          .single();
+          .eq("id", heroImageId)
+          .maybeSingle();
         if (mediaData) {
           setHeroImageUrl(mediaData.file_path);
         }

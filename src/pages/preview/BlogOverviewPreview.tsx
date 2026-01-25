@@ -55,7 +55,12 @@ const BlogOverviewPreview = () => {
 
       const sectionsMap: Record<string, Section> = {};
       sectionsData?.forEach((section) => {
-        sectionsMap[section.id] = section as Section;
+        // Use draft content with fallback to published content
+        sectionsMap[section.id] = {
+          id: section.id,
+          content: (section.draft_content ?? section.content) as SectionContent,
+          is_visible: section.draft_is_visible ?? section.is_visible,
+        };
       });
       setSections(sectionsMap);
 
@@ -67,12 +72,28 @@ const BlogOverviewPreview = () => {
 
       if (error) throw error;
 
-      setPosts(data || []);
+      // Transform posts to use draft values
+      const transformedPosts = (data || []).map(post => ({
+        id: post.id,
+        title: post.draft_title ?? post.title,
+        slug: post.draft_slug ?? post.slug,
+        excerpt: post.draft_excerpt ?? post.excerpt ?? "",
+        category: post.draft_category ?? post.category ?? "",
+        created_at: post.created_at ?? "",
+        content_blocks: post.draft_content_blocks ?? post.content_blocks,
+        featured_image_id: post.draft_featured_image_id ?? post.featured_image_id,
+      }));
+      setPosts(transformedPosts);
 
-      // Fetch cover images
-      const imageIds = data?.map(p => p.featured_image_id).filter((id): id is string => !!id) || [];
-      if (imageIds.length > 0) {
-        const { data: media } = await supabase.from("media").select("id, file_path").in("id", imageIds);
+      // Fetch cover images - include both published and draft image IDs
+      const allImageIds = (data || []).flatMap(p => [
+        p.featured_image_id,
+        p.draft_featured_image_id
+      ]).filter((id): id is string => !!id);
+      
+      if (allImageIds.length > 0) {
+        const uniqueImageIds = [...new Set(allImageIds)];
+        const { data: media } = await supabase.from("media").select("id, file_path").in("id", uniqueImageIds);
         if (media) {
           const map: Record<string, string> = {};
           media.forEach(m => { map[m.id] = m.file_path; });
@@ -80,9 +101,9 @@ const BlogOverviewPreview = () => {
         }
       }
 
-      // Calculate categories
+      // Calculate categories from transformed posts
       const categoryMap = new Map<string, number>();
-      data?.forEach((post) => {
+      transformedPosts.forEach((post) => {
         if (post.category) {
           categoryMap.set(post.category, (categoryMap.get(post.category) || 0) + 1);
         }
