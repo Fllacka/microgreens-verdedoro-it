@@ -72,7 +72,8 @@ const CosaSonoMicrogreensPreview = () => {
         const imageIds: string[] = [];
 
         data.forEach((section) => {
-          const content = section.content as Record<string, any>;
+          // Use draft content with fallback to published content
+          const content = (section.draft_content ?? section.content) as Record<string, any>;
           switch (section.id) {
             case "hero":
               setHeroData({
@@ -110,7 +111,8 @@ const CosaSonoMicrogreensPreview = () => {
 
           if (mediaData) {
             const heroSection = data.find((s) => s.id === "hero");
-            const heroContent = heroSection?.content as Record<string, any>;
+            // Use draft content for hero image lookup
+            const heroContent = (heroSection?.draft_content ?? heroSection?.content) as Record<string, any>;
             const foundMedia = mediaData.find((m) => m.id === heroContent?.imageId);
             if (foundMedia) setHeroImageUrl(foundMedia.file_path);
           }

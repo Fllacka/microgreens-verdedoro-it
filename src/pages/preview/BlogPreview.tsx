@@ -74,17 +74,29 @@ const BlogPreview = () => {
 
         if (postError) throw postError;
         if (postData) {
-          setPost({
-            ...postData,
-            content_blocks: (postData.content_blocks as unknown as ContentBlock[]) || []
-          } as BlogPost);
+          // Use draft values with fallback to published values
+          const transformedPost: BlogPost = {
+            id: postData.id,
+            title: postData.draft_title ?? postData.title,
+            slug: postData.draft_slug ?? postData.slug,
+            excerpt: postData.draft_excerpt ?? postData.excerpt ?? "",
+            category: postData.draft_category ?? postData.category ?? "",
+            content_blocks: (postData.draft_content_blocks ?? postData.content_blocks ?? []) as unknown as ContentBlock[],
+            published_at: postData.published_at ?? "",
+            published: postData.published ?? false,
+            featured_image_id: postData.draft_featured_image_id ?? postData.featured_image_id,
+            meta_title: postData.draft_meta_title ?? postData.meta_title,
+            meta_description: postData.draft_meta_description ?? postData.meta_description,
+          };
+          setPost(transformedPost);
 
-          // Fetch cover image if exists
-          if (postData.featured_image_id) {
+          // Fetch cover image - prioritize draft image
+          const imageId = postData.draft_featured_image_id ?? postData.featured_image_id;
+          if (imageId) {
             const { data: media } = await supabase
               .from("media")
               .select("file_path")
-              .eq("id", postData.featured_image_id)
+              .eq("id", imageId)
               .maybeSingle();
             if (media) setCoverImageUrl(media.file_path);
           }

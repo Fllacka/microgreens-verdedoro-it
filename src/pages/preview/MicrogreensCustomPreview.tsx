@@ -53,7 +53,15 @@ const MicrogreensCustomPreview = () => {
         .order('sort_order');
       
       if (error) throw error;
-      setSections((data || []) as unknown as Section[]);
+      
+      // Transform to use draft content with fallback to published content
+      const transformedSections = (data || []).map(section => ({
+        id: section.id,
+        content: (section.draft_content ?? section.content) as SectionContent,
+        is_visible: section.draft_is_visible ?? section.is_visible,
+        sort_order: section.sort_order,
+      }));
+      setSections(transformedSections);
     } catch (error) {
       console.error('Error fetching sections:', error);
       toast.error('Errore nel caricamento');
