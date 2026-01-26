@@ -46,8 +46,8 @@ const HomepagePreview = () => {
         </div>
       </div>
 
-      {/* Render the actual homepage */}
-      <Index />
+      {/* Render the actual homepage with preview mode */}
+      <Index isPreview={true} />
     </>
   );
 };
