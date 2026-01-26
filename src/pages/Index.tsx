@@ -74,7 +74,11 @@ const ICON_MAP: Record<string, React.ComponentType<{
   ChefHat,
   ArrowRight,
 };
-const Index = () => {
+interface IndexProps {
+  isPreview?: boolean;
+}
+
+const Index = ({ isPreview = false }: IndexProps) => {
   const navigate = useNavigate();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
@@ -91,7 +95,7 @@ const Index = () => {
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [isPreview]);
   useEffect(() => {
     if (sections.featured_products?.content?.product_slugs?.length > 0) {
       fetchFeaturedProducts(sections.featured_products.content.product_slugs);
@@ -101,13 +105,22 @@ const Index = () => {
     const {
       data,
       error
-    } = await supabase.from("homepage_sections").select("id, content, is_visible").order("sort_order");
+    } = await supabase.from("homepage_sections").select("id, content, is_visible, draft_content, draft_is_visible").order("sort_order");
     if (!error && data) {
       const sectionsMap: Record<string, HomepageSection> = {};
       data.forEach(section => {
+        // If in preview mode, prioritize draft content with fallback to live
+        const content = isPreview 
+          ? ((section.draft_content as Record<string, any>) ?? (section.content as Record<string, any>))
+          : (section.content as Record<string, any>);
+        const isVisible = isPreview
+          ? (section.draft_is_visible ?? section.is_visible)
+          : section.is_visible;
+          
         sectionsMap[section.id] = {
-          ...section,
-          content: section.content as Record<string, any>
+          id: section.id,
+          content: content,
+          is_visible: isVisible,
         };
       });
       setSections(sectionsMap);

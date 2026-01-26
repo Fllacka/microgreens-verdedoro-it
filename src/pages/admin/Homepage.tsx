@@ -11,6 +11,7 @@ import { MediaSelector } from "@/components/admin/MediaSelector";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Eye, EyeOff, Home, Search, Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star, ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, Hand, HandCoins, type LucideIcon } from "lucide-react";
+import SeedingHandIcon from "@/components/icons/SeedingHandIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
@@ -33,7 +34,8 @@ interface Product {
 }
 
 // Icon map for visual preview in selector
-const ICON_COMPONENTS: Record<string, LucideIcon> = {
+const ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentType<{className?: string}>> = {
+  SeedingHand: SeedingHandIcon,
   Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star,
   ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, Hand, HandCoins,
 };
