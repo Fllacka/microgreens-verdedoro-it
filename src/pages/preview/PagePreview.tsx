@@ -47,10 +47,11 @@ const PagePreview = () => {
 
       try {
         // Fetch page WITHOUT published filter for preview
+        // Search by both slug and draft_slug to handle slug changes
         const { data: pageData, error: pageError } = await supabase
           .from("pages")
           .select("*")
-          .eq("slug", slug)
+          .or(`slug.eq.${slug},draft_slug.eq.${slug}`)
           .maybeSingle();
 
         if (pageError) throw pageError;

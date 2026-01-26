@@ -838,7 +838,11 @@ export type Database = {
       site_settings: {
         Row: {
           created_at: string
+          draft_footer_settings: Json | null
+          draft_header_settings: Json | null
           footer_settings: Json | null
+          has_draft_footer_changes: boolean | null
+          has_draft_header_changes: boolean | null
           header_settings: Json | null
           id: string
           logo_id: string | null
@@ -846,7 +850,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          draft_footer_settings?: Json | null
+          draft_header_settings?: Json | null
           footer_settings?: Json | null
+          has_draft_footer_changes?: boolean | null
+          has_draft_header_changes?: boolean | null
           header_settings?: Json | null
           id?: string
           logo_id?: string | null
@@ -854,7 +862,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          draft_footer_settings?: Json | null
+          draft_header_settings?: Json | null
           footer_settings?: Json | null
+          has_draft_footer_changes?: boolean | null
+          has_draft_header_changes?: boolean | null
           header_settings?: Json | null
           id?: string
           logo_id?: string | null
