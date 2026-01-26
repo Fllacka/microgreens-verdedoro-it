@@ -66,10 +66,11 @@ const BlogPreview = () => {
 
       try {
         // Fetch blog post WITHOUT published filter for preview
+        // Search by both slug and draft_slug to handle slug changes
         const { data: postData, error: postError } = await supabase
           .from("blog_posts")
           .select("*")
-          .eq("slug", slug)
+          .or(`slug.eq.${slug},draft_slug.eq.${slug}`)
           .maybeSingle();
 
         if (postError) throw postError;

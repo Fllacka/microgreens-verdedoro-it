@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
-import { SettingsActionBar } from "@/components/admin/SettingsActionBar";
+import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { SortableItem } from "@/components/admin/SortableItem";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
@@ -213,6 +213,7 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const initialLoadComplete = useRef(false);
 
@@ -241,6 +242,10 @@ const Settings = () => {
           logo_id,
           header_settings,
           footer_settings,
+          draft_header_settings,
+          draft_footer_settings,
+          has_draft_header_changes,
+          has_draft_footer_changes,
           media:logo_id (
             file_path
           )
@@ -255,25 +260,32 @@ const Settings = () => {
         if (data.media && typeof data.media === 'object' && 'file_path' in data.media) {
           setLogoUrl(data.media.file_path as string);
         }
-        if (data.header_settings) {
-          setHeaderSettings(data.header_settings as unknown as HeaderSettings);
+        
+        // Load from draft if available, otherwise from live
+        const headerData = (data.draft_header_settings ?? data.header_settings) as unknown as HeaderSettings;
+        const footerData = (data.draft_footer_settings ?? data.footer_settings) as unknown as FooterSettings;
+        
+        if (headerData) {
+          setHeaderSettings(headerData);
         }
-        if (data.footer_settings) {
-          const dbFooterSettings = data.footer_settings as unknown as FooterSettings;
-          
+        if (footerData) {
           // Merge social links - ensure all default platforms exist
           const mergedSocialLinks = defaultFooterSettings.social_links.map(defaultLink => {
-            const existingLink = dbFooterSettings.social_links?.find(
+            const existingLink = footerData.social_links?.find(
               link => link.platform === defaultLink.platform
             );
             return existingLink || defaultLink;
           });
           
           setFooterSettings({
-            ...dbFooterSettings,
+            ...footerData,
             social_links: mergedSocialLinks
           });
         }
+        
+        // Check if there are draft changes
+        const hasDraft = data.has_draft_header_changes || data.has_draft_footer_changes;
+        setHasDraftChanges(hasDraft || false);
       }
     } catch (error) {
       console.error("Error fetching settings:", error);
@@ -297,6 +309,7 @@ const Settings = () => {
     setHasChanges(true);
   };
 
+  // Save to draft columns only
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -304,19 +317,65 @@ const Settings = () => {
         .from("site_settings")
         .update({ 
           logo_id: logoId,
-          header_settings: JSON.parse(JSON.stringify(headerSettings)),
-          footer_settings: JSON.parse(JSON.stringify(footerSettings))
+          draft_header_settings: JSON.parse(JSON.stringify(headerSettings)),
+          draft_footer_settings: JSON.parse(JSON.stringify(footerSettings)),
+          has_draft_header_changes: true,
+          has_draft_footer_changes: true,
         })
         .eq("id", "default");
 
       if (error) throw error;
 
-      toast.success("Impostazioni salvate e pubblicate con successo");
+      toast.success("Bozza salvata con successo");
       setHasChanges(false);
+      setHasDraftChanges(true);
       setLastSaved(new Date());
     } catch (error) {
       console.error("Error saving settings:", error);
       toast.error("Errore nel salvataggio delle impostazioni");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Publish: copy draft to live columns
+  const handlePublish = async (publish: boolean) => {
+    setIsSaving(true);
+    try {
+      if (publish) {
+        // First save current state to draft
+        const { error: draftError } = await supabase
+          .from("site_settings")
+          .update({ 
+            logo_id: logoId,
+            draft_header_settings: JSON.parse(JSON.stringify(headerSettings)),
+            draft_footer_settings: JSON.parse(JSON.stringify(footerSettings)),
+          })
+          .eq("id", "default");
+
+        if (draftError) throw draftError;
+
+        // Then copy draft to live
+        const { error } = await supabase
+          .from("site_settings")
+          .update({ 
+            header_settings: JSON.parse(JSON.stringify(headerSettings)),
+            footer_settings: JSON.parse(JSON.stringify(footerSettings)),
+            has_draft_header_changes: false,
+            has_draft_footer_changes: false,
+          })
+          .eq("id", "default");
+
+        if (error) throw error;
+
+        toast.success("Impostazioni pubblicate con successo");
+        setHasDraftChanges(false);
+      }
+      setHasChanges(false);
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Error publishing settings:", error);
+      toast.error("Errore nella pubblicazione delle impostazioni");
     } finally {
       setIsSaving(false);
     }
@@ -533,10 +592,6 @@ const Settings = () => {
               Configura le impostazioni generali del sito
             </p>
           </div>
-          <Button onClick={handleSave} disabled={isSaving}>
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Salvataggio..." : "Salva"}
-          </Button>
         </div>
 
         <Tabs defaultValue="logo" className="space-y-6">
@@ -1142,11 +1197,13 @@ const Settings = () => {
       {/* Spacer for action bar */}
       <div className="h-20" />
       
-      <SettingsActionBar
+      <PublishActionBar
+        isPublished={true}
         isSaving={isSaving}
         onSave={handleSave}
+        onPublish={handlePublish}
         hasChanges={hasChanges}
-        lastSaved={lastSaved}
+        hasDraftChanges={hasDraftChanges}
       />
 
       <UnsavedChangesDialog
