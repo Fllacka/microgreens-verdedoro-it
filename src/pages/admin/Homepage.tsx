@@ -521,7 +521,87 @@ const Homepage = () => {
             </AccordionItem>
           )}
 
-          {/* How It Works Section */}
+          {/* Featured Products Section - Now 3rd position */}
+          {sections.featured_products && (
+            <AccordionItem value="featured_products" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-4">
+                  <span className="font-semibold">Prodotti in Evidenza</span>
+                  {sections.featured_products.is_visible ? (
+                    <Eye className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-4">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={sections.featured_products.is_visible}
+                    onCheckedChange={(checked) => updateSectionVisibility("featured_products", checked)}
+                  />
+                  <Label>Sezione visibile</Label>
+                </div>
+
+                <div className="grid gap-4">
+                  <div>
+                    <Label>Titolo</Label>
+                    <Input
+                      value={sections.featured_products.content.heading || ""}
+                      onChange={(e) => updateSectionContent("featured_products", "heading", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Sottotitolo</Label>
+                    <RichTextEditor
+                      content={sections.featured_products.content.subtitle || ""}
+                      onChange={(value) => updateSectionContent("featured_products", "subtitle", value)}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Seleziona Prodotti da Mostrare</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {products.map((product) => (
+                        <div key={product.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={product.slug}
+                            checked={(sections.featured_products.content.product_slugs || []).includes(product.slug)}
+                            onCheckedChange={() => toggleProductSelection("featured_products", product.slug)}
+                          />
+                          <label htmlFor={product.slug} className="text-sm cursor-pointer">
+                            {product.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {products.length === 0 && (
+                      <p className="text-sm text-muted-foreground">Nessun prodotto pubblicato disponibile</p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Testo Pulsante</Label>
+                      <Input
+                        value={sections.featured_products.content.button_text || ""}
+                        onChange={(e) => updateSectionContent("featured_products", "button_text", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label>Link Pulsante</Label>
+                      <Input
+                        value={sections.featured_products.content.button_link || ""}
+                        onChange={(e) => updateSectionContent("featured_products", "button_link", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )}
+
+          {/* How It Works Section - Now 4th position */}
           {sections.how_it_works && (
             <AccordionItem value="how_it_works" className="border rounded-lg px-4">
               <AccordionTrigger className="hover:no-underline">
@@ -688,85 +768,6 @@ const Homepage = () => {
             </AccordionItem>
           )}
 
-          {/* Featured Products Section */}
-          {sections.featured_products && (
-            <AccordionItem value="featured_products" className="border rounded-lg px-4">
-              <AccordionTrigger className="hover:no-underline">
-                <div className="flex items-center gap-4">
-                  <span className="font-semibold">Prodotti in Evidenza</span>
-                  {sections.featured_products.is_visible ? (
-                    <Eye className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-6 pt-4">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={sections.featured_products.is_visible}
-                    onCheckedChange={(checked) => updateSectionVisibility("featured_products", checked)}
-                  />
-                  <Label>Sezione visibile</Label>
-                </div>
-
-                <div className="grid gap-4">
-                  <div>
-                    <Label>Titolo</Label>
-                    <Input
-                      value={sections.featured_products.content.heading || ""}
-                      onChange={(e) => updateSectionContent("featured_products", "heading", e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label>Sottotitolo</Label>
-                    <RichTextEditor
-                      content={sections.featured_products.content.subtitle || ""}
-                      onChange={(value) => updateSectionContent("featured_products", "subtitle", value)}
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">Seleziona Prodotti da Mostrare</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {products.map((product) => (
-                        <div key={product.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={product.slug}
-                            checked={(sections.featured_products.content.product_slugs || []).includes(product.slug)}
-                            onCheckedChange={() => toggleProductSelection("featured_products", product.slug)}
-                          />
-                          <label htmlFor={product.slug} className="text-sm cursor-pointer">
-                            {product.name}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    {products.length === 0 && (
-                      <p className="text-sm text-muted-foreground">Nessun prodotto pubblicato disponibile</p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Testo Pulsante</Label>
-                      <Input
-                        value={sections.featured_products.content.button_text || ""}
-                        onChange={(e) => updateSectionContent("featured_products", "button_text", e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Link Pulsante</Label>
-                      <Input
-                        value={sections.featured_products.content.button_link || ""}
-                        onChange={(e) => updateSectionContent("featured_products", "button_link", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          )}
 
           {/* Custom Microgreens Section */}
           {sections.custom_microgreens && (
