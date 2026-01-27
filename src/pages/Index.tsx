@@ -661,9 +661,9 @@ const Index = ({ isPreview = false }: IndexProps) => {
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
                 {featuredProductsContent.heading}
               </h2>
-              <div className="font-body text-lg text-muted-foreground max-w-3xl mx-auto text-center prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline [&_p]:text-center" dangerouslySetInnerHTML={{
-            __html: featuredProductsContent.subtitle
-          }} />
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                {stripHtmlTags(featuredProductsContent.subtitle)}
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
@@ -719,9 +719,9 @@ const Index = ({ isPreview = false }: IndexProps) => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
               {blogContent.heading}
             </h2>
-            <div className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12 text-center prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline [&_p]:text-center" dangerouslySetInnerHTML={{
-          __html: blogContent.subtitle
-        }} />
+            <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
+              {stripHtmlTags(blogContent.subtitle)}
+            </p>
 
             <div className={`grid gap-8 mb-8 ${blogPosts.length === 1 ? "max-w-md mx-auto" : blogPosts.length === 2 ? "grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto" : "grid-cols-1 md:grid-cols-3"}`}>
               {blogPosts.map(post => {
