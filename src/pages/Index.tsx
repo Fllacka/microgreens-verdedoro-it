@@ -661,7 +661,7 @@ const Index = ({ isPreview = false }: IndexProps) => {
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
                 {featuredProductsContent.heading}
               </h2>
-              <div className="font-body text-lg text-muted-foreground max-w-3xl mx-auto prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline" dangerouslySetInnerHTML={{
+              <div className="font-body text-lg text-muted-foreground max-w-3xl mx-auto text-center prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline [&_p]:text-center" dangerouslySetInnerHTML={{
             __html: featuredProductsContent.subtitle
           }} />
             </div>
@@ -719,7 +719,7 @@ const Index = ({ isPreview = false }: IndexProps) => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
               {blogContent.heading}
             </h2>
-            <div className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12 prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline" dangerouslySetInnerHTML={{
+            <div className="font-body text-lg text-muted-foreground max-w-3xl mx-auto mb-12 text-center prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline [&_p]:text-center" dangerouslySetInnerHTML={{
           __html: blogContent.subtitle
         }} />
 
