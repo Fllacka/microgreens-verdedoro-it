@@ -469,6 +469,36 @@ const Index = ({ isPreview = false }: IndexProps) => {
           </div>
         </section>}
 
+      {/* Featured Products - Positioned after "Cosa sono i microgreens" */}
+      {sections.featured_products?.is_visible !== false && productsToShow.length > 0 && <section className="section-padding bg-background">
+          <div className="container-width">
+            <div className="text-center mb-16">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+                {featuredProductsContent.heading}
+              </h2>
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                {stripHtmlTags(featuredProductsContent.subtitle)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {productsToShow.map((product, index) => {
+            const imageId = 'image_id' in product ? product.image_id as string | null : null;
+            const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
+            const productImage = mediaInfo?.file_path || (hasDefaultProducts ? index === 1 ? varietiesImage : chefImage : chefImage);
+            const gridDesc = 'grid_description' in product ? (product as Product).grid_description : undefined;
+            return <ProductCard key={product.id} name={product.name} category={product.category || ""} description={product.description || ""} gridDescription={gridDesc || undefined} benefits={product.benefits || []} uses={product.uses || []} image={productImage} onCardClick={() => navigate(`/microgreens/${product.slug}`)} priority={index < 3} />;
+          })}
+            </div>
+
+            <div className="text-center">
+              <Button variant="verde" size="lg" asChild>
+                <Link to={featuredProductsContent.button_link}>{featuredProductsContent.button_text}</Link>
+              </Button>
+            </div>
+          </div>
+        </section>}
+
       {/* Come Funziona Section - Journey Timeline */}
       {sections.how_it_works?.is_visible !== false && (() => {
         // Get journey steps from CMS or use defaults
@@ -602,8 +632,7 @@ const Index = ({ isPreview = false }: IndexProps) => {
                   return (
                     <div key={index} className="relative">
                       {/* Card */}
-                      <div className="relative bg-white rounded-[1.25rem] p-5 pt-8 shadow-sm border border-gray-100/50 
-                                      hover:shadow-lg transition-shadow duration-300">
+                      <div className="relative bg-white rounded-[1.25rem] p-5 pt-8 shadow-sm border border-gray-100/50">
                         {/* Gold badge - top left */}
                         <div className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-gradient-to-br from-oro-primary to-oro-light 
                                         flex items-center justify-center shadow-md z-10">
@@ -612,19 +641,17 @@ const Index = ({ isPreview = false }: IndexProps) => {
                         
                         <div className="flex items-center gap-4">
                           {/* Icon with ring */}
-                          <div className={`flex h-12 w-12 items-center justify-center rounded-full ${iconColors[index].bg} 
-                                          ring-2 ${iconColors[index].ring} shadow-lg flex-shrink-0`}>
+                          <div className={`flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full ${iconColors[index].bg} 
+                                          ring-2 ${iconColors[index].ring} shadow-lg`}>
                             <IconComponent className="h-5 w-5 text-white stroke-[2.5]" />
                           </div>
                           
-                          <div className="flex-1">
-                            {/* Title */}
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
                             <h3 className="font-display text-base font-bold text-primary mb-1">
                               {step.title}
                             </h3>
-                            
-                            {/* Description */}
-                            <p className="font-body text-sm text-muted-foreground leading-relaxed">
+                            <p className="font-body text-sm text-muted-foreground leading-snug">
                               {step.description}
                             </p>
                           </div>
@@ -651,36 +678,6 @@ const Index = ({ isPreview = false }: IndexProps) => {
             <Button variant="verde" size="lg" asChild>
               <Link to={ordersDeliveryContent.button_link}>{ordersDeliveryContent.button_text}</Link>
             </Button>
-          </div>
-        </section>}
-
-      {/* Featured Products */}
-      {sections.featured_products?.is_visible !== false && productsToShow.length > 0 && <section className="section-padding bg-gradient-subtle">
-          <div className="container-width">
-            <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
-                {featuredProductsContent.heading}
-              </h2>
-              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
-                {stripHtmlTags(featuredProductsContent.subtitle)}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              {productsToShow.map((product, index) => {
-            const imageId = 'image_id' in product ? product.image_id as string | null : null;
-            const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
-            const productImage = mediaInfo?.file_path || (hasDefaultProducts ? index === 1 ? varietiesImage : chefImage : chefImage);
-            const gridDesc = 'grid_description' in product ? (product as Product).grid_description : undefined;
-            return <ProductCard key={product.id} name={product.name} category={product.category || ""} description={product.description || ""} gridDescription={gridDesc || undefined} benefits={product.benefits || []} uses={product.uses || []} image={productImage} onCardClick={() => navigate(`/microgreens/${product.slug}`)} priority={index < 3} />;
-          })}
-            </div>
-
-            <div className="text-center">
-              <Button variant="verde" size="lg" asChild>
-                <Link to={featuredProductsContent.button_link}>{featuredProductsContent.button_text}</Link>
-              </Button>
-            </div>
           </div>
         </section>}
 
