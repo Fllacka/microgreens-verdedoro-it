@@ -72,13 +72,14 @@ const ICON_MAP: Record<string, React.ComponentType<{
   Flame,
   Sun,
   ChefHat,
-  ArrowRight,
+  ArrowRight
 };
 interface IndexProps {
   isPreview?: boolean;
 }
-
-const Index = ({ isPreview = false }: IndexProps) => {
+const Index = ({
+  isPreview = false
+}: IndexProps) => {
   const navigate = useNavigate();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
@@ -110,17 +111,12 @@ const Index = ({ isPreview = false }: IndexProps) => {
       const sectionsMap: Record<string, HomepageSection> = {};
       data.forEach(section => {
         // If in preview mode, prioritize draft content with fallback to live
-        const content = isPreview 
-          ? ((section.draft_content as Record<string, any>) ?? (section.content as Record<string, any>))
-          : (section.content as Record<string, any>);
-        const isVisible = isPreview
-          ? (section.draft_is_visible ?? section.is_visible)
-          : section.is_visible;
-          
+        const content = isPreview ? section.draft_content as Record<string, any> ?? section.content as Record<string, any> : section.content as Record<string, any>;
+        const isVisible = isPreview ? section.draft_is_visible ?? section.is_visible : section.is_visible;
         sectionsMap[section.id] = {
           id: section.id,
           content: content,
-          is_visible: isVisible,
+          is_visible: isVisible
         };
       });
       setSections(sectionsMap);
@@ -470,13 +466,7 @@ const Index = ({ isPreview = false }: IndexProps) => {
         </section>}
 
       {/* Section Divider */}
-      <div className="flex justify-center py-2 bg-secondary">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
-          <Leaf className="w-4 h-4 text-verde-primary/50" />
-          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
-        </div>
-      </div>
+      
 
       {/* Featured Products - Positioned after "Cosa sono i microgreens" */}
       {sections.featured_products?.is_visible !== false && productsToShow.length > 0 && <section className="section-padding bg-secondary shadow-[inset_0_4px_12px_-4px_rgba(0,0,0,0.06)]">
@@ -509,42 +499,54 @@ const Index = ({ isPreview = false }: IndexProps) => {
         </section>}
 
       {/* Section Divider */}
-      <div className="flex justify-center py-2 bg-background">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
-          <Leaf className="w-4 h-4 text-verde-primary/50" />
-          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
-        </div>
-      </div>
+      
 
       {/* Come Funziona Section - Journey Timeline */}
       {sections.how_it_works?.is_visible !== false && (() => {
-        // Get journey steps from CMS or use defaults
-        const cmsSteps = howItWorksContent.steps || [];
-        const journeySteps = cmsSteps.length > 0 
-          ? cmsSteps.map((step: any, index: number) => ({
-              number: index + 1,
-              icon: ICON_MAP[step.icon] || ShoppingBag,
-              title: step.title || "",
-              description: step.description || "",
-            }))
-          : [
-              { number: 1, icon: ShoppingBag, title: "Ordine", description: "Scegli le varietà e attiviamo la semina dedicata a te." },
-              { number: 2, icon: Sprout, title: "Semina", description: "Coltiviamo in ambiente controllato per qualità perfetta." },
-              { number: 3, icon: Scissors, title: "Raccolta", description: "Tagliamo a mano solo quando è il momento giusto." },
-              { number: 4, icon: Bike, title: "Consegna", description: "A casa tua a Reggio Emilia, poche ore dal taglio." },
-            ];
+      // Get journey steps from CMS or use defaults
+      const cmsSteps = howItWorksContent.steps || [];
+      const journeySteps = cmsSteps.length > 0 ? cmsSteps.map((step: any, index: number) => ({
+        number: index + 1,
+        icon: ICON_MAP[step.icon] || ShoppingBag,
+        title: step.title || "",
+        description: step.description || ""
+      })) : [{
+        number: 1,
+        icon: ShoppingBag,
+        title: "Ordine",
+        description: "Scegli le varietà e attiviamo la semina dedicata a te."
+      }, {
+        number: 2,
+        icon: Sprout,
+        title: "Semina",
+        description: "Coltiviamo in ambiente controllato per qualità perfetta."
+      }, {
+        number: 3,
+        icon: Scissors,
+        title: "Raccolta",
+        description: "Tagliamo a mano solo quando è il momento giusto."
+      }, {
+        number: 4,
+        icon: Bike,
+        title: "Consegna",
+        description: "A casa tua a Reggio Emilia, poche ore dal taglio."
+      }];
 
-        // Green progression - lighter to darker (symbolizing growth)
-        const iconColors = [
-          { bg: "bg-verde-primary/60", ring: "ring-verde-primary/40" },
-          { bg: "bg-verde-primary/75", ring: "ring-verde-primary/50" },
-          { bg: "bg-verde-primary/90", ring: "ring-verde-primary/60" },
-          { bg: "bg-verde-primary", ring: "ring-verde-primary/70" },
-        ];
-
-        return (
-          <section className="section-padding bg-gradient-subtle">
+      // Green progression - lighter to darker (symbolizing growth)
+      const iconColors = [{
+        bg: "bg-verde-primary/60",
+        ring: "ring-verde-primary/40"
+      }, {
+        bg: "bg-verde-primary/75",
+        ring: "ring-verde-primary/50"
+      }, {
+        bg: "bg-verde-primary/90",
+        ring: "ring-verde-primary/60"
+      }, {
+        bg: "bg-verde-primary",
+        ring: "ring-verde-primary/70"
+      }];
+      return <section className="section-padding bg-gradient-subtle">
             <div className="container-width">
               {/* Header */}
               <div className="text-center mb-12 lg:mb-16">
@@ -559,11 +561,9 @@ const Index = ({ isPreview = false }: IndexProps) => {
               {/* Desktop: 4 columns with chevrons */}
               <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] items-stretch gap-2">
                 {journeySteps.map((step, index) => {
-                  const IconComponent = step.icon;
-                  const isLast = index === journeySteps.length - 1;
-                  
-                  return (
-                    <>
+              const IconComponent = step.icon;
+              const isLast = index === journeySteps.length - 1;
+              return <>
                       {/* Card */}
                       <div key={`card-${index}`} className="relative bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
                                       hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[220px] flex flex-col">
@@ -593,23 +593,18 @@ const Index = ({ isPreview = false }: IndexProps) => {
                       </div>
                       
                       {/* Chevron between cards */}
-                      {!isLast && (
-                        <div key={`chevron-${index}`} className="flex items-center justify-center">
+                      {!isLast && <div key={`chevron-${index}`} className="flex items-center justify-center">
                           <span className="text-2xl font-light text-oro-primary/50 select-none">›</span>
-                        </div>
-                      )}
-                    </>
-                  );
-                })}
+                        </div>}
+                    </>;
+            })}
               </div>
 
               {/* Tablet: 2 columns */}
               <div className="hidden md:grid md:grid-cols-2 lg:hidden gap-6 items-stretch">
                 {journeySteps.map((step, index) => {
-                  const IconComponent = step.icon;
-                  
-                  return (
-                    <div key={index} className="relative h-full">
+              const IconComponent = step.icon;
+              return <div key={index} className="relative h-full">
                       {/* Card */}
                       <div className="relative bg-white rounded-[1.25rem] p-6 pt-10 shadow-sm border border-gray-100/50 
                                       hover:shadow-lg hover:-translate-y-1 transition-all duration-300 min-h-[200px] flex flex-col h-full">
@@ -637,18 +632,15 @@ const Index = ({ isPreview = false }: IndexProps) => {
                           {step.description}
                         </p>
                       </div>
-                    </div>
-                  );
-                })}
+                    </div>;
+            })}
               </div>
 
               {/* Mobile: 1 column */}
               <div className="grid grid-cols-1 md:hidden gap-5">
                 {journeySteps.map((step, index) => {
-                  const IconComponent = step.icon;
-                  
-                  return (
-                    <div key={index} className="relative">
+              const IconComponent = step.icon;
+              return <div key={index} className="relative">
                       {/* Card */}
                       <div className="relative bg-white rounded-[1.25rem] p-5 pt-8 shadow-sm border border-gray-100/50">
                         {/* Gold badge - top left */}
@@ -675,23 +667,15 @@ const Index = ({ isPreview = false }: IndexProps) => {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    </div>;
+            })}
               </div>
             </div>
-          </section>
-        );
-      })()}
+          </section>;
+    })()}
 
       {/* Section Divider */}
-      <div className="flex justify-center py-2 bg-background">
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
-          <Leaf className="w-4 h-4 text-verde-primary/50" />
-          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
-        </div>
-      </div>
+      
 
       {/* Ordini e Consegne Section */}
       {sections.orders_delivery?.is_visible !== false && <section className="section-padding bg-secondary">
