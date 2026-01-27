@@ -1,135 +1,100 @@
 
+# Piano: Riordinamento Sezioni Homepage
 
-# Piano: Fix Draft Preview per Homepage
+## Situazione Attuale
 
-## Problema Identificato
+Ho analizzato il codice e trovato che:
 
-Ho trovato **due problemi** distinti:
+| Posizione | Sezione Attuale | Sezione Richiesta |
+|-----------|-----------------|-------------------|
+| 1 | Hero | Hero |
+| 2 | Cosa sono i microgreens | Cosa sono i microgreens |
+| 3 | Come Funziona | **Prodotti in Evidenza** |
+| 4 | Ordini e Consegne | **Come Funziona** |
+| 5 | Prodotti in Evidenza | Ordini e Consegne |
+| 6 | Microgreens su Misura | Microgreens su Misura |
+| 7 | Blog | Blog |
 
-### Problema 1: Preview non mostra i contenuti Draft
-| Componente | Comportamento Attuale | Problema |
-|------------|----------------------|----------|
-| `HomepagePreview.tsx` | Renderizza `<Index />` direttamente | `Index.tsx` legge solo le colonne live |
-| `Index.tsx` | Fetcha `content` e `is_visible` | Non legge `draft_content` e `draft_is_visible` |
+**Problema**: L'ordine delle sezioni e **hardcodato nel JSX** di `Index.tsx`. La colonna `sort_order` nel database esiste ma non viene usata per il rendering dinamico.
 
-**Risultato**: Quando clicchi "Salva e Anteprima", vedi sempre i dati pubblicati, mai le modifiche draft.
+## Soluzione
 
-### Problema 2: Errore Console "React.jsx: type is invalid"
-L'icona `SeedingHand` è inclusa in `ICON_OPTIONS` ma **non** in `ICON_COMPONENTS` nel file `Homepage.tsx`, causando un errore quando l'admin seleziona quell'icona.
+Per implementare correttamente il riordinamento (e permettere futuri cambiamenti dal CMS):
 
----
+### Fase 1: Aggiornare Index.tsx
 
-## Soluzione Proposta
+Devo spostare il blocco JSX della sezione "Featured Products" **prima** di "Come Funziona" nel file.
 
-### Fase 1: Creare una versione Preview della Homepage
+**Ordine sezioni nel JSX dopo la modifica:**
+1. Hero Section
+2. Cosa sono i microgreens
+3. **Featured Products** (spostato qui)
+4. Come Funziona
+5. Ordini e Consegne
+6. Microgreens su Misura
+7. Blog
 
-Invece di riutilizzare `Index.tsx`, devo creare una logica specifica per la preview che:
-1. Fetchi i dati prioritizzando `draft_content` con fallback a `content`
-2. Applichi lo stesso pattern usato nelle altre preview (ChiSiamo, Blog, etc.)
+### Fase 2: Aggiornare il Database
 
-**Approccio tecnico:**
-- Modificare `HomepagePreview.tsx` per fetchare direttamente i dati draft invece di usare `<Index />`
-- Oppure: Passare un prop `isPreview` a `Index.tsx` che cambia la logica di fetch
+Aggiornare i valori `sort_order` per riflettere il nuovo ordine:
 
-**Scelta consigliata**: Modificare `Index.tsx` per accettare un prop `isPreview` che, se `true`, legge dalle colonne draft. Questo mantiene la coerenza del rendering e evita duplicazione del codice.
+```sql
+UPDATE homepage_sections SET sort_order = 3 WHERE id = 'featured_products';
+UPDATE homepage_sections SET sort_order = 4 WHERE id = 'how_it_works';
+UPDATE homepage_sections SET sort_order = 5 WHERE id = 'orders_delivery';
+```
 
-### Fase 2: Fix errore icona mancante
+### Fase 3: Aggiornare il CMS (Homepage.tsx)
 
-Aggiungere `SeedingHand` (che usa il componente `SeedingHandIcon`) alla mappa `ICON_COMPONENTS` in `Homepage.tsx`.
+Riordinare gli AccordionItem nel CMS per corrispondere al nuovo ordine visivo:
+1. Hero
+2. Cosa sono i microgreens
+3. **Prodotti in Evidenza**
+4. Come Funziona
+5. Ordini e Consegne
+6. Microgreens su Misura
+7. Blog
+8. SEO
 
----
+### Fase 4: Aggiustamenti di Design
+
+Verificare che la transizione visiva tra le sezioni sia fluida:
+- "Cosa sono i microgreens" ha sfondo `bg-background` (bianco)
+- "Featured Products" ha sfondo `bg-gradient-subtle` (gradiente sottile)
+- "Come Funziona" ha sfondo `bg-gradient-subtle`
+
+Per evitare due sezioni consecutive con lo stesso sfondo, posso:
+- Cambiare "Featured Products" a `bg-background` (bianco)
+- Oppure aggiungere un separatore visivo sottile
+
+**Raccomandazione**: Cambiare lo sfondo di "Featured Products" a `bg-background` per creare alternanza visiva.
 
 ## File da Modificare
 
 | File | Modifica |
 |------|----------|
-| `src/pages/Index.tsx` | Aggiungere prop `isPreview` e logica per leggere draft |
-| `src/pages/preview/HomepagePreview.tsx` | Passare `isPreview={true}` a Index |
-| `src/pages/admin/Homepage.tsx` | Aggiungere `SeedingHand: SeedingHandIcon` a ICON_COMPONENTS |
+| `src/pages/Index.tsx` | Spostare blocco Featured Products prima di Come Funziona, aggiustare sfondo |
+| `src/pages/admin/Homepage.tsx` | Riordinare AccordionItem nel CMS |
+| Database | Aggiornare sort_order via migration |
 
----
+## Riepilogo Visivo Finale
 
-## Dettaglio Implementazione
-
-### Index.tsx - Aggiungere supporto Preview
-
-```typescript
-// Aggiungere prop
-interface IndexProps {
-  isPreview?: boolean;
-}
-
-const Index = ({ isPreview = false }: IndexProps) => {
-  // ...
-
-  const fetchSections = async () => {
-    // Modificare la query per includere draft columns
-    const { data, error } = await supabase
-      .from("homepage_sections")
-      .select("id, content, is_visible, draft_content, draft_is_visible")
-      .order("sort_order");
-
-    if (!error && data) {
-      const sectionsMap: Record<string, HomepageSection> = {};
-      data.forEach(section => {
-        // Se in preview, prioritizza draft con fallback a live
-        const content = isPreview 
-          ? (section.draft_content ?? section.content)
-          : section.content;
-        const isVisible = isPreview
-          ? (section.draft_is_visible ?? section.is_visible)
-          : section.is_visible;
-          
-        sectionsMap[section.id] = {
-          id: section.id,
-          content: content as Record<string, any>,
-          is_visible: isVisible,
-        };
-      });
-      setSections(sectionsMap);
-      // ... rest of image fetching
-    }
-  };
-};
+```text
+┌─────────────────────────────┐
+│         HERO               │ bg-image (scuro)
+├─────────────────────────────┤
+│  COSA SONO I MICROGREENS   │ bg-background (bianco)
+├─────────────────────────────┤
+│   PRODOTTI IN EVIDENZA     │ bg-background (bianco) - modificato
+├─────────────────────────────┤
+│      COME FUNZIONA         │ bg-gradient-subtle (sfumato)
+├─────────────────────────────┤
+│    ORDINI E CONSEGNE       │ bg-background (bianco)
+├─────────────────────────────┤
+│   MICROGREENS SU MISURA    │ bg-gradient-verde (verde scuro)
+├─────────────────────────────┤
+│          BLOG              │ bg-gradient-subtle (sfumato)
+└─────────────────────────────┘
 ```
 
-### HomepagePreview.tsx - Passare prop
-
-```typescript
-// Cambiare da:
-<Index />
-
-// A:
-<Index isPreview={true} />
-```
-
-### Homepage.tsx - Fix icona mancante
-
-```typescript
-import SeedingHandIcon from "@/components/icons/SeedingHandIcon";
-
-const ICON_COMPONENTS: Record<string, LucideIcon | React.ComponentType<{className?: string}>> = {
-  SeedingHand: SeedingHandIcon,  // <-- Aggiungere questa riga
-  Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star,
-  ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, Hand, HandCoins,
-};
-```
-
----
-
-## Comportamento Finale
-
-1. **Sito Live** (`/`): `Index` viene chiamato senza props, quindi `isPreview = false` e legge solo dati pubblicati
-2. **Preview** (`/preview/homepage`): `Index` viene chiamato con `isPreview={true}`, quindi legge dati draft con fallback a live
-3. **Admin** (`/admin/homepage`): Il selettore icone funziona correttamente senza errori console
-
----
-
-## Considerazioni
-
-Questo approccio:
-- Evita duplicazione del codice di rendering della homepage
-- Mantiene coerenza visiva tra preview e sito live
-- Segue lo stesso pattern delle altre pagine preview del CMS
-- Risolve anche l'errore console relativo all'icona mancante
-
+Questo crea una buona alternanza di sfondi per guidare l'occhio dell'utente.
