@@ -469,8 +469,17 @@ const Index = ({ isPreview = false }: IndexProps) => {
           </div>
         </section>}
 
+      {/* Section Divider */}
+      <div className="flex justify-center py-2 bg-secondary">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
+          <Leaf className="w-4 h-4 text-verde-primary/50" />
+          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
+        </div>
+      </div>
+
       {/* Featured Products - Positioned after "Cosa sono i microgreens" */}
-      {sections.featured_products?.is_visible !== false && productsToShow.length > 0 && <section className="section-padding bg-background">
+      {sections.featured_products?.is_visible !== false && productsToShow.length > 0 && <section className="section-padding bg-secondary shadow-[inset_0_4px_12px_-4px_rgba(0,0,0,0.06)]">
           <div className="container-width">
             <div className="text-center mb-16">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
@@ -498,6 +507,15 @@ const Index = ({ isPreview = false }: IndexProps) => {
             </div>
           </div>
         </section>}
+
+      {/* Section Divider */}
+      <div className="flex justify-center py-2 bg-background">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
+          <Leaf className="w-4 h-4 text-verde-primary/50" />
+          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
+        </div>
+      </div>
 
       {/* Come Funziona Section - Journey Timeline */}
       {sections.how_it_works?.is_visible !== false && (() => {
@@ -666,8 +684,17 @@ const Index = ({ isPreview = false }: IndexProps) => {
         );
       })()}
 
+      {/* Section Divider */}
+      <div className="flex justify-center py-2 bg-background">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
+          <Leaf className="w-4 h-4 text-verde-primary/50" />
+          <div className="w-1.5 h-1.5 rounded-full bg-oro-primary/40" />
+        </div>
+      </div>
+
       {/* Ordini e Consegne Section */}
-      {sections.orders_delivery?.is_visible !== false && <section className="section-padding bg-background">
+      {sections.orders_delivery?.is_visible !== false && <section className="section-padding bg-secondary">
           <div className="container-width text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
               {ordersDeliveryContent.heading}
@@ -711,7 +738,7 @@ const Index = ({ isPreview = false }: IndexProps) => {
         </section>}
 
       {/* Blog Section */}
-      {sections.blog?.is_visible !== false && blogPosts.length > 0 && <section className="section-padding bg-gradient-subtle">
+      {sections.blog?.is_visible !== false && blogPosts.length > 0 && <section className="section-padding bg-secondary">
           <div className="container-width text-center">
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-6">
               {blogContent.heading}
