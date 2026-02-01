@@ -1,93 +1,103 @@
-# Piano Performance: LCP sotto 2.5s ✅ COMPLETATO
 
-## Stato Implementazione
+# Piano: Modificare Foreign Keys con ON DELETE SET NULL
 
-| Fase | Stato | Descrizione |
-|------|-------|-------------|
-| Fase 1 | ✅ | WebP universale - `format=webp` aggiunto a tutte le trasformazioni |
-| Fase 2 | ✅ | Compressione client-side - max 500KB, 1920px prima dell'upload |
-| Fase 3 | ✅ | BlurHash - generato durante upload, salvato in DB |
-| Fase 4 | ✅ | SmartImage component - componente globale con srcset + BlurHash |
-| Fase 5 | ✅ | Build-time preload - plugin Vite per injection hero preload |
+## Analisi Completa delle Foreign Keys
 
----
+Ho identificato **6 foreign keys** che referenziano la tabella `media`. Di queste:
+- **5 bloccano** l'eliminazione (comportamento RESTRICT di default)
+- **1 è già configurata** correttamente (`site_settings_logo_id_fkey`)
 
-## File Creati/Modificati
+### Stato Attuale
 
-| File | Modifica |
-|------|----------|
-| `src/lib/image-utils.ts` | Aggiunto `format=webp` a tutte le trasformazioni |
-| `src/lib/image-compression.ts` | **NUOVO** - Utility per compressione + BlurHash |
-| `src/pages/admin/Media.tsx` | Compressione automatica + estrazione dimensioni/BlurHash |
-| `src/components/ui/SmartImage.tsx` | **NUOVO** - Componente globale ottimizzato |
-| `scripts/fetch-hero-url.ts` | **NUOVO** - Script per fetch URL hero |
-| `vite-plugin-hero-preload.ts` | **NUOVO** - Plugin Vite per injection preload |
-| `vite.config.ts` | Integrato plugin hero preload |
+| Tabella | Colonna | Constraint | Stato |
+|---------|---------|------------|-------|
+| `products` | `image_id` | `products_image_id_fkey` | Blocca |
+| `products` | `og_image_id` | `products_og_image_id_fkey` | Blocca |
+| `blog_posts` | `featured_image_id` | `blog_posts_featured_image_id_fkey` | Blocca |
+| `blog_posts` | `og_image_id` | `blog_posts_og_image_id_fkey` | Blocca |
+| `pages` | `og_image_id` | `pages_og_image_id_fkey` | Blocca |
+| `site_settings` | `logo_id` | `site_settings_logo_id_fkey` | OK |
+
+Le colonne `draft_*_image_id` (es. `draft_image_id`, `draft_featured_image_id`) non hanno foreign keys, quindi non bloccano l'eliminazione.
 
 ---
 
-## Database Migration
+## Implementazione
 
-Nuove colonne nella tabella `media`:
-- `width` (integer) - larghezza immagine
-- `height` (integer) - altezza immagine  
-- `blurhash` (text) - hash per placeholder sfocato
-- `is_hero` (boolean) - flag per immagini prioritarie
+### Migrazione Database
 
----
+Creare una migrazione SQL che modifica le 5 foreign keys bloccanti:
 
-## Dipendenze Installate
+```sql
+-- products.image_id
+ALTER TABLE products DROP CONSTRAINT IF EXISTS products_image_id_fkey;
+ALTER TABLE products ADD CONSTRAINT products_image_id_fkey 
+  FOREIGN KEY (image_id) REFERENCES media(id) ON DELETE SET NULL;
 
-- `browser-image-compression` - Compressione client-side
-- `blurhash` - Encoding BlurHash
-- `react-blurhash` - Componente React BlurHash
+-- products.og_image_id
+ALTER TABLE products DROP CONSTRAINT IF EXISTS products_og_image_id_fkey;
+ALTER TABLE products ADD CONSTRAINT products_og_image_id_fkey 
+  FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL;
 
----
+-- blog_posts.featured_image_id
+ALTER TABLE blog_posts DROP CONSTRAINT IF EXISTS blog_posts_featured_image_id_fkey;
+ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_featured_image_id_fkey 
+  FOREIGN KEY (featured_image_id) REFERENCES media(id) ON DELETE SET NULL;
 
-## Come Usare SmartImage
+-- blog_posts.og_image_id
+ALTER TABLE blog_posts DROP CONSTRAINT IF EXISTS blog_posts_og_image_id_fkey;
+ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_og_image_id_fkey 
+  FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL;
 
-```tsx
-import SmartImage from "@/components/ui/SmartImage";
-
-// Hero image (priority loading)
-<SmartImage
-  src={heroImageUrl}
-  alt="Hero banner"
-  priority={true}
-  context="hero"
-  blurhash={heroMedia?.blurhash}
-  width={1920}
-  height={1080}
-/>
-
-// Product card (lazy loading)
-<SmartImage
-  src={productImage}
-  alt={productName}
-  context="productCard"
-  blurhash={productMedia?.blurhash}
-  aspectRatio="1/1"
-/>
+-- pages.og_image_id
+ALTER TABLE pages DROP CONSTRAINT IF EXISTS pages_og_image_id_fkey;
+ALTER TABLE pages ADD CONSTRAINT pages_og_image_id_fkey 
+  FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL;
 ```
 
 ---
 
-## Prossimi Passi
+## Copertura Completa del Sito
 
-1. **Azione immediata**: Ri-caricare l'immagine hero attuale tramite la Media Library per applicare la compressione automatica
+Questa modifica abilita l'eliminazione di immagini usate in:
 
-2. **Integrare SmartImage**: Sostituire `<img>` e `OptimizedImage` con `SmartImage` nelle pagine chiave (Index.tsx, ProductCard, etc.)
+| Area del Sito | Colonne Coinvolte |
+|---------------|-------------------|
+| **Prodotti** | `image_id`, `og_image_id` |
+| **Blog Posts** | `featured_image_id`, `og_image_id` |
+| **Pagine Generiche** | `og_image_id` |
+| **Impostazioni Sito** | `logo_id` (gia OK) |
+| **Sezioni CMS** | Nessuna FK (usano `content` JSON) |
 
-3. **Pubblicare**: Il preload dell'hero verrà iniettato automaticamente al prossimo build di produzione
+Le sezioni delle pagine (`homepage_sections`, `chi_siamo_sections`, `microgreens_sections`, etc.) salvano gli ID immagine dentro campi JSONB (`content.background_image_id`, etc.), quindi non hanno foreign keys e non bloccano mai l'eliminazione.
 
 ---
 
-## Impatto Previsto
+## Comportamento Dopo la Modifica
 
-| Metrica | Prima | Dopo | Miglioramento |
-|---------|-------|------|---------------|
-| LCP | 10.2s | ~2.0s | **-80%** |
-| FCP | 4.3s | ~1.5s | **-65%** |
-| Image Size (hero) | 5.9MB | ~120KB | **-98%** |
-| Perceived Load | Schermo bianco | BlurHash immediato | **Istantaneo** |
-| Performance Score | 63 | 90+ | **+30 punti** |
+**Prima**: Tentando di eliminare un'immagine usata da un prodotto:
+- Errore: "violates foreign key constraint"
+- Impossibile procedere
+
+**Dopo**: Eliminando un'immagine usata da un prodotto:
+- L'immagine viene eliminata dallo storage e dal database
+- Il campo `image_id` del prodotto diventa `NULL`
+- Il prodotto continua a esistere, mostrando un placeholder
+
+---
+
+## File da Modificare
+
+| File | Modifica |
+|------|----------|
+| Nuova migrazione SQL | Ricreare 5 FK con `ON DELETE SET NULL` |
+
+---
+
+## Risultato Atteso
+
+Dopo l'implementazione potrai:
+1. Andare nella Media Library
+2. Eliminare qualsiasi immagine, anche se usata da prodotti/blog/pagine
+3. Ricaricare le immagini ottimizzate (il sistema le comprimera a ~200KB con BlurHash)
+4. Riassegnarle ai contenuti nel CMS
