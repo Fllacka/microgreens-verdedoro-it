@@ -111,11 +111,26 @@ export default function AdminMedia() {
             // Show compression stats
             const savings = originalSize - result.compressedSize;
             console.log(
-              `[Compression] ${file.name}: ${formatBytes(originalSize)} → ${formatBytes(result.compressedSize)} (saved ${formatBytes(savings)}, blurhash: ${blurhash ? 'yes' : 'no'})`
+              `[Compression] ✅ ${file.name}: ${formatBytes(originalSize)} → ${formatBytes(result.compressedSize)} (saved ${formatBytes(savings)}, blurhash: ${blurhash ? 'yes' : 'no'})`
             );
           } catch (compressError) {
-            console.error("[Compression] Failed:", compressError);
-            // Continue with original file if compression fails
+            console.error("[Compression] ❌ Failed:", compressError);
+            
+            // FALLBACK: Try to at least get dimensions and blurhash from original
+            try {
+              console.log("[Compression] Attempting fallback metadata extraction...");
+              const { getImageDimensions, generateBlurHash } = await import('@/lib/image-compression');
+              const [dims, hash] = await Promise.all([
+                getImageDimensions(file),
+                generateBlurHash(file)
+              ]);
+              width = dims.width;
+              height = dims.height;
+              blurhash = hash;
+              console.log(`[Compression] ✅ Fallback metadata: ${width}x${height}, blurhash: ${blurhash ? 'yes' : 'no'}`);
+            } catch (fallbackError) {
+              console.error("[Compression] ❌ Fallback also failed:", fallbackError);
+            }
           }
         } else {
           console.log(`[Upload] Skipping compression for non-image: ${file.name} (type: ${file.type})`);
