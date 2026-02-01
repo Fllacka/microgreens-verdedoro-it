@@ -350,45 +350,57 @@ export type Database = {
       media: {
         Row: {
           alt_text: string | null
+          blurhash: string | null
           created_at: string | null
           file_name: string
           file_path: string
           file_size: number | null
           file_type: string
+          height: number | null
           id: string
+          is_hero: boolean | null
           is_optimized: boolean | null
           optimized_urls: Json | null
           storage_path: string
           updated_at: string | null
           uploaded_by: string | null
+          width: number | null
         }
         Insert: {
           alt_text?: string | null
+          blurhash?: string | null
           created_at?: string | null
           file_name: string
           file_path: string
           file_size?: number | null
           file_type: string
+          height?: number | null
           id?: string
+          is_hero?: boolean | null
           is_optimized?: boolean | null
           optimized_urls?: Json | null
           storage_path: string
           updated_at?: string | null
           uploaded_by?: string | null
+          width?: number | null
         }
         Update: {
           alt_text?: string | null
+          blurhash?: string | null
           created_at?: string | null
           file_name?: string
           file_path?: string
           file_size?: number | null
           file_type?: string
+          height?: number | null
           id?: string
+          is_hero?: boolean | null
           is_optimized?: boolean | null
           optimized_urls?: Json | null
           storage_path?: string
           updated_at?: string | null
           uploaded_by?: string | null
+          width?: number | null
         }
         Relationships: []
       }

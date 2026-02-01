@@ -110,6 +110,9 @@ export function getTransformedImageUrl(
   if (options.quality) params.set('quality', options.quality.toString());
   if (options.resize) params.set('resize', options.resize);
   
+  // PHASE 1: Always serve WebP format for optimal compression
+  params.set('format', 'webp');
+  
   const queryString = params.toString();
   const renderUrl = `${SUPABASE_URL}/storage/v1/render/image/public/${storagePath}`;
   
