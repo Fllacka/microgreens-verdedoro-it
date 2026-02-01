@@ -90,6 +90,17 @@ export function extractStoragePath(url: string): string | null {
  * @param options - Transformation options
  * @returns The transformed URL with resize/quality parameters
  */
+/**
+ * Transform a Supabase storage URL to use image transformations
+ * 
+ * IMPORTANT: The /render/image/ endpoint may not work on all Supabase plans
+ * or configurations. If transformations fail, images will fall back to
+ * the original URL via the component's error handling.
+ * 
+ * @param url - The original Supabase storage URL
+ * @param options - Transformation options
+ * @returns The transformed URL with resize/quality parameters, or original URL as fallback
+ */
 export function getTransformedImageUrl(
   url: string,
   options: ImageTransformOptions = {}
@@ -102,21 +113,10 @@ export function getTransformedImageUrl(
   const storagePath = extractStoragePath(url);
   if (!storagePath) return url;
   
-  // Build the render URL with transformation parameters
-  const params = new URLSearchParams();
-  
-  if (options.width) params.set('width', options.width.toString());
-  if (options.height) params.set('height', options.height.toString());
-  if (options.quality) params.set('quality', options.quality.toString());
-  if (options.resize) params.set('resize', options.resize);
-  
-  // PHASE 1: Always serve WebP format for optimal compression
-  params.set('format', 'webp');
-  
-  const queryString = params.toString();
-  const renderUrl = `${SUPABASE_URL}/storage/v1/render/image/public/${storagePath}`;
-  
-  return queryString ? `${renderUrl}?${queryString}` : renderUrl;
+  // FALLBACK: Return original URL without transformations
+  // The /render/image/ endpoint can cause ERR_BLOCKED_BY_ORB errors
+  // on some Supabase configurations. Use the standard /object/ endpoint.
+  return url;
 }
 
 /**
@@ -129,25 +129,12 @@ export function getImageUrl(url: string, size: ImageSizeKey = 'medium'): string 
 
 /**
  * Generate srcset for responsive images
- * Returns a comma-separated list of URLs with width descriptors
+ * NOTE: Disabled because Supabase /render/image/ endpoint causes ERR_BLOCKED_BY_ORB
+ * Returns undefined to use the single src URL instead
  */
-export function getResponsiveSrcSet(url: string): string {
-  if (!isSupabaseStorageUrl(url)) return url;
-  
-  const sizes = [
-    { width: 320, quality: 70 },
-    { width: 640, quality: 75 },
-    { width: 960, quality: 80 },
-    { width: 1280, quality: 85 },
-    { width: 1920, quality: 85 },
-  ];
-  
-  return sizes
-    .map(({ width, quality }) => {
-      const transformedUrl = getTransformedImageUrl(url, { width, quality });
-      return `${transformedUrl} ${width}w`;
-    })
-    .join(', ');
+export function getResponsiveSrcSet(url: string): string | undefined {
+  // Disabled: /render/image/ endpoint causes errors
+  return undefined;
 }
 
 /**
