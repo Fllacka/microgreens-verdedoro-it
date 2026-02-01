@@ -100,6 +100,7 @@ export default function AdminMedia() {
         // PHASE 2: Compress images before upload
         if (isImage) {
           try {
+            console.log(`[Upload] Starting compression for ${file.name} (${formatBytes(originalSize)}, type: ${file.type})`);
             setUploadProgress(`Comprimendo ${file.name}...`);
             const result = await compressImage(file);
             fileToUpload = result.file;
@@ -109,15 +110,15 @@ export default function AdminMedia() {
             
             // Show compression stats
             const savings = originalSize - result.compressedSize;
-            if (savings > 0) {
-              console.log(
-                `[Compression] ${file.name}: ${formatBytes(originalSize)} → ${formatBytes(result.compressedSize)} (saved ${formatBytes(savings)})`
-              );
-            }
+            console.log(
+              `[Compression] ${file.name}: ${formatBytes(originalSize)} → ${formatBytes(result.compressedSize)} (saved ${formatBytes(savings)}, blurhash: ${blurhash ? 'yes' : 'no'})`
+            );
           } catch (compressError) {
-            console.warn("Compression failed, uploading original:", compressError);
+            console.error("[Compression] Failed:", compressError);
             // Continue with original file if compression fails
           }
+        } else {
+          console.log(`[Upload] Skipping compression for non-image: ${file.name} (type: ${file.type})`);
         }
 
         // Generate unique filename
