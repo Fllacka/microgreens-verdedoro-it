@@ -104,31 +104,56 @@ export async function compressImage(
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const originalSize = file.size;
 
+  console.log(`[compressImage] Starting for ${file.name} (${formatBytes(originalSize)}, type: ${file.type})`);
+
   // Skip compression for small files (under 100KB)
   const skipCompression = originalSize < 100 * 1024;
 
   let compressedFile: File;
   
   if (skipCompression) {
+    console.log(`[compressImage] Skipping compression for small file`);
     compressedFile = file;
   } else {
-    const compressionOptions = {
-      maxSizeMB: opts.maxSizeMB!,
-      maxWidthOrHeight: opts.maxWidthOrHeight!,
-      useWebWorker: true,
-      initialQuality: opts.quality!,
-      // Try to output WebP for better compression
-      fileType: file.type === 'image/png' ? 'image/webp' : undefined,
-    };
+    try {
+      const compressionOptions = {
+        maxSizeMB: opts.maxSizeMB!,
+        maxWidthOrHeight: opts.maxWidthOrHeight!,
+        useWebWorker: false, // Disable web worker for better compatibility
+        initialQuality: opts.quality!,
+        // Don't force webp conversion - it can cause issues with some PNG files
+      };
 
-    compressedFile = await imageCompression(file, compressionOptions);
+      console.log(`[compressImage] Compressing with options:`, compressionOptions);
+      compressedFile = await imageCompression(file, compressionOptions);
+      console.log(`[compressImage] ✅ Compressed: ${formatBytes(originalSize)} → ${formatBytes(compressedFile.size)}`);
+    } catch (compressionError) {
+      console.warn(`[compressImage] ⚠️ Compression failed, using original file:`, compressionError);
+      compressedFile = file;
+    }
   }
 
-  // Get dimensions and BlurHash in parallel
-  const [dimensions, blurhash] = await Promise.all([
-    getImageDimensions(compressedFile),
-    generateBlurHash(compressedFile),
-  ]);
+  // Get dimensions and BlurHash in parallel with error handling
+  console.log(`[compressImage] Extracting dimensions and blurhash...`);
+  
+  let dimensions: { width: number; height: number };
+  let blurhash: string;
+  
+  try {
+    dimensions = await getImageDimensions(compressedFile);
+    console.log(`[compressImage] ✅ Dimensions: ${dimensions.width}x${dimensions.height}`);
+  } catch (dimError) {
+    console.error(`[compressImage] ❌ Failed to get dimensions:`, dimError);
+    throw dimError;
+  }
+  
+  try {
+    blurhash = await generateBlurHash(compressedFile);
+    console.log(`[compressImage] ✅ BlurHash generated: ${blurhash.substring(0, 10)}...`);
+  } catch (hashError) {
+    console.error(`[compressImage] ❌ Failed to generate blurhash:`, hashError);
+    throw hashError;
+  }
 
   return {
     file: compressedFile,
