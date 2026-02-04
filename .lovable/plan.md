@@ -1,103 +1,304 @@
 
-# Piano: Modificare Foreign Keys con ON DELETE SET NULL
+# Piano di Implementazione: Sistema di Ottimizzazione Immagini On-Demand
 
-## Analisi Completa delle Foreign Keys
-
-Ho identificato **6 foreign keys** che referenziano la tabella `media`. Di queste:
-- **5 bloccano** l'eliminazione (comportamento RESTRICT di default)
-- **1 è già configurata** correttamente (`site_settings_logo_id_fkey`)
-
-### Stato Attuale
-
-| Tabella | Colonna | Constraint | Stato |
-|---------|---------|------------|-------|
-| `products` | `image_id` | `products_image_id_fkey` | Blocca |
-| `products` | `og_image_id` | `products_og_image_id_fkey` | Blocca |
-| `blog_posts` | `featured_image_id` | `blog_posts_featured_image_id_fkey` | Blocca |
-| `blog_posts` | `og_image_id` | `blog_posts_og_image_id_fkey` | Blocca |
-| `pages` | `og_image_id` | `pages_og_image_id_fkey` | Blocca |
-| `site_settings` | `logo_id` | `site_settings_logo_id_fkey` | OK |
-
-Le colonne `draft_*_image_id` (es. `draft_image_id`, `draft_featured_image_id`) non hanno foreign keys, quindi non bloccano l'eliminazione.
+## Obiettivo
+Raggiungere PageSpeed Performance 90+ su mobile con LCP < 2.5s attraverso un sistema intelligente di ottimizzazione immagini on-demand.
 
 ---
 
-## Implementazione
+## Stato Attuale (Problemi Identificati)
 
-### Migrazione Database
+### Database Media
+| File | Dimensione | Width | Height | BlurHash |
+|------|-----------|-------|--------|----------|
+| broccoli_microgreens.jpg | 988 KB | null | null | null |
+| broccoli_microgreens.png | 5.5 MB | null | null | null |
+| Salad and Salmon.png | 5.9 MB | null | null | null |
+| verde_doro_logo.png | 5.3 MB | null | null | null |
 
-Creare una migrazione SQL che modifica le 5 foreign keys bloccanti:
+### Problemi Tecnici
+1. **Client-side compression fallisce** silenziosamente su file > 5MB
+2. **Edge function `process-image`** non ridimensiona realmente (copia file originale)
+3. **Supabase `/render/image/`** disabilitato per errori ORB
+4. **Nessun BlurHash** = nessun placeholder istantaneo
 
-```sql
--- products.image_id
-ALTER TABLE products DROP CONSTRAINT IF EXISTS products_image_id_fkey;
-ALTER TABLE products ADD CONSTRAINT products_image_id_fkey 
-  FOREIGN KEY (image_id) REFERENCES media(id) ON DELETE SET NULL;
+---
 
--- products.og_image_id
-ALTER TABLE products DROP CONSTRAINT IF EXISTS products_og_image_id_fkey;
-ALTER TABLE products ADD CONSTRAINT products_og_image_id_fkey 
-  FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL;
+## Architettura Proposta
 
--- blog_posts.featured_image_id
-ALTER TABLE blog_posts DROP CONSTRAINT IF EXISTS blog_posts_featured_image_id_fkey;
-ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_featured_image_id_fkey 
-  FOREIGN KEY (featured_image_id) REFERENCES media(id) ON DELETE SET NULL;
-
--- blog_posts.og_image_id
-ALTER TABLE blog_posts DROP CONSTRAINT IF EXISTS blog_posts_og_image_id_fkey;
-ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_og_image_id_fkey 
-  FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL;
-
--- pages.og_image_id
-ALTER TABLE pages DROP CONSTRAINT IF EXISTS pages_og_image_id_fkey;
-ALTER TABLE pages ADD CONSTRAINT pages_og_image_id_fkey 
-  FOREIGN KEY (og_image_id) REFERENCES media(id) ON DELETE SET NULL;
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                        FLUSSO IMMAGINI                          │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. UPLOAD (Media Library)                                      │
+│     └─> Salva originale in storage                              │
+│     └─> Estrai width/height/blurhash                            │
+│     └─> NON comprime (mantiene qualita originale)               │
+│                                                                 │
+│  2. SELEZIONE (MediaSelector con context)                       │
+│     └─> Admin sceglie immagine per: hero, productCard, etc.     │
+│     └─> Chiama Edge Function con context specifico              │
+│     └─> Genera SOLO la versione necessaria                      │
+│                                                                 │
+│  3. RENDERING (SmartImage / OptimizedImage)                     │
+│     └─> Usa versione ottimizzata se esiste                      │
+│     └─> BlurHash come placeholder                               │
+│     └─> Lazy loading per below-fold                             │
+│     └─> Priority loading per hero/LCP                           │
+│                                                                 │
+│  4. CACHING                                                     │
+│     └─> Cache-Control: 1 anno per asset statici                 │
+│     └─> Versioni cached per context                             │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Copertura Completa del Sito
+## STEP 2: Ottimizzazione On-Demand
 
-Questa modifica abilita l'eliminazione di immagini usate in:
+### 2.1 Nuova Edge Function: `optimize-image`
 
-| Area del Sito | Colonne Coinvolte |
-|---------------|-------------------|
-| **Prodotti** | `image_id`, `og_image_id` |
-| **Blog Posts** | `featured_image_id`, `og_image_id` |
-| **Pagine Generiche** | `og_image_id` |
-| **Impostazioni Sito** | `logo_id` (gia OK) |
-| **Sezioni CMS** | Nessuna FK (usano `content` JSON) |
+Creare una nuova edge function che utilizza Sharp (via Deno) per ridimensionamento reale.
 
-Le sezioni delle pagine (`homepage_sections`, `chi_siamo_sections`, `microgreens_sections`, etc.) salvano gli ID immagine dentro campi JSONB (`content.background_image_id`, etc.), quindi non hanno foreign keys e non bloccano mai l'eliminazione.
+**File:** `supabase/functions/optimize-image/index.ts`
+
+**Funzionalita:**
+- Accetta `storagePath`, `mediaId`, e `context` (hero, productCard, etc.)
+- Scarica immagine originale da storage
+- Ridimensiona alle dimensioni appropriate per il context
+- Converte in WebP con qualita ottimizzata
+- Carica versione ottimizzata in `optimized/{context}/`
+- Aggiorna record media con URL ottimizzato
+
+**Configurazioni per Context:**
+
+| Context | Width | Height | Quality | Aspect Ratio |
+|---------|-------|--------|---------|--------------|
+| hero | 1920 | auto | 85 | 16:9 |
+| productCard | 800 | 800 | 85 | 1:1 |
+| productDetail | 1200 | 1200 | 85 | 1:1 |
+| articleCard | 800 | auto | 85 | 16:9 |
+| featuredArticle | 1200 | auto | 80 | 16:9 |
+| contentImage | 1536 | auto | 80 | original |
+| textImageBlock | 768 | auto | 80 | original |
+| sectionImage | 1200 | auto | 80 | original |
+| thumbnail | 300 | 300 | 70 | 1:1 |
+| logo | 400 | auto | 90 | original |
+
+### 2.2 Aggiornare Upload in Media Library
+
+**File:** `src/pages/admin/Media.tsx`
+
+Modifiche:
+- Rimuovere compressione client-side (causa fallimenti)
+- Mantenere estrazione metadata (width, height, blurhash) con fallback robusto
+- Caricare file originale senza alterazioni
+- Usare canvas ridotto (max 300px) per generare BlurHash senza crash di memoria
+
+### 2.3 Schema Database per Ottimizzazioni
+
+Aggiungere colonna `optimized_versions` al table `media`:
+
+```sql
+-- Nuova struttura per tracking versioni ottimizzate
+ALTER TABLE media ADD COLUMN IF NOT EXISTS optimized_versions jsonb DEFAULT '{}'::jsonb;
+
+-- Esempio struttura:
+-- {
+--   "hero": { "url": "...", "width": 1920, "height": 1080, "size": 150000 },
+--   "productCard": { "url": "...", "width": 800, "height": 800, "size": 45000 }
+-- }
+```
 
 ---
 
-## Comportamento Dopo la Modifica
+## STEP 3: Ottimizzazione Context-Aware
 
-**Prima**: Tentando di eliminare un'immagine usata da un prodotto:
-- Errore: "violates foreign key constraint"
-- Impossibile procedere
+### 3.1 Aggiornare MediaSelector
 
-**Dopo**: Eliminando un'immagine usata da un prodotto:
-- L'immagine viene eliminata dallo storage e dal database
-- Il campo `image_id` del prodotto diventa `NULL`
-- Il prodotto continua a esistere, mostrando un placeholder
+**File:** `src/components/admin/MediaSelector.tsx`
+
+Modifiche:
+- Aggiungere prop `context: ImageSizeKey` per specificare dove sara usata l'immagine
+- Quando si seleziona un'immagine, chiamare edge function con il context
+- Mostrare preview nel formato corretto per quel context
+- Passare URL ottimizzato al parent component
+
+**Nuova interfaccia:**
+```typescript
+interface MediaSelectorProps {
+  value: string | null;
+  onChange: (imageId: string | null, imageUrl: string | null, optimizedUrl?: string | null) => void;
+  context?: ImageSizeKey; // 'hero' | 'productCard' | 'articleCard' etc.
+  altText?: string;
+  onAltTextChange?: (altText: string) => void;
+  showAltText?: boolean;
+}
+```
+
+### 3.2 Aggiornare IMAGE_SIZES
+
+**File:** `src/lib/image-utils.ts`
+
+Gia definito, ma aggiungere:
+- `productDetail` per pagina prodotto
+- `ogImage` per Open Graph (1200x630)
+- Aspect ratio specifici per ogni context
 
 ---
 
-## File da Modificare
+## STEP 4: Output HTML Automatico
 
-| File | Modifica |
-|------|----------|
-| Nuova migrazione SQL | Ricreare 5 FK con `ON DELETE SET NULL` |
+### 4.1 Migliorare SmartImage Component
+
+**File:** `src/components/ui/SmartImage.tsx`
+
+Modifiche:
+- Accettare `optimizedUrl` come prop prioritaria
+- Se presente BlurHash, mostrarlo immediatamente
+- Generare srcset solo se abbiamo versioni multiple
+- Applicare width/height espliciti dal database
+
+**Props aggiornate:**
+```typescript
+interface SmartImageProps {
+  src: string;
+  alt: string;
+  blurhash?: string | null;
+  width?: number;
+  height?: number;
+  priority?: boolean;
+  context?: ImageSizeKey;
+  optimizedUrl?: string; // URL pre-ottimizzato dal CMS
+  // ...
+}
+```
+
+### 4.2 Preload per Hero Images
+
+**File:** `vite-plugin-hero-preload.ts`
+
+Il plugin esiste gia. Verificare che:
+- Usa URL ottimizzato (non originale)
+- Tipo corretto (image/webp)
+- fetchpriority="high"
+
+### 4.3 Aggiornare Pagine Pubbliche
+
+**Files da aggiornare:**
+- `src/pages/Index.tsx` - Hero section
+- `src/pages/ProductDetail.tsx` - Product image
+- `src/components/ProductCard.tsx` - Card images
+- `src/pages/Blog.tsx` - Article cards
+- `src/pages/BlogArticle.tsx` - Featured image
+
+Per ogni pagina:
+- Passare BlurHash dal database a SmartImage
+- Passare width/height espliciti
+- Usare `priority={true}` per above-the-fold
 
 ---
 
-## Risultato Atteso
+## STEP 5: Interfaccia CMS
 
-Dopo l'implementazione potrai:
-1. Andare nella Media Library
-2. Eliminare qualsiasi immagine, anche se usata da prodotti/blog/pagine
-3. Ricaricare le immagini ottimizzate (il sistema le comprimera a ~200KB con BlurHash)
-4. Riassegnarle ai contenuti nel CMS
+### 5.1 Preview Contestuale in MediaSelector
+
+**File:** `src/components/admin/MediaSelector.tsx`
+
+Aggiungere:
+- Preview dell'immagine nel formato del context selezionato
+- Badge con dimensioni risultanti (es. "1920x1080")
+- Badge con dimensione file stimata
+- Warning se risoluzione sorgente troppo bassa
+
+### 5.2 Focus Point / Crop Control (Fase Futura)
+
+Per una fase successiva:
+- Componente per selezionare punto focale
+- Salvataggio in database
+- Crop intelligente in edge function
+
+---
+
+## STEP 6: Cache Headers
+
+### 6.1 Storage Upload con Cache Lungo
+
+**File:** `src/pages/admin/Media.tsx` (gia implementato)
+
+```typescript
+await supabase.storage
+  .from("cms-media")
+  .upload(filePath, file, {
+    cacheControl: '31536000', // 1 anno
+  });
+```
+
+### 6.2 Edge Function Response Headers
+
+**File:** `supabase/functions/optimize-image/index.ts`
+
+```typescript
+await supabase.storage
+  .from("cms-media")
+  .upload(optimizedPath, optimizedBuffer, {
+    contentType: 'image/webp',
+    cacheControl: '31536000', // 1 anno
+    upsert: true,
+  });
+```
+
+---
+
+## File da Creare/Modificare
+
+### Nuovi File
+| File | Descrizione |
+|------|-------------|
+| `supabase/functions/optimize-image/index.ts` | Edge function per ottimizzazione reale con Sharp |
+
+### File da Modificare
+| File | Modifiche |
+|------|-----------|
+| `src/pages/admin/Media.tsx` | Rimuovere compressione, migliorare estrazione metadata |
+| `src/lib/image-compression.ts` | Rendere piu robusto BlurHash per file grandi |
+| `src/components/admin/MediaSelector.tsx` | Aggiungere prop `context`, trigger ottimizzazione on-demand |
+| `src/components/ui/SmartImage.tsx` | Supporto `optimizedUrl`, BlurHash migliorato |
+| `src/components/ui/optimized-image.tsx` | Allineare con SmartImage |
+| `src/lib/image-utils.ts` | Aggiungere nuovi context e aspect ratios |
+| `src/pages/Index.tsx` | Passare BlurHash e dimensioni a hero |
+| `src/pages/ProductDetail.tsx` | Usare SmartImage con BlurHash |
+| `src/components/ProductCard.tsx` | Passare BlurHash dal database |
+
+### Migrazione Database
+```sql
+-- Aggiungere colonna per versioni ottimizzate per context
+ALTER TABLE media ADD COLUMN IF NOT EXISTS optimized_versions jsonb DEFAULT '{}'::jsonb;
+```
+
+---
+
+## Risultati Attesi
+
+| Metrica | Prima | Dopo |
+|---------|-------|------|
+| File size hero | 5+ MB | ~150 KB |
+| File size product card | 5+ MB | ~45 KB |
+| LCP mobile | 3-5s | < 2.5s |
+| CLS | Variabile | ~0 (con width/height) |
+| BlurHash | Assente | Presente |
+| PageSpeed mobile | 50-70 | 90+ |
+
+---
+
+## Ordine di Implementazione
+
+1. **Database Migration** - Aggiungere `optimized_versions`
+2. **Edge Function** - Creare `optimize-image` con Sharp
+3. **Media Upload** - Correggere estrazione metadata
+4. **MediaSelector** - Aggiungere context e trigger ottimizzazione
+5. **SmartImage** - Supporto BlurHash e optimizedUrl
+6. **Pagine Pubbliche** - Integrare BlurHash e dimensioni
+7. **Test End-to-End** - Verificare flusso completo
