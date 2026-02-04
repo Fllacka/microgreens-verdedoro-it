@@ -52,11 +52,28 @@ export function getImageDimensions(file: File): Promise<{ width: number; height:
 
 /**
  * Generate BlurHash from an image file
- * Uses a small canvas for performance
+ * Uses a pre-resized image for large files to prevent memory issues
  */
-export function generateBlurHash(file: File): Promise<string> {
+export async function generateBlurHash(file: File): Promise<string> {
+  // For large files (>2MB), pre-resize to avoid memory crashes
+  let fileToProcess = file;
+  
+  if (file.size > 2 * 1024 * 1024) {
+    console.log(`[generateBlurHash] File is large (${formatBytes(file.size)}), pre-resizing...`);
+    try {
+      fileToProcess = await imageCompression(file, {
+        maxWidthOrHeight: 300,
+        useWebWorker: false,
+        initialQuality: 0.8,
+      });
+      console.log(`[generateBlurHash] Pre-resized to ${formatBytes(fileToProcess.size)}`);
+    } catch (resizeError) {
+      console.warn(`[generateBlurHash] Pre-resize failed, trying with original:`, resizeError);
+    }
+  }
+
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');
@@ -89,13 +106,47 @@ export function generateBlurHash(file: File): Promise<string> {
       URL.revokeObjectURL(img.src);
       reject(new Error('Failed to load image for BlurHash'));
     };
-    img.src = URL.createObjectURL(file);
+    img.src = URL.createObjectURL(fileToProcess);
   });
 }
 
 /**
  * Compress an image file with smart defaults
  * Returns the compressed file along with metadata
+ */
+/**
+ * Extract metadata from an image file without compression
+ * More robust for large files - doesn't compress, just extracts metadata
+ */
+export async function extractImageMetadata(file: File): Promise<{
+  width: number;
+  height: number;
+  blurhash: string;
+}> {
+  console.log(`[extractImageMetadata] Starting for ${file.name} (${formatBytes(file.size)})`);
+  
+  // Get dimensions from original file
+  const dimensions = await getImageDimensions(file);
+  console.log(`[extractImageMetadata] ✅ Dimensions: ${dimensions.width}x${dimensions.height}`);
+  
+  // Generate BlurHash (function handles pre-resizing for large files internally)
+  const blurhash = await generateBlurHash(file);
+  console.log(`[extractImageMetadata] ✅ BlurHash: ${blurhash.substring(0, 10)}...`);
+  
+  return {
+    width: dimensions.width,
+    height: dimensions.height,
+    blurhash,
+  };
+}
+
+/**
+ * Compress an image file with smart defaults
+ * Returns the compressed file along with metadata
+ * 
+ * NOTE: For the new on-demand optimization system, we skip client-side
+ * compression and only extract metadata. Actual optimization happens
+ * server-side via the optimize-image edge function.
  */
 export async function compressImage(
   file: File,
@@ -106,62 +157,27 @@ export async function compressImage(
 
   console.log(`[compressImage] Starting for ${file.name} (${formatBytes(originalSize)}, type: ${file.type})`);
 
-  // Skip compression for small files (under 100KB)
-  const skipCompression = originalSize < 100 * 1024;
-
-  let compressedFile: File;
+  // NEW: Skip client-side compression entirely
+  // The optimize-image edge function handles resizing server-side
+  // We only extract metadata here for immediate database storage
+  console.log(`[compressImage] Using on-demand optimization - skipping client-side compression`);
   
-  if (skipCompression) {
-    console.log(`[compressImage] Skipping compression for small file`);
-    compressedFile = file;
-  } else {
-    try {
-      const compressionOptions = {
-        maxSizeMB: opts.maxSizeMB!,
-        maxWidthOrHeight: opts.maxWidthOrHeight!,
-        useWebWorker: false, // Disable web worker for better compatibility
-        initialQuality: opts.quality!,
-        // Don't force webp conversion - it can cause issues with some PNG files
-      };
-
-      console.log(`[compressImage] Compressing with options:`, compressionOptions);
-      compressedFile = await imageCompression(file, compressionOptions);
-      console.log(`[compressImage] ✅ Compressed: ${formatBytes(originalSize)} → ${formatBytes(compressedFile.size)}`);
-    } catch (compressionError) {
-      console.warn(`[compressImage] ⚠️ Compression failed, using original file:`, compressionError);
-      compressedFile = file;
-    }
-  }
-
-  // Get dimensions and BlurHash in parallel with error handling
-  console.log(`[compressImage] Extracting dimensions and blurhash...`);
-  
-  let dimensions: { width: number; height: number };
-  let blurhash: string;
+  let metadata: { width: number; height: number; blurhash: string };
   
   try {
-    dimensions = await getImageDimensions(compressedFile);
-    console.log(`[compressImage] ✅ Dimensions: ${dimensions.width}x${dimensions.height}`);
-  } catch (dimError) {
-    console.error(`[compressImage] ❌ Failed to get dimensions:`, dimError);
-    throw dimError;
-  }
-  
-  try {
-    blurhash = await generateBlurHash(compressedFile);
-    console.log(`[compressImage] ✅ BlurHash generated: ${blurhash.substring(0, 10)}...`);
-  } catch (hashError) {
-    console.error(`[compressImage] ❌ Failed to generate blurhash:`, hashError);
-    throw hashError;
+    metadata = await extractImageMetadata(file);
+  } catch (metadataError) {
+    console.error(`[compressImage] ❌ Failed to extract metadata:`, metadataError);
+    throw metadataError;
   }
 
   return {
-    file: compressedFile,
-    width: dimensions.width,
-    height: dimensions.height,
-    blurhash,
+    file: file, // Return original file - server will optimize on-demand
+    width: metadata.width,
+    height: metadata.height,
+    blurhash: metadata.blurhash,
     originalSize,
-    compressedSize: compressedFile.size,
+    compressedSize: file.size, // Same as original since we're not compressing
   };
 }
 

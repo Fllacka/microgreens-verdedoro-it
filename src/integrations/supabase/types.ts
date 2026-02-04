@@ -361,6 +361,7 @@ export type Database = {
           is_hero: boolean | null
           is_optimized: boolean | null
           optimized_urls: Json | null
+          optimized_versions: Json | null
           storage_path: string
           updated_at: string | null
           uploaded_by: string | null
@@ -379,6 +380,7 @@ export type Database = {
           is_hero?: boolean | null
           is_optimized?: boolean | null
           optimized_urls?: Json | null
+          optimized_versions?: Json | null
           storage_path: string
           updated_at?: string | null
           uploaded_by?: string | null
@@ -397,6 +399,7 @@ export type Database = {
           is_hero?: boolean | null
           is_optimized?: boolean | null
           optimized_urls?: Json | null
+          optimized_versions?: Json | null
           storage_path?: string
           updated_at?: string | null
           uploaded_by?: string | null
