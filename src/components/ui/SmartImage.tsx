@@ -24,6 +24,8 @@ interface SmartImageProps {
   fallbackSrc?: string;
   onLoad?: () => void;
   onError?: () => void;
+  /** Pre-optimized URL from CMS (takes priority over src) */
+  optimizedUrl?: string | null;
 }
 
 /**
@@ -31,6 +33,7 @@ interface SmartImageProps {
  * 
  * Features:
  * - BlurHash placeholder for perceived instant loading
+ * - Prioritizes optimizedUrl from CMS when available
  * - Responsive srcset with WebP format (via Supabase transforms)
  * - Lazy loading with IntersectionObserver for below-fold images
  * - Priority loading for LCP images (eager + high fetchPriority)
@@ -51,6 +54,7 @@ const SmartImage = ({
   fallbackSrc,
   onLoad,
   onError,
+  optimizedUrl,
 }: SmartImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -93,11 +97,17 @@ const SmartImage = ({
     onError?.();
   };
 
-  // Get optimized image URL
+  // Get the best available image URL
+  // Priority: optimizedUrl > transformed src > original src > fallback
   const getOptimizedSrc = (): string => {
     if (hasError && fallbackSrc) return fallbackSrc;
+    
+    // Use pre-optimized URL from CMS if available
+    if (optimizedUrl) return optimizedUrl;
+    
     if (!src) return fallbackSrc || "";
     
+    // For Supabase URLs, apply transformation
     if (isSupabaseStorageUrl(src)) {
       return getImageUrl(src, context);
     }
@@ -106,7 +116,9 @@ const SmartImage = ({
   };
 
   // Get responsive srcset for Supabase images
+  // Only used if no pre-optimized URL is provided
   const getSrcSet = (): string | undefined => {
+    if (optimizedUrl) return undefined; // Pre-optimized, no need for srcset
     if (!src || !isSupabaseStorageUrl(src)) return undefined;
     return getResponsiveSrcSet(src);
   };
@@ -125,6 +137,9 @@ const SmartImage = ({
   // Show BlurHash only when we have it and image isn't loaded yet
   const showBlurhash = blurhash && !isLoaded && !hasError;
 
+  // Calculate aspect ratio from width/height if not provided
+  const computedAspectRatio = aspectRatio || (width && height ? `${width}/${height}` : undefined);
+
   return (
     <div
       ref={containerRef}
@@ -133,7 +148,7 @@ const SmartImage = ({
         containerClassName
       )}
       style={{
-        aspectRatio: aspectRatio,
+        aspectRatio: computedAspectRatio,
         width: width ? `${width}px` : undefined,
         height: height ? `${height}px` : undefined,
       }}

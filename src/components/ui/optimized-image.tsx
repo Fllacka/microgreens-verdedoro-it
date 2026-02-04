@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Blurhash } from "react-blurhash";
 import { cn } from "@/lib/utils";
 import { 
   getImageUrl, 
@@ -39,6 +40,10 @@ interface OptimizedImageProps {
   size?: ImageSizeKey;
   /** Layout context for responsive sizing - determines the sizes attribute */
   context?: ImageSizeKey;
+  /** BlurHash for instant placeholder */
+  blurhash?: string | null;
+  /** Pre-optimized URL from CMS (takes priority over src) */
+  optimizedUrl?: string | null;
 }
 
 /**
@@ -47,7 +52,8 @@ interface OptimizedImageProps {
  * - Lazy loading for below-fold images (priority=false)
  * - Eager loading for above-fold images (priority=true)
  * - Responsive srcset for optimal image delivery
- * - Skeleton placeholder while loading
+ * - BlurHash placeholder while loading
+ * - Supports pre-optimized URLs from CMS
  */
 const OptimizedImage = ({
   src,
@@ -65,6 +71,8 @@ const OptimizedImage = ({
   optimizedUrls, // Legacy - ignored now, kept for backwards compatibility
   size = "medium",
   context,
+  blurhash,
+  optimizedUrl,
 }: OptimizedImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -107,9 +115,14 @@ const OptimizedImage = ({
     onError?.();
   };
 
-  // Get the optimized image URL using Supabase transformations
+  // Get the optimized image URL
+  // Priority: optimizedUrl > transformed src > original src > fallback
   const getOptimizedSrc = (): string => {
     if (hasError && fallbackSrc) return fallbackSrc;
+    
+    // Use pre-optimized URL from CMS if available
+    if (optimizedUrl) return optimizedUrl;
+    
     if (!src) return fallbackSrc || '';
     
     // Use Supabase image transformation if it's a Supabase URL
@@ -121,7 +134,9 @@ const OptimizedImage = ({
   };
 
   // Get responsive srcset for Supabase images
+  // Skip if we have a pre-optimized URL
   const getSrcSet = (): string | undefined => {
+    if (optimizedUrl) return undefined;
     if (!src || !isSupabaseStorageUrl(src)) return undefined;
     return getResponsiveSrcSet(src);
   };
@@ -129,6 +144,9 @@ const OptimizedImage = ({
   const imageSrc = getOptimizedSrc();
   const srcSet = getSrcSet();
   const sizes = getImageSizes(context);
+
+  // Show BlurHash only when we have it and image isn't loaded yet
+  const showBlurhash = blurhash && !isLoaded && !hasError;
 
   const objectFitClass = {
     cover: "object-cover",
@@ -150,12 +168,24 @@ const OptimizedImage = ({
         height: height ? `${height}px` : undefined,
       }}
     >
-      {/* Skeleton placeholder */}
-      {!isLoaded && (
-        <div className="absolute inset-0 animate-pulse bg-muted/50" />
+      {/* BlurHash placeholder - renders instantly */}
+      {showBlurhash && (
+        <div className="absolute inset-0 z-10">
+          <Blurhash
+            hash={blurhash}
+            width="100%"
+            height="100%"
+            resolutionX={32}
+            resolutionY={32}
+            punch={1}
+          />
+        </div>
       )}
 
-      {/* Optimized image with responsive srcset */}
+      {/* Fallback skeleton when no BlurHash */}
+      {!blurhash && !isLoaded && (
+        <div className="absolute inset-0 animate-pulse bg-muted/50" />
+      )}
       {shouldLoad && imageSrc && (
         <img
           src={imageSrc}

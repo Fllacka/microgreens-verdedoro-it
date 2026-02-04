@@ -25,6 +25,9 @@ export const IMAGE_SIZES = {
   // Product cards: 1:1 square aspect ratio for consistency across card and detail views
   productCard: { width: 800, height: 800, quality: 85, resize: 'cover' },
   
+  // Product detail page - larger 1:1 square
+  productDetail: { width: 1200, height: 1200, quality: 85, resize: 'cover' },
+  
   // Blog article cards
   articleCard: { width: 800, quality: 85 },
   
@@ -44,7 +47,7 @@ export const IMAGE_SIZES = {
   hero: { width: 1920, quality: 85 },
   
   // Thumbnails for media library
-  thumbnail: { width: 300, quality: 70 },
+  thumbnail: { width: 300, height: 300, quality: 70, resize: 'cover' },
   
   // Medium size for general use
   medium: { width: 600, quality: 80 },
@@ -57,6 +60,9 @@ export const IMAGE_SIZES = {
   
   // Full-width fallback
   full: { width: 1200, quality: 85 },
+  
+  // OG Image for social sharing
+  ogImage: { width: 1200, height: 630, quality: 85, resize: 'cover' },
 } as const;
 
 export type ImageSizeKey = keyof typeof IMAGE_SIZES;

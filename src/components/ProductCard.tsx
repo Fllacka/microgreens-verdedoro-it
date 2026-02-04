@@ -15,6 +15,13 @@ interface ProductCardProps {
   popular?: boolean;
   onCardClick?: () => void;
   priority?: boolean;
+  /** BlurHash for instant placeholder */
+  blurhash?: string | null;
+  /** Pre-optimized image URL from CMS */
+  optimizedUrl?: string | null;
+  /** Original image dimensions for CLS prevention */
+  imageWidth?: number | null;
+  imageHeight?: number | null;
 }
 
 const ProductCard = ({
@@ -29,13 +36,17 @@ const ProductCard = ({
   popular,
   onCardClick,
   priority = false,
+  blurhash,
+  optimizedUrl,
+  imageWidth,
+  imageHeight,
 }: ProductCardProps) => {
   return (
     <Card 
       className="product-card overflow-hidden border-border/50 relative cursor-pointer group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex flex-col"
       onClick={onCardClick}
     >
-      {/* Product Image - Optimized with WebP support and fixed 1:1 aspect ratio */}
+      {/* Product Image - Optimized with BlurHash and WebP support */}
       <div className="relative aspect-square overflow-hidden">
         <OptimizedImage
           src={image}
@@ -47,6 +58,10 @@ const ProductCard = ({
           aspectRatio="1/1"
           size="productCard"
           context="productCard"
+          blurhash={blurhash}
+          optimizedUrl={optimizedUrl}
+          width={imageWidth ?? undefined}
+          height={imageHeight ?? undefined}
         />
         
         {/* Gradient overlay for better text readability */}
