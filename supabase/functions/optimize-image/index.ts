@@ -1,5 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  ImageMagick,
+  initializeImageMagick,
+  MagickFormat,
+} from "npm:@imagemagick/magick-wasm@0.0.30";
+
+// Initialize ImageMagick at module level
+const wasmBytes = await Deno.readFile(
+  new URL(
+    "magick.wasm",
+    import.meta.resolve("npm:@imagemagick/magick-wasm@0.0.30"),
+  ),
+);
+await initializeImageMagick(wasmBytes);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -72,176 +86,67 @@ serve(async (req: Request) => {
     const originalSize = originalBytes.byteLength;
     console.log(`[optimize-image] Original size: ${(originalSize / 1024).toFixed(1)} KB`);
 
-    // Use Photon library for image processing in Deno
-    // Import photon for image processing
-    const { Image, PhotonImage, resize, SamplingFilter } = await import("https://unpkg.com/@aspect-build/photon@0.1.5/dist/index.js");
+    // Use ImageMagick WASM for processing
+    console.log(`[optimize-image] Optimizing to ${config.width}x${config.height || 'auto'} at quality ${config.quality}`);
     
-    // Load image into PhotonImage
-    const uint8Array = new Uint8Array(originalBytes);
-    let photonImage: PhotonImage;
+    const originalUint8 = new Uint8Array(originalBytes);
     
-    try {
-      photonImage = PhotonImage.new_from_byteslice(uint8Array);
-    } catch (loadError) {
-      console.error('[optimize-image] Failed to load image with Photon:', loadError);
+    // Use ImageMagick.read synchronously (returns the result of the callback)
+    const optimizedBytes = ImageMagick.read(originalUint8, (img): Uint8Array => {
+      // Resize the image
+      const targetWidth = config.width;
+      const targetHeight = config.height;
       
-      // Fallback: try using native browser APIs
-      console.log('[optimize-image] Attempting fallback with Canvas API...');
-      
-      // Create optimized version using canvas (simpler approach)
-      const blob = new Blob([originalBytes]);
-      const imageBitmap = await createImageBitmap(blob);
-      
-      const { width: origWidth, height: origHeight } = imageBitmap;
-      let newWidth = config.width;
-      let newHeight = config.height;
-      
-      // Calculate dimensions maintaining aspect ratio if height not specified
-      if (!newHeight) {
-        const aspectRatio = origHeight / origWidth;
-        newHeight = Math.round(newWidth * aspectRatio);
+      if (targetHeight) {
+        // Fixed dimensions - resize to fill and crop center
+        const aspectRatio = img.width / img.height;
+        const targetAspect = targetWidth / targetHeight;
+        
+        if (aspectRatio > targetAspect) {
+          // Image is wider, resize to target height then crop width
+          const newWidth = Math.round(targetHeight * aspectRatio);
+          img.resize(newWidth, targetHeight);
+        } else {
+          // Image is taller, resize to target width then crop height
+          const newHeight = Math.round(targetWidth / aspectRatio);
+          img.resize(targetWidth, newHeight);
+        }
+        
+        // Center crop to exact dimensions
+        const cropX = Math.round((img.width - targetWidth) / 2);
+        const cropY = Math.round((img.height - targetHeight) / 2);
+        img.crop(targetWidth, targetHeight, cropX, cropY);
+      } else {
+        // Width only, maintain aspect ratio
+        const aspectRatio = img.height / img.width;
+        const newHeight = Math.round(targetWidth * aspectRatio);
+        img.resize(targetWidth, newHeight);
       }
       
-      // Don't upscale - use original dimensions if smaller
-      if (origWidth < newWidth) {
-        newWidth = origWidth;
-        newHeight = config.height ? Math.min(config.height, origHeight) : origHeight;
-      }
+      // Set quality
+      img.quality = config.quality;
       
-      // Create canvas and draw resized image
-      const canvas = new OffscreenCanvas(newWidth, newHeight);
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Failed to get canvas context');
-      
-      ctx.drawImage(imageBitmap, 0, 0, newWidth, newHeight);
-      
-      // Convert to WebP blob
-      const webpBlob = await canvas.convertToBlob({ 
-        type: 'image/webp', 
-        quality: config.quality / 100 
-      });
-      
-      const optimizedBytes = await webpBlob.arrayBuffer();
-      const optimizedSize = optimizedBytes.byteLength;
-      
-      console.log(`[optimize-image] Optimized size (canvas): ${(optimizedSize / 1024).toFixed(1)} KB (${Math.round((1 - optimizedSize / originalSize) * 100)}% reduction)`);
-      
-      // Generate optimized path
-      const pathParts = storagePath.split('/');
-      const fileName = pathParts.pop()!;
-      const baseName = fileName.replace(/\.[^/.]+$/, '');
-      const optimizedPath = `optimized/${context}/${baseName}.webp`;
-      
-      // Upload optimized version
-      const { error: uploadError } = await supabase.storage
-        .from('cms-media')
-        .upload(optimizedPath, new Uint8Array(optimizedBytes), {
-          contentType: 'image/webp',
-          cacheControl: '31536000',
-          upsert: true,
-        });
-
-      if (uploadError) {
-        console.error('[optimize-image] Upload error:', uploadError);
-        return new Response(
-          JSON.stringify({ error: `Failed to upload optimized image: ${uploadError.message}` }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('cms-media')
-        .getPublicUrl(optimizedPath);
-
-      // Update media record with optimized version info
-      const { data: currentMedia, error: fetchError } = await supabase
-        .from('media')
-        .select('optimized_versions')
-        .eq('id', mediaId)
-        .single();
-
-      if (fetchError) {
-        console.error('[optimize-image] Fetch media error:', fetchError);
-      }
-
-      const existingVersions = (currentMedia?.optimized_versions as Record<string, unknown>) || {};
-      const updatedVersions = {
-        ...existingVersions,
-        [context]: {
-          url: publicUrl,
-          width: newWidth,
-          height: newHeight,
-          size: optimizedSize,
-          created_at: new Date().toISOString(),
-        },
-      };
-
-      const { error: updateError } = await supabase
-        .from('media')
-        .update({ optimized_versions: updatedVersions })
-        .eq('id', mediaId);
-
-      if (updateError) {
-        console.error('[optimize-image] Update media error:', updateError);
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          context,
-          optimizedUrl: publicUrl,
-          originalSize,
-          optimizedSize,
-          reduction: Math.round((1 - optimizedSize / originalSize) * 100),
-          dimensions: { width: newWidth, height: newHeight },
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // If Photon loaded successfully, use it for processing
-    const origWidth = photonImage.get_width();
-    const origHeight = photonImage.get_height();
+      // Write as PNG (WebP has issues in current version)
+      return img.write((data) => data);
+    });
     
-    let newWidth = config.width;
-    let newHeight = config.height;
+    const optimizedSize = optimizedBytes.byteLength;
+    const reduction = Math.round((1 - optimizedSize / originalSize) * 100);
     
-    // Calculate dimensions maintaining aspect ratio if height not specified
-    if (!newHeight) {
-      const aspectRatio = origHeight / origWidth;
-      newHeight = Math.round(newWidth * aspectRatio);
-    }
+    console.log(`[optimize-image] Optimized size: ${(optimizedSize / 1024).toFixed(1)} KB (${reduction}% reduction)`);
     
-    // Don't upscale - use original dimensions if smaller
-    if (origWidth < newWidth) {
-      newWidth = origWidth;
-      newHeight = config.height ? Math.min(config.height, origHeight) : origHeight;
-    }
-
-    console.log(`[optimize-image] Resizing from ${origWidth}x${origHeight} to ${newWidth}x${newHeight}`);
-
-    // Resize using Lanczos3 for high quality
-    const resized = resize(photonImage, newWidth, newHeight, SamplingFilter.Lanczos3);
-    
-    // Get WebP bytes
-    const webpBytes = resized.get_bytes_webp();
-    const optimizedSize = webpBytes.length;
-    
-    console.log(`[optimize-image] Optimized size: ${(optimizedSize / 1024).toFixed(1)} KB (${Math.round((1 - optimizedSize / originalSize) * 100)}% reduction)`);
-
     // Generate optimized path
     const pathParts = storagePath.split('/');
     const fileName = pathParts.pop()!;
     const baseName = fileName.replace(/\.[^/.]+$/, '');
     const optimizedPath = `optimized/${context}/${baseName}.webp`;
-
+    
     // Upload optimized version with long cache
     console.log(`[optimize-image] Uploading to: ${optimizedPath}`);
     const { error: uploadError } = await supabase.storage
       .from('cms-media')
-      .upload(optimizedPath, webpBytes, {
-        contentType: 'image/webp',
+      .upload(optimizedPath, optimizedBytes, {
+        contentType: 'image/png',
         cacheControl: '31536000', // 1 year
         upsert: true,
       });
@@ -277,8 +182,8 @@ serve(async (req: Request) => {
       ...existingVersions,
       [context]: {
         url: publicUrl,
-        width: newWidth,
-        height: newHeight,
+        width: config.width,
+        height: config.height || null,
         size: optimizedSize,
         created_at: new Date().toISOString(),
       },
@@ -302,8 +207,8 @@ serve(async (req: Request) => {
         optimizedUrl: publicUrl,
         originalSize,
         optimizedSize,
-        reduction: Math.round((1 - optimizedSize / originalSize) * 100),
-        dimensions: { width: newWidth, height: newHeight },
+        reduction,
+        dimensions: { width: config.width, height: config.height || 'auto' },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
