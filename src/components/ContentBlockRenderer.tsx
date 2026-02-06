@@ -80,7 +80,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     // Top/Bottom layout (stacked)
     if (position === "top" || position === "bottom") {
       return (
-        <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-2 sm:mx-4 lg:mx-6 xl:mx-8">
+      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-[2.5%]">
           <div className="max-w-6xl mx-auto space-y-6">
             {position === "top" ? (
               <>
@@ -112,7 +112,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
     // Left/Right layout: side by side on desktop - wider container
     return (
-      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-2 sm:mx-4 lg:mx-6 xl:mx-8">
+      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-[2.5%]">
         {/* Mobile layout: Title first, then image, then text */}
         <div className="lg:hidden space-y-6">
           {renderBlockTitle(block, false)}
@@ -161,7 +161,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
               h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4 text-center",
             };
             return (
-              <div key={block.id} className="max-w-3xl mx-auto px-4">
+              <div key={block.id} className="max-w-4xl mx-auto px-4">
                 <HeadingTag className={headingClasses[block.level || "h2"]}>
                   {block.content}
                 </HeadingTag>
@@ -170,7 +170,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
           case "text":
             return (
-              <div key={block.id} className="max-w-3xl mx-auto px-4 py-6 md:py-8">
+              <div key={block.id} className="max-w-4xl mx-auto px-4 py-6 md:py-8">
                 {renderBlockTitle(block, true)}
                 <div
                   className={cn(
@@ -185,7 +185,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
           case "image":
             return (
-              <div key={block.id} className="max-w-5xl mx-auto px-4">
+              <div key={block.id} className="max-w-4xl mx-auto px-4">
                 <div className="relative w-full aspect-video rounded-2xl shadow-lg overflow-hidden">
                   <OptimizedImage
                     src={block.url || ""}
