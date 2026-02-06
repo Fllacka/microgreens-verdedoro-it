@@ -216,19 +216,22 @@ export const MediaSelector = ({
 
     setUploading(true);
     try {
-      // Extract metadata from original file
+      // Extract metadata and pre-resize if needed (prevents Edge Function memory issues)
       console.log(`[MediaSelector] Extracting metadata for ${file.name}...`);
       const metadata = await extractImageMetadata(file);
       console.log(`[MediaSelector] Metadata: ${metadata.width}x${metadata.height}, blurhash: ${metadata.blurhash.substring(0, 10)}...`);
+      
+      // Use the processed (possibly resized) file for upload
+      const fileToUpload = metadata.processedFile;
 
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `uploads/${fileName}`;
 
-      // Upload original file with 1-year cache
+      // Upload pre-resized file with 1-year cache
       const { error: uploadError } = await supabase.storage
         .from("cms-media")
-        .upload(filePath, file, {
+        .upload(filePath, fileToUpload, {
           cacheControl: '31536000',
         });
 
@@ -244,8 +247,8 @@ export const MediaSelector = ({
         .insert({
           file_name: file.name,
           file_path: urlData.publicUrl,
-          file_type: file.type,
-          file_size: file.size,
+          file_type: fileToUpload.type,
+          file_size: fileToUpload.size,
           storage_path: filePath,
           is_optimized: false,
           width: metadata.width,
