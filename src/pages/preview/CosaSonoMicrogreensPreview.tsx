@@ -4,13 +4,29 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
 import OptimizedImage from "@/components/ui/optimized-image";
+import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Link } from "react-router-dom";
-import { ChevronRight, AlertCircle, HelpCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { AlertCircle, HelpCircle } from "lucide-react";
+import { stripHtmlTags } from "@/lib/seo";
 
 // Import fallback images
 import heroImage from "@/assets/cosa-sono-microgreens-hero.jpg";
+import chefImage from "@/assets/chef-microgreens.jpg";
+import varietiesImage from "@/assets/microgreens-varieties.jpg";
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  grid_description?: string | null;
+  category: string | null;
+  benefits: string[] | null;
+  uses: string[] | null;
+  image_id?: string | null;
+}
 
 interface ContentBlock {
   id: string;
@@ -52,6 +68,7 @@ interface FAQContent {
 const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
 
 const CosaSonoMicrogreensPreview = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [heroData, setHeroData] = useState<HeroContent>({
     title: "Cosa sono i Microgreens?",
@@ -73,10 +90,98 @@ const CosaSonoMicrogreensPreview = () => {
     published: true,
   });
   const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  
+  // Featured products state
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [featuredProductsContent, setFeaturedProductsContent] = useState({
+    heading: "I microgreens più ricercati",
+    subtitle: "Scopri i microgreens più richiesti. Trova la varietà che fa per te adatta al tuo utilizzo in cucina per dare un tocco speciale ai tuoi piatti.",
+    button_text: "Visualizza tutti i prodotti",
+    button_link: "/microgreens",
+    product_slugs: [] as string[],
+  });
+  const [productMediaMap, setProductMediaMap] = useState<Record<string, {
+    file_path: string;
+    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
+    blurhash?: string | null;
+    width?: number | null;
+    height?: number | null;
+  }>>({});
 
   useEffect(() => {
     fetchContent();
+    fetchFeaturedProductsConfig();
   }, []);
+  
+  // Fetch featured products when we have the slugs
+  useEffect(() => {
+    if (featuredProductsContent.product_slugs.length > 0) {
+      fetchFeaturedProducts(featuredProductsContent.product_slugs);
+    }
+  }, [featuredProductsContent.product_slugs]);
+  
+  const fetchFeaturedProductsConfig = async () => {
+    const { data, error } = await supabase
+      .from("homepage_sections")
+      .select("content, draft_content")
+      .eq("id", "featured_products")
+      .single();
+    
+    if (!error && data) {
+      // Use draft content for preview
+      const content = (data.draft_content ?? data.content) as Record<string, any>;
+      setFeaturedProductsContent({
+        heading: content.heading || featuredProductsContent.heading,
+        subtitle: content.subtitle || featuredProductsContent.subtitle,
+        button_text: content.button_text || featuredProductsContent.button_text,
+        button_link: content.button_link || featuredProductsContent.button_link,
+        product_slugs: content.product_slugs || [],
+      });
+    }
+  };
+  
+  const fetchFeaturedProducts = async (slugs: string[]) => {
+    const { data: products, error } = await supabase
+      .from("products")
+      .select("id, name, slug, description, grid_description, category, benefits, uses, image_id")
+      .in("slug", slugs)
+      .eq("published", true);
+    
+    if (!error && products) {
+      const orderedProducts = slugs
+        .map(slug => products.find(p => p.slug === slug))
+        .filter((p): p is typeof products[number] => p !== undefined) as Product[];
+      setFeaturedProducts(orderedProducts);
+      
+      const imageIds = products.map(p => p.image_id).filter((id): id is string => id !== null);
+      if (imageIds.length > 0) {
+        const { data: media } = await supabase
+          .from("media")
+          .select("id, file_path, optimized_versions, blurhash, width, height")
+          .in("id", imageIds);
+        
+        if (media) {
+          const map: Record<string, {
+            file_path: string;
+            optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
+            blurhash?: string | null;
+            width?: number | null;
+            height?: number | null;
+          }> = {};
+          media.forEach(m => {
+            map[m.id] = {
+              file_path: m.file_path,
+              optimized_versions: m.optimized_versions as Record<string, { url: string; width: number; height: number }> | null,
+              blurhash: m.blurhash,
+              width: m.width,
+              height: m.height,
+            };
+          });
+          setProductMediaMap(map);
+        }
+      }
+    }
+  };
 
   const fetchContent = async () => {
     try {
@@ -291,30 +396,56 @@ const CosaSonoMicrogreensPreview = () => {
         </section>
       )}
 
-      {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-verde-primary">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-6">
-            Pronto a Scoprire i Nostri Microgreens?
-          </h2>
-          <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-            Esplora la nostra selezione di microgreens freschi, coltivati con cura per garantirti qualità e sapore in ogni piatto.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary" className="group">
-              <Link to="/microgreens">
-                Scopri i Prodotti
-                <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
-              <Link to="/contatti">
-                Contattaci
-              </Link>
-            </Button>
+      {/* Featured Products Section - Same as Homepage */}
+      {featuredProducts.length > 0 && (
+        <section className="section-padding bg-secondary shadow-[inset_0_4px_12px_-4px_rgba(0,0,0,0.06)]">
+          <div className="container-width">
+            <div className="text-center mb-16">
+              <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+                {featuredProductsContent.heading}
+              </h2>
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                {stripHtmlTags(featuredProductsContent.subtitle)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              {featuredProducts.map((product, index) => {
+                const imageId = product.image_id;
+                const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
+                const productImage = mediaInfo?.file_path || (index === 1 ? varietiesImage : chefImage);
+                const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                const gridDesc = product.grid_description;
+                
+                return (
+                  <ProductCard 
+                    key={product.id} 
+                    name={product.name} 
+                    category={product.category || ""} 
+                    description={product.description || ""} 
+                    gridDescription={gridDesc || undefined} 
+                    benefits={product.benefits || []} 
+                    uses={product.uses || []} 
+                    image={productImage} 
+                    onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+                    priority={index < 3}
+                    blurhash={mediaInfo?.blurhash}
+                    optimizedUrl={optimizedUrl}
+                    imageWidth={mediaInfo?.width}
+                    imageHeight={mediaInfo?.height}
+                  />
+                );
+              })}
+            </div>
+
+            <div className="text-center">
+              <Button variant="verde" size="lg" asChild>
+                <Link to={featuredProductsContent.button_link}>{featuredProductsContent.button_text}</Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </Layout>
   );
 };
