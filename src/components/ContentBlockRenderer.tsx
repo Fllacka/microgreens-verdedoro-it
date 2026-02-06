@@ -128,19 +128,19 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
         <div className="hidden lg:grid lg:grid-cols-12 lg:gap-12 lg:items-start">
           {position === "left" ? (
             <>
-              <div className="col-span-5 flex-shrink-0">
+              <div className="col-span-6 flex-shrink-0">
                 {block.url && imageElement}
               </div>
-              <div className="col-span-7">
+              <div className="col-span-6">
                 {textContent}
               </div>
             </>
           ) : (
             <>
-              <div className="col-span-7">
+              <div className="col-span-6">
                 {textContent}
               </div>
-              <div className="col-span-5 flex-shrink-0">
+              <div className="col-span-6 flex-shrink-0">
                 {block.url && imageElement}
               </div>
             </>
