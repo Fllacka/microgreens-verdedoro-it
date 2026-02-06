@@ -239,9 +239,9 @@ const CosaSonoMicrogreens = () => {
         // Fallback static content (original design)
         <>
           {/* Section 1: Cosa Sono i Microgreens? - Text + Image */}
-          <section className="section-padding bg-background">
-            <div className="container-width">
-              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <section className="py-12 md:py-16 bg-background">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
                 <div>
                   <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
                     Cosa Sono i Microgreens?
@@ -264,14 +264,11 @@ const CosaSonoMicrogreens = () => {
                   </div>
                 </div>
                 
-                <div>
-                  <OptimizedImage
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                  <img
                     src={heroImageFallback}
                     alt="Microgreens freschi appena raccolti"
-                    className="rounded-xl w-full h-auto"
-                    containerClassName="rounded-xl overflow-hidden shadow-lg"
-                    aspectRatio="4/3"
-                    priority={false}
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
               </div>
@@ -279,8 +276,8 @@ const CosaSonoMicrogreens = () => {
           </section>
 
           {/* Section 2: Perché i Microgreens Fanno Bene all'Ambiente? - Text Only */}
-          <section className="section-padding bg-secondary/30">
-            <div className="container-width max-w-4xl">
+          <section className="py-12 md:py-16 bg-secondary/30">
+            <div className="max-w-3xl mx-auto px-4">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
                 Perché i Microgreens Fanno Bene all'Ambiente?
               </h2>
@@ -304,8 +301,8 @@ const CosaSonoMicrogreens = () => {
           </section>
 
           {/* Section 3: La Storia dei Microgreens - Text Only */}
-          <section className="section-padding bg-background">
-            <div className="container-width max-w-4xl">
+          <section className="py-12 md:py-16 bg-background">
+            <div className="max-w-3xl mx-auto px-4">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
                 La Storia dei Microgreens
               </h2>
@@ -329,16 +326,14 @@ const CosaSonoMicrogreens = () => {
           </section>
 
           {/* Section 4: Microgreens vs Germogli - Text + Image */}
-          <section className="section-padding bg-secondary/30">
-            <div className="container-width">
-              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-                <div className="order-2 lg:order-1">
-                  <OptimizedImage
+          <section className="py-12 md:py-16 bg-secondary/30">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+                <div className="order-2 lg:order-1 relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                  <img
                     src={heroImageFallback}
                     alt="Confronto tra microgreens e germogli"
-                    className="rounded-xl w-full h-auto"
-                    containerClassName="rounded-xl overflow-hidden shadow-lg"
-                    aspectRatio="4/3"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
                 
@@ -369,8 +364,8 @@ const CosaSonoMicrogreens = () => {
           </section>
 
           {/* Section 5: Perché i Microgreens Sono Considerati un "Superfood"? - Text Only */}
-          <section className="section-padding bg-background">
-            <div className="container-width max-w-4xl">
+          <section className="py-12 md:py-16 bg-background">
+            <div className="max-w-3xl mx-auto px-4">
               <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
                 Perché i Microgreens Sono Considerati un "Superfood"?
               </h2>
@@ -402,9 +397,9 @@ const CosaSonoMicrogreens = () => {
           </section>
 
           {/* Section 6: Come Usare i Microgreens in Cucina - Text + Image */}
-          <section className="section-padding bg-secondary/30">
-            <div className="container-width">
-              <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <section className="py-12 md:py-16 bg-secondary/30">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
                 <div>
                   <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">
                     Come Usare i Microgreens in Cucina
@@ -430,13 +425,11 @@ const CosaSonoMicrogreens = () => {
                   </div>
                 </div>
                 
-                <div>
-                  <OptimizedImage
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg">
+                  <img
                     src={heroImageFallback}
                     alt="Piatto gourmet guarnito con microgreens freschi"
-                    className="rounded-xl w-full h-auto"
-                    containerClassName="rounded-xl overflow-hidden shadow-lg"
-                    aspectRatio="4/3"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 </div>
               </div>
