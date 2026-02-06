@@ -69,7 +69,6 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
     const textContent = (
       <div className="flex flex-col justify-start py-4 md:py-6">
-        {renderBlockTitle(block, false)}
         <div
           className={cn("prose prose-lg max-w-none", proseClasses)}
           dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
@@ -82,11 +81,12 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
       return (
       <div key={block.id} className="mx-[2.5%]">
           <div className="max-w-6xl mx-auto space-y-6">
+            {/* Title always on top, centered */}
+            {renderBlockTitle(block, true)}
             {position === "top" ? (
               <>
                 {block.url && imageElement}
                 <div className="pt-4">
-                  {renderBlockTitle(block, false)}
                   <div
                     className={cn("prose prose-lg max-w-none", proseClasses)}
                     dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
@@ -96,7 +96,6 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
             ) : (
               <>
                 <div className="pb-4">
-                  {renderBlockTitle(block, false)}
                   <div
                     className={cn("prose prose-lg max-w-none", proseClasses)}
                     dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
@@ -110,12 +109,14 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
       );
     }
 
-    // Left/Right layout: side by side on desktop - wider container
+    // Left/Right layout: Title on top centered, then side by side
     return (
       <div key={block.id} className="mx-[2.5%]">
-        {/* Mobile layout: Title first, then image, then text */}
+        {/* Title always on top, centered - for all screen sizes */}
+        {renderBlockTitle(block, true)}
+        
+        {/* Mobile layout: image then text */}
         <div className="lg:hidden space-y-6">
-          {renderBlockTitle(block, false)}
           {block.url && imageElement}
           <div
             className={cn("prose prose-lg max-w-none", proseClasses)}
