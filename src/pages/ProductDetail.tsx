@@ -60,6 +60,10 @@ interface Product {
   price_tiers?: PriceTier[];
   media?: {
     file_path: string;
+    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
+    blurhash?: string | null;
+    width?: number | null;
+    height?: number | null;
   };
 }
 
@@ -95,7 +99,10 @@ const ProductDetail = () => {
             *,
             media:media!products_image_id_fkey (
               file_path,
-              optimized_urls
+              optimized_versions,
+              blurhash,
+              width,
+              height
             )
           `)
           .eq("slug", slug)
@@ -114,7 +121,10 @@ const ProductDetail = () => {
               *,
               media:media!products_image_id_fkey (
                 file_path,
-                optimized_urls
+                optimized_versions,
+                blurhash,
+                width,
+                height
               )
             `)
             .eq("published", true)
@@ -270,7 +280,11 @@ const ProductDetail = () => {
                 priority={true}
                 objectFit="cover"
                 size="large"
-                context="hero"
+                context="productDetail"
+                blurhash={product.media?.blurhash}
+                optimizedUrl={product.media?.optimized_versions?.productDetail?.url}
+                width={product.media?.width ?? undefined}
+                height={product.media?.height ?? undefined}
               />
             </div>
 

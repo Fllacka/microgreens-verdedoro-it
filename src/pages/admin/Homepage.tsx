@@ -417,7 +417,11 @@ const Homepage = () => {
                     <Label>Immagine di Sfondo</Label>
                     <MediaSelector
                       value={sections.hero.content.background_image_id}
-                      onChange={(id) => updateSectionContent("hero", "background_image_id", id)}
+                      onChange={(id, url, optimizedUrl) => {
+                        updateSectionContent("hero", "background_image_id", id);
+                        updateSectionContent("hero", "background_image_optimized_url", optimizedUrl);
+                      }}
+                      context="hero"
                       altText={sections.hero.content.background_image_alt || ""}
                       onAltTextChange={(alt) => updateSectionContent("hero", "background_image_alt", alt)}
                       showAltText={true}
@@ -469,7 +473,11 @@ const Homepage = () => {
                     <Label>Immagine Sezione</Label>
                     <MediaSelector
                       value={sections.what_are_microgreens.content.image_id}
-                      onChange={(id) => updateSectionContent("what_are_microgreens", "image_id", id)}
+                      onChange={(id, url, optimizedUrl) => {
+                        updateSectionContent("what_are_microgreens", "image_id", id);
+                        updateSectionContent("what_are_microgreens", "image_optimized_url", optimizedUrl);
+                      }}
+                      context="sectionImage"
                       altText={sections.what_are_microgreens.content.image_alt || ""}
                       onAltTextChange={(alt) => updateSectionContent("what_are_microgreens", "image_alt", alt)}
                       showAltText={true}
@@ -833,7 +841,11 @@ const Homepage = () => {
                     <Label>Immagine Sezione</Label>
                     <MediaSelector
                       value={sections.custom_microgreens.content.image_id}
-                      onChange={(id) => updateSectionContent("custom_microgreens", "image_id", id)}
+                      onChange={(id, url, optimizedUrl) => {
+                        updateSectionContent("custom_microgreens", "image_id", id);
+                        updateSectionContent("custom_microgreens", "image_optimized_url", optimizedUrl);
+                      }}
+                      context="sectionImage"
                       altText={sections.custom_microgreens.content.image_alt || ""}
                       onAltTextChange={(alt) => updateSectionContent("custom_microgreens", "image_alt", alt)}
                       showAltText={true}

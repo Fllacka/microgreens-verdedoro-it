@@ -22,20 +22,23 @@ const corsHeaders = {
 
 // Context-specific optimization configurations
 const OPTIMIZATION_CONFIGS: Record<string, { width: number; height?: number; quality: number; fit: 'cover' | 'contain' | 'fill' }> = {
-  hero: { width: 1920, quality: 85, fit: 'cover' },
-  productCard: { width: 800, height: 800, quality: 85, fit: 'cover' },
-  productDetail: { width: 1200, height: 1200, quality: 85, fit: 'cover' },
-  articleCard: { width: 800, quality: 85, fit: 'cover' },
-  featuredArticle: { width: 1200, quality: 80, fit: 'cover' },
-  contentImage: { width: 1536, quality: 80, fit: 'contain' },
-  textImageBlock: { width: 768, quality: 80, fit: 'contain' },
-  sectionImage: { width: 1200, quality: 80, fit: 'cover' },
-  thumbnail: { width: 300, height: 300, quality: 70, fit: 'cover' },
-  logo: { width: 400, quality: 90, fit: 'contain' },
-  ogImage: { width: 1200, height: 630, quality: 85, fit: 'cover' },
+  hero: { width: 1920, quality: 80, fit: 'cover' },
+  productCard: { width: 800, height: 800, quality: 80, fit: 'cover' },
+  productDetail: { width: 1200, height: 1200, quality: 80, fit: 'cover' },
+  articleCard: { width: 800, quality: 80, fit: 'cover' },
+  featuredArticle: { width: 1200, quality: 75, fit: 'cover' },
+  contentImage: { width: 1536, quality: 75, fit: 'contain' },
+  textImageBlock: { width: 768, quality: 75, fit: 'contain' },
+  sectionImage: { width: 1200, quality: 75, fit: 'cover' },
+  thumbnail: { width: 300, height: 300, quality: 65, fit: 'cover' },
+  logo: { width: 400, quality: 85, fit: 'contain' },
+  ogImage: { width: 1200, height: 630, quality: 80, fit: 'cover' },
 };
 
 type ContextType = keyof typeof OPTIMIZATION_CONFIGS;
+
+// Size threshold for aggressive compression (2MB)
+const SIZE_THRESHOLD_AGGRESSIVE = 2 * 1024 * 1024;
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -86,8 +89,15 @@ serve(async (req: Request) => {
     const originalSize = originalBytes.byteLength;
     console.log(`[optimize-image] Original size: ${(originalSize / 1024).toFixed(1)} KB`);
 
+    // Apply more aggressive compression for large files
+    let effectiveQuality = config.quality;
+    if (originalSize > SIZE_THRESHOLD_AGGRESSIVE) {
+      effectiveQuality = Math.max(config.quality - 15, 50);
+      console.log(`[optimize-image] Large file detected, reducing quality to ${effectiveQuality}`);
+    }
+
     // Use ImageMagick WASM for processing
-    console.log(`[optimize-image] Optimizing to ${config.width}x${config.height || 'auto'} at quality ${config.quality}`);
+    console.log(`[optimize-image] Optimizing to ${config.width}x${config.height || 'auto'} at quality ${effectiveQuality}`);
     
     const originalUint8 = new Uint8Array(originalBytes);
     
@@ -124,10 +134,10 @@ serve(async (req: Request) => {
       }
       
       // Set quality
-      img.quality = config.quality;
+      img.quality = effectiveQuality;
       
-      // Write as PNG (WebP has issues in current version)
-      return img.write((data) => data);
+      // Write as WebP for better compression
+      return img.write(MagickFormat.Webp, (data) => data);
     });
     
     const optimizedSize = optimizedBytes.byteLength;
@@ -146,7 +156,7 @@ serve(async (req: Request) => {
     const { error: uploadError } = await supabase.storage
       .from('cms-media')
       .upload(optimizedPath, optimizedBytes, {
-        contentType: 'image/png',
+        contentType: 'image/webp',
         cacheControl: '31536000', // 1 year
         upsert: true,
       });

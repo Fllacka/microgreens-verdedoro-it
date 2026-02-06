@@ -27,7 +27,10 @@ interface BlogPost {
 interface MediaItem {
   id: string;
   file_path: string;
-  optimized_urls?: Record<string, string> | null;
+  optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
+  blurhash?: string | null;
+  width?: number | null;
+  height?: number | null;
 }
 interface HomepageSection {
   id: string;
@@ -82,12 +85,15 @@ const Index = ({
 }: IndexProps) => {
   const navigate = useNavigate();
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [mediaMap, setMediaMap] = useState<Record<string, string>>({});
+  const [mediaMap, setMediaMap] = useState<Record<string, MediaItem>>({});
   const [sections, setSections] = useState<Record<string, HomepageSection>>({});
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [productMediaMap, setProductMediaMap] = useState<Record<string, {
     file_path: string;
-    optimized_urls?: Record<string, string> | null;
+    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
+    blurhash?: string | null;
+    width?: number | null;
+    height?: number | null;
   }>>({});
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -131,13 +137,18 @@ const Index = ({
       if (imageIds.length > 0) {
         const {
           data: media
-        } = await supabase.from("media").select("id, file_path").in("id", imageIds);
+        } = await supabase.from("media").select("id, file_path, optimized_versions, blurhash, width, height").in("id", imageIds);
         if (media) {
-          const map: Record<string, string> = {
-            ...mediaMap
-          };
-          media.forEach((m: MediaItem) => {
-            map[m.id] = m.file_path;
+          const map: Record<string, MediaItem> = {};
+          media.forEach((m) => {
+            map[m.id] = {
+              id: m.id,
+              file_path: m.file_path,
+              optimized_versions: m.optimized_versions as MediaItem['optimized_versions'],
+              blurhash: m.blurhash,
+              width: m.width,
+              height: m.height,
+            };
           });
           setMediaMap(map);
         }
@@ -159,16 +170,22 @@ const Index = ({
       if (imageIds.length > 0) {
         const {
           data: media
-        } = await supabase.from("media").select("id, file_path, optimized_urls").in("id", imageIds);
+        } = await supabase.from("media").select("id, file_path, optimized_versions, blurhash, width, height").in("id", imageIds);
         if (media) {
           const map: Record<string, {
             file_path: string;
-            optimized_urls?: Record<string, string> | null;
+            optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
+            blurhash?: string | null;
+            width?: number | null;
+            height?: number | null;
           }> = {};
           media.forEach(m => {
             map[m.id] = {
               file_path: m.file_path,
-              optimized_urls: m.optimized_urls as Record<string, string> | null
+              optimized_versions: m.optimized_versions as Record<string, { url: string; width: number; height: number }> | null,
+              blurhash: m.blurhash,
+              width: m.width,
+              height: m.height,
             };
           });
           setProductMediaMap(map);
@@ -189,14 +206,21 @@ const Index = ({
       if (imageIds.length > 0) {
         const {
           data: media
-        } = await supabase.from("media").select("id, file_path").in("id", imageIds);
+        } = await supabase.from("media").select("id, file_path, optimized_versions, blurhash, width, height").in("id", imageIds);
         if (media) {
           setMediaMap(prev => {
             const map = {
               ...prev
             };
-            media.forEach((m: MediaItem) => {
-              map[m.id] = m.file_path;
+            media.forEach((m) => {
+              map[m.id] = {
+                id: m.id,
+                file_path: m.file_path,
+                optimized_versions: m.optimized_versions as MediaItem['optimized_versions'],
+                blurhash: m.blurhash,
+                width: m.width,
+                height: m.height,
+              };
             });
             return map;
           });
@@ -293,19 +317,31 @@ const Index = ({
     robots: "index, follow"
   };
 
-  // Get images from CMS or use defaults
+  // Get images from CMS or use defaults - prioritize optimized versions
   const getHeroImage = () => {
-    const url = heroContent.background_image_id && mediaMap[heroContent.background_image_id] ? mediaMap[heroContent.background_image_id] : heroImage;
-    // Apply transformation for Supabase images
-    return isSupabaseStorageUrl(url) ? getImageUrl(url, 'hero') : url;
+    const imageId = heroContent.background_image_id;
+    if (imageId && mediaMap[imageId]) {
+      const media = mediaMap[imageId];
+      // Prioritize optimized version for hero context
+      return media.optimized_versions?.hero?.url || media.file_path;
+    }
+    return heroImage;
   };
   const getWhatAreMicrogreensImage = () => {
-    const url = whatAreMicrogreensContent.image_id && mediaMap[whatAreMicrogreensContent.image_id] ? mediaMap[whatAreMicrogreensContent.image_id] : varietiesImage;
-    return isSupabaseStorageUrl(url) ? getImageUrl(url, 'sectionImage') : url;
+    const imageId = whatAreMicrogreensContent.image_id;
+    if (imageId && mediaMap[imageId]) {
+      const media = mediaMap[imageId];
+      return media.optimized_versions?.sectionImage?.url || media.file_path;
+    }
+    return varietiesImage;
   };
   const getCustomMicrogreensImage = () => {
-    const url = customMicrogreensContent.image_id && mediaMap[customMicrogreensContent.image_id] ? mediaMap[customMicrogreensContent.image_id] : chefImage;
-    return isSupabaseStorageUrl(url) ? getImageUrl(url, 'sectionImage') : url;
+    const imageId = customMicrogreensContent.image_id;
+    if (imageId && mediaMap[imageId]) {
+      const media = mediaMap[imageId];
+      return media.optimized_versions?.sectionImage?.url || media.file_path;
+    }
+    return chefImage;
   };
 
   // Alt text getters
@@ -316,7 +352,7 @@ const Index = ({
   // Get OG image URL
   const getOgImageUrl = () => {
     if (seoContent.og_image_id && mediaMap[seoContent.og_image_id]) {
-      return mediaMap[seoContent.og_image_id];
+      return mediaMap[seoContent.og_image_id].file_path;
     }
     return undefined;
   };
@@ -485,8 +521,24 @@ const Index = ({
             const imageId = 'image_id' in product ? product.image_id as string | null : null;
             const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
             const productImage = mediaInfo?.file_path || (hasDefaultProducts ? index === 1 ? varietiesImage : chefImage : chefImage);
+            const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
             const gridDesc = 'grid_description' in product ? (product as Product).grid_description : undefined;
-            return <ProductCard key={product.id} name={product.name} category={product.category || ""} description={product.description || ""} gridDescription={gridDesc || undefined} benefits={product.benefits || []} uses={product.uses || []} image={productImage} onCardClick={() => navigate(`/microgreens/${product.slug}`)} priority={index < 3} />;
+            return <ProductCard 
+              key={product.id} 
+              name={product.name} 
+              category={product.category || ""} 
+              description={product.description || ""} 
+              gridDescription={gridDesc || undefined} 
+              benefits={product.benefits || []} 
+              uses={product.uses || []} 
+              image={productImage} 
+              onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+              priority={index < 3}
+              blurhash={mediaInfo?.blurhash}
+              optimizedUrl={optimizedUrl}
+              imageWidth={mediaInfo?.width}
+              imageHeight={mediaInfo?.height}
+            />;
           })}
             </div>
 
@@ -733,11 +785,12 @@ const Index = ({
 
             <div className={`grid gap-8 mb-8 ${blogPosts.length === 1 ? "max-w-md mx-auto" : blogPosts.length === 2 ? "grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto" : "grid-cols-1 md:grid-cols-3"}`}>
               {blogPosts.map(post => {
-            const imageUrl = post.featured_image_id && mediaMap[post.featured_image_id] ? mediaMap[post.featured_image_id] : varietiesImage;
+            const media = post.featured_image_id && mediaMap[post.featured_image_id] ? mediaMap[post.featured_image_id] : null;
+            const imageUrl = media?.optimized_versions?.articleCard?.url || media?.file_path || varietiesImage;
             return <Link key={post.id} to={`/blog/${post.slug}`}>
                     <Card className="overflow-hidden hover-lift border-border/50 h-full">
                       <div className="relative h-48 overflow-hidden bg-muted/30">
-                        <OptimizedImage src={imageUrl} alt={`${post.title} - articolo blog`} className="w-full h-full" containerClassName="w-full h-full" objectFit="cover" size="articleCard" context="articleCard" />
+                        <OptimizedImage src={imageUrl} alt={`${post.title} - articolo blog`} className="w-full h-full" containerClassName="w-full h-full" objectFit="cover" size="articleCard" context="articleCard" blurhash={media?.blurhash} />
                         <div className="absolute inset-0 bg-gradient-hero/20 pointer-events-none" />
                       </div>
                       <CardContent className="p-6 text-left">
