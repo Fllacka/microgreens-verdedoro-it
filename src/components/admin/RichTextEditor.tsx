@@ -253,11 +253,6 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
             <Unlink className="h-4 w-4" />
           </Button>
         )}
-        <ImageDialog onSelectImage={addImage}>
-          <Button type="button" variant="ghost" size="sm">
-            <ImageIcon className="h-4 w-4" />
-          </Button>
-        </ImageDialog>
       </div>
       
       {isImageSelected && (
