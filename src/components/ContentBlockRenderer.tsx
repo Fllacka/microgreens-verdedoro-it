@@ -151,7 +151,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
   };
 
   return (
-    <div className="space-y-8 md:space-y-12">
+    <div className="space-y-4 md:space-y-6">
       {blocks.map((block) => {
         switch (block.type) {
           case "heading":
