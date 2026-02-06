@@ -81,8 +81,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
       return (
       <div key={block.id} className="mx-[2.5%]">
           <div className="max-w-6xl mx-auto space-y-6">
-            {/* Title always on top, centered */}
-            {renderBlockTitle(block, true)}
+            {/* Title always on top, left-aligned */}
+            {renderBlockTitle(block, false)}
             {position === "top" ? (
               <>
                 {block.url && imageElement}
@@ -112,8 +112,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     // Left/Right layout: Title on top centered, then side by side
     return (
       <div key={block.id} className="mx-[2.5%]">
-        {/* Title always on top, centered - for all screen sizes */}
-        {renderBlockTitle(block, true)}
+        {/* Title always on top, left-aligned - for all screen sizes */}
+        {renderBlockTitle(block, false)}
         
         {/* Mobile layout: image then text */}
         <div className="lg:hidden space-y-6">
@@ -157,9 +157,9 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
           case "heading":
             const HeadingTag = block.level || "h2";
             const headingClasses = {
-              h1: "font-display text-4xl md:text-5xl font-bold text-foreground mb-6 text-center",
-              h2: "font-display text-3xl md:text-4xl font-bold text-foreground mb-6 text-center",
-              h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4 text-center",
+              h1: "font-display text-4xl md:text-5xl font-bold text-foreground mb-6",
+              h2: "font-display text-3xl md:text-4xl font-bold text-foreground mb-6",
+              h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4",
             };
             return (
               <div key={block.id} className="max-w-4xl mx-auto px-4">
@@ -172,12 +172,11 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
           case "text":
             return (
               <div key={block.id} className="max-w-4xl mx-auto px-4 py-6 md:py-8">
-                {renderBlockTitle(block, true)}
+                {renderBlockTitle(block, false)}
                 <div
                   className={cn(
-                    "prose prose-lg max-w-none text-center",
-                    proseClasses,
-                    "[&_p]:text-center [&_ul]:text-left [&_ol]:text-left"
+                    "prose prose-lg max-w-none",
+                    proseClasses
                   )}
                   dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
                 />
