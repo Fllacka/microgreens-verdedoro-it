@@ -182,23 +182,6 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
               </SelectContent>
             </Select>
           </div>
-          <div className={isMobile ? 'w-full' : 'w-40'}>
-            <Label className="text-xs text-muted-foreground">Formato Immagine</Label>
-            <Select
-              value={block.imageAspectRatio || "4/3"}
-              onValueChange={(value) => updateBlock(block.id, { imageAspectRatio: value as ContentBlock["imageAspectRatio"] })}
-            >
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1/1">Quadrato (1:1)</SelectItem>
-                <SelectItem value="4/3">Orizzontale (4:3)</SelectItem>
-                <SelectItem value="16/9">Widescreen (16:9)</SelectItem>
-                <SelectItem value="3/4">Verticale (3:4)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         {/* Compact image section */}
