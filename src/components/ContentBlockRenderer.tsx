@@ -1,4 +1,5 @@
 import OptimizedImage from "@/components/ui/optimized-image";
+import { cn } from "@/lib/utils";
 
 interface ContentBlock {
   id: string;
@@ -24,109 +25,120 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
   const sanitizeRichTextHtml = (html: string) => {
     if (!html) return "";
-
-    // Remove the literal sequence "\00a0" if it exists in saved content.
     const withoutLiteral = html.replace(/\\00a0/g, "");
-
-    // If a paragraph only contains a nbsp, keep the paragraph but remove the visible char.
     return withoutLiteral.replace(/<p>\s*(?:&nbsp;|\u00a0)\s*<\/p>/g, "<p></p>");
   };
 
-  const getAspectRatioClass = (ratio?: string) => {
-    switch (ratio) {
-      case "1/1": return "aspect-square";
-      case "4/3": return "aspect-[4/3]";
-      case "16/9": return "aspect-video";
-      case "3/4": return "aspect-[3/4]";
-      default: return "aspect-[4/3]";
-    }
-  };
-
-  const renderBlockTitle = (block: ContentBlock) => {
+  const renderBlockTitle = (block: ContentBlock, centered = false) => {
     if (!block.title || !block.titleLevel) return null;
     
     const titleClasses = {
-      h2: "font-display text-3xl md:text-4xl font-bold text-foreground mb-6",
-      h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4",
+      h2: cn(
+        "font-display text-3xl md:text-4xl font-bold text-foreground mb-6",
+        centered && "text-center"
+      ),
+      h3: cn(
+        "font-display text-2xl md:text-3xl font-bold text-foreground mb-4",
+        centered && "text-center"
+      ),
     };
     
     const TitleTag = block.titleLevel;
     return <TitleTag className={titleClasses[block.titleLevel]}>{block.title}</TitleTag>;
   };
 
+  const proseClasses = "[&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg";
+
   const renderTextImageBlock = (block: ContentBlock) => {
     const position = block.imagePosition || "right";
-    const aspectClass = getAspectRatioClass(block.imageAspectRatio);
     
     const imageElement = (
-      <OptimizedImage
-        src={block.url || ""}
-        alt={block.alt || ""}
-        className="w-full h-full"
-        containerClassName={`w-full ${aspectClass} rounded-xl shadow-lg overflow-hidden`}
-        objectFit="cover"
-        size="textImageBlock"
-        context="textImageBlock"
-      />
+      <div className="relative w-full h-full min-h-[280px] md:min-h-[360px] rounded-xl overflow-hidden shadow-lg">
+        <OptimizedImage
+          src={block.url || ""}
+          alt={block.alt || ""}
+          className="absolute inset-0 w-full h-full object-cover"
+          containerClassName="absolute inset-0"
+          objectFit="cover"
+          size="textImageBlock"
+          context="textImageBlock"
+        />
+      </div>
     );
 
     const textContent = (
-      <div
-        className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg"
-        dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
-      />
+      <div className="flex flex-col justify-center h-full py-4 md:py-6">
+        {renderBlockTitle(block, false)}
+        <div
+          className={cn("prose prose-lg max-w-none", proseClasses)}
+          dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
+        />
+      </div>
     );
 
-    // Top/Bottom layout (stacked) - same on mobile and desktop
+    // Top/Bottom layout (stacked)
     if (position === "top" || position === "bottom") {
       return (
-        <div key={block.id} className="space-y-6">
-          {position === "top" ? (
-            <>
-              {renderBlockTitle(block)}
-              {block.url && imageElement}
-              {textContent}
-            </>
-          ) : (
-            <>
-              {renderBlockTitle(block)}
-              {textContent}
-              {block.url && imageElement}
-            </>
-          )}
+        <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {position === "top" ? (
+              <>
+                {block.url && imageElement}
+                <div className="pt-4">
+                  {renderBlockTitle(block, false)}
+                  <div
+                    className={cn("prose prose-lg max-w-none", proseClasses)}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="pb-4">
+                  {renderBlockTitle(block, false)}
+                  <div
+                    className={cn("prose prose-lg max-w-none", proseClasses)}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
+                  />
+                </div>
+                {block.url && imageElement}
+              </>
+            )}
+          </div>
         </div>
       );
     }
 
-    // Left/Right layout: side by side on desktop, title-image-text stacked on mobile
+    // Left/Right layout: side by side on desktop
     return (
-      <div key={block.id}>
+      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10">
         {/* Mobile layout: Title first, then image, then text */}
-        <div className="lg:hidden space-y-4">
-          {renderBlockTitle(block)}
+        <div className="lg:hidden space-y-6">
+          {renderBlockTitle(block, false)}
           {block.url && imageElement}
-          {textContent}
+          <div
+            className={cn("prose prose-lg max-w-none", proseClasses)}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
+          />
         </div>
         
-        {/* Desktop layout: side by side with title inside text column */}
-        <div className="hidden lg:flex lg:flex-row gap-12 items-start">
+        {/* Desktop layout: side by side with 55/45 proportions */}
+        <div className="hidden lg:grid lg:grid-cols-12 lg:gap-10 lg:items-stretch lg:min-h-[400px]">
           {position === "left" ? (
             <>
-              <div className="w-1/2">
+              <div className="col-span-7">
                 {block.url && imageElement}
               </div>
-              <div className="w-1/2">
-                {renderBlockTitle(block)}
+              <div className="col-span-5 flex flex-col justify-center">
                 {textContent}
               </div>
             </>
           ) : (
             <>
-              <div className="w-1/2">
-                {renderBlockTitle(block)}
+              <div className="col-span-5 flex flex-col justify-center">
                 {textContent}
               </div>
-              <div className="w-1/2">
+              <div className="col-span-7">
                 {block.url && imageElement}
               </div>
             </>
@@ -137,28 +149,34 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12 md:space-y-16">
       {blocks.map((block) => {
         switch (block.type) {
           case "heading":
             const HeadingTag = block.level || "h2";
             const headingClasses = {
-              h1: "font-display text-4xl md:text-5xl font-bold text-foreground mb-6",
-              h2: "font-display text-3xl md:text-4xl font-bold text-foreground mb-6",
-              h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4",
+              h1: "font-display text-4xl md:text-5xl font-bold text-foreground mb-6 text-center",
+              h2: "font-display text-3xl md:text-4xl font-bold text-foreground mb-6 text-center",
+              h3: "font-display text-2xl md:text-3xl font-bold text-foreground mb-4 text-center",
             };
             return (
-              <HeadingTag key={block.id} className={headingClasses[block.level || "h2"]}>
-                {block.content}
-              </HeadingTag>
+              <div key={block.id} className="max-w-3xl mx-auto px-4">
+                <HeadingTag className={headingClasses[block.level || "h2"]}>
+                  {block.content}
+                </HeadingTag>
+              </div>
             );
 
           case "text":
             return (
-              <div key={block.id}>
-                {renderBlockTitle(block)}
+              <div key={block.id} className="max-w-3xl mx-auto px-4 py-6 md:py-8">
+                {renderBlockTitle(block, true)}
                 <div
-                  className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=center]]:float-none [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2"
+                  className={cn(
+                    "prose prose-lg max-w-none text-center",
+                    proseClasses,
+                    "[&_p]:text-center [&_ul]:text-left [&_ol]:text-left"
+                  )}
                   dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(block.content || "") }}
                 />
               </div>
@@ -166,16 +184,18 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
           case "image":
             return (
-              <div key={block.id} className="my-8">
-                <OptimizedImage
-                  src={block.url || ""}
-                  alt={block.alt || ""}
-                  className="w-full h-full"
-                  containerClassName="w-full aspect-video rounded-xl shadow-lg overflow-hidden"
-                  objectFit="cover"
-                  size="contentImage"
-                  context="contentImage"
-                />
+              <div key={block.id} className="max-w-5xl mx-auto px-4">
+                <div className="relative w-full aspect-video rounded-2xl shadow-lg overflow-hidden">
+                  <OptimizedImage
+                    src={block.url || ""}
+                    alt={block.alt || ""}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    containerClassName="absolute inset-0"
+                    objectFit="cover"
+                    size="contentImage"
+                    context="contentImage"
+                  />
+                </div>
               </div>
             );
 
