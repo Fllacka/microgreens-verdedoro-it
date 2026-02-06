@@ -1,169 +1,187 @@
-# Piano di Implementazione: Sistema di Ottimizzazione Immagini On-Demand
 
-## ✅ STATO: IMPLEMENTATO
+# Piano di Correzione: Integrazione Sistema Ottimizzazione Immagini
 
-Tutti gli step sono stati completati con successo.
+## Problema Principale
+L'ottimizzazione funziona correttamente a livello di Edge Function e database, ma le pagine frontend non utilizzano le versioni ottimizzate perché:
+1. Cercano il campo `optimized_urls` invece del campo corretto `optimized_versions`
+2. Il MediaSelector per l'Hero nella Homepage non passa `context="hero"`
 
----
-
-## Obiettivo
-Raggiungere PageSpeed Performance 90+ su mobile con LCP < 2.5s attraverso un sistema intelligente di ottimizzazione immagini on-demand.
-
----
-
-## Architettura Implementata
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                        FLUSSO IMMAGINI                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. UPLOAD (Media Library) ✅                                   │
-│     └─> Salva originale in storage                              │
-│     └─> Estrai width/height/blurhash (robusto per file grandi)  │
-│     └─> NON comprime client-side (server-side on-demand)        │
-│                                                                 │
-│  2. SELEZIONE (MediaSelector con context) ✅                    │
-│     └─> Admin sceglie immagine per: hero, productCard, etc.     │
-│     └─> Chiama Edge Function con context specifico              │
-│     └─> Genera SOLO la versione necessaria                      │
-│                                                                 │
-│  3. RENDERING (SmartImage / OptimizedImage) ✅                  │
-│     └─> Usa versione ottimizzata se esiste                      │
-│     └─> BlurHash come placeholder istantaneo                    │
-│     └─> Lazy loading per below-fold                             │
-│     └─> Priority loading per hero/LCP                           │
-│                                                                 │
-│  4. CACHING ✅                                                  │
-│     └─> Cache-Control: 1 anno per tutti gli asset               │
-│     └─> Versioni cached per context in storage                  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+## Stato Attuale Database
+L'immagine Broccoli e stata ottimizzata con successo:
+```
+broccoli_microgreens.png
+├── Originale: 5.5 MB (2107×1543)
+├── Blurhash: LKD^9|^l,J%L_MohXRNG=O%Mxtov ✓
+└── optimized_versions:
+    └── productCard: 800×800 WebP (1.2 MB)
 ```
 
 ---
 
-## Risultati dell'Implementazione
+## File da Correggere
 
-### ✅ STEP 2: Ottimizzazione On-Demand
+### 1. Homepage CMS - Aggiungere context="hero"
+**File:** `src/pages/admin/Homepage.tsx`
 
-#### 2.1 Edge Function `optimize-image` - COMPLETATA
-- **File**: `supabase/functions/optimize-image/index.ts`
-- Accetta `storagePath`, `mediaId`, e `context`
-- Ridimensiona usando OffscreenCanvas API
-- Converte in WebP con qualità configurabile
-- Salva in `optimized/{context}/`
-- Aggiorna `optimized_versions` nel database
+Tutte le MediaSelector devono passare il context appropriato:
+- Hero: `context="hero"`
+- What Are Microgreens: `context="sectionImage"`
+- Custom Microgreens: `context="sectionImage"`
+- Blog: `context="articleCard"`
 
-**Configurazioni Context:**
-| Context | Width | Height | Quality |
-|---------|-------|--------|---------|
-| hero | 1920 | auto | 85 |
-| productCard | 800 | 800 | 85 |
-| productDetail | 1200 | 1200 | 85 |
-| articleCard | 800 | auto | 85 |
-| thumbnail | 300 | 300 | 70 |
-| ogImage | 1200 | 630 | 85 |
+### 2. Index.tsx - Correggere Query e Interfaccia
+**File:** `src/pages/Index.tsx`
 
-#### 2.2 Upload Media Library - COMPLETATA
-- **File**: `src/pages/admin/Media.tsx`
-- Rimossa compressione client-side (causa fallimenti su file grandi)
-- `extractImageMetadata()` estrae width/height/blurhash in modo robusto
-- Pre-resize a 300px per BlurHash su file > 2MB
+Cambiamenti:
+- Rinominare `optimized_urls` → `optimized_versions` nell'interfaccia MediaItem
+- Correggere la query per selezionare `optimized_versions`
+- Aggiornare il productMediaMap per usare `optimized_versions`
+- Passare `optimizedUrl` al rendering dell'Hero
 
-#### 2.3 Schema Database - COMPLETATA
-- Migrazione eseguita: colonna `optimized_versions` JSONB aggiunta
+### 3. ProductDetail.tsx - Correggere Query
+**File:** `src/pages/ProductDetail.tsx`
 
----
+Cambiamenti:
+- Correggere la join query per selezionare `optimized_versions` invece di `optimized_urls`
+- Usare la versione ottimizzata nel rendering
 
-### ✅ STEP 3: Ottimizzazione Context-Aware
+### 4. ProductCard.tsx - Usare Versione Ottimizzata
+**File:** `src/components/ProductCard.tsx`
 
-#### 3.1 MediaSelector Aggiornato - COMPLETATA
-- **File**: `src/components/admin/MediaSelector.tsx`
-- Nuova prop `context: ImageSizeKey`
-- Trigger automatico ottimizzazione on-demand alla selezione
-- Badge per versioni ottimizzate e warning bassa risoluzione
-- Passa metadata (width, height, blurhash, optimizedUrl) al parent
+Verificare che passi correttamente `optimizedUrl` al componente OptimizedImage/SmartImage
 
 ---
 
-### ✅ STEP 4: Output HTML Automatico
+## Dettagli Implementazione
 
-#### 4.1 SmartImage Migliorato - COMPLETATA
-- **File**: `src/components/ui/SmartImage.tsx`
-- Nuova prop `optimizedUrl` (priorità su src)
-- BlurHash placeholder istantaneo
-- Aspect ratio calcolato da width/height
-- Priority loading per LCP images
+### 1. Homepage.tsx - MediaSelector con Context
 
-#### 4.2 OptimizedImage Migliorato - COMPLETATA
-- **File**: `src/components/ui/optimized-image.tsx`
-- Stesse nuove props di SmartImage
-- BlurHash support aggiunto
+```typescript
+// Hero
+<MediaSelector
+  value={sections.hero.content.background_image_id}
+  onChange={(id, url, optimizedUrl) => {
+    updateSectionContent("hero", "background_image_id", id);
+    updateSectionContent("hero", "background_image_optimized_url", optimizedUrl);
+  }}
+  context="hero"
+  altText={sections.hero.content.background_image_alt || ""}
+  onAltTextChange={(alt) => updateSectionContent("hero", "background_image_alt", alt)}
+/>
 
-#### 4.3 ProductCard Aggiornato - COMPLETATA
-- **File**: `src/components/ProductCard.tsx`
-- Nuove props: `blurhash`, `optimizedUrl`, `imageWidth`, `imageHeight`
+// What Are Microgreens
+<MediaSelector
+  value={sections.what_are_microgreens.content.image_id}
+  onChange={(id, url, optimizedUrl) => {
+    updateSectionContent("what_are_microgreens", "image_id", id);
+    updateSectionContent("what_are_microgreens", "image_optimized_url", optimizedUrl);
+  }}
+  context="sectionImage"
+/>
+
+// Custom Microgreens
+<MediaSelector
+  value={sections.custom_microgreens.content.image_id}
+  onChange={(id, url, optimizedUrl) => {
+    updateSectionContent("custom_microgreens", "image_id", id);
+    updateSectionContent("custom_microgreens", "image_optimized_url", optimizedUrl);
+  }}
+  context="sectionImage"
+/>
+```
+
+### 2. Index.tsx - Query Corretta
+
+```typescript
+// Interfaccia corretta
+interface MediaItem {
+  id: string;
+  file_path: string;
+  optimized_versions?: Record<string, any> | null;  // NUOVO CAMPO
+}
+
+// Query corretta per media
+const { data: media } = await supabase
+  .from("media")
+  .select("id, file_path, optimized_versions")  // Campo corretto
+  .in("id", imageIds);
+
+// Uso nel productMediaMap
+media.forEach(m => {
+  map[m.id] = {
+    file_path: m.file_path,
+    optimized_versions: m.optimized_versions
+  };
+});
+
+// Rendering Hero con versione ottimizzata
+const getHeroImage = () => {
+  const imageId = heroContent.background_image_id;
+  if (imageId && mediaMap[imageId]) {
+    // Prima cerca versione ottimizzata
+    const optimizedUrl = mediaMap[imageId].optimized_versions?.hero?.url;
+    return optimizedUrl || mediaMap[imageId].file_path;
+  }
+  return heroImage;
+};
+```
+
+### 3. ProductDetail.tsx - Query Corretta
+
+```typescript
+// Query con campo corretto
+const { data: productData } = await supabase
+  .from("products")
+  .select(`
+    *,
+    media:media!products_image_id_fkey (
+      file_path,
+      optimized_versions,  // Campo corretto
+      blurhash,
+      width,
+      height
+    )
+  `)
+  .eq("slug", slug)
+  .eq("published", true)
+  .maybeSingle();
+
+// Rendering con versione ottimizzata
+<OptimizedImage
+  src={product.media?.optimized_versions?.productDetail?.url || product.media?.file_path || "/placeholder.svg"}
+  alt={product.image_alt || product.name}
+  blurhash={product.media?.blurhash}
+  width={product.media?.width}
+  height={product.media?.height}
+  priority={true}
+  context="productDetail"
+/>
+```
 
 ---
 
-### ✅ STEP 5: Interfaccia CMS
+## Ordine di Implementazione
 
-- Preview contestuale con badge dimensioni
-- Warning risoluzione bassa (< 80% della dimensione target)
-- Badge "Ottimizzato ({context})" per versioni esistenti
-
----
-
-### ✅ STEP 6: Cache Headers
-
-- Tutte le immagini caricate con `cacheControl: '31536000'` (1 anno)
-- Edge function imposta stesso cache per versioni ottimizzate
+1. **Homepage.tsx** - Aggiungere context a tutte le MediaSelector
+2. **Index.tsx** - Correggere interfaccia e query per usare `optimized_versions`
+3. **ProductDetail.tsx** - Correggere query per usare `optimized_versions`
+4. **Verificare ProductCard.tsx** - Assicurarsi che usi correttamente i dati
 
 ---
 
-## File Modificati/Creati
+## Test Richiesti
 
-| File | Tipo | Descrizione |
-|------|------|-------------|
-| `supabase/functions/optimize-image/index.ts` | Nuovo | Edge function ottimizzazione |
-| `supabase/config.toml` | Modificato | Aggiunta config per optimize-image |
-| `src/lib/image-compression.ts` | Modificato | `extractImageMetadata()`, BlurHash robusto |
-| `src/lib/image-utils.ts` | Modificato | Aggiunti productDetail, ogImage |
-| `src/components/admin/MediaSelector.tsx` | Modificato | Context prop, trigger ottimizzazione |
-| `src/components/ui/SmartImage.tsx` | Modificato | optimizedUrl, BlurHash |
-| `src/components/ui/optimized-image.tsx` | Modificato | optimizedUrl, BlurHash |
-| `src/components/ProductCard.tsx` | Modificato | Props per metadata immagine |
+1. **Homepage Hero**: Selezionare immagine → verificare che venga generata versione `hero` (1920px)
+2. **Prodotto Broccoli**: Verificare che la pagina prodotto mostri la versione ottimizzata (800×800 WebP)
+3. **Console Network**: Verificare che vengano caricate le immagini da `/optimized/` invece di `/uploads/`
 
 ---
 
-## Risultati Attesi
+## Risultato Atteso
 
-| Metrica | Prima | Dopo |
-|---------|-------|------|
-| File size hero | 5+ MB | ~150 KB |
-| File size product card | 5+ MB | ~45 KB |
-| LCP mobile | 3-5s | < 2.5s |
-| CLS | Variabile | ~0 (con width/height) |
-| BlurHash | Assente | Presente |
-| PageSpeed mobile | 50-70 | 90+ |
-
----
-
-## Prossimi Passi Consigliati
-
-1. **Testare il flusso completo** - Caricare una nuova immagine e verificare che:
-   - Metadata (width, height, blurhash) vengono estratti
-   - Selezionando l'immagine per un context, viene generata la versione ottimizzata
-   - L'immagine ottimizzata viene mostrata nel frontend
-
-2. **Aggiornare le pagine pubbliche** per passare i nuovi metadata:
-   - `src/pages/Index.tsx` - Hero section con BlurHash
-   - `src/pages/ProductDetail.tsx` - Product image con BlurHash
-   - `src/pages/Microgreens.tsx` - Grid prodotti
-
-3. **Eseguire PageSpeed Insights** dopo aver caricato immagini ottimizzate
-
-4. **Ottimizzare immagini esistenti** - Le immagini già in database non hanno metadata. Si può:
-   - Ricaricarle tramite Media Library
-   - Oppure creare uno script batch per estrarre metadata
+| Elemento | Prima | Dopo |
+|----------|-------|------|
+| Hero Homepage | 5+ MB (originale) | ~150 KB (1920px WebP) |
+| Product Card | 5+ MB (originale) | ~45 KB (800×800 WebP) |
+| Product Detail | 5+ MB (originale) | ~100 KB (1200×1200 WebP) |
+| BlurHash | Non usato | Placeholder istantaneo |
