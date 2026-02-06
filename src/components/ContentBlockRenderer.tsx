@@ -52,9 +52,9 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
   const renderTextImageBlock = (block: ContentBlock) => {
     const position = block.imagePosition || "right";
     
-    // Fixed image dimensions - always 420px height on desktop
+    // Fixed image dimensions - always 500px height on desktop
     const imageElement = (
-      <div className="relative w-full rounded-xl overflow-hidden shadow-lg h-[280px] md:h-[320px] lg:h-[420px]">
+      <div className="relative w-full rounded-xl overflow-hidden shadow-lg h-[300px] md:h-[380px] lg:h-[500px]">
         <OptimizedImage
           src={block.url || ""}
           alt={block.alt || ""}
