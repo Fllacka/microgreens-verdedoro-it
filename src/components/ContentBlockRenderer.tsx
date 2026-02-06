@@ -52,8 +52,9 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
   const renderTextImageBlock = (block: ContentBlock) => {
     const position = block.imagePosition || "right";
     
+    // Fixed image dimensions - always 420px height on desktop
     const imageElement = (
-      <div className="relative w-full h-full min-h-[280px] md:min-h-[360px] rounded-xl overflow-hidden shadow-lg">
+      <div className="relative w-full rounded-xl overflow-hidden shadow-lg h-[280px] md:h-[320px] lg:h-[420px]">
         <OptimizedImage
           src={block.url || ""}
           alt={block.alt || ""}
@@ -67,7 +68,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     );
 
     const textContent = (
-      <div className="flex flex-col justify-center h-full py-4 md:py-6">
+      <div className="flex flex-col justify-start py-4 md:py-6">
         {renderBlockTitle(block, false)}
         <div
           className={cn("prose prose-lg max-w-none", proseClasses)}
@@ -79,8 +80,8 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     // Top/Bottom layout (stacked)
     if (position === "top" || position === "bottom") {
       return (
-        <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10">
-          <div className="max-w-4xl mx-auto space-y-6">
+        <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-4 lg:mx-8">
+          <div className="max-w-6xl mx-auto space-y-6">
             {position === "top" ? (
               <>
                 {block.url && imageElement}
@@ -109,9 +110,9 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
       );
     }
 
-    // Left/Right layout: side by side on desktop
+    // Left/Right layout: side by side on desktop - wider container
     return (
-      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10">
+      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-4 lg:mx-8">
         {/* Mobile layout: Title first, then image, then text */}
         <div className="lg:hidden space-y-6">
           {renderBlockTitle(block, false)}
@@ -122,23 +123,23 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
           />
         </div>
         
-        {/* Desktop layout: side by side with 55/45 proportions */}
-        <div className="hidden lg:grid lg:grid-cols-12 lg:gap-10 lg:items-stretch lg:min-h-[400px]">
+        {/* Desktop layout: side by side - image has fixed height, text can overflow */}
+        <div className="hidden lg:grid lg:grid-cols-12 lg:gap-12 lg:items-start">
           {position === "left" ? (
             <>
-              <div className="col-span-7">
+              <div className="col-span-7 flex-shrink-0">
                 {block.url && imageElement}
               </div>
-              <div className="col-span-5 flex flex-col justify-center">
+              <div className="col-span-5">
                 {textContent}
               </div>
             </>
           ) : (
             <>
-              <div className="col-span-5 flex flex-col justify-center">
+              <div className="col-span-5">
                 {textContent}
               </div>
-              <div className="col-span-7">
+              <div className="col-span-7 flex-shrink-0">
                 {block.url && imageElement}
               </div>
             </>
