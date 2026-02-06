@@ -80,7 +80,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     // Top/Bottom layout (stacked)
     if (position === "top" || position === "bottom") {
       return (
-        <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-4 lg:mx-8">
+        <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-2 sm:mx-4 lg:mx-6 xl:mx-8">
           <div className="max-w-6xl mx-auto space-y-6">
             {position === "top" ? (
               <>
@@ -112,7 +112,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
     // Left/Right layout: side by side on desktop - wider container
     return (
-      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-4 lg:mx-8">
+      <div key={block.id} className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-2 sm:mx-4 lg:mx-6 xl:mx-8">
         {/* Mobile layout: Title first, then image, then text */}
         <div className="lg:hidden space-y-6">
           {renderBlockTitle(block, false)}
