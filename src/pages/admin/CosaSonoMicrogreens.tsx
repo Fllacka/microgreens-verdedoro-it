@@ -11,10 +11,11 @@ import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, PenSquare, Search, Image } from "lucide-react";
+import { ArrowLeft, PenSquare, Search, Image, HelpCircle, Plus, Trash2, GripVertical } from "lucide-react";
 
 interface HeroContent {
   title: string;
@@ -33,6 +34,17 @@ interface SeoContent {
   changeFrequency: string;
   priority: string;
   structuredData: string;
+}
+
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+interface FAQContent {
+  title: string;
+  items: FAQItem[];
 }
 
 interface DatabaseSection {
@@ -64,6 +76,11 @@ const AdminCosaSonoMicrogreens = () => {
 
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
 
+  const [faqData, setFaqData] = useState<FAQContent>({
+    title: "Domande Frequenti sui Microgreens",
+    items: [],
+  });
+
   const [seoData, setSeoData] = useState<SeoContent>({
     metaTitle: "",
     metaDescription: "",
@@ -87,7 +104,7 @@ const AdminCosaSonoMicrogreens = () => {
     if (initialDataLoaded.current) {
       setHasChanges(true);
     }
-  }, [heroData, contentBlocks, seoData]);
+  }, [heroData, contentBlocks, faqData, seoData]);
 
   useEffect(() => {
     fetchContent();
@@ -122,6 +139,12 @@ const AdminCosaSonoMicrogreens = () => {
               if (content.blocks && Array.isArray(content.blocks)) {
                 setContentBlocks(content.blocks as ContentBlock[]);
               }
+              break;
+            case "faq":
+              setFaqData({
+                title: content.title || "Domande Frequenti sui Microgreens",
+                items: (content.items as FAQItem[]) || [],
+              });
               break;
             case "seo":
               setSeoData({
@@ -169,6 +192,11 @@ const AdminCosaSonoMicrogreens = () => {
         blocks: contentBlocks,
       };
       
+      const faqContent = {
+        title: faqData.title,
+        items: faqData.items,
+      };
+      
       const seoContent = {
         metaTitle: seoData.metaTitle,
         metaDescription: seoData.metaDescription,
@@ -209,6 +237,18 @@ const AdminCosaSonoMicrogreens = () => {
           }] as any);
         if (contentError) throw contentError;
 
+        const { error: faqError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "faq",
+            content: faqContent,
+            draft_content: null,
+            draft_is_visible: null,
+            has_draft_changes: false,
+            sort_order: 3,
+          }] as any);
+        if (faqError) throw faqError;
+
         const { error: seoError } = await supabase
           .from("cosa_sono_microgreens_sections")
           .upsert([{
@@ -248,6 +288,16 @@ const AdminCosaSonoMicrogreens = () => {
             sort_order: 2,
           }] as any);
         if (contentError) throw contentError;
+
+        const { error: faqError } = await supabase
+          .from("cosa_sono_microgreens_sections")
+          .upsert([{
+            id: "faq",
+            draft_content: faqContent,
+            has_draft_changes: true,
+            sort_order: 3,
+          }] as any);
+        if (faqError) throw faqError;
 
         const { error: seoError } = await supabase
           .from("cosa_sono_microgreens_sections")
@@ -309,11 +359,15 @@ const AdminCosaSonoMicrogreens = () => {
         </div>
 
         <Tabs defaultValue="content" className="space-y-4 md:space-y-6">
-          <TabsList className="w-full md:w-auto grid grid-cols-3 md:flex">
+          <TabsList className="w-full md:w-auto grid grid-cols-4 md:flex">
             <TabsTrigger value="content" className="text-xs md:text-sm">
               <PenSquare className="h-4 w-4 mr-1 md:mr-2" />
               <span className="hidden xs:inline">Contenuto</span>
               <span className="xs:hidden">Testo</span>
+            </TabsTrigger>
+            <TabsTrigger value="faq" className="text-xs md:text-sm">
+              <HelpCircle className="h-4 w-4 mr-1 md:mr-2" />
+              FAQ
             </TabsTrigger>
             <TabsTrigger value="hero" className="text-xs md:text-sm">
               <Image className="h-4 w-4 mr-1 md:mr-2" />
@@ -335,6 +389,121 @@ const AdminCosaSonoMicrogreens = () => {
                   Aggiungi e modifica i blocchi di contenuto della pagina. Puoi aggiungere titoli, testi con formattazione e immagini.
                 </p>
                 <ContentBlockEditor blocks={contentBlocks} onChange={setContentBlocks} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="faq" className="space-y-4 md:space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-5 w-5" />
+                  Domande Frequenti (FAQ)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="faqTitle">Titolo Sezione</Label>
+                  <Input
+                    id="faqTitle"
+                    value={faqData.title}
+                    onChange={(e) => setFaqData({ ...faqData, title: e.target.value })}
+                    placeholder="Domande Frequenti sui Microgreens"
+                  />
+                </div>
+                
+                <div className="space-y-4 mt-6">
+                  {faqData.items.map((faq, index) => (
+                    <div 
+                      key={faq.id} 
+                      className="border rounded-lg p-4 space-y-3 bg-background"
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", index.toString());
+                        e.currentTarget.classList.add("opacity-50");
+                      }}
+                      onDragEnd={(e) => {
+                        e.currentTarget.classList.remove("opacity-50");
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.classList.add("border-verde-primary", "border-2");
+                      }}
+                      onDragLeave={(e) => {
+                        e.currentTarget.classList.remove("border-verde-primary", "border-2");
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.classList.remove("border-verde-primary", "border-2");
+                        const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                        const toIndex = index;
+                        if (fromIndex !== toIndex) {
+                          const updated = [...faqData.items];
+                          const [movedItem] = updated.splice(fromIndex, 1);
+                          updated.splice(toIndex, 0, movedItem);
+                          setFaqData({ ...faqData, items: updated });
+                        }
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing mt-6">
+                          <GripVertical className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <Label>Domanda {index + 1}</Label>
+                          <Input
+                            value={faq.question}
+                            onChange={(e) => {
+                              const updated = [...faqData.items];
+                              updated[index].question = e.target.value;
+                              setFaqData({ ...faqData, items: updated });
+                            }}
+                            placeholder="Inserisci la domanda..."
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive mt-6"
+                          onClick={() => {
+                            const updated = faqData.items.filter((_, i) => i !== index);
+                            setFaqData({ ...faqData, items: updated });
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="space-y-2 pl-7">
+                        <Label>Risposta</Label>
+                        <RichTextEditor
+                          content={faq.answer}
+                          onChange={(content) => {
+                            const updated = [...faqData.items];
+                            updated[index].answer = content;
+                            setFaqData({ ...faqData, items: updated });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const newFaq: FAQItem = {
+                        id: crypto.randomUUID(),
+                        question: "",
+                        answer: "",
+                      };
+                      setFaqData({ ...faqData, items: [...faqData.items, newFaq] });
+                    }}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Aggiungi FAQ
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

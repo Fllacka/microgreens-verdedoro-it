@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
-import { ArrowRight } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowRight, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 // Import fallback images
 import heroImageFallback from "@/assets/cosa-sono-microgreens-hero.jpg";
 
-import { generateBreadcrumbSchema, generateFAQSchema, combineSchemas } from "@/lib/seo";
+import { generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
 
 interface ContentBlock {
   id: string;
@@ -37,6 +38,20 @@ interface SeoContent {
   robots: string;
 }
 
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+interface FAQContent {
+  title: string;
+  items: FAQItem[];
+}
+
+// Reusable prose styling constant
+const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
+
 const CosaSonoMicrogreens = () => {
   const [loading, setLoading] = useState(true);
   const [heroData, setHeroData] = useState<HeroContent>({
@@ -45,6 +60,10 @@ const CosaSonoMicrogreens = () => {
     imageId: null,
   });
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [faqData, setFaqData] = useState<FAQContent>({
+    title: "Domande Frequenti sui Microgreens",
+    items: [],
+  });
   const [seoData, setSeoData] = useState<SeoContent>({
     metaTitle: "Cosa sono i Microgreens? Guida Completa ai Superfood | Verde D'Oro",
     metaDescription: "Scopri cosa sono i microgreens, i benefici nutrizionali, la differenza con i germogli e come usarli in cucina. Guida completa ai superfood più nutrienti.",
@@ -87,6 +106,14 @@ const CosaSonoMicrogreens = () => {
             case "content":
               if (content.blocks && Array.isArray(content.blocks) && content.blocks.length > 0) {
                 setContentBlocks(content.blocks as ContentBlock[]);
+              }
+              break;
+            case "faq":
+              if (content.items && Array.isArray(content.items)) {
+                setFaqData({
+                  title: content.title || "Domande Frequenti sui Microgreens",
+                  items: content.items as FAQItem[],
+                });
               }
               break;
             case "seo":
@@ -136,20 +163,28 @@ const CosaSonoMicrogreens = () => {
     { name: "Cosa sono i Microgreens?", url: canonicalUrl }
   ]);
 
-  const faqSchema = generateFAQSchema([
-    {
-      question: "Cosa sono i Microgreens?",
-      answer: "I microgreens sono giovani piantine commestibili, raccolte appena dopo la formazione delle prime foglie vere (cotiledoni). Rappresentano una fase intermedia tra i germogli e le verdure adulte, con dimensioni tipiche tra 2,5 e 7,5 centimetri."
-    },
-    {
-      question: "Qual è la differenza tra Microgreens e Germogli?",
-      answer: "I germogli crescono senza luce e terra, consumando tutto (seme incluso), mentre i microgreens crescono con luce e substrato, consumando solo stelo e foglie. I microgreens hanno sapori più intensi e sono più sicuri dal punto di vista igienico."
-    },
-    {
-      question: "Perché i Microgreens sono considerati Superfood?",
-      answer: "I microgreens contengono concentrazioni di nutrienti fino a 40 volte superiori rispetto agli ortaggi maturi. Sono ricchi di vitamina C, vitamina K, beta-carotene e antiossidanti come luteina e zeaxantina."
-    }
-  ]);
+  // Generate FAQ schema from CMS data or fallback to defaults
+  const faqSchemaItems = faqData.items.length > 0 
+    ? faqData.items.map(faq => ({
+        question: faq.question,
+        answer: stripHtmlTags(faq.answer)
+      }))
+    : [
+        {
+          question: "Cosa sono i Microgreens?",
+          answer: "I microgreens sono giovani piantine commestibili, raccolte appena dopo la formazione delle prime foglie vere (cotiledoni). Rappresentano una fase intermedia tra i germogli e le verdure adulte, con dimensioni tipiche tra 2,5 e 7,5 centimetri."
+        },
+        {
+          question: "Qual è la differenza tra Microgreens e Germogli?",
+          answer: "I germogli crescono senza luce e terra, consumando tutto (seme incluso), mentre i microgreens crescono con luce e substrato, consumando solo stelo e foglie. I microgreens hanno sapori più intensi e sono più sicuri dal punto di vista igienico."
+        },
+        {
+          question: "Perché i Microgreens sono considerati Superfood?",
+          answer: "I microgreens contengono concentrazioni di nutrienti fino a 40 volte superiori rispetto agli ortaggi maturi. Sono ricchi di vitamina C, vitamina K, beta-carotene e antiossidanti come luteina e zeaxantina."
+        }
+      ];
+
+  const faqSchema = generateFAQSchema(faqSchemaItems);
 
   const combinedSchema = combineSchemas(breadcrumbSchema, faqSchema);
 
@@ -228,13 +263,55 @@ const CosaSonoMicrogreens = () => {
       {/* Content Section */}
       {hasCmsContent ? (
         // CMS-driven content with ContentBlockRenderer
-        <section className="section-padding bg-background">
-          <div className="container-width">
-            <div className="max-w-4xl mx-auto">
-              <ContentBlockRenderer blocks={contentBlocks} />
+        <>
+          <section className="section-padding bg-background">
+            <div className="container-width">
+              <div className="max-w-4xl mx-auto">
+                <ContentBlockRenderer blocks={contentBlocks} />
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+
+          {/* FAQ Section - CMS driven */}
+          {faqData.items.length > 0 && (
+            <section className="section-padding bg-background">
+              <div className="container mx-auto px-4">
+                <div className="max-w-5xl mx-auto">
+                  {/* Section Divider */}
+                  <div className="border-t border-border/30 mb-12" />
+                  
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="p-2.5 rounded-xl bg-verde-primary/10">
+                      <HelpCircle className="h-6 w-6 text-verde-primary" />
+                    </div>
+                    <h2 className="font-display text-3xl font-bold text-primary">{faqData.title}</h2>
+                  </div>
+                  <Accordion type="single" collapsible className="space-y-4">
+                    {faqData.items.map((faq, index) => (
+                      <AccordionItem 
+                        key={faq.id || index} 
+                        value={`faq-${index}`}
+                        className="border-2 border-verde-primary/20 rounded-xl px-6 bg-gradient-to-br from-verde-primary/5 to-transparent shadow-sm hover:shadow-md hover:border-verde-primary/30 transition-all duration-300"
+                      >
+                        <AccordionTrigger className="text-left font-display text-lg font-semibold text-primary hover:no-underline py-5 [&[data-state=open]]:text-verde-primary">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-6">
+                          <div className="border-t border-verde-primary/10 pt-4">
+                            <div 
+                              className={proseClasses}
+                              dangerouslySetInnerHTML={{ __html: faq.answer }}
+                            />
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+              </div>
+            </section>
+          )}
+        </>
       ) : (
         // Fallback static content (original design)
         <>
