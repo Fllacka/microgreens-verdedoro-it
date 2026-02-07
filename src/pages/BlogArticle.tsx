@@ -415,28 +415,6 @@ const BlogArticle = () => {
             <div className="max-w-3xl mx-auto">
               <ContentBlockRenderer blocks={post.content_blocks} />
 
-              {/* Call to Action */}
-              <Card className="bg-gradient-subtle border-border/50 text-center p-8 mt-16">
-                <h3 className="font-display text-2xl font-bold text-foreground mb-4">
-                  Prova i Nostri Microgreens
-                </h3>
-                <p className="font-body text-muted-foreground mb-6">
-                  Scopri tutta la potenza nutrizionale dei microgreens Verde D'Oro, 
-                  coltivati con passione a Reggio Emilia.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="verde" size="lg" asChild>
-                    <Link to="/microgreens">
-                      Esplora i Prodotti
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <Link to="/microgreens-su-misura">
-                      Microgreens su Misura
-                    </Link>
-                  </Button>
-                </div>
-              </Card>
             </div>
           </div>
         </section>
