@@ -1,86 +1,151 @@
 
-# Piano: Centratura Blocchi e Larghezza 95%
 
-## Problemi Identificati
+# Piano di Implementazione: FAQ e Prodotti in Evidenza per Blog Article
 
-1. **Text Only & Heading blocks**: Usano `max-w-3xl` (~768px) invece di `max-w-4xl` (~896px) come richiesto. Non sono perfettamente centrati.
-
-2. **Standalone Image blocks**: Usa `max-w-5xl` (~1024px) invece di `max-w-4xl` (~896px).
-
-3. **Text + Image blocks**: La larghezza attuale (~98%) deve diventare 95% (2.5% margine su ogni lato).
-
----
-
-## Modifiche da Effettuare
-
-### File: `src/components/ContentBlockRenderer.tsx`
-
-**1. Riga 164 - Heading blocks**
-Cambiare da `max-w-3xl` a `max-w-4xl`:
-```jsx
-<div key={block.id} className="max-w-4xl mx-auto px-4">
-```
-
-**2. Riga 173 - Text blocks**
-Cambiare da `max-w-3xl` a `max-w-4xl`:
-```jsx
-<div key={block.id} className="max-w-4xl mx-auto px-4 py-6 md:py-8">
-```
-
-**3. Riga 188 - Standalone Image blocks**
-Cambiare da `max-w-5xl` a `max-w-4xl`:
-```jsx
-<div key={block.id} className="max-w-4xl mx-auto px-4">
-```
-
-**4. Righe 83 e 115 - Text + Image blocks (Top/Bottom e Left/Right)**
-Cambiare i margini per ottenere esattamente 95% di larghezza (2.5% su ogni lato):
-```jsx
-// Da:
-className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-2 sm:mx-4 lg:mx-6 xl:mx-8"
-
-// A:
-className="bg-secondary/30 rounded-2xl p-6 md:p-10 mx-[2.5%]"
-```
-
-L'uso di `mx-[2.5%]` applica un margine percentuale su ogni lato, garantendo sempre il 95% di larghezza indipendentemente dalla dimensione dello schermo.
+## Obiettivo
+Allineare la pagina **Blog Article** con le funzionalità della pagina **Cosa sono i Microgreens**, aggiungendo:
+- Sezione FAQ con gestione CMS drag-and-drop
+- Sezione Prodotti in Evidenza
+- Schema JSON-LD per FAQ
 
 ---
 
-## Riepilogo Finale
+## Fase 1: Database Migration
 
-| Tipo Blocco | Prima | Dopo |
-|-------------|-------|------|
-| Heading | `max-w-3xl` (~768px) | `max-w-4xl` (~896px), centrato |
-| Text Only | `max-w-3xl` (~768px) | `max-w-4xl` (~896px), centrato |
-| Standalone Image | `max-w-5xl` (~1024px) | `max-w-4xl` (~896px), centrato |
-| Text + Image | ~98% width | Esattamente 95% width |
+Aggiungeremo 4 nuove colonne alla tabella `blog_posts`:
+
+```sql
+ALTER TABLE blog_posts
+ADD COLUMN faq_title text DEFAULT 'Domande Frequenti',
+ADD COLUMN faq_items jsonb DEFAULT '[]'::jsonb,
+ADD COLUMN draft_faq_title text,
+ADD COLUMN draft_faq_items jsonb;
+```
 
 ---
 
-## Visualizzazione
+## Fase 2: CMS - BlogEdit.tsx
+
+### 2.1 Nuova Tab "FAQ"
+
+Aggiungeremo una tab FAQ tra "Contenuto" e "SEO" con:
+
+- Campo titolo sezione FAQ (Input text)
+- Lista FAQ items con drag-and-drop (usando pattern esistente con GripVertical)
+- Per ogni FAQ item:
+  - Input per la domanda
+  - RichTextEditor per la risposta
+  - Pulsante elimina
+- Pulsante "Aggiungi FAQ"
+
+### 2.2 Stato FAQ
+
+```typescript
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+const [faqTitle, setFaqTitle] = useState("Domande Frequenti");
+const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
+```
+
+### 2.3 Logica Save/Publish
+
+- **Save**: Salva in `draft_faq_title` e `draft_faq_items`
+- **Publish**: Copia da draft a `faq_title` e `faq_items`
+
+---
+
+## Fase 3: Frontend - BlogArticle.tsx
+
+### 3.1 Sezione FAQ
+
+Posizionata dopo Content Blocks e prima di Related Articles:
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│                         PAGINA                                   │
-│                                                                  │
-│           ┌─────────────────────────────────┐                    │
-│           │     HEADING / TEXT ONLY         │  ~896px            │
-│           │     (perfettamente centrato)    │  centrato          │
-│           └─────────────────────────────────┘                    │
-│                                                                  │
-│    ┌─────────────────────────────────────────────────────────┐   │
-│    │                    TEXT + IMAGE                         │   │
-│ 2.5%│  ┌─────────────────────┐  ┌───────────────────────┐   │2.5%│
-│    │  │      IMMAGINE       │  │        TESTO          │   │    │
-│    │  │      (500px h)      │  │    (allineato top)    │   │    │
-│    │  └─────────────────────┘  └───────────────────────┘   │    │
-│    └─────────────────────────────────────────────────────────┘   │
-│                              95% width                           │
-│           ┌─────────────────────────────────┐                    │
-│           │      STANDALONE IMAGE           │  ~896px            │
-│           │      (centrata)                 │  centrato          │
-│           └─────────────────────────────────┘                    │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────┐
+│           Hero Section               │
+├─────────────────────────────────────┤
+│        Content Blocks                │
+├─────────────────────────────────────┤
+│          CTA Card                    │
+├─────────────────────────────────────┤
+│     FAQ Section (se presenti)        │  ← NUOVO
+├─────────────────────────────────────┤
+│   I microgreens più ricercati        │  ← NUOVO
+├─────────────────────────────────────┤
+│        Related Articles              │
+└─────────────────────────────────────┘
 ```
+
+### 3.2 Styling FAQ (identico a CosaSonoMicrogreens)
+
+```jsx
+<AccordionItem className="border-2 border-verde-primary/20 rounded-xl bg-gradient-to-r from-verde-primary/5 to-transparent">
+  <AccordionTrigger className="text-primary data-[state=open]:text-verde-primary">
+    {faq.question}
+  </AccordionTrigger>
+  <AccordionContent className="border-t border-verde-primary/10 pt-4">
+    <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
+  </AccordionContent>
+</AccordionItem>
+```
+
+### 3.3 Sezione Prodotti in Evidenza
+
+- Fetch configurazione da `homepage_sections` (sezione `featured_products`)
+- Fetch prodotti popolari da tabella `products`
+- Rendering con componente `ProductCard` esistente
+- Grid 3 colonne desktop, 1 colonna mobile
+
+---
+
+## Fase 4: Preview - BlogPreview.tsx
+
+Stesse modifiche di BlogArticle.tsx per coerenza nell'anteprima CMS.
+
+---
+
+## Fase 5: SEO - FAQ Schema
+
+Aggiungeremo generazione automatica dello schema FAQPage:
+
+```typescript
+const generateFAQSchema = (faqItems: FAQItem[]) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqItems.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer.replace(/<[^>]*>/g, '') // Strip HTML
+    }
+  }))
+});
+```
+
+---
+
+## File da Modificare
+
+| File | Modifiche |
+|------|-----------|
+| `supabase/migrations/` | Nuova migration per colonne FAQ |
+| `src/pages/admin/BlogEdit.tsx` | Tab FAQ, stato, logica save/publish |
+| `src/pages/BlogArticle.tsx` | Sezione FAQ + Prodotti in evidenza + Schema |
+| `src/pages/preview/BlogPreview.tsx` | Sezione FAQ + Prodotti in evidenza |
+
+---
+
+## Risultato Atteso
+
+Dopo l'implementazione:
+
+1. **CMS**: Nuova tab "FAQ" con gestione drag-and-drop
+2. **Frontend**: Sezione FAQ con accordion verde + Prodotti popolari
+3. **SEO**: Schema FAQPage automatico per Google Rich Results
+4. **Preview**: Anteprima completa con FAQ e prodotti
+
