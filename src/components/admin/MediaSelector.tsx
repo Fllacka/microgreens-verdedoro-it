@@ -58,7 +58,7 @@ export const MediaSelector = ({
   altText = "", 
   onAltTextChange, 
   showAltText = true,
-  context = "medium"
+  context = "contentImage"
 }: MediaSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaFile[]>([]);
