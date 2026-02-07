@@ -158,9 +158,6 @@ const Blog = () => {
     ? posts.filter(post => post.category === selectedCategory)
     : posts;
 
-  const featuredPost = filteredPosts[0];
-  const latestPosts = filteredPosts.slice(1);
-
   const currentUrl = window.location.origin + "/blog";
   const canonicalUrl = seoSection?.content?.canonical_url
     ? `${window.location.origin}${seoSection.content.canonical_url}`
@@ -265,78 +262,17 @@ const Blog = () => {
           </section>
         )}
 
-        {/* Featured Article */}
-        {featuredSection?.is_visible !== false && featuredPost && (
-          <section className="section-padding bg-gradient-subtle">
-            <div className="container-width">
-              <h2 className="font-display text-3xl font-bold text-foreground mb-8 text-center">
-                {featuredSection?.content?.title || "Articolo in Evidenza"}
-              </h2>
-              <Card className="overflow-hidden hover-lift border-border/50 bg-card max-w-4xl mx-auto">
-                <div className="grid md:grid-cols-2 gap-0">
-                  <div className="relative h-64 md:h-full overflow-hidden bg-muted/30">
-                    <OptimizedImage
-                      src={featuredPost.featured_image_id && mediaMap[featuredPost.featured_image_id] ? mediaMap[featuredPost.featured_image_id] : varietiesImage}
-                      alt={`${featuredPost.title} - articolo blog`}
-                      className="w-full h-full"
-                      containerClassName="w-full h-full"
-                      objectFit="cover"
-                      size="featuredArticle"
-                      context="featuredArticle"
-                    />
-                  </div>
-                  <CardContent className="p-8 flex flex-col justify-center">
-                    <div className="flex items-center gap-4 mb-4">
-                      {featuredPost.category && (
-                        <Badge variant="outline" className="text-xs">
-                          {featuredPost.category}
-                        </Badge>
-                      )}
-                      <div className="flex items-center text-sm text-muted-foreground gap-4">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(featuredPost.created_at)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {calculateReadTime(featuredPost.content_blocks)}
-                        </span>
-                      </div>
-                    </div>
-                    <h3 className="font-display text-2xl font-bold text-foreground mb-4">
-                      {featuredPost.title}
-                    </h3>
-                    <p className="font-body text-muted-foreground mb-6 leading-relaxed">
-                      {featuredPost.excerpt}
-                    </p>
-                    <Button variant="verde" className="inline-flex items-center w-fit" asChild>
-                      <Link to={`/blog/${featuredPost.slug}`}>
-                        Leggi l'articolo
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </div>
-              </Card>
-            </div>
-          </section>
-        )}
-
-        {/* Latest Articles */}
+        {/* All Articles */}
         {latestSection?.is_visible !== false && (
           <section className="section-padding bg-background">
             <div className="container-width">
-              {loading ? (
+          {loading ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">{latestSection?.content?.loading_text || "Caricamento articoli..."}</p>
                 </div>
-              ) : latestPosts.length > 0 ? (
-                <>
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-12 text-center">
-                    {latestSection?.content?.title || "Ultimi Articoli"}
-                  </h2>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {latestPosts.map((article) => (
+              ) : filteredPosts.length > 0 ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredPosts.map((article) => (
                       <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card">
                         <div className="relative h-48 overflow-hidden bg-muted/30">
                           <OptimizedImage
@@ -377,11 +313,10 @@ const Blog = () => {
                               </Link>
                             </Button>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </>
+                    </CardContent>
+                  </Card>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">{latestSection?.content?.empty_text || "Nessun articolo disponibile al momento."}</p>
