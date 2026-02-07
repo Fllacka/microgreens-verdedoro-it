@@ -65,6 +65,8 @@ export type Database = {
           draft_content: string | null
           draft_content_blocks: Json | null
           draft_excerpt: string | null
+          draft_faq_items: Json | null
+          draft_faq_title: string | null
           draft_featured_image_id: string | null
           draft_meta_description: string | null
           draft_meta_title: string | null
@@ -78,6 +80,8 @@ export type Database = {
           draft_tags: string[] | null
           draft_title: string | null
           excerpt: string | null
+          faq_items: Json | null
+          faq_title: string | null
           featured_image_id: string | null
           has_draft_changes: boolean | null
           id: string
@@ -110,6 +114,8 @@ export type Database = {
           draft_content?: string | null
           draft_content_blocks?: Json | null
           draft_excerpt?: string | null
+          draft_faq_items?: Json | null
+          draft_faq_title?: string | null
           draft_featured_image_id?: string | null
           draft_meta_description?: string | null
           draft_meta_title?: string | null
@@ -123,6 +129,8 @@ export type Database = {
           draft_tags?: string[] | null
           draft_title?: string | null
           excerpt?: string | null
+          faq_items?: Json | null
+          faq_title?: string | null
           featured_image_id?: string | null
           has_draft_changes?: boolean | null
           id?: string
@@ -155,6 +163,8 @@ export type Database = {
           draft_content?: string | null
           draft_content_blocks?: Json | null
           draft_excerpt?: string | null
+          draft_faq_items?: Json | null
+          draft_faq_title?: string | null
           draft_featured_image_id?: string | null
           draft_meta_description?: string | null
           draft_meta_title?: string | null
@@ -168,6 +178,8 @@ export type Database = {
           draft_tags?: string[] | null
           draft_title?: string | null
           excerpt?: string | null
+          faq_items?: Json | null
+          faq_title?: string | null
           featured_image_id?: string | null
           has_draft_changes?: boolean | null
           id?: string

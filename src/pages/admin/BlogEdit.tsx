@@ -13,10 +13,33 @@ import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, PenSquare, Search } from "lucide-react";
+import { ArrowLeft, PenSquare, Search, HelpCircle, Plus, Trash2, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableItem } from "@/components/admin/SortableItem";
+
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
+}
 
 const AdminBlogEdit = () => {
   const { id } = useParams();
@@ -44,6 +67,10 @@ const AdminBlogEdit = () => {
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [availableCategories, setAvailableCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
 
+  // FAQ state
+  const [faqTitle, setFaqTitle] = useState("Domande Frequenti");
+  const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
+
   const [seoData, setSeoData] = useState({
     slug: "",
     metaTitle: "",
@@ -57,6 +84,14 @@ const AdminBlogEdit = () => {
     structuredData: "",
   });
 
+  // DnD sensors for FAQ
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
     hasUnsavedChanges: hasChanges,
@@ -67,7 +102,7 @@ const AdminBlogEdit = () => {
     if (initialDataLoaded.current) {
       setHasChanges(true);
     }
-  }, [formData, contentBlocks, seoData]);
+  }, [formData, contentBlocks, seoData, faqTitle, faqItems]);
 
   useEffect(() => {
     fetchCategories();
@@ -140,6 +175,15 @@ const AdminBlogEdit = () => {
         ]);
       }
 
+      // Load FAQ data
+      const draftFaqTitle = (data as any).draft_faq_title;
+      const draftFaqItems = (data as any).draft_faq_items;
+      const publishedFaqTitle = (data as any).faq_title;
+      const publishedFaqItems = (data as any).faq_items;
+
+      setFaqTitle(draftFaqTitle ?? publishedFaqTitle ?? "Domande Frequenti");
+      setFaqItems((draftFaqItems ?? publishedFaqItems ?? []) as FAQItem[]);
+
       setSeoData({
         slug: (data as any).draft_slug ?? data.slug ?? "",
         metaTitle: (data as any).draft_meta_title ?? data.meta_title ?? "",
@@ -178,6 +222,8 @@ const AdminBlogEdit = () => {
         draft_category: formData.category,
         draft_tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
         draft_featured_image_id: formData.featuredImageId,
+        draft_faq_title: faqTitle,
+        draft_faq_items: faqItems as any,
         draft_meta_title: seoData.metaTitle,
         draft_meta_description: seoData.metaDescription,
         draft_og_title: seoData.ogTitle,
@@ -247,6 +293,8 @@ const AdminBlogEdit = () => {
         published: publish,
         published_at: scheduledDate ? new Date(scheduledDate).toISOString() : (formData.publishedAt ? new Date(formData.publishedAt).toISOString() : new Date().toISOString()),
         featured_image_id: formData.featuredImageId,
+        faq_title: faqTitle,
+        faq_items: faqItems as any,
         meta_title: seoData.metaTitle,
         meta_description: seoData.metaDescription,
         og_title: seoData.ogTitle,
@@ -264,6 +312,8 @@ const AdminBlogEdit = () => {
         draft_category: null,
         draft_tags: null,
         draft_featured_image_id: null,
+        draft_faq_title: null,
+        draft_faq_items: null,
         draft_meta_title: null,
         draft_meta_description: null,
         draft_og_title: null,
@@ -321,6 +371,39 @@ const AdminBlogEdit = () => {
     await publishPost(publish, scheduledDate);
   };
 
+  // FAQ handlers
+  const addFAQItem = () => {
+    setFaqItems([
+      ...faqItems,
+      {
+        id: crypto.randomUUID(),
+        question: "",
+        answer: "",
+      },
+    ]);
+  };
+
+  const removeFAQItem = (id: string) => {
+    setFaqItems(faqItems.filter(item => item.id !== id));
+  };
+
+  const updateFAQItem = (id: string, field: "question" | "answer", value: string) => {
+    setFaqItems(faqItems.map(item => 
+      item.id === id ? { ...item, [field]: value } : item
+    ));
+  };
+
+  const handleFAQDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setFaqItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   if (loading && !isNew) {
     return (
       <AdminLayout>
@@ -345,11 +428,15 @@ const AdminBlogEdit = () => {
         </div>
 
         <Tabs defaultValue="content" className="space-y-4 md:space-y-6">
-          <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
+          <TabsList className="w-full md:w-auto grid grid-cols-3 md:flex">
             <TabsTrigger value="content" className="text-xs md:text-sm">
               <PenSquare className="h-4 w-4 mr-1 md:mr-2" />
               <span className="hidden xs:inline">Contenuto</span>
               <span className="xs:hidden">Info</span>
+            </TabsTrigger>
+            <TabsTrigger value="faq" className="text-xs md:text-sm">
+              <HelpCircle className="h-4 w-4 mr-1 md:mr-2" />
+              FAQ
             </TabsTrigger>
             <TabsTrigger value="seo" className="text-xs md:text-sm">
               <Search className="h-4 w-4 mr-1 md:mr-2" />
@@ -477,6 +564,96 @@ const AdminBlogEdit = () => {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="faq" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="h-5 w-5" />
+                  Domande Frequenti
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="faqTitle">Titolo Sezione FAQ</Label>
+                  <Input
+                    id="faqTitle"
+                    value={faqTitle}
+                    onChange={(e) => setFaqTitle(e.target.value)}
+                    placeholder="Domande Frequenti"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>FAQ Items</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={addFAQItem}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Aggiungi FAQ
+                    </Button>
+                  </div>
+
+                  {faqItems.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                      <HelpCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p>Nessuna FAQ aggiunta</p>
+                      <p className="text-sm">Clicca "Aggiungi FAQ" per iniziare</p>
+                    </div>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleFAQDragEnd}
+                    >
+                      <SortableContext
+                        items={faqItems.map(item => item.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-4">
+                          {faqItems.map((faq, index) => (
+                            <SortableItem key={faq.id} id={faq.id}>
+                              <Card className="border-border/50">
+                                <CardContent className="pt-4 space-y-4">
+                                  <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1 space-y-4">
+                                      <div className="space-y-2">
+                                        <Label>Domanda {index + 1}</Label>
+                                        <Input
+                                          value={faq.question}
+                                          onChange={(e) => updateFAQItem(faq.id, "question", e.target.value)}
+                                          placeholder="Inserisci la domanda..."
+                                        />
+                                      </div>
+                                      <div className="space-y-2">
+                                        <Label>Risposta</Label>
+                                        <RichTextEditor
+                                          content={faq.answer}
+                                          onChange={(value) => updateFAQItem(faq.id, "answer", value)}
+                                        />
+                                      </div>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => removeFAQItem(faq.id)}
+                                      className="text-destructive hover:text-destructive shrink-0"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </SortableItem>
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-6">

@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Layout from "@/components/Layout";
 import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowLeft, Calendar, Clock, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { generateArticleSchema, generateBreadcrumbSchema, combineSchemas } from "@/lib/seo";
+import { generateArticleSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
 import OptimizedImage from "@/components/ui/optimized-image";
+import ProductCard from "@/components/ProductCard";
 import { getImageUrl } from "@/lib/image-utils";
 
 interface ContentBlock {
@@ -21,6 +23,12 @@ interface ContentBlock {
   content?: string;
   url?: string;
   alt?: string;
+}
+
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 interface BlogPost {
@@ -37,15 +45,44 @@ interface BlogPost {
   og_title?: string;
   og_description?: string;
   canonical_url?: string;
+  faq_title?: string;
+  faq_items?: FAQItem[];
 }
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  grid_description?: string | null;
+  category: string | null;
+  benefits: string[] | null;
+  uses: string[] | null;
+  image_id?: string | null;
+}
+
+// Reusable prose styling constant
+const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
 
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [relatedMediaMap, setRelatedMediaMap] = useState<Record<string, string>>({});
+  
+  // Featured products state
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [featuredProductsContent, setFeaturedProductsContent] = useState({
+    heading: "I microgreens più ricercati",
+    subtitle: "Scopri i microgreens più richiesti. Trova la varietà che fa per te adatta al tuo utilizzo in cucina per dare un tocco speciale ai tuoi piatti.",
+    button_text: "Visualizza tutti i prodotti",
+    button_link: "/microgreens",
+    product_slugs: [] as string[],
+  });
+  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>>({});
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -70,7 +107,9 @@ const BlogArticle = () => {
 
         setPost({
           ...postData,
-          content_blocks: (postData.content_blocks as unknown as ContentBlock[]) || []
+          content_blocks: (postData.content_blocks as unknown as ContentBlock[]) || [],
+          faq_title: (postData as any).faq_title || "Domande Frequenti",
+          faq_items: ((postData as any).faq_items as FAQItem[]) || [],
         } as BlogPost);
 
         // Fetch cover image if exists
@@ -93,10 +132,23 @@ const BlogArticle = () => {
           .limit(3);
 
         if (relatedError) throw relatedError;
-        const related = (relatedData?.map(post => ({
-          ...post,
-          content_blocks: (post.content_blocks as unknown as ContentBlock[]) || []
-        })) as BlogPost[]) || [];
+        const related = relatedData?.map(post => ({
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt || "",
+          category: post.category || "",
+          content_blocks: (post.content_blocks as unknown as ContentBlock[]) || [],
+          published_at: post.published_at || "",
+          featured_image_id: post.featured_image_id,
+          meta_title: post.meta_title,
+          meta_description: post.meta_description,
+          og_title: post.og_title,
+          og_description: post.og_description,
+          canonical_url: post.canonical_url,
+          faq_title: (post as any).faq_title,
+          faq_items: ((post as any).faq_items as FAQItem[]) || [],
+        })) as BlogPost[] || [];
         setRelatedPosts(related);
 
         // Fetch cover images for related posts
@@ -123,6 +175,81 @@ const BlogArticle = () => {
 
     fetchPost();
   }, [slug]);
+
+  // Fetch featured products (same as CosaSonoMicrogreens)
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        // Fetch featured products config from homepage_sections
+        const { data: sectionData, error: sectionError } = await supabase
+          .from("homepage_sections")
+          .select("content")
+          .eq("id", "featured_products")
+          .maybeSingle();
+
+        if (sectionError) throw sectionError;
+
+        if (sectionData?.content) {
+          const content = sectionData.content as any;
+          setFeaturedProductsContent({
+            heading: content.heading || "I microgreens più ricercati",
+            subtitle: content.subtitle || "",
+            button_text: content.button_text || "Visualizza tutti i prodotti",
+            button_link: content.button_link || "/microgreens",
+            product_slugs: content.product_slugs || [],
+          });
+
+          // Fetch products by slugs if available
+          if (content.product_slugs && content.product_slugs.length > 0) {
+            const { data: products, error: productsError } = await supabase
+              .from("products")
+              .select("id, name, slug, description, grid_description, category, benefits, uses, image_id")
+              .in("slug", content.product_slugs)
+              .eq("published", true);
+
+            if (productsError) throw productsError;
+            
+            // Sort products by the order in product_slugs
+            const sortedProducts = content.product_slugs
+              .map((slug: string) => products?.find(p => p.slug === slug))
+              .filter(Boolean) as Product[];
+            
+            setFeaturedProducts(sortedProducts);
+
+            // Fetch media for products
+            const imageIds = sortedProducts
+              .map(p => p.image_id)
+              .filter((id): id is string => !!id);
+            
+            if (imageIds.length > 0) {
+              const { data: mediaData } = await supabase
+                .from("media")
+                .select("id, file_path, blurhash, width, height, optimized_versions")
+                .in("id", imageIds);
+              
+              if (mediaData) {
+                const mediaMap: Record<string, any> = {};
+                mediaData.forEach(m => {
+                  mediaMap[m.id] = {
+                    file_path: m.file_path,
+                    blurhash: m.blurhash,
+                    width: m.width,
+                    height: m.height,
+                    optimized_versions: m.optimized_versions,
+                  };
+                });
+                setProductMediaMap(mediaMap);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
 
   const calculateReadTime = (blocks: ContentBlock[]) => {
     const wordsPerMinute = 200;
@@ -164,6 +291,7 @@ const BlogArticle = () => {
   }
 
   const readTime = calculateReadTime(post.content_blocks);
+  const faqItems = post.faq_items || [];
 
   // Calculate word count for structured data
   const wordCount = post.content_blocks?.reduce((total, block) => {
@@ -192,6 +320,18 @@ const BlogArticle = () => {
     { name: post.title, url: `/blog/${post.slug}` },
   ]);
 
+  // Generate FAQ schema if FAQs exist
+  const faqSchema = faqItems.length > 0 
+    ? generateFAQSchema(faqItems.map(faq => ({
+        question: faq.question,
+        answer: stripHtmlTags(faq.answer),
+      })))
+    : null;
+
+  const allSchemas = faqSchema 
+    ? combineSchemas(articleSchema, breadcrumbSchema, faqSchema)
+    : combineSchemas(articleSchema, breadcrumbSchema);
+
   return (
     <Layout>
       <Helmet>
@@ -206,7 +346,7 @@ const BlogArticle = () => {
         {coverImageUrl && <meta property="og:image" content={coverImageUrl} />}
         <link rel="canonical" href={`${window.location.origin}${post.canonical_url || `/blog/${post.slug}`}`} />
         <script type="application/ld+json">
-          {JSON.stringify(combineSchemas(articleSchema, breadcrumbSchema))}
+          {JSON.stringify(allSchemas)}
         </script>
       </Helmet>
 
@@ -300,6 +440,97 @@ const BlogArticle = () => {
             </div>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        {faqItems.length > 0 && (
+          <section className="py-16 md:py-20 bg-secondary/30">
+            <div className="container-width">
+              <div className="max-w-3xl mx-auto">
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-verde-primary/10 mb-4">
+                    <HelpCircle className="w-8 h-8 text-verde-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+                    {post.faq_title || "Domande Frequenti"}
+                  </h2>
+                </div>
+                
+                <Accordion type="single" collapsible className="space-y-4">
+                  {faqItems.map((faq) => (
+                    <AccordionItem
+                      key={faq.id}
+                      value={faq.id}
+                      className="border-2 border-verde-primary/20 rounded-xl px-6 bg-gradient-to-br from-verde-primary/5 to-transparent shadow-sm hover:shadow-md hover:border-verde-primary/30 transition-all duration-300"
+                    >
+                      <AccordionTrigger className="text-left font-display text-lg font-semibold text-primary hover:no-underline py-5 [&[data-state=open]]:text-verde-primary">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-6">
+                        <div className="border-t border-verde-primary/10 pt-4">
+                          <div 
+                            className={proseClasses}
+                            dangerouslySetInnerHTML={{ __html: faq.answer }}
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Featured Products Section */}
+        {featuredProducts.length > 0 && (
+          <section className="section-padding bg-secondary shadow-[inset_0_4px_12px_-4px_rgba(0,0,0,0.06)]">
+            <div className="container-width">
+              <div className="text-center mb-16">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+                  {featuredProductsContent.heading}
+                </h2>
+                <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {stripHtmlTags(featuredProductsContent.subtitle)}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                {featuredProducts.map((product, index) => {
+                  const imageId = product.image_id;
+                  const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
+                  const productImage = mediaInfo?.file_path || "/placeholder.svg";
+                  const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                  const gridDesc = product.grid_description;
+                  
+                  return (
+                    <ProductCard 
+                      key={product.id} 
+                      name={product.name} 
+                      category={product.category || ""} 
+                      description={product.description || ""} 
+                      gridDescription={gridDesc || undefined} 
+                      benefits={product.benefits || []} 
+                      uses={product.uses || []} 
+                      image={productImage} 
+                      onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+                      priority={index < 3}
+                      blurhash={mediaInfo?.blurhash}
+                      optimizedUrl={optimizedUrl}
+                      imageWidth={mediaInfo?.width}
+                      imageHeight={mediaInfo?.height}
+                    />
+                  );
+                })}
+              </div>
+
+              <div className="text-center">
+                <Button variant="verde" size="lg" asChild>
+                  <Link to={featuredProductsContent.button_link}>{featuredProductsContent.button_text}</Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Related Articles */}
         {relatedPosts.length > 0 && (

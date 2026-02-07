@@ -6,12 +6,15 @@ import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Clock, AlertTriangle } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowLeft, Calendar, Clock, AlertTriangle, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { toast } from "sonner";
+import ProductCard from "@/components/ProductCard";
+import { stripHtmlTags } from "@/lib/seo";
 
 interface ContentBlock {
   id: string;
@@ -20,6 +23,12 @@ interface ContentBlock {
   content?: string;
   url?: string;
   alt?: string;
+}
+
+interface FAQItem {
+  id: string;
+  question: string;
+  answer: string;
 }
 
 interface BlogPost {
@@ -34,7 +43,24 @@ interface BlogPost {
   featured_image_id?: string | null;
   meta_title?: string;
   meta_description?: string;
+  faq_title?: string;
+  faq_items?: FAQItem[];
 }
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  grid_description?: string | null;
+  category: string | null;
+  benefits: string[] | null;
+  uses: string[] | null;
+  image_id?: string | null;
+}
+
+// Reusable prose styling constant
+const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
 
 const BlogPreview = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -44,6 +70,17 @@ const BlogPreview = () => {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  
+  // Featured products state
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [featuredProductsContent, setFeaturedProductsContent] = useState({
+    heading: "I microgreens più ricercati",
+    subtitle: "Scopri i microgreens più richiesti. Trova la varietà che fa per te adatta al tuo utilizzo in cucina per dare un tocco speciale ai tuoi piatti.",
+    button_text: "Visualizza tutti i prodotti",
+    button_link: "/microgreens",
+    product_slugs: [] as string[],
+  });
+  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>>({});
 
   useEffect(() => {
     if (authLoading) return;
@@ -88,6 +125,8 @@ const BlogPreview = () => {
             featured_image_id: postData.draft_featured_image_id ?? postData.featured_image_id,
             meta_title: postData.draft_meta_title ?? postData.meta_title,
             meta_description: postData.draft_meta_description ?? postData.meta_description,
+            faq_title: (postData as any).draft_faq_title ?? (postData as any).faq_title ?? "Domande Frequenti",
+            faq_items: ((postData as any).draft_faq_items ?? (postData as any).faq_items ?? []) as FAQItem[],
           };
           setPost(transformedPost);
 
@@ -112,6 +151,79 @@ const BlogPreview = () => {
 
     fetchPost();
   }, [slug, authorized]);
+
+  // Fetch featured products
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      if (!authorized) return;
+      
+      try {
+        const { data: sectionData, error: sectionError } = await supabase
+          .from("homepage_sections")
+          .select("content")
+          .eq("id", "featured_products")
+          .maybeSingle();
+
+        if (sectionError) throw sectionError;
+
+        if (sectionData?.content) {
+          const content = sectionData.content as any;
+          setFeaturedProductsContent({
+            heading: content.heading || "I microgreens più ricercati",
+            subtitle: content.subtitle || "",
+            button_text: content.button_text || "Visualizza tutti i prodotti",
+            button_link: content.button_link || "/microgreens",
+            product_slugs: content.product_slugs || [],
+          });
+
+          if (content.product_slugs && content.product_slugs.length > 0) {
+            const { data: products, error: productsError } = await supabase
+              .from("products")
+              .select("id, name, slug, description, grid_description, category, benefits, uses, image_id")
+              .in("slug", content.product_slugs)
+              .eq("published", true);
+
+            if (productsError) throw productsError;
+            
+            const sortedProducts = content.product_slugs
+              .map((slug: string) => products?.find(p => p.slug === slug))
+              .filter(Boolean) as Product[];
+            
+            setFeaturedProducts(sortedProducts);
+
+            const imageIds = sortedProducts
+              .map(p => p.image_id)
+              .filter((id): id is string => !!id);
+            
+            if (imageIds.length > 0) {
+              const { data: mediaData } = await supabase
+                .from("media")
+                .select("id, file_path, blurhash, width, height, optimized_versions")
+                .in("id", imageIds);
+              
+              if (mediaData) {
+                const mediaMap: Record<string, any> = {};
+                mediaData.forEach(m => {
+                  mediaMap[m.id] = {
+                    file_path: m.file_path,
+                    blurhash: m.blurhash,
+                    width: m.width,
+                    height: m.height,
+                    optimized_versions: m.optimized_versions,
+                  };
+                });
+                setProductMediaMap(mediaMap);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, [authorized]);
 
   const calculateReadTime = (blocks: ContentBlock[]) => {
     const wordsPerMinute = 200;
@@ -151,6 +263,7 @@ const BlogPreview = () => {
   }
 
   const readTime = calculateReadTime(post.content_blocks);
+  const faqItems = post.faq_items || [];
 
   return (
     <Layout>
@@ -257,6 +370,97 @@ const BlogPreview = () => {
             </div>
           </div>
         </section>
+
+        {/* FAQ Section */}
+        {faqItems.length > 0 && (
+          <section className="py-16 md:py-20 bg-secondary/30">
+            <div className="container-width">
+              <div className="max-w-3xl mx-auto">
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-verde-primary/10 mb-4">
+                    <HelpCircle className="w-8 h-8 text-verde-primary" />
+                  </div>
+                  <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+                    {post.faq_title || "Domande Frequenti"}
+                  </h2>
+                </div>
+                
+                <Accordion type="single" collapsible className="space-y-4">
+                  {faqItems.map((faq) => (
+                    <AccordionItem
+                      key={faq.id}
+                      value={faq.id}
+                      className="border-2 border-verde-primary/20 rounded-xl px-6 bg-gradient-to-br from-verde-primary/5 to-transparent shadow-sm hover:shadow-md hover:border-verde-primary/30 transition-all duration-300"
+                    >
+                      <AccordionTrigger className="text-left font-display text-lg font-semibold text-primary hover:no-underline py-5 [&[data-state=open]]:text-verde-primary">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-6">
+                        <div className="border-t border-verde-primary/10 pt-4">
+                          <div 
+                            className={proseClasses}
+                            dangerouslySetInnerHTML={{ __html: faq.answer }}
+                          />
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Featured Products Section */}
+        {featuredProducts.length > 0 && (
+          <section className="section-padding bg-secondary shadow-[inset_0_4px_12px_-4px_rgba(0,0,0,0.06)]">
+            <div className="container-width">
+              <div className="text-center mb-16">
+                <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+                  {featuredProductsContent.heading}
+                </h2>
+                <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                  {stripHtmlTags(featuredProductsContent.subtitle)}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                {featuredProducts.map((product, index) => {
+                  const imageId = product.image_id;
+                  const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
+                  const productImage = mediaInfo?.file_path || "/placeholder.svg";
+                  const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                  const gridDesc = product.grid_description;
+                  
+                  return (
+                    <ProductCard 
+                      key={product.id} 
+                      name={product.name} 
+                      category={product.category || ""} 
+                      description={product.description || ""} 
+                      gridDescription={gridDesc || undefined} 
+                      benefits={product.benefits || []} 
+                      uses={product.uses || []} 
+                      image={productImage} 
+                      onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+                      priority={index < 3}
+                      blurhash={mediaInfo?.blurhash}
+                      optimizedUrl={optimizedUrl}
+                      imageWidth={mediaInfo?.width}
+                      imageHeight={mediaInfo?.height}
+                    />
+                  );
+                })}
+              </div>
+
+              <div className="text-center">
+                <Button variant="verde" size="lg" asChild>
+                  <Link to={featuredProductsContent.button_link}>{featuredProductsContent.button_text}</Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+        )}
       </article>
     </Layout>
   );
