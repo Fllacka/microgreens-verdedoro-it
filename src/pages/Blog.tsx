@@ -273,7 +273,7 @@ const Blog = () => {
               ) : filteredPosts.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredPosts.map((article) => (
-                      <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card">
+                      <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card flex flex-col">
                         <div className="relative h-48 overflow-hidden bg-muted/30">
                           <OptimizedImage
                             src={article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage}
@@ -285,7 +285,7 @@ const Blog = () => {
                             context="articleCard"
                           />
                         </div>
-                        <CardContent className="p-6">
+                        <CardContent className="p-6 flex flex-col flex-1">
                           <div className="flex items-center justify-between mb-3">
                             {article.category && (
                               <Badge variant="outline" className="text-xs">
@@ -300,10 +300,10 @@ const Blog = () => {
                           <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2">
                             {article.title}
                           </h3>
-                          <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-3">
+                          <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
                             {article.excerpt}
                           </p>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between mt-auto">
                             <span className="text-xs text-muted-foreground">
                               {formatDate(article.created_at)}
                             </span>
