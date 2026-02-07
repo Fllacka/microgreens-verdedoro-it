@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Layout from "@/components/Layout";
 import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -12,9 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { generateArticleSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
-import OptimizedImage from "@/components/ui/optimized-image";
 import ProductCard from "@/components/ProductCard";
 import { getImageUrl } from "@/lib/image-utils";
+import ArticleCard from "@/components/ArticleCard";
 
 interface ContentBlock {
   id: string;
@@ -519,45 +518,18 @@ const BlogArticle = () => {
                   Articoli Correlati
                 </h2>
                 <div className="grid md:grid-cols-3 gap-8">
-                  {relatedPosts.map((relatedPost) => {
-                    const relatedCoverUrl = relatedPost.featured_image_id && relatedMediaMap[relatedPost.featured_image_id];
-                    return (
-                    <Card key={relatedPost.id} className="overflow-hidden hover-lift border-border/50 bg-card group">
-                      <div className="relative h-48 overflow-hidden bg-muted/30">
-                        {relatedCoverUrl ? (
-                          <OptimizedImage
-                            src={relatedCoverUrl}
-                            alt={`${relatedPost.title} - articolo correlato`}
-                            className="w-full h-full"
-                            containerClassName="w-full h-full"
-                            objectFit="cover"
-                            size="articleCard"
-                            context="articleCard"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-hero" />
-                        )}
-                      </div>
-                      <div className="p-6">
-                        {relatedPost.category && (
-                          <Badge variant="outline" className="text-xs mb-3">
-                            {relatedPost.category}
-                          </Badge>
-                        )}
-                        <h3 className="font-display text-lg font-semibold text-foreground mb-3">
-                          {relatedPost.title}
-                        </h3>
-                        <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-2">
-                          {relatedPost.excerpt}
-                        </p>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/blog/${relatedPost.slug}`}>
-                            Leggi articolo
-                          </Link>
-                        </Button>
-                      </div>
-                    </Card>
-                  )})}
+                  {relatedPosts.map((relatedPost) => (
+                    <ArticleCard
+                      key={relatedPost.id}
+                      title={relatedPost.title}
+                      slug={relatedPost.slug}
+                      excerpt={relatedPost.excerpt}
+                      category={relatedPost.category}
+                      publishedAt={relatedPost.published_at}
+                      imageUrl={relatedPost.featured_image_id && relatedMediaMap[relatedPost.featured_image_id] ? relatedMediaMap[relatedPost.featured_image_id] : undefined}
+                      buttonText="Leggi articolo"
+                    />
+                  ))}
                 </div>
               </div>
             </div>
