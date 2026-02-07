@@ -1,151 +1,129 @@
 
-
-# Piano di Implementazione: FAQ e Prodotti in Evidenza per Blog Article
+# Piano: Componente ArticleCard Unificato
 
 ## Obiettivo
-Allineare la pagina **Blog Article** con le funzionalità della pagina **Cosa sono i Microgreens**, aggiungendo:
-- Sezione FAQ con gestione CMS drag-and-drop
-- Sezione Prodotti in Evidenza
-- Schema JSON-LD per FAQ
+Creare un unico componente `ArticleCard` riutilizzabile per uniformare le card degli articoli blog in tutte e tre le posizioni:
+1. Pagina `/blog` (overview)
+2. Homepage sezione "Dal nostro blog"
+3. Pagina articolo sezione "Articoli Correlati"
 
 ---
 
-## Fase 1: Database Migration
+## Analisi Attuale
 
-Aggiungeremo 4 nuove colonne alla tabella `blog_posts`:
+| Posizione | Altezza Immagine | Struttura | Pulsante |
+|-----------|------------------|-----------|----------|
+| /blog | h-48 (192px) | flex-col + flex-1 | "Leggi" fisso in basso |
+| Homepage | h-48 (192px) | CardContent semplice | Nessuno, card cliccabile |
+| Articoli Correlati | h-48 (192px) | div p-6 | "Leggi articolo" |
 
-```sql
-ALTER TABLE blog_posts
-ADD COLUMN faq_title text DEFAULT 'Domande Frequenti',
-ADD COLUMN faq_items jsonb DEFAULT '[]'::jsonb,
-ADD COLUMN draft_faq_title text,
-ADD COLUMN draft_faq_items jsonb;
-```
+**Problema principale**: Le card hanno strutture diverse e il rapporto immagine non corrisponde al formato consigliato 16:9 (800×450px).
 
 ---
 
-## Fase 2: CMS - BlogEdit.tsx
+## Soluzione: Componente ArticleCard
 
-### 2.1 Nuova Tab "FAQ"
-
-Aggiungeremo una tab FAQ tra "Contenuto" e "SEO" con:
-
-- Campo titolo sezione FAQ (Input text)
-- Lista FAQ items con drag-and-drop (usando pattern esistente con GripVertical)
-- Per ogni FAQ item:
-  - Input per la domanda
-  - RichTextEditor per la risposta
-  - Pulsante elimina
-- Pulsante "Aggiungi FAQ"
-
-### 2.2 Stato FAQ
-
-```typescript
-interface FAQItem {
-  id: string;
-  question: string;
-  answer: string;
-}
-
-const [faqTitle, setFaqTitle] = useState("Domande Frequenti");
-const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
-```
-
-### 2.3 Logica Save/Publish
-
-- **Save**: Salva in `draft_faq_title` e `draft_faq_items`
-- **Publish**: Copia da draft a `faq_title` e `faq_items`
-
----
-
-## Fase 3: Frontend - BlogArticle.tsx
-
-### 3.1 Sezione FAQ
-
-Posizionata dopo Content Blocks e prima di Related Articles:
+### Struttura del Componente
 
 ```text
-┌─────────────────────────────────────┐
-│           Hero Section               │
-├─────────────────────────────────────┤
-│        Content Blocks                │
-├─────────────────────────────────────┤
-│          CTA Card                    │
-├─────────────────────────────────────┤
-│     FAQ Section (se presenti)        │  ← NUOVO
-├─────────────────────────────────────┤
-│   I microgreens più ricercati        │  ← NUOVO
-├─────────────────────────────────────┤
-│        Related Articles              │
-└─────────────────────────────────────┘
+┌─────────────────────────────────┐
+│                                 │
+│      Immagine (aspect-video)    │  ← 16:9 ratio
+│      16:9 = ~56.25%             │
+│                                 │
+├─────────────────────────────────┤
+│  [Categoria]    [Clock] 3 min   │  ← Badge + tempo lettura
+├─────────────────────────────────┤
+│  Titolo Articolo                │  ← max 2 righe
+│  (line-clamp-2)                 │
+├─────────────────────────────────┤
+│  Excerpt breve del contenuto    │  ← max 3 righe (flex-1)
+│  dell'articolo...               │
+├─────────────────────────────────┤
+│  12 Gen 2025          [Leggi]   │  ← fisso in basso
+└─────────────────────────────────┘
 ```
 
-### 3.2 Styling FAQ (identico a CosaSonoMicrogreens)
-
-```jsx
-<AccordionItem className="border-2 border-verde-primary/20 rounded-xl bg-gradient-to-r from-verde-primary/5 to-transparent">
-  <AccordionTrigger className="text-primary data-[state=open]:text-verde-primary">
-    {faq.question}
-  </AccordionTrigger>
-  <AccordionContent className="border-t border-verde-primary/10 pt-4">
-    <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
-  </AccordionContent>
-</AccordionItem>
-```
-
-### 3.3 Sezione Prodotti in Evidenza
-
-- Fetch configurazione da `homepage_sections` (sezione `featured_products`)
-- Fetch prodotti popolari da tabella `products`
-- Rendering con componente `ProductCard` esistente
-- Grid 3 colonne desktop, 1 colonna mobile
-
----
-
-## Fase 4: Preview - BlogPreview.tsx
-
-Stesse modifiche di BlogArticle.tsx per coerenza nell'anteprima CMS.
-
----
-
-## Fase 5: SEO - FAQ Schema
-
-Aggiungeremo generazione automatica dello schema FAQPage:
+### Props del Componente
 
 ```typescript
-const generateFAQSchema = (faqItems: FAQItem[]) => ({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": faqItems.map(faq => ({
-    "@type": "Question",
-    "name": faq.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": faq.answer.replace(/<[^>]*>/g, '') // Strip HTML
-    }
-  }))
-});
+interface ArticleCardProps {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  category?: string;
+  publishedAt: string;
+  imageUrl?: string;
+  readTime?: string;
+  showButton?: boolean;        // default: true
+  buttonText?: string;         // default: "Leggi"
+  className?: string;
+  priority?: boolean;          // per lazy loading
+  blurhash?: string;
+}
 ```
 
----
+### Dimensioni Unificate
 
-## File da Modificare
-
-| File | Modifiche |
-|------|-----------|
-| `supabase/migrations/` | Nuova migration per colonne FAQ |
-| `src/pages/admin/BlogEdit.tsx` | Tab FAQ, stato, logica save/publish |
-| `src/pages/BlogArticle.tsx` | Sezione FAQ + Prodotti in evidenza + Schema |
-| `src/pages/preview/BlogPreview.tsx` | Sezione FAQ + Prodotti in evidenza |
+- **Immagine**: `aspect-video` (16:9) invece di `h-48` fisso
+- **Larghezza immagine ottimizzata**: 800px (già configurato come `articleCard`)
+- **Altezza risultante**: ~56.25% della larghezza (automatica con aspect-ratio)
 
 ---
 
-## Risultato Atteso
+## File da Creare/Modificare
 
-Dopo l'implementazione:
+| File | Azione |
+|------|--------|
+| `src/components/ArticleCard.tsx` | **CREARE** - Nuovo componente unificato |
+| `src/pages/Blog.tsx` | Sostituire card inline con ArticleCard |
+| `src/pages/Index.tsx` | Sostituire card blog con ArticleCard |
+| `src/pages/BlogArticle.tsx` | Sostituire card correlati con ArticleCard |
 
-1. **CMS**: Nuova tab "FAQ" con gestione drag-and-drop
-2. **Frontend**: Sezione FAQ con accordion verde + Prodotti popolari
-3. **SEO**: Schema FAQPage automatico per Google Rich Results
-4. **Preview**: Anteprima completa con FAQ e prodotti
+---
 
+## Dettagli Implementazione
+
+### 1. Nuovo Componente ArticleCard
+
+Creeremo `src/components/ArticleCard.tsx` con:
+- Immagine con aspect-video (16:9)
+- OptimizedImage con context="articleCard"
+- Layout flex per contenuto
+- Pulsante fissato in basso
+- Supporto per card cliccabile o con pulsante
+
+### 2. Aggiornamento Blog.tsx
+
+- Importare ArticleCard
+- Rimuovere Card inline attuale
+- Passare dati formattati al nuovo componente
+
+### 3. Aggiornamento Index.tsx
+
+- Importare ArticleCard  
+- Sostituire la card nella sezione blog
+- Mantenere la card cliccabile (senza pulsante esplicito o con wrapper Link)
+
+### 4. Aggiornamento BlogArticle.tsx
+
+- Importare ArticleCard
+- Sostituire le card nella sezione "Articoli Correlati"
+
+---
+
+## Vantaggi
+
+1. **Consistenza visiva**: Stesse dimensioni e proporzioni ovunque
+2. **Manutenibilità**: Un solo componente da aggiornare
+3. **Rispetto linee guida**: Immagini 16:9 come da specifiche
+4. **DRY**: Nessuna duplicazione di codice
+
+---
+
+## Note Tecniche
+
+- L'aspect ratio 16:9 si ottiene con la classe Tailwind `aspect-video`
+- Il componente usa OptimizedImage con size/context "articleCard" (800px width)
+- Il layout flex-col con flex-1 sull'excerpt garantisce il pulsante sempre in basso
+- La card mantiene hover-lift per feedback visivo
