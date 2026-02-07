@@ -1,17 +1,13 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Clock, ArrowRight, Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import { generateBreadcrumbSchema } from "@/lib/seo";
-import OptimizedImage from "@/components/ui/optimized-image";
 import { getImageUrl } from "@/lib/image-utils";
+import ArticleCard from "@/components/ArticleCard";
 
 interface BlogPost {
   id: string;
@@ -273,48 +269,16 @@ const Blog = () => {
               ) : filteredPosts.length > 0 ? (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredPosts.map((article) => (
-                      <Card key={article.id} className="overflow-hidden hover-lift border-border/50 bg-card flex flex-col">
-                        <div className="relative h-48 overflow-hidden bg-muted/30">
-                          <OptimizedImage
-                            src={article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage}
-                            alt={`${article.title} - articolo blog`}
-                            className="w-full h-full"
-                            containerClassName="w-full h-full"
-                            objectFit="cover"
-                            size="articleCard"
-                            context="articleCard"
-                          />
-                        </div>
-                        <CardContent className="p-6 flex flex-col flex-1">
-                          <div className="flex items-center justify-between mb-3">
-                            {article.category && (
-                              <Badge variant="outline" className="text-xs">
-                                {article.category}
-                              </Badge>
-                            )}
-                            <div className="flex items-center text-xs text-muted-foreground gap-2">
-                              <Clock className="w-3 h-3" />
-                              {calculateReadTime(article.content_blocks)}
-                            </div>
-                          </div>
-                          <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2">
-                            {article.title}
-                          </h3>
-                          <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
-                            {article.excerpt}
-                          </p>
-                          <div className="flex items-center justify-between mt-auto">
-                            <span className="text-xs text-muted-foreground">
-                              {formatDate(article.created_at)}
-                            </span>
-                            <Button variant="outline" size="sm" asChild>
-                              <Link to={`/blog/${article.slug}`}>
-                                Leggi
-                              </Link>
-                            </Button>
-                          </div>
-                    </CardContent>
-                  </Card>
+                    <ArticleCard
+                      key={article.id}
+                      title={article.title}
+                      slug={article.slug}
+                      excerpt={article.excerpt}
+                      category={article.category}
+                      publishedAt={article.created_at}
+                      imageUrl={article.featured_image_id && mediaMap[article.featured_image_id] ? mediaMap[article.featured_image_id] : varietiesImage}
+                      readTime={calculateReadTime(article.content_blocks)}
+                    />
                   ))}
                 </div>
               ) : (

@@ -1,10 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
-import OptimizedImage from "@/components/ui/optimized-image";
+import ArticleCard from "@/components/ArticleCard";
 import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand, HandCoins } from "lucide-react";
 import SeedingHandIcon from "@/components/icons/SeedingHandIcon";
 import heroImage from "@/assets/hero-microgreens.jpg";
@@ -785,30 +784,21 @@ const Index = ({
 
             <div className={`grid gap-8 mb-8 ${blogPosts.length === 1 ? "max-w-md mx-auto" : blogPosts.length === 2 ? "grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto" : "grid-cols-1 md:grid-cols-3"}`}>
               {blogPosts.map(post => {
-            const media = post.featured_image_id && mediaMap[post.featured_image_id] ? mediaMap[post.featured_image_id] : null;
-            const imageUrl = media?.optimized_versions?.articleCard?.url || media?.file_path || varietiesImage;
-            return <Link key={post.id} to={`/blog/${post.slug}`}>
-                    <Card className="overflow-hidden hover-lift border-border/50 h-full">
-                      <div className="relative h-48 overflow-hidden bg-muted/30">
-                        <OptimizedImage src={imageUrl} alt={`${post.title} - articolo blog`} className="w-full h-full" containerClassName="w-full h-full" objectFit="cover" size="articleCard" context="articleCard" blurhash={media?.blurhash} />
-                        <div className="absolute inset-0 bg-gradient-hero/20 pointer-events-none" />
-                      </div>
-                      <CardContent className="p-6 text-left">
-                        <h3 className="font-display text-xl font-semibold text-primary mb-2 line-clamp-2">
-                          {post.title}
-                        </h3>
-                        {post.excerpt && <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-2">
-                            {post.excerpt}
-                          </p>}
-                        {post.published_at && <span className="text-xs text-muted-foreground">
-                            {format(new Date(post.published_at), "d MMM yyyy", {
-                      locale: it
-                    })}
-                          </span>}
-                      </CardContent>
-                    </Card>
-                  </Link>;
-          })}
+                const media = post.featured_image_id && mediaMap[post.featured_image_id] ? mediaMap[post.featured_image_id] : null;
+                const imageUrl = media?.optimized_versions?.articleCard?.url || media?.file_path || varietiesImage;
+                return (
+                  <ArticleCard
+                    key={post.id}
+                    title={post.title}
+                    slug={post.slug}
+                    excerpt={post.excerpt || undefined}
+                    publishedAt={post.published_at || new Date().toISOString()}
+                    imageUrl={imageUrl}
+                    blurhash={media?.blurhash || undefined}
+                    showButton={false}
+                  />
+                );
+              })}
             </div>
 
             <div className="mt-8">
