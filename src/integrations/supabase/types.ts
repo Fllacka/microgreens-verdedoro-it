@@ -814,6 +814,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "products_draft_image_id_fkey"
+            columns: ["draft_image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_draft_og_image_id_fkey"
+            columns: ["draft_og_image_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "products_image_id_fkey"
             columns: ["image_id"]
             isOneToOne: false

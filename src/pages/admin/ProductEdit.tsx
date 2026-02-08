@@ -295,6 +295,28 @@ const AdminProductEdit = () => {
     setSaving(true);
 
     try {
+      // Validate image exists before publishing
+      if (formData.image_id) {
+        const { data: mediaExists } = await supabase
+          .from("media")
+          .select("id")
+          .eq("id", formData.image_id)
+          .maybeSingle();
+        
+        if (!mediaExists) {
+          // Image was deleted, clear the reference
+          setFormData(prev => ({ ...prev, image_id: null }));
+          setImageUrl(null);
+          toast({
+            title: "Attenzione",
+            description: "L'immagine selezionata non esiste più. Seleziona una nuova immagine prima di pubblicare.",
+            variant: "destructive",
+          });
+          setSaving(false);
+          return;
+        }
+      }
+
       const productData = {
         // Published fields
         name: formData.name,
