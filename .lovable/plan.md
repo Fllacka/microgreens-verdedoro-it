@@ -1,129 +1,103 @@
 
-# Piano: Componente ArticleCard Unificato
+# Piano: Risolvere l'Errore di Foreign Key su Publish Prodotti
 
-## Obiettivo
-Creare un unico componente `ArticleCard` riutilizzabile per uniformare le card degli articoli blog in tutte e tre le posizioni:
-1. Pagina `/blog` (overview)
-2. Homepage sezione "Dal nostro blog"
-3. Pagina articolo sezione "Articoli Correlati"
+## Problema Identificato
 
----
+L'errore `"products_image_id_fkey" violates foreign key constraint` si verifica perché:
 
-## Analisi Attuale
+1. Il prodotto "Pak Choi" ha un `draft_image_id` che punta a un record media **eliminato**
+2. L'ID `a2cae300-0424-4645-b2e7-ebf8e4c1b617` non esiste più nella tabella `media`
+3. Quando si pubblica, il codice copia `draft_image_id` in `image_id`, causando il fallimento del vincolo FK
 
-| Posizione | Altezza Immagine | Struttura | Pulsante |
-|-----------|------------------|-----------|----------|
-| /blog | h-48 (192px) | flex-col + flex-1 | "Leggi" fisso in basso |
-| Homepage | h-48 (192px) | CardContent semplice | Nessuno, card cliccabile |
-| Articoli Correlati | h-48 (192px) | div p-6 | "Leggi articolo" |
+### Stato Attuale del Prodotto
 
-**Problema principale**: Le card hanno strutture diverse e il rapporto immagine non corrisponde al formato consigliato 16:9 (800×450px).
+| Campo | Valore |
+|-------|--------|
+| `image_id` | `null` |
+| `draft_image_id` | `a2cae300-0424-4645-b2e7-ebf8e4c1b617` (non esiste!) |
 
 ---
 
-## Soluzione: Componente ArticleCard
+## Soluzione Proposta
 
-### Struttura del Componente
+### 1. Fix Immediato: Pulire il Riferimento Orfano
 
-```text
-┌─────────────────────────────────┐
-│                                 │
-│      Immagine (aspect-video)    │  ← 16:9 ratio
-│      16:9 = ~56.25%             │
-│                                 │
-├─────────────────────────────────┤
-│  [Categoria]    [Clock] 3 min   │  ← Badge + tempo lettura
-├─────────────────────────────────┤
-│  Titolo Articolo                │  ← max 2 righe
-│  (line-clamp-2)                 │
-├─────────────────────────────────┤
-│  Excerpt breve del contenuto    │  ← max 3 righe (flex-1)
-│  dell'articolo...               │
-├─────────────────────────────────┤
-│  12 Gen 2025          [Leggi]   │  ← fisso in basso
-└─────────────────────────────────┘
+Eseguire una query per rimuovere il `draft_image_id` orfano dal prodotto Pak Choi:
+
+```sql
+UPDATE products 
+SET draft_image_id = NULL 
+WHERE id = 'a4edbed2-123d-4e4a-a1b0-091009a24c58';
 ```
 
-### Props del Componente
+### 2. Fix Preventivo: Aggiungere Foreign Key su `draft_image_id`
+
+Attualmente solo `image_id` ha un vincolo FK con `ON DELETE SET NULL`. Aggiungere lo stesso vincolo a `draft_image_id` per evitare riferimenti orfani in futuro:
+
+```sql
+ALTER TABLE products
+ADD CONSTRAINT products_draft_image_id_fkey 
+FOREIGN KEY (draft_image_id) 
+REFERENCES media(id) 
+ON DELETE SET NULL;
+```
+
+### 3. Fix nel Codice: Validazione Pre-Publish
+
+Aggiungere una validazione nel `publishProduct()` per verificare che l'immagine esista prima di pubblicare:
 
 ```typescript
-interface ArticleCardProps {
-  title: string;
-  slug: string;
-  excerpt?: string;
-  category?: string;
-  publishedAt: string;
-  imageUrl?: string;
-  readTime?: string;
-  showButton?: boolean;        // default: true
-  buttonText?: string;         // default: "Leggi"
-  className?: string;
-  priority?: boolean;          // per lazy loading
-  blurhash?: string;
+// Prima di pubblicare, verifica che l'immagine esista
+if (formData.image_id) {
+  const { data: mediaExists } = await supabase
+    .from("media")
+    .select("id")
+    .eq("id", formData.image_id)
+    .maybeSingle();
+  
+  if (!mediaExists) {
+    // L'immagine non esiste più, pulisci il riferimento
+    formData.image_id = null;
+    toast({
+      title: "Attenzione",
+      description: "L'immagine selezionata non esiste più. Seleziona una nuova immagine.",
+      variant: "destructive",
+    });
+    return;
+  }
 }
 ```
 
-### Dimensioni Unificate
-
-- **Immagine**: `aspect-video` (16:9) invece di `h-48` fisso
-- **Larghezza immagine ottimizzata**: 800px (già configurato come `articleCard`)
-- **Altezza risultante**: ~56.25% della larghezza (automatica con aspect-ratio)
-
 ---
 
-## File da Creare/Modificare
+## File da Modificare
 
 | File | Azione |
 |------|--------|
-| `src/components/ArticleCard.tsx` | **CREARE** - Nuovo componente unificato |
-| `src/pages/Blog.tsx` | Sostituire card inline con ArticleCard |
-| `src/pages/Index.tsx` | Sostituire card blog con ArticleCard |
-| `src/pages/BlogArticle.tsx` | Sostituire card correlati con ArticleCard |
+| Database | Aggiungere FK constraint su `draft_image_id` |
+| `src/pages/admin/ProductEdit.tsx` | Aggiungere validazione immagine pre-publish |
 
 ---
 
-## Dettagli Implementazione
+## Azioni nel Dettaglio
 
-### 1. Nuovo Componente ArticleCard
+### Passo 1: Migration Database
 
-Creeremo `src/components/ArticleCard.tsx` con:
-- Immagine con aspect-video (16:9)
-- OptimizedImage con context="articleCard"
-- Layout flex per contenuto
-- Pulsante fissato in basso
-- Supporto per card cliccabile o con pulsante
+Creare una migration per:
+1. Pulire tutti i riferimenti orfani esistenti in `draft_image_id`
+2. Aggiungere il vincolo FK con ON DELETE SET NULL
 
-### 2. Aggiornamento Blog.tsx
+### Passo 2: Modifica ProductEdit.tsx
 
-- Importare ArticleCard
-- Rimuovere Card inline attuale
-- Passare dati formattati al nuovo componente
-
-### 3. Aggiornamento Index.tsx
-
-- Importare ArticleCard  
-- Sostituire la card nella sezione blog
-- Mantenere la card cliccabile (senza pulsante esplicito o con wrapper Link)
-
-### 4. Aggiornamento BlogArticle.tsx
-
-- Importare ArticleCard
-- Sostituire le card nella sezione "Articoli Correlati"
+Aggiungere nella funzione `publishProduct()`:
+- Validazione che l'immagine esista prima del publish
+- Messaggio di errore chiaro se l'immagine è stata eliminata
+- Pulizia automatica del riferimento orfano
 
 ---
 
-## Vantaggi
+## Benefici
 
-1. **Consistenza visiva**: Stesse dimensioni e proporzioni ovunque
-2. **Manutenibilità**: Un solo componente da aggiornare
-3. **Rispetto linee guida**: Immagini 16:9 come da specifiche
-4. **DRY**: Nessuna duplicazione di codice
-
----
-
-## Note Tecniche
-
-- L'aspect ratio 16:9 si ottiene con la classe Tailwind `aspect-video`
-- Il componente usa OptimizedImage con size/context "articleCard" (800px width)
-- Il layout flex-col con flex-1 sull'excerpt garantisce il pulsante sempre in basso
-- La card mantiene hover-lift per feedback visivo
+1. **Fix immediato**: L'utente potrà pubblicare il prodotto Pak Choi
+2. **Prevenzione futura**: Il vincolo FK eviterà nuovi riferimenti orfani
+3. **UX migliorata**: Messaggi di errore chiari invece di errori tecnici del database
