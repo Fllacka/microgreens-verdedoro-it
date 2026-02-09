@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, Zap, Shield } from "lucide-react";
-import OptimizedImage from "@/components/ui/optimized-image";
 
 interface ProductCardProps {
   name: string;
@@ -15,13 +14,6 @@ interface ProductCardProps {
   popular?: boolean;
   onCardClick?: () => void;
   priority?: boolean;
-  /** BlurHash for instant placeholder */
-  blurhash?: string | null;
-  /** Pre-optimized image URL from CMS */
-  optimizedUrl?: string | null;
-  /** Original image dimensions for CLS prevention */
-  imageWidth?: number | null;
-  imageHeight?: number | null;
 }
 
 const ProductCard = ({
@@ -36,32 +28,19 @@ const ProductCard = ({
   popular,
   onCardClick,
   priority = false,
-  blurhash,
-  optimizedUrl,
-  imageWidth,
-  imageHeight,
 }: ProductCardProps) => {
   return (
     <Card 
       className="product-card overflow-hidden border-border/50 relative cursor-pointer group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex flex-col"
       onClick={onCardClick}
     >
-      {/* Product Image - Optimized with BlurHash and WebP support */}
+      {/* Product Image */}
       <div className="relative aspect-square overflow-hidden">
-        <OptimizedImage
+        <img
           src={image}
           alt={`${name} - microgreen fresco`}
-          className="w-full h-full"
-          containerClassName="w-full h-full"
-          priority={priority}
-          objectFit="cover"
-          aspectRatio="1/1"
-          size="productCard"
-          context="productCard"
-          blurhash={blurhash}
-          optimizedUrl={optimizedUrl}
-          width={imageWidth ?? undefined}
-          height={imageHeight ?? undefined}
+          className="w-full h-full object-cover"
+          loading={priority ? "eager" : "lazy"}
         />
         
         {/* Gradient overlay for better text readability */}

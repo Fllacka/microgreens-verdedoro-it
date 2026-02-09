@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { generateOrganizationSchema, generateWebSiteSchema, generateLocalBusinessSchema, combineSchemas } from "@/lib/seo";
-import { getImageUrl, isSupabaseStorageUrl } from "@/lib/image-utils";
+
 interface BlogPost {
   id: string;
   title: string;
@@ -26,10 +26,6 @@ interface BlogPost {
 interface MediaItem {
   id: string;
   file_path: string;
-  optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-  blurhash?: string | null;
-  width?: number | null;
-  height?: number | null;
 }
 interface HomepageSection {
   id: string;
@@ -89,10 +85,6 @@ const Index = ({
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [productMediaMap, setProductMediaMap] = useState<Record<string, {
     file_path: string;
-    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-    blurhash?: string | null;
-    width?: number | null;
-    height?: number | null;
   }>>({});
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -136,17 +128,13 @@ const Index = ({
       if (imageIds.length > 0) {
         const {
           data: media
-        } = await supabase.from("media").select("id, file_path, optimized_versions, blurhash, width, height").in("id", imageIds);
+        } = await supabase.from("media").select("id, file_path").in("id", imageIds);
         if (media) {
           const map: Record<string, MediaItem> = {};
           media.forEach((m) => {
             map[m.id] = {
               id: m.id,
               file_path: m.file_path,
-              optimized_versions: m.optimized_versions as MediaItem['optimized_versions'],
-              blurhash: m.blurhash,
-              width: m.width,
-              height: m.height,
             };
           });
           setMediaMap(map);
@@ -164,27 +152,17 @@ const Index = ({
       const orderedProducts = slugs.map(slug => products.find(p => p.slug === slug)).filter((p): p is typeof products[number] => p !== undefined) as Product[];
       setFeaturedProducts(orderedProducts);
 
-      // Fetch product images with optimized URLs
+      // Fetch product images
       const imageIds = products.map(p => p.image_id).filter((id): id is string => id !== null);
       if (imageIds.length > 0) {
         const {
           data: media
-        } = await supabase.from("media").select("id, file_path, optimized_versions, blurhash, width, height").in("id", imageIds);
+        } = await supabase.from("media").select("id, file_path").in("id", imageIds);
         if (media) {
-          const map: Record<string, {
-            file_path: string;
-            optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-            blurhash?: string | null;
-            width?: number | null;
-            height?: number | null;
-          }> = {};
+          const map: Record<string, { file_path: string }> = {};
           media.forEach(m => {
             map[m.id] = {
               file_path: m.file_path,
-              optimized_versions: m.optimized_versions as Record<string, { url: string; width: number; height: number }> | null,
-              blurhash: m.blurhash,
-              width: m.width,
-              height: m.height,
             };
           });
           setProductMediaMap(map);
@@ -205,20 +183,14 @@ const Index = ({
       if (imageIds.length > 0) {
         const {
           data: media
-        } = await supabase.from("media").select("id, file_path, optimized_versions, blurhash, width, height").in("id", imageIds);
+        } = await supabase.from("media").select("id, file_path").in("id", imageIds);
         if (media) {
           setMediaMap(prev => {
-            const map = {
-              ...prev
-            };
+            const map = { ...prev };
             media.forEach((m) => {
               map[m.id] = {
                 id: m.id,
                 file_path: m.file_path,
-                optimized_versions: m.optimized_versions as MediaItem['optimized_versions'],
-                blurhash: m.blurhash,
-                width: m.width,
-                height: m.height,
               };
             });
             return map;
@@ -316,29 +288,25 @@ const Index = ({
     robots: "index, follow"
   };
 
-  // Get images from CMS or use defaults - prioritize optimized versions
+  // Get images from CMS or use defaults
   const getHeroImage = () => {
     const imageId = heroContent.background_image_id;
     if (imageId && mediaMap[imageId]) {
-      const media = mediaMap[imageId];
-      // Prioritize optimized version for hero context
-      return media.optimized_versions?.hero?.url || media.file_path;
+      return mediaMap[imageId].file_path;
     }
     return heroImage;
   };
   const getWhatAreMicrogreensImage = () => {
     const imageId = whatAreMicrogreensContent.image_id;
     if (imageId && mediaMap[imageId]) {
-      const media = mediaMap[imageId];
-      return media.optimized_versions?.sectionImage?.url || media.file_path;
+      return mediaMap[imageId].file_path;
     }
     return varietiesImage;
   };
   const getCustomMicrogreensImage = () => {
     const imageId = customMicrogreensContent.image_id;
     if (imageId && mediaMap[imageId]) {
-      const media = mediaMap[imageId];
-      return media.optimized_versions?.sectionImage?.url || media.file_path;
+      return mediaMap[imageId].file_path;
     }
     return chefImage;
   };
@@ -520,7 +488,6 @@ const Index = ({
             const imageId = 'image_id' in product ? product.image_id as string | null : null;
             const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
             const productImage = mediaInfo?.file_path || (hasDefaultProducts ? index === 1 ? varietiesImage : chefImage : chefImage);
-            const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
             const gridDesc = 'grid_description' in product ? (product as Product).grid_description : undefined;
             return <ProductCard 
               key={product.id} 
@@ -533,10 +500,6 @@ const Index = ({
               image={productImage} 
               onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
               priority={index < 3}
-              blurhash={mediaInfo?.blurhash}
-              optimizedUrl={optimizedUrl}
-              imageWidth={mediaInfo?.width}
-              imageHeight={mediaInfo?.height}
             />;
           })}
             </div>
@@ -785,7 +748,7 @@ const Index = ({
             <div className={`grid gap-8 mb-8 ${blogPosts.length === 1 ? "max-w-md mx-auto" : blogPosts.length === 2 ? "grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto" : "grid-cols-1 md:grid-cols-3"}`}>
               {blogPosts.map(post => {
                 const media = post.featured_image_id && mediaMap[post.featured_image_id] ? mediaMap[post.featured_image_id] : null;
-                const imageUrl = media?.optimized_versions?.articleCard?.url || media?.file_path || varietiesImage;
+                const imageUrl = media?.file_path || varietiesImage;
                 return (
                   <ArticleCard
                     key={post.id}
@@ -794,7 +757,6 @@ const Index = ({
                     excerpt={post.excerpt || undefined}
                     publishedAt={post.published_at || new Date().toISOString()}
                     imageUrl={imageUrl}
-                    blurhash={media?.blurhash || undefined}
                     showButton={false}
                   />
                 );

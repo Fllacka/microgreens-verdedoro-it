@@ -922,7 +922,6 @@ const AdminProductEdit = () => {
                       }}
                       altText={formData.image_alt}
                       onAltTextChange={(altText) => setFormData({ ...formData, image_alt: altText })}
-                      context="productCard"
                     />
                   </CardContent>
                 </Card>

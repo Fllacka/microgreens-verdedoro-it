@@ -279,12 +279,6 @@ const ProductDetail = () => {
                 containerClassName="w-full h-full"
                 priority={true}
                 objectFit="cover"
-                size="large"
-                context="productDetail"
-                blurhash={product.media?.blurhash}
-                optimizedUrl={product.media?.optimized_versions?.productDetail?.url}
-                width={product.media?.width ?? undefined}
-                height={product.media?.height ?? undefined}
               />
             </div>
 

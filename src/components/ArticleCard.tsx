@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";
-import OptimizedImage from "@/components/ui/optimized-image";
 import { cn } from "@/lib/utils";
 
 interface ArticleCardProps {
@@ -18,7 +17,6 @@ interface ArticleCardProps {
   buttonText?: string;
   className?: string;
   priority?: boolean;
-  blurhash?: string;
 }
 
 const ArticleCard = ({
@@ -33,7 +31,6 @@ const ArticleCard = ({
   buttonText = "Leggi",
   className,
   priority = false,
-  blurhash,
 }: ArticleCardProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -52,15 +49,11 @@ const ArticleCard = ({
       {/* Image - 16:9 aspect ratio */}
       <div className="relative aspect-video overflow-hidden bg-muted/30">
         {imageUrl ? (
-          <OptimizedImage
+          <img
             src={imageUrl}
             alt={`${title} - articolo blog`}
-            className="w-full h-full"
-            containerClassName="w-full h-full"
-            objectFit="cover"
-            size="articleCard"
-            context="articleCard"
-            blurhash={blurhash}
+            className="w-full h-full object-cover"
+            loading={priority ? "eager" : "lazy"}
           />
         ) : (
           <div className="w-full h-full bg-gradient-hero" />

@@ -1,4 +1,3 @@
-import OptimizedImage from "@/components/ui/optimized-image";
 import { cn } from "@/lib/utils";
 
 interface ContentBlock {
@@ -55,14 +54,11 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     // Fixed image dimensions - always 500px height on desktop
     const imageElement = (
       <div className="relative w-full rounded-xl overflow-hidden shadow-lg h-[300px] md:h-[380px] lg:h-[500px]">
-        <OptimizedImage
+        <img
           src={block.url || ""}
           alt={block.alt || ""}
           className="absolute inset-0 w-full h-full object-cover"
-          containerClassName="absolute inset-0"
-          objectFit="cover"
-          size="textImageBlock"
-          context="textImageBlock"
+          loading="lazy"
         />
       </div>
     );
@@ -187,14 +183,11 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
             return (
               <div key={block.id} className="max-w-4xl mx-auto px-4">
                 <div className="relative w-full aspect-video rounded-2xl shadow-lg overflow-hidden">
-                  <OptimizedImage
+                  <img
                     src={block.url || ""}
                     alt={block.alt || ""}
                     className="absolute inset-0 w-full h-full object-cover"
-                    containerClassName="absolute inset-0"
-                    objectFit="cover"
-                    size="contentImage"
-                    context="contentImage"
+                    loading="lazy"
                   />
                 </div>
               </div>
