@@ -1,103 +1,171 @@
 
-# Piano: Risolvere l'Errore di Foreign Key su Publish Prodotti
+# Piano: Rimozione Sistema di Ottimizzazione Immagini
 
-## Problema Identificato
-
-L'errore `"products_image_id_fkey" violates foreign key constraint` si verifica perché:
-
-1. Il prodotto "Pak Choi" ha un `draft_image_id` che punta a un record media **eliminato**
-2. L'ID `a2cae300-0424-4645-b2e7-ebf8e4c1b617` non esiste più nella tabella `media`
-3. Quando si pubblica, il codice copia `draft_image_id` in `image_id`, causando il fallimento del vincolo FK
-
-### Stato Attuale del Prodotto
-
-| Campo | Valore |
-|-------|--------|
-| `image_id` | `null` |
-| `draft_image_id` | `a2cae300-0424-4645-b2e7-ebf8e4c1b617` (non esiste!) |
+## Obiettivo
+Semplificare il flusso delle immagini: **carica → inserisci**. Niente compressione, ridimensionamento, conversione WebP, BlurHash, Edge Function o configurazioni per contesto.
 
 ---
 
-## Soluzione Proposta
+## Componenti da Rimuovere/Modificare
 
-### 1. Fix Immediato: Pulire il Riferimento Orfano
+### 1. File da ELIMINARE
 
-Eseguire una query per rimuovere il `draft_image_id` orfano dal prodotto Pak Choi:
+| File | Motivo |
+|------|--------|
+| `supabase/functions/optimize-image/` | Edge Function per ottimizzazione server-side |
+| `src/lib/image-compression.ts` | Libreria compressione client-side + BlurHash |
+| `src/components/ui/SmartImage.tsx` | Componente con BlurHash placeholder |
 
-```sql
-UPDATE products 
-SET draft_image_id = NULL 
-WHERE id = 'a4edbed2-123d-4e4a-a1b0-091009a24c58';
+### 2. File da SEMPLIFICARE
+
+| File | Modifiche |
+|------|-----------|
+| `src/lib/image-utils.ts` | Rimuovere configurazioni contesto, mantenere solo helper URL base |
+| `src/components/ui/optimized-image.tsx` | Convertire in semplice `<img>` wrapper senza BlurHash/srcset |
+| `src/components/admin/MediaSelector.tsx` | Rimuovere: context prop, chiamata optimize-image, badge ottimizzazione |
+| `src/pages/admin/Media.tsx` | Rimuovere: compressImage, BlurHash generation, badge ottimizzazione |
+
+### 3. Pagine Frontend da SEMPLIFICARE
+
+| File | Modifiche |
+|------|-----------|
+| `src/pages/Index.tsx` | Usare `file_path` diretto invece di `optimized_versions.hero.url` |
+| `src/pages/ProductDetail.tsx` | Rimuovere riferimenti a `optimized_versions` |
+| `src/components/ProductCard.tsx` | Semplificare `OptimizedImage` → `<img>` base |
+| `src/components/ArticleCard.tsx` | Semplificare `OptimizedImage` → `<img>` base |
+| `src/components/ContentBlockRenderer.tsx` | Usare `<img>` semplice |
+
+---
+
+## Nuovo Flusso Semplificato
+
+```text
+PRIMA (complesso):
+┌────────────────────────────────────────────────────────────────────┐
+│ Upload → Pre-resize → BlurHash → Store → Select Context →         │
+│ Edge Function → Resize/Crop/WebP → Store Optimized → Display      │
+└────────────────────────────────────────────────────────────────────┘
+
+DOPO (semplice):
+┌─────────────────────────────────────┐
+│ Upload → Store → Display            │
+└─────────────────────────────────────┘
 ```
 
-### 2. Fix Preventivo: Aggiungere Foreign Key su `draft_image_id`
+---
 
-Attualmente solo `image_id` ha un vincolo FK con `ON DELETE SET NULL`. Aggiungere lo stesso vincolo a `draft_image_id` per evitare riferimenti orfani in futuro:
+## Dettagli Implementazione
 
-```sql
-ALTER TABLE products
-ADD CONSTRAINT products_draft_image_id_fkey 
-FOREIGN KEY (draft_image_id) 
-REFERENCES media(id) 
-ON DELETE SET NULL;
-```
-
-### 3. Fix nel Codice: Validazione Pre-Publish
-
-Aggiungere una validazione nel `publishProduct()` per verificare che l'immagine esista prima di pubblicare:
+### A. Nuovo `MediaSelector.tsx` (semplificato)
 
 ```typescript
-// Prima di pubblicare, verifica che l'immagine esista
-if (formData.image_id) {
-  const { data: mediaExists } = await supabase
-    .from("media")
-    .select("id")
-    .eq("id", formData.image_id)
-    .maybeSingle();
-  
-  if (!mediaExists) {
-    // L'immagine non esiste più, pulisci il riferimento
-    formData.image_id = null;
-    toast({
-      title: "Attenzione",
-      description: "L'immagine selezionata non esiste più. Seleziona una nuova immagine.",
-      variant: "destructive",
-    });
-    return;
-  }
+// PRIMA: context, optimizedUrl, blurhash, chiamata Edge Function
+onChange(file.id, file.file_path, optimizedUrl, { width, height, blurhash })
+
+// DOPO: solo ID e URL
+onChange(file.id, file.file_path)
+```
+
+- Rimuovere prop `context`
+- Rimuovere chiamata a `supabase.functions.invoke('optimize-image')`
+- Rimuovere badge "Ottimizzato"
+- Rimuovere calcolo dimensioni attese
+
+### B. Nuovo `Media.tsx` (upload semplice)
+
+```typescript
+// PRIMA
+const result = await compressImage(file);
+fileToUpload = result.file;
+width = result.width;
+height = result.height;
+blurhash = result.blurhash;
+
+// DOPO
+const fileToUpload = file; // Nessuna elaborazione
+```
+
+- Rimuovere import `compressImage`
+- Upload diretto del file originale
+- Rimuovere badge BlurHash/dimensioni
+
+### C. Nuovo componente `SimpleImage.tsx`
+
+```typescript
+interface SimpleImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+  loading?: "lazy" | "eager";
 }
+
+const SimpleImage = ({ src, alt, className, loading = "lazy" }) => (
+  <img 
+    src={src} 
+    alt={alt} 
+    className={className}
+    loading={loading}
+  />
+);
+```
+
+### D. Database: Colonne che Rimangono Inutilizzate
+
+Le seguenti colonne nella tabella `media` non verranno più popolate (ma non le eliminiamo per evitare migration distruttive):
+
+- `blurhash` → null
+- `optimized_versions` → null  
+- `optimized_urls` → null
+- `is_optimized` → false
+- `width` / `height` → opzionali (utili per layout, ma non obbligatori)
+
+---
+
+## Dipendenze npm da RIMUOVERE
+
+```json
+// Possono essere rimosse da package.json:
+"blurhash": "^2.0.5",
+"react-blurhash": "^0.3.0",
+"browser-image-compression": "^2.0.2"
 ```
 
 ---
 
-## File da Modificare
+## Riepilogo Modifiche per File
 
-| File | Azione |
-|------|--------|
-| Database | Aggiungere FK constraint su `draft_image_id` |
-| `src/pages/admin/ProductEdit.tsx` | Aggiungere validazione immagine pre-publish |
-
----
-
-## Azioni nel Dettaglio
-
-### Passo 1: Migration Database
-
-Creare una migration per:
-1. Pulire tutti i riferimenti orfani esistenti in `draft_image_id`
-2. Aggiungere il vincolo FK con ON DELETE SET NULL
-
-### Passo 2: Modifica ProductEdit.tsx
-
-Aggiungere nella funzione `publishProduct()`:
-- Validazione che l'immagine esista prima del publish
-- Messaggio di errore chiaro se l'immagine è stata eliminata
-- Pulizia automatica del riferimento orfano
+| Azione | File |
+|--------|------|
+| **ELIMINA** | `supabase/functions/optimize-image/` |
+| **ELIMINA** | `src/lib/image-compression.ts` |
+| **ELIMINA** | `src/components/ui/SmartImage.tsx` |
+| **SEMPLIFICA** | `src/lib/image-utils.ts` |
+| **SEMPLIFICA** | `src/components/ui/optimized-image.tsx` |
+| **SEMPLIFICA** | `src/components/admin/MediaSelector.tsx` |
+| **SEMPLIFICA** | `src/pages/admin/Media.tsx` |
+| **AGGIORNA** | `src/pages/Index.tsx` |
+| **AGGIORNA** | `src/pages/ProductDetail.tsx` |
+| **AGGIORNA** | `src/components/ProductCard.tsx` |
+| **AGGIORNA** | `src/components/ArticleCard.tsx` |
+| **AGGIORNA** | `src/components/ContentBlockRenderer.tsx` |
+| **AGGIORNA** | Tutte le pagine preview che usano OptimizedImage |
 
 ---
 
-## Benefici
+## Risultato Finale
 
-1. **Fix immediato**: L'utente potrà pubblicare il prodotto Pak Choi
-2. **Prevenzione futura**: Il vincolo FK eviterà nuovi riferimenti orfani
-3. **UX migliorata**: Messaggi di errore chiari invece di errori tecnici del database
+**Workflow semplificato:**
+1. Vai nella Media Library
+2. Clicca "Carica File"
+3. Seleziona immagine (nessuna elaborazione)
+4. Immagine salvata così com'è
+5. Seleziona l'immagine nel prodotto/articolo/pagina
+6. L'immagine viene mostrata con un semplice `<img src="...">` 
+
+**Nessuna:**
+- Compressione automatica
+- Conversione WebP
+- BlurHash placeholder
+- Edge Function
+- Configurazioni per contesto
+- Pre-resize
