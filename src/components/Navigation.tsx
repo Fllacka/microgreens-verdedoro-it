@@ -14,7 +14,7 @@ import { Menu, ShoppingBasket, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { getImageUrl, isSupabaseStorageUrl } from "@/lib/image-utils";
+
 
 // Marker for dropdown items in navigation
 const DROPDOWN_MARKER = "#microgreens-dropdown";
@@ -107,10 +107,7 @@ const Navigation = () => {
 
         if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
           const mediaData = data.media as { file_path: string };
-          const optimizedUrl = isSupabaseStorageUrl(mediaData.file_path)
-            ? getImageUrl(mediaData.file_path, 'logo')
-            : mediaData.file_path;
-          setLogoUrl(optimizedUrl);
+          setLogoUrl(mediaData.file_path);
         } else {
           setLogoUrl(null);
         }

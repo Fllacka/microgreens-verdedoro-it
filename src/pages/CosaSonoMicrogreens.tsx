@@ -654,10 +654,6 @@ const CosaSonoMicrogreens = () => {
                     image={productImage} 
                     onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
                     priority={index < 3}
-                    blurhash={mediaInfo?.blurhash}
-                    optimizedUrl={optimizedUrl}
-                    imageWidth={mediaInfo?.width}
-                    imageHeight={mediaInfo?.height}
                   />
                 );
               })}

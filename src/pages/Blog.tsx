@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import { generateBreadcrumbSchema } from "@/lib/seo";
-import { getImageUrl } from "@/lib/image-utils";
+
 import ArticleCard from "@/components/ArticleCard";
 interface BlogPost {
   id: string;
@@ -177,7 +177,7 @@ const Blog = () => {
         {/* Hero Section */}
         {heroSection?.is_visible !== false && <section className="section-padding relative overflow-hidden">
             {/* Hero Background Image - Optimized for LCP */}
-            {heroImageUrl && <img src={getImageUrl(heroImageUrl, 'hero')} alt={heroSection?.content?.background_image_alt || "Blog hero background"} className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" loading="eager" width={1920} height={600} decoding="async" />}
+            {heroImageUrl && <img src={heroImageUrl} alt={heroSection?.content?.background_image_alt || "Blog hero background"} className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" loading="eager" width={1920} height={600} decoding="async" />}
             {/* Overlay for background image */}
             {heroImageUrl && <div className="absolute inset-0 bg-gradient-hero" />}
             {/* Gradient fallback when no image */}

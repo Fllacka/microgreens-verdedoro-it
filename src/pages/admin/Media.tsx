@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, Copy, Check, Loader2, ImageIcon } from "lucide-react";
+import { Upload, Trash2, Copy, Check, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -21,7 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { compressImage, formatBytes } from "@/lib/image-compression";
+import { formatBytes } from "@/lib/image-utils";
 
 interface MediaFile {
   id: string;
@@ -32,11 +32,8 @@ interface MediaFile {
   file_size: number;
   alt_text: string | null;
   created_at: string;
-  is_optimized: boolean;
-  optimized_urls: Record<string, string> | null;
   width: number | null;
   height: number | null;
-  blurhash: string | null;
 }
 
 export default function AdminMedia() {
@@ -87,66 +84,18 @@ export default function AdminMedia() {
       
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i];
-        const isImage = file.type.startsWith("image/");
         
-        setUploadProgress(`Processando ${i + 1}/${fileArray.length}: ${file.name}`);
-
-        let fileToUpload = file;
-        let width: number | null = null;
-        let height: number | null = null;
-        let blurhash: string | null = null;
-        let originalSize = file.size;
-
-        // PHASE 2: Compress images before upload
-        if (isImage) {
-          try {
-            console.log(`[Upload] Starting compression for ${file.name} (${formatBytes(originalSize)}, type: ${file.type})`);
-            setUploadProgress(`Comprimendo ${file.name}...`);
-            const result = await compressImage(file);
-            fileToUpload = result.file;
-            width = result.width;
-            height = result.height;
-            blurhash = result.blurhash;
-            
-            // Show compression stats
-            const savings = originalSize - result.compressedSize;
-            console.log(
-              `[Compression] ✅ ${file.name}: ${formatBytes(originalSize)} → ${formatBytes(result.compressedSize)} (saved ${formatBytes(savings)}, blurhash: ${blurhash ? 'yes' : 'no'})`
-            );
-          } catch (compressError) {
-            console.error("[Compression] ❌ Failed:", compressError);
-            
-            // FALLBACK: Try to at least get dimensions and blurhash from original
-            try {
-              console.log("[Compression] Attempting fallback metadata extraction...");
-              const { getImageDimensions, generateBlurHash } = await import('@/lib/image-compression');
-              const [dims, hash] = await Promise.all([
-                getImageDimensions(file),
-                generateBlurHash(file)
-              ]);
-              width = dims.width;
-              height = dims.height;
-              blurhash = hash;
-              console.log(`[Compression] ✅ Fallback metadata: ${width}x${height}, blurhash: ${blurhash ? 'yes' : 'no'}`);
-            } catch (fallbackError) {
-              console.error("[Compression] ❌ Fallback also failed:", fallbackError);
-            }
-          }
-        } else {
-          console.log(`[Upload] Skipping compression for non-image: ${file.name} (type: ${file.type})`);
-        }
+        setUploadProgress(`Caricando ${i + 1}/${fileArray.length}: ${file.name}`);
 
         // Generate unique filename
-        const fileExt = fileToUpload.name.split(".").pop() || file.name.split(".").pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `uploads/${fileName}`;
 
-        setUploadProgress(`Caricando ${file.name}...`);
-
-        // Upload to storage with 1-year cache
+        // Upload to storage directly - no compression
         const { error: uploadError } = await supabase.storage
           .from("cms-media")
-          .upload(filePath, fileToUpload, {
+          .upload(filePath, file, {
             cacheControl: '31536000', // 1 year cache
           });
 
@@ -157,19 +106,15 @@ export default function AdminMedia() {
           .from("cms-media")
           .getPublicUrl(filePath);
 
-        // Save to database with dimensions and blurhash
+        // Save to database
         const { error: dbError } = await supabase.from("media").insert([
           {
             file_name: file.name,
-            file_type: fileToUpload.type,
+            file_type: file.type,
             file_path: publicUrl,
             storage_path: filePath,
-            file_size: fileToUpload.size,
+            file_size: file.size,
             uploaded_by: user.id,
-            is_optimized: true, // Already optimized client-side
-            width,
-            height,
-            blurhash,
           },
         ]);
 
@@ -178,7 +123,7 @@ export default function AdminMedia() {
 
       toast({
         title: "Successo",
-        description: `${fileArray.length} file caricati e ottimizzati`,
+        description: `${fileArray.length} file caricati`,
       });
       fetchMedia();
     } catch (error: any) {
@@ -306,22 +251,6 @@ export default function AdminMedia() {
                       <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-background/80">
                         {file.width}×{file.height}
                       </Badge>
-                    </div>
-                  )}
-                  
-                  {/* Optimization badge */}
-                  {file.file_type.startsWith("image/") && (
-                    <div className="absolute top-1 right-1">
-                      {file.blurhash ? (
-                        <Badge variant="secondary" className="text-[10px] px-1 py-0">
-                          <Check className="h-3 w-3 mr-0.5" />
-                          Opt
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] px-1 py-0 bg-background/80">
-                          <ImageIcon className="h-3 w-3" />
-                        </Badge>
-                      )}
                     </div>
                   )}
                 </div>

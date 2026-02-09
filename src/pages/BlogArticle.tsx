@@ -12,7 +12,7 @@ import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { generateArticleSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
 import ProductCard from "@/components/ProductCard";
-import { getImageUrl } from "@/lib/image-utils";
+
 import ArticleCard from "@/components/ArticleCard";
 
 interface ContentBlock {
@@ -354,7 +354,7 @@ const BlogArticle = () => {
         <section 
           className="relative min-h-[60vh] flex items-center justify-center"
           style={coverImageUrl ? { 
-            backgroundImage: `url(${getImageUrl(coverImageUrl, 'hero')})`,
+            backgroundImage: `url(${coverImageUrl})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           } : {}}
@@ -491,10 +491,6 @@ const BlogArticle = () => {
                       image={productImage} 
                       onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
                       priority={index < 3}
-                      blurhash={mediaInfo?.blurhash}
-                      optimizedUrl={optimizedUrl}
-                      imageWidth={mediaInfo?.width}
-                      imageHeight={mediaInfo?.height}
                     />
                   );
                 })}
