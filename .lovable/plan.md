@@ -1,67 +1,121 @@
 
-
-# Hero Title Visibility: Design Sofisticato
+# Fix: "Modifiche non salvate" - Soluzione Globale
 
 ## Problema
-Con sfondi hero variabili dal CMS, il titolo "VERDE D'ORO" rischia di perdersi su immagini chiare o colorate. Attualmente c'e' solo un overlay `bg-black/30` uniforme.
+Su tutte le pagine CMS, dopo aver salvato/pubblicato, il dialog "Modifiche non salvate" appare erroneamente perche' il `useEffect` di tracking scatta DOPO il salvataggio a causa degli aggiornamenti di stato.
 
-## Soluzione Proposta: Glassmorphism Backdrop + Text Shadow
+## Soluzione: Hook Centralizzato `useChangeTracking`
 
-Un approccio a tre livelli che garantisce leggibilita' su qualsiasi sfondo senza sacrificare l'estetica premium:
+Creare un nuovo hook riutilizzabile che gestisce il tracking delle modifiche con protezione anti-falso-positivo integrata. Questo vale per tutte le pagine esistenti e future.
 
-### Livello 1 - Gradient Overlay Direzionale
-Sostituire l'overlay uniforme `bg-black/30` con un gradiente che si concentra nella zona del testo (sinistra/basso), lasciando il resto dell'immagine piu' visibile:
+```text
+PRIMA (ogni pagina implementa manualmente):
+  useRef(initialDataLoaded) + useEffect + setHasChanges + bug post-save
 
-```css
-bg-gradient-to-r from-black/60 via-black/30 to-transparent
+DOPO (hook unico con protezione integrata):
+  const { hasChanges, markSaved, trackingReady } = useChangeTracking(deps)
 ```
-
-Questo crea un effetto cinematografico dove il testo ha sempre uno sfondo scuro naturale, mentre l'immagine resta visibile a destra.
-
-### Livello 2 - Text Shadow Multi-Layer
-Aggiungere un'ombra di testo stratificata al titolo H1 e al sottotitolo per creare un alone di contrasto attorno ad ogni lettera:
-
-```css
-text-shadow: 
-  0 2px 8px rgba(0,0,0,0.5),
-  0 4px 24px rgba(0,0,0,0.3);
-```
-
-Questo garantisce leggibilita' anche dove il gradiente e' piu' leggero.
-
-### Livello 3 - Sottile linea decorativa dorata
-Una sottile linea orizzontale dorata sotto il titolo che separa visivamente "VERDE D'ORO" dal sottotitolo, aggiungendo eleganza e ancorandone la posizione visiva.
 
 ---
 
-## File da Modificare
+## File da CREARE
+
+### `src/hooks/useChangeTracking.ts`
+
+Un hook che:
+- Accetta le dipendenze da osservare (formData, seoData, ecc.)
+- Ignora il primo caricamento (come `initialDataLoaded`)
+- Ha un metodo `markSaved()` che sopprime il prossimo ciclo di change detection
+- Restituisce `hasChanges` e `setReady()` per segnalare quando i dati iniziali sono caricati
+
+---
+
+## File da MODIFICARE (7 pagine)
+
+Tutte le pagine che usano il pattern `initialDataLoaded` + `setHasChanges`:
 
 | File | Modifica |
 |------|----------|
-| `src/pages/Index.tsx` | Overlay gradiente, text-shadow sul titolo, linea decorativa |
-| `src/index.css` | Classe utility per text-shadow riutilizzabile |
+| `src/pages/admin/ProductEdit.tsx` | Usare `useChangeTracking` al posto del pattern manuale |
+| `src/pages/admin/BlogEdit.tsx` | Usare `useChangeTracking` |
+| `src/pages/admin/PageEdit.tsx` | Usare `useChangeTracking` |
+| `src/pages/admin/CosaSonoMicrogreens.tsx` | Usare `useChangeTracking` |
+| `src/pages/admin/Settings.tsx` | Usare `useChangeTracking` (osserva `logoId, headerSettings, footerSettings`) |
+| `src/pages/admin/Contatti.tsx` | Aggiungere `justSaved` ref nelle funzioni save/publish (usa `setHasChanges(true)` manuale) |
+| `src/pages/admin/MicrogreensCustom.tsx` | Aggiungere `justSaved` ref nelle funzioni save/publish (usa `setHasChanges(true)` manuale) |
 
 ## Dettagli Tecnici
 
-### `src/index.css`
-Aggiungere una classe utility:
-```css
-.text-shadow-hero {
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 4px 24px rgba(0,0,0,0.3);
+### Nuovo Hook `useChangeTracking`
+
+```typescript
+export function useChangeTracking(dependencies: any[]) {
+  const [hasChanges, setHasChanges] = useState(false);
+  const initialDataLoaded = useRef(false);
+  const justSaved = useRef(false);
+
+  useEffect(() => {
+    if (justSaved.current) {
+      justSaved.current = false;
+      return;
+    }
+    if (initialDataLoaded.current) {
+      setHasChanges(true);
+    }
+  }, dependencies);
+
+  const markSaved = () => {
+    justSaved.current = true;
+    setHasChanges(false);
+  };
+
+  const setReady = () => {
+    initialDataLoaded.current = true;
+  };
+
+  return { hasChanges, setHasChanges, markSaved, setReady };
 }
 ```
 
-### `src/pages/Index.tsx`
-1. Cambiare l'overlay da `bg-black/30` a `bg-gradient-to-r from-black/55 via-black/30 to-black/10`
-2. Aggiungere `text-shadow-hero` al titolo H1 e al sottotitolo
-3. Aggiungere un elemento decorativo dorato sotto il titolo:
-```html
-<div className="w-24 h-0.5 bg-gradient-to-r from-oro-primary to-oro-primary/0 mb-6" />
+### Uso nelle pagine (esempio PageEdit.tsx)
+
+```typescript
+// PRIMA:
+const [hasChanges, setHasChanges] = useState(false);
+const initialDataLoaded = useRef(false);
+
+useEffect(() => {
+  if (initialDataLoaded.current) setHasChanges(true);
+}, [formData, seoData]);
+
+// nelle funzioni save: setHasChanges(false);
+// nel fetchPage: initialDataLoaded.current = true;
+
+// DOPO:
+const { hasChanges, markSaved, setReady } = useChangeTracking([formData, seoData]);
+
+// nelle funzioni save: markSaved();
+// nel fetchPage: setReady();
 ```
 
-## Risultato Visivo
-- Il titolo rimane perfettamente leggibile su qualsiasi sfondo
-- L'effetto e' sottile e premium, non invasivo
-- L'immagine di sfondo resta valorizzata (non coperta da un overlay troppo scuro)
-- La linea dorata richiama il colore "D'ORO" e aggiunge raffinatezza
+### Per Contatti e MicrogreensCustom (tracking manuale)
 
+Queste pagine non usano `useEffect` per tracking ma chiamano `setHasChanges(true)` direttamente nei handler. Per queste, basta aggiungere un `justSaved` ref:
+
+```typescript
+const justSaved = useRef(false);
+
+// Nei handler onChange:
+if (!justSaved.current) setHasChanges(true);
+
+// Nelle funzioni save/publish:
+justSaved.current = true;
+setHasChanges(false);
+setTimeout(() => { justSaved.current = false; }, 100);
+```
+
+## Risultato
+
+- Il dialog "Modifiche non salvate" apparira' SOLO quando ci sono vere modifiche
+- La soluzione e' centralizzata: le pagine future useranno `useChangeTracking` automaticamente
+- Nessun impatto visivo o funzionale sulle pagine
