@@ -166,6 +166,11 @@
     overflow: hidden;
   }
   
+  /* Hero Text Shadow */
+  .text-shadow-hero {
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 4px 24px rgba(0,0,0,0.3);
+  }
+
   /* Content Sections */
   .section-padding {
     @apply py-16 md:py-24;
