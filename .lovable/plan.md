@@ -1,171 +1,67 @@
 
-# Piano: Rimozione Sistema di Ottimizzazione Immagini
 
-## Obiettivo
-Semplificare il flusso delle immagini: **carica → inserisci**. Niente compressione, ridimensionamento, conversione WebP, BlurHash, Edge Function o configurazioni per contesto.
+# Hero Title Visibility: Design Sofisticato
+
+## Problema
+Con sfondi hero variabili dal CMS, il titolo "VERDE D'ORO" rischia di perdersi su immagini chiare o colorate. Attualmente c'e' solo un overlay `bg-black/30` uniforme.
+
+## Soluzione Proposta: Glassmorphism Backdrop + Text Shadow
+
+Un approccio a tre livelli che garantisce leggibilita' su qualsiasi sfondo senza sacrificare l'estetica premium:
+
+### Livello 1 - Gradient Overlay Direzionale
+Sostituire l'overlay uniforme `bg-black/30` con un gradiente che si concentra nella zona del testo (sinistra/basso), lasciando il resto dell'immagine piu' visibile:
+
+```css
+bg-gradient-to-r from-black/60 via-black/30 to-transparent
+```
+
+Questo crea un effetto cinematografico dove il testo ha sempre uno sfondo scuro naturale, mentre l'immagine resta visibile a destra.
+
+### Livello 2 - Text Shadow Multi-Layer
+Aggiungere un'ombra di testo stratificata al titolo H1 e al sottotitolo per creare un alone di contrasto attorno ad ogni lettera:
+
+```css
+text-shadow: 
+  0 2px 8px rgba(0,0,0,0.5),
+  0 4px 24px rgba(0,0,0,0.3);
+```
+
+Questo garantisce leggibilita' anche dove il gradiente e' piu' leggero.
+
+### Livello 3 - Sottile linea decorativa dorata
+Una sottile linea orizzontale dorata sotto il titolo che separa visivamente "VERDE D'ORO" dal sottotitolo, aggiungendo eleganza e ancorandone la posizione visiva.
 
 ---
 
-## Componenti da Rimuovere/Modificare
+## File da Modificare
 
-### 1. File da ELIMINARE
+| File | Modifica |
+|------|----------|
+| `src/pages/Index.tsx` | Overlay gradiente, text-shadow sul titolo, linea decorativa |
+| `src/index.css` | Classe utility per text-shadow riutilizzabile |
 
-| File | Motivo |
-|------|--------|
-| `supabase/functions/optimize-image/` | Edge Function per ottimizzazione server-side |
-| `src/lib/image-compression.ts` | Libreria compressione client-side + BlurHash |
-| `src/components/ui/SmartImage.tsx` | Componente con BlurHash placeholder |
+## Dettagli Tecnici
 
-### 2. File da SEMPLIFICARE
-
-| File | Modifiche |
-|------|-----------|
-| `src/lib/image-utils.ts` | Rimuovere configurazioni contesto, mantenere solo helper URL base |
-| `src/components/ui/optimized-image.tsx` | Convertire in semplice `<img>` wrapper senza BlurHash/srcset |
-| `src/components/admin/MediaSelector.tsx` | Rimuovere: context prop, chiamata optimize-image, badge ottimizzazione |
-| `src/pages/admin/Media.tsx` | Rimuovere: compressImage, BlurHash generation, badge ottimizzazione |
-
-### 3. Pagine Frontend da SEMPLIFICARE
-
-| File | Modifiche |
-|------|-----------|
-| `src/pages/Index.tsx` | Usare `file_path` diretto invece di `optimized_versions.hero.url` |
-| `src/pages/ProductDetail.tsx` | Rimuovere riferimenti a `optimized_versions` |
-| `src/components/ProductCard.tsx` | Semplificare `OptimizedImage` → `<img>` base |
-| `src/components/ArticleCard.tsx` | Semplificare `OptimizedImage` → `<img>` base |
-| `src/components/ContentBlockRenderer.tsx` | Usare `<img>` semplice |
-
----
-
-## Nuovo Flusso Semplificato
-
-```text
-PRIMA (complesso):
-┌────────────────────────────────────────────────────────────────────┐
-│ Upload → Pre-resize → BlurHash → Store → Select Context →         │
-│ Edge Function → Resize/Crop/WebP → Store Optimized → Display      │
-└────────────────────────────────────────────────────────────────────┘
-
-DOPO (semplice):
-┌─────────────────────────────────────┐
-│ Upload → Store → Display            │
-└─────────────────────────────────────┘
-```
-
----
-
-## Dettagli Implementazione
-
-### A. Nuovo `MediaSelector.tsx` (semplificato)
-
-```typescript
-// PRIMA: context, optimizedUrl, blurhash, chiamata Edge Function
-onChange(file.id, file.file_path, optimizedUrl, { width, height, blurhash })
-
-// DOPO: solo ID e URL
-onChange(file.id, file.file_path)
-```
-
-- Rimuovere prop `context`
-- Rimuovere chiamata a `supabase.functions.invoke('optimize-image')`
-- Rimuovere badge "Ottimizzato"
-- Rimuovere calcolo dimensioni attese
-
-### B. Nuovo `Media.tsx` (upload semplice)
-
-```typescript
-// PRIMA
-const result = await compressImage(file);
-fileToUpload = result.file;
-width = result.width;
-height = result.height;
-blurhash = result.blurhash;
-
-// DOPO
-const fileToUpload = file; // Nessuna elaborazione
-```
-
-- Rimuovere import `compressImage`
-- Upload diretto del file originale
-- Rimuovere badge BlurHash/dimensioni
-
-### C. Nuovo componente `SimpleImage.tsx`
-
-```typescript
-interface SimpleImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-  loading?: "lazy" | "eager";
+### `src/index.css`
+Aggiungere una classe utility:
+```css
+.text-shadow-hero {
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 4px 24px rgba(0,0,0,0.3);
 }
-
-const SimpleImage = ({ src, alt, className, loading = "lazy" }) => (
-  <img 
-    src={src} 
-    alt={alt} 
-    className={className}
-    loading={loading}
-  />
-);
 ```
 
-### D. Database: Colonne che Rimangono Inutilizzate
-
-Le seguenti colonne nella tabella `media` non verranno più popolate (ma non le eliminiamo per evitare migration distruttive):
-
-- `blurhash` → null
-- `optimized_versions` → null  
-- `optimized_urls` → null
-- `is_optimized` → false
-- `width` / `height` → opzionali (utili per layout, ma non obbligatori)
-
----
-
-## Dipendenze npm da RIMUOVERE
-
-```json
-// Possono essere rimosse da package.json:
-"blurhash": "^2.0.5",
-"react-blurhash": "^0.3.0",
-"browser-image-compression": "^2.0.2"
+### `src/pages/Index.tsx`
+1. Cambiare l'overlay da `bg-black/30` a `bg-gradient-to-r from-black/55 via-black/30 to-black/10`
+2. Aggiungere `text-shadow-hero` al titolo H1 e al sottotitolo
+3. Aggiungere un elemento decorativo dorato sotto il titolo:
+```html
+<div className="w-24 h-0.5 bg-gradient-to-r from-oro-primary to-oro-primary/0 mb-6" />
 ```
 
----
+## Risultato Visivo
+- Il titolo rimane perfettamente leggibile su qualsiasi sfondo
+- L'effetto e' sottile e premium, non invasivo
+- L'immagine di sfondo resta valorizzata (non coperta da un overlay troppo scuro)
+- La linea dorata richiama il colore "D'ORO" e aggiunge raffinatezza
 
-## Riepilogo Modifiche per File
-
-| Azione | File |
-|--------|------|
-| **ELIMINA** | `supabase/functions/optimize-image/` |
-| **ELIMINA** | `src/lib/image-compression.ts` |
-| **ELIMINA** | `src/components/ui/SmartImage.tsx` |
-| **SEMPLIFICA** | `src/lib/image-utils.ts` |
-| **SEMPLIFICA** | `src/components/ui/optimized-image.tsx` |
-| **SEMPLIFICA** | `src/components/admin/MediaSelector.tsx` |
-| **SEMPLIFICA** | `src/pages/admin/Media.tsx` |
-| **AGGIORNA** | `src/pages/Index.tsx` |
-| **AGGIORNA** | `src/pages/ProductDetail.tsx` |
-| **AGGIORNA** | `src/components/ProductCard.tsx` |
-| **AGGIORNA** | `src/components/ArticleCard.tsx` |
-| **AGGIORNA** | `src/components/ContentBlockRenderer.tsx` |
-| **AGGIORNA** | Tutte le pagine preview che usano OptimizedImage |
-
----
-
-## Risultato Finale
-
-**Workflow semplificato:**
-1. Vai nella Media Library
-2. Clicca "Carica File"
-3. Seleziona immagine (nessuna elaborazione)
-4. Immagine salvata così com'è
-5. Seleziona l'immagine nel prodotto/articolo/pagina
-6. L'immagine viene mostrata con un semplice `<img src="...">` 
-
-**Nessuna:**
-- Compressione automatica
-- Conversione WebP
-- BlurHash placeholder
-- Edge Function
-- Configurazioni per contesto
-- Pre-resize
