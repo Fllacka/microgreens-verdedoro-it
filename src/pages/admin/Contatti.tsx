@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +45,7 @@ const AdminContatti = () => {
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
+  const justSaved = useRef(false);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -96,7 +97,7 @@ const AdminContatti = () => {
         ...updates,
       },
     }));
-    setHasChanges(true);
+    if (!justSaved.current) setHasChanges(true);
   };
 
   const updateSectionContent = (sectionId: string, field: string, value: any) => {
@@ -110,7 +111,7 @@ const AdminContatti = () => {
         },
       },
     }));
-    setHasChanges(true);
+    if (!justSaved.current) setHasChanges(true);
   };
 
   const handleSave = async () => {
@@ -133,7 +134,9 @@ const AdminContatti = () => {
       setOriginalSections(sections);
       setHasDraftChanges(true);
       toast.success("Bozza salvata con successo");
+      justSaved.current = true;
       setHasChanges(false);
+      setTimeout(() => { justSaved.current = false; }, 100);
     } catch (error) {
       console.error("Error saving sections:", error);
       toast.error("Errore nel salvataggio");
@@ -164,7 +167,9 @@ const AdminContatti = () => {
       setOriginalSections(sections);
       setHasDraftChanges(false);
       toast.success("Pagina pubblicata con successo");
+      justSaved.current = true;
       setHasChanges(false);
+      setTimeout(() => { justSaved.current = false; }, 100);
     } catch (error) {
       console.error("Error publishing:", error);
       toast.error("Errore nella pubblicazione");

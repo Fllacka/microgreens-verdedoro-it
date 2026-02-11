@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { MediaSelector } from "@/components/admin/MediaSelector";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useChangeTracking } from "@/hooks/useChangeTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle, GripVertical, Euro } from "lucide-react";
@@ -51,10 +52,8 @@ const AdminProductEdit = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
-  const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -95,24 +94,20 @@ const AdminProductEdit = () => {
   const [availableCategories, setAvailableCategories] = useState<CategoryItem[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  // Centralized change tracking with justSaved protection
+  const { hasChanges, markSaved, setReady } = useChangeTracking([formData, seoData]);
+
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
     hasUnsavedChanges: hasChanges,
   });
-
-  // Track changes after initial load
-  useEffect(() => {
-    if (initialDataLoaded.current) {
-      setHasChanges(true);
-    }
-  }, [formData, seoData]);
 
   useEffect(() => {
     fetchCategories();
     if (!isNew) {
       fetchProduct();
     } else {
-      initialDataLoaded.current = true;
+      setReady();
     }
   }, [id]);
 
@@ -207,7 +202,7 @@ const AdminProductEdit = () => {
       });
     } finally {
       setLoading(false);
-      initialDataLoaded.current = true;
+      setReady();
     }
   };
 
@@ -286,7 +281,7 @@ const AdminProductEdit = () => {
       });
     } finally {
       setSaving(false);
-      setHasChanges(false);
+      markSaved();
     }
   };
 
@@ -413,7 +408,7 @@ const AdminProductEdit = () => {
       });
     } finally {
       setSaving(false);
-      setHasChanges(false);
+      markSaved();
     }
   };
 
