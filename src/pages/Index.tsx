@@ -375,14 +375,15 @@ const Index = ({
       {sections.hero?.is_visible !== false && <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
           {/* Hero Background Image - Optimized for LCP */}
           <img src={getHeroImage()} alt={getHeroAlt()} className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" loading="eager" width={1920} height={1080} decoding="async" />
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/30 to-black/10" />
 
           <div className="relative z-10 container-width text-left text-white">
             <div className="max-w-2xl">
-              <h1 className="font-display text-5xl md:text-6xl font-bold mb-6">
+              <h1 className="font-display text-5xl md:text-6xl font-bold mb-4 text-shadow-hero">
                 <span className="text-verde-primary">VERDE</span> <span className="text-oro-primary">D'ORO</span>
               </h1>
-              <div className="font-body text-lg md:text-xl mb-8 text-white/90 leading-relaxed prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline" dangerouslySetInnerHTML={{
+              <div className="w-24 h-0.5 bg-gradient-to-r from-oro-primary to-oro-primary/0 mb-6" />
+              <div className="font-body text-lg md:text-xl mb-8 text-white/90 leading-relaxed text-shadow-hero prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline" dangerouslySetInnerHTML={{
             __html: heroContent.subtitle
           }} />
               <div className="flex flex-col sm:flex-row gap-4">
