@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { MediaSelector } from "@/components/admin/MediaSelector";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useChangeTracking } from "@/hooks/useChangeTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, PenSquare, Search, HelpCircle, Plus, Trash2, GripVertical } from "lucide-react";
@@ -49,10 +50,8 @@ const AdminBlogEdit = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
-  const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -92,24 +91,20 @@ const AdminBlogEdit = () => {
     })
   );
 
+  // Centralized change tracking with justSaved protection
+  const { hasChanges, markSaved, setReady } = useChangeTracking([formData, contentBlocks, seoData, faqTitle, faqItems]);
+
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
     hasUnsavedChanges: hasChanges,
   });
-
-  // Track changes after initial load
-  useEffect(() => {
-    if (initialDataLoaded.current) {
-      setHasChanges(true);
-    }
-  }, [formData, contentBlocks, seoData, faqTitle, faqItems]);
 
   useEffect(() => {
     fetchCategories();
     if (!isNew) {
       fetchPost();
     } else {
-      initialDataLoaded.current = true;
+      setReady();
     }
   }, [id]);
 
@@ -205,7 +200,7 @@ const AdminBlogEdit = () => {
       });
     } finally {
       setLoading(false);
-      initialDataLoaded.current = true;
+      setReady();
     }
   };
 
@@ -273,7 +268,7 @@ const AdminBlogEdit = () => {
       });
     } finally {
       setSaving(false);
-      setHasChanges(false);
+      markSaved();
     }
   };
 
@@ -359,7 +354,7 @@ const AdminBlogEdit = () => {
       });
     } finally {
       setSaving(false);
-      setHasChanges(false);
+      markSaved();
     }
   };
 

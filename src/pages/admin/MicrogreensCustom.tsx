@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,6 +57,7 @@ const AdminMicrogreensCustom = () => {
   const [isPublished, setIsPublished] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
+  const justSaved = useRef(false);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -119,7 +120,7 @@ const AdminMicrogreensCustom = () => {
       }
       return section;
     }));
-    setHasChanges(true);
+    if (!justSaved.current) setHasChanges(true);
   };
 
   const updateSectionVisibility = (sectionId: string, isVisible: boolean) => {
@@ -129,7 +130,7 @@ const AdminMicrogreensCustom = () => {
       }
       return section;
     }));
-    setHasChanges(true);
+    if (!justSaved.current) setHasChanges(true);
   };
 
   const getSection = (id: string) => sections.find(s => s.id === id);
@@ -242,7 +243,9 @@ const AdminMicrogreensCustom = () => {
       setOriginalSections(sections);
       setHasDraftChanges(true);
       toast.success('Bozza salvata con successo');
+      justSaved.current = true;
       setHasChanges(false);
+      setTimeout(() => { justSaved.current = false; }, 100);
     } catch (error) {
       console.error('Error saving:', error);
       toast.error('Errore nel salvataggio');
@@ -278,7 +281,9 @@ const AdminMicrogreensCustom = () => {
       setHasDraftChanges(false);
       setIsPublished(publish);
       toast.success(publish ? 'Pagina pubblicata' : 'Pagina rimossa dalla pubblicazione');
+      justSaved.current = true;
       setHasChanges(false);
+      setTimeout(() => { justSaved.current = false; }, 100);
     } catch (error) {
       console.error('Error publishing:', error);
       toast.error('Errore nella pubblicazione');

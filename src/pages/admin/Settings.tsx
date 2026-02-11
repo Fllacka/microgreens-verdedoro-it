@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { MediaSelector } from "@/components/admin/MediaSelector";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -6,6 +6,7 @@ import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { SortableItem } from "@/components/admin/SortableItem";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useChangeTracking } from "@/hooks/useChangeTracking";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -212,10 +213,8 @@ const Settings = () => {
   const [footerSettings, setFooterSettings] = useState<FooterSettings>(defaultFooterSettings);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const initialLoadComplete = useRef(false);
 
   // DnD sensors
   const sensors = useSensors(
@@ -224,6 +223,9 @@ const Settings = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Centralized change tracking with justSaved protection
+  const { hasChanges, markSaved, setReady } = useChangeTracking([logoId, logoUrl, headerSettings, footerSettings]);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -292,21 +294,13 @@ const Settings = () => {
       toast.error("Errore nel caricamento delle impostazioni");
     } finally {
       setIsLoading(false);
-      initialLoadComplete.current = true;
+      setReady();
     }
   };
-
-  // Track changes after initial load
-  useEffect(() => {
-    if (initialLoadComplete.current) {
-      setHasChanges(true);
-    }
-  }, [logoId, logoUrl, headerSettings, footerSettings]);
 
   const handleLogoChange = (imageId: string | null, imageUrl: string | null) => {
     setLogoId(imageId);
     setLogoUrl(imageUrl);
-    setHasChanges(true);
   };
 
   // Save to draft columns only
@@ -327,7 +321,7 @@ const Settings = () => {
       if (error) throw error;
 
       toast.success("Bozza salvata con successo");
-      setHasChanges(false);
+      markSaved();
       setHasDraftChanges(true);
       setLastSaved(new Date());
     } catch (error) {
@@ -371,7 +365,7 @@ const Settings = () => {
         toast.success("Impostazioni pubblicate con successo");
         setHasDraftChanges(false);
       }
-      setHasChanges(false);
+      markSaved();
       setLastSaved(new Date());
     } catch (error) {
       console.error("Error publishing settings:", error);

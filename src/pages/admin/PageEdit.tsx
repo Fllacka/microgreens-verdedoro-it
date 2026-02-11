@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useChangeTracking } from "@/hooks/useChangeTracking";
 import { ArrowLeft, FileText, Search } from "lucide-react";
 
 export default function PageEdit() {
@@ -23,10 +24,8 @@ export default function PageEdit() {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
   const [createdId, setCreatedId] = useState<string | null>(null);
-  const initialDataLoaded = useRef(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -48,23 +47,19 @@ export default function PageEdit() {
     structuredData: "",
   });
 
+  // Centralized change tracking with justSaved protection
+  const { hasChanges, markSaved, setReady } = useChangeTracking([formData, seoData]);
+
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
     hasUnsavedChanges: hasChanges,
   });
 
-  // Track changes after initial load
-  useEffect(() => {
-    if (initialDataLoaded.current) {
-      setHasChanges(true);
-    }
-  }, [formData, seoData]);
-
   useEffect(() => {
     if (!isNew) {
       fetchPage();
     } else {
-      initialDataLoaded.current = true;
+      setReady();
     }
   }, [id]);
 
@@ -111,7 +106,7 @@ export default function PageEdit() {
       });
     } finally {
       setLoading(false);
-      initialDataLoaded.current = true;
+      setReady();
     }
   };
 
@@ -159,7 +154,7 @@ export default function PageEdit() {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
       setSaving(false);
-      setHasChanges(false);
+      markSaved();
     }
   };
 
@@ -203,7 +198,7 @@ export default function PageEdit() {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
       setSaving(false);
-      setHasChanges(false);
+      markSaved();
     }
   };
 

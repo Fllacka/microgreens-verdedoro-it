@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { MediaSelector } from "@/components/admin/MediaSelector";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
+import { useChangeTracking } from "@/hooks/useChangeTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, PenSquare, Search, Image, HelpCircle, Plus, Trash2, GripVertical } from "lucide-react";
@@ -63,10 +64,8 @@ const AdminCosaSonoMicrogreens = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
   const [hasDraftChanges, setHasDraftChanges] = useState(false);
-  const initialDataLoaded = useRef(false);
 
   const [heroData, setHeroData] = useState<HeroContent>({
     title: "Cosa sono i Microgreens?",
@@ -94,17 +93,13 @@ const AdminCosaSonoMicrogreens = () => {
     structuredData: "",
   });
 
+  // Centralized change tracking with justSaved protection
+  const { hasChanges, markSaved, setReady } = useChangeTracking([heroData, contentBlocks, faqData, seoData]);
+
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
     hasUnsavedChanges: hasChanges,
   });
-
-  // Track changes after initial load
-  useEffect(() => {
-    if (initialDataLoaded.current) {
-      setHasChanges(true);
-    }
-  }, [heroData, contentBlocks, faqData, seoData]);
 
   useEffect(() => {
     fetchContent();
@@ -174,7 +169,7 @@ const AdminCosaSonoMicrogreens = () => {
       });
     } finally {
       setLoading(false);
-      initialDataLoaded.current = true;
+      setReady();
     }
   };
 
@@ -316,7 +311,7 @@ const AdminCosaSonoMicrogreens = () => {
         });
       }
 
-      setHasChanges(false);
+      markSaved();
     } catch (error: any) {
       console.error("Error saving content:", error);
       toast({
