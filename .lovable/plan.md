@@ -1,24 +1,30 @@
 
-# Remove Auto-Open Cart Drawer on Add
+# Fix: Navigation Dropdown Styling and Alignment
 
-## What Changes
+## Problem
+The "Microgreens" dropdown menu has visual issues:
+- The active item ("I nostri microgreens") has a solid gold/yellow background that looks heavy and misaligned
+- The dropdown border and shadow feel slightly off from the rest of the design
+- The overall dropdown alignment and spacing could be cleaner
 
-Only one small change is needed in `src/contexts/CartContext.tsx`: remove the `openCart()` call in the `addItem` function (line 59).
+## Changes
 
-The cart badge shake animation (`animate-cart-shake`) is already implemented and working -- it triggers whenever `lastAddedTimestamp` updates, which happens on every add. So after removing the auto-open, the user will see:
-- The cart icon badge shakes and scales up briefly (0.6s)
-- The item count updates in the badge
+### 1. `src/components/Navigation.tsx` (lines 259-279)
+- Remove the heavy `bg-accent` active state and replace it with a subtler left-border accent style
+- Clean up padding and spacing for better alignment
+- Use a softer active indicator (e.g., left border in oro-primary + subtle background) instead of the full gold highlight
 
-No other files need changes.
+### 2. `src/components/ui/navigation-menu.tsx` (line 80-89)
+- Adjust the viewport container positioning to center it better under the trigger
+- Clean up border radius and shadow for a more polished look
 
-## Technical Details
+## Details
 
-**File: `src/contexts/CartContext.tsx`**
+**Dropdown item styling (Navigation.tsx):**
+- Active state: change from `bg-accent text-accent-foreground` to a subtle `bg-secondary/60 border-l-2 border-oro-primary` for elegance
+- Hover state: keep `hover:bg-accent` but ensure smooth transitions
+- Increase padding slightly for better touch targets and readability
 
-Remove lines 58-59:
-```typescript
-// Open cart drawer to confirm the addition
-openCart();
-```
-
-Keep only the badge animation trigger (`setLastAddedTimestamp(Date.now())`).
+**Viewport alignment (navigation-menu.tsx):**
+- Change viewport wrapper from `left-0` to centering logic so the dropdown aligns under the trigger text
+- Ensure `bg-popover` renders a solid white background (no transparency)
