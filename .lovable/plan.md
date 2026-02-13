@@ -1,63 +1,42 @@
 
 
-# Precise Text Alignment for Navigation Dropdown
+# Dropdown Box Padding with Text Alignment
 
 ## Goal
-Align the first letter of each dropdown item with the first letter of "Microgreens" in the nav bar, creating a clean vertical text line.
+Keep dropdown text aligned with "M" of "Microgreens", but extend the dropdown **box** to the left to create balanced padding around the text.
 
-## How It Works
+## Approach
+Use a negative left margin on the viewport container to shift the box left, then add equal left padding inside the dropdown items so the text stays aligned with "Microgreens".
 
-The trigger text "Microgreens" has `px-0` padding, so its text starts at the left edge of the NavigationMenuItem. The dropdown currently uses `left-1/2 -translate-x-1/2` centering on the viewport, which misaligns the text.
-
-The fix:
-1. Position the dropdown to start at `left-0` relative to the trigger item (not centered)
-2. Remove all left padding from dropdown items so text starts flush
-3. Offset the dropdown container slightly left (negative margin) to compensate for the viewport border, so the actual text inside lines up with the trigger text
+Think of it like this:
+- The box moves 16px to the left (negative margin)
+- The text inside gets 16px left padding (cancels out)
+- Net result: text stays aligned, box has padding on both sides
 
 ## Changes
 
-### 1. `src/components/ui/navigation-menu.tsx` (viewport positioning)
-- Change viewport from `left-1/2 -translate-x-1/2` back to `left-0` so the dropdown anchors to the left edge of its parent trigger item
+### 1. `src/components/ui/navigation-menu.tsx` (line 80)
+- Add `-ml-4` to the viewport wrapper div so the dropdown box extends 16px to the left of the text alignment point
 
-### 2. `src/components/Navigation.tsx` (dropdown content)
-- Remove `p-2` from the `<ul>` container -- use `py-2 pl-0 pr-2` instead so the left side has zero padding
-- Change dropdown item padding from `px-3` to `pl-0 pr-3` so text starts flush left
-- Increase text size from `text-sm` to `text-[0.95rem]` (slightly bigger as requested)
-- For the active state border-l indicator, switch to a different approach: use a left pseudo-element or just a background highlight so the border doesn't push text alignment off
-- Set dropdown width to `w-[280px]` to accommodate slightly larger text
+### 2. `src/components/Navigation.tsx` (lines 260, 267)
+- On the `ul` container (line 260): add `pl-4` left padding to offset the text back to the right, matching the negative margin
+- On each dropdown link (line 267): change `pl-0` to `pl-4` so text has left padding that compensates for the box shift
+- Keep `pr-3` (or increase to `pr-4` for symmetry)
 
-### 3. Active state adjustment
-- Replace `border-l-2 border-oro-primary` (which shifts text by 2px) with an underline or background-only indicator to maintain perfect alignment
-- Use a subtle `bg-secondary/60` background with a small colored dot or bold text weight as the active indicator instead
-
-## Technical Details
-
-**navigation-menu.tsx line 80:**
+### Result
 ```
-// FROM:
-"absolute left-1/2 top-full -translate-x-1/2 flex justify-center"
-// TO:
-"absolute left-0 top-full flex justify-center"
-```
-
-**Navigation.tsx line 260 (ul container):**
-```
-// FROM:
-"grid w-[260px] gap-0.5 p-2"
-// TO:
-"grid w-[280px] gap-0.5 py-2 pr-2"
+         Microgreens v
+         |
+    +----|------------------+
+    |    |                  |
+    |    I nostri microgreens|
+    |    |                  |
+    |    Cosa sono i micro..|
+    |    |                  |
+    +---------------------------+
+    ^    ^
+    box  text aligns with "M"
 ```
 
-**Navigation.tsx lines 267-271 (item links):**
-```
-// FROM:
-"block select-none rounded-md px-3 py-2.5 text-sm leading-none ..."
-// Active: "bg-secondary/60 text-foreground font-medium border-l-2 border-oro-primary"
+The box has ~16px padding on both left and right of the text, while the text's first letter remains vertically aligned with "Microgreens".
 
-// TO:
-"block select-none rounded-r-md py-2.5 pl-0 pr-3 text-[0.95rem] leading-none ..."
-// Active: "text-foreground font-semibold" (bold weight as indicator, no border-l)
-// Inactive: "text-muted-foreground"
-```
-
-This ensures every dropdown item's first character sits on the exact same vertical line as the "M" in "Microgreens".
