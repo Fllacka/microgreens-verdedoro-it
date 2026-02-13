@@ -99,9 +99,13 @@ export function CartDrawer() {
               <Separator />
               
               <div className="space-y-2">
+                <p className="text-xs text-center text-muted-foreground italic">
+                  Pagamento alla consegna
+                </p>
+                
                 <Button variant="oro" size="lg" className="w-full" asChild onClick={closeCart}>
                   <Link to="/contatti">
-                    Richiedi preventivo
+                    Completa l'ordine
                     {hasPrices && ` - ${formatPrice(totalPrice)}`}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
