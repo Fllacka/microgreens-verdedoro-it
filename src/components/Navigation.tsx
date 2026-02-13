@@ -267,7 +267,7 @@ const Navigation = () => {
                                       "block select-none rounded-md py-2.5 pl-0 pr-4 text-[0.95rem] leading-snug no-underline outline-none transition-colors",
                                       "hover:bg-secondary/80 hover:text-foreground focus:bg-secondary/80 focus:text-foreground",
                                       isActive(subItem.url) 
-                                        ? "bg-secondary/60 text-foreground font-semibold" 
+                                        ? "bg-secondary/60 text-foreground font-semibold border-l-2 border-oro-primary pl-2" 
                                         : "text-muted-foreground"
                                     )}
                                   >
