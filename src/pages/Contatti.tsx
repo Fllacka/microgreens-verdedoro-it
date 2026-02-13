@@ -74,7 +74,7 @@ const Contatti = () => {
   useEffect(() => {
     if (cartItems.length > 0) {
       const productsText = cartItems.map((item) => `- ${item.name}: ${item.quantity}g`).join('\n');
-      const autoMessage = `Vorrei richiedere un preventivo per i seguenti prodotti:\n\n${productsText}\n\n`;
+      const autoMessage = `Vorrei ordinare e avviare la coltivazione delle seguenti varietà di microgreens:\n\n${productsText}\n\n`;
       setFormData((prev) => ({
         ...prev,
         messaggio: autoMessage
