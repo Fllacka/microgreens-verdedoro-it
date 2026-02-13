@@ -282,7 +282,7 @@ const Contatti = () => {
                               </div>
                               <p className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Info className="h-3 w-3" />
-                                Il prezzo finale sarà confermato nel preventivo
+                                Paghi comodamente alla consegna
                               </p>
                             </>
                       }
