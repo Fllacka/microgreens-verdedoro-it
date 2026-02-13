@@ -1,30 +1,26 @@
 
 
-## Ridurre il blur dell'header
+## Header completamente opaco
 
-Mantenere la trasparenza attuale dell'header ma ridurre l'intensità del backdrop-blur per un effetto più leggero.
+### Problema
+Anche con `backdrop-blur-sm`, lo sfondo dell'header resta troppo trasparente e le immagini hero rendono illeggibile la navigazione.
 
-### Modifica
-
-**File: `src/components/Navigation.tsx` (riga ~192-195)**
-
-Aggiornare le classi del `<nav>`:
-
-- **Stato scrolled**: cambiare `backdrop-blur-md` in `backdrop-blur-sm`
-- **Stato iniziale (top)**: cambiare `backdrop-blur` in `backdrop-blur-sm` e rimuovere la regola `supports-[backdrop-filter]:bg-background/60` che abbassa ulteriormente l'opacità al 60%
-
-Il risultato sarà un header che mantiene la sua trasparenza naturale (`bg-background/95` e `bg-background/98`) con un blur più sottile, senza quella regola che lo rende quasi trasparente sui browser moderni.
+### Soluzione
+Rendere lo sfondo dell'header 100% opaco (`bg-background`) in entrambi gli stati (top e scrolled), eliminando qualsiasi trasparenza.
 
 ### Dettaglio tecnico
 
+**File: `src/components/Navigation.tsx` (righe 204-207)**
+
 ```text
 Prima:
-  scrolled  → "bg-background/98 backdrop-blur-md"
-  top       → "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-
-Dopo:
   scrolled  → "bg-background/98 backdrop-blur-sm"
   top       → "bg-background/95 backdrop-blur-sm"
+
+Dopo:
+  scrolled  → "bg-background shadow-sm"
+  top       → "bg-background"
 ```
 
-Una sola riga da modificare, nessun impatto funzionale.
+Si rimuovono le classi `backdrop-blur-sm` (non servono più con sfondo opaco) e le opacità `/98` e `/95`. L'header mantiene la transizione di padding e l'ombra allo scroll.
+
