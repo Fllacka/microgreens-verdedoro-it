@@ -153,7 +153,7 @@ const Blog = () => {
   const filteredPosts = selectedCategory ? posts.filter(post => post.category === selectedCategory) : posts;
   const currentUrl = window.location.origin + "/blog";
   const canonicalUrl = seoSection?.content?.canonical_url ? `${window.location.origin}${seoSection.content.canonical_url}` : currentUrl;
-  if (loading) {
+  if (loading || Object.keys(sections).length === 0) {
     return <Layout><PageLoading /></Layout>;
   }
 

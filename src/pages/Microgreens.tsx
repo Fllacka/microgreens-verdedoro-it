@@ -148,7 +148,7 @@ const Microgreens = () => {
     ? `${window.location.origin}${seoSection.content.canonical_url}`
     : currentUrl;
 
-  if (loading) {
+  if (loading || Object.keys(sections).length === 0) {
     return <Layout><PageLoading /></Layout>;
   }
 

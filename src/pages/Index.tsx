@@ -90,16 +90,26 @@ const Index = ({
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
-      await Promise.all([fetchSections(), fetchBlogPosts()]);
-      setLoading(false);
+      // 1. Fetch sections first
+      await fetchSections();
     };
     fetchData();
   }, [isPreview]);
+
+  // Unified loading: after sections are loaded, fetch products + blog, then mark ready
   useEffect(() => {
-    if (sections.featured_products?.content?.product_slugs?.length > 0) {
-      fetchFeaturedProducts(sections.featured_products.content.product_slugs);
-    }
-  }, [sections.featured_products]);
+    if (Object.keys(sections).length === 0) return;
+    
+    const fetchRemainingData = async () => {
+      const slugs = sections.featured_products?.content?.product_slugs;
+      await Promise.all([
+        slugs?.length > 0 ? fetchFeaturedProducts(slugs) : Promise.resolve(),
+        fetchBlogPosts(),
+      ]);
+      setLoading(false);
+    };
+    fetchRemainingData();
+  }, [sections]);
   const fetchSections = async () => {
     const {
       data,
@@ -325,37 +335,11 @@ const Index = ({
     return undefined;
   };
 
-  // Use default products if no CMS products are selected
-  const displayProducts = featuredProducts.length > 0 ? featuredProducts : [];
-  const hasDefaultProducts = featuredProducts.length === 0;
-  const defaultProducts = [{
-    id: "basilico",
-    name: "Basilico",
-    description: "Aroma mediterraneo concentrato",
-    benefits: ["Oli essenziali", "Proprietà digestive", "Aroma intenso"],
-    uses: ["Pasta", "Bruschette", "Caprese"],
-    category: "Erbe Aromatiche",
-    slug: "basilico"
-  }, {
-    id: "ravanello-rosso",
-    name: "Ravanello Rosso",
-    description: "Croccante e leggermente piccante",
-    benefits: ["Vitamina C", "Fibre", "Minerali"],
-    uses: ["Sushi", "Tartare", "Antipasti"],
-    category: "Brassicaceae",
-    slug: "ravanello-rosso"
-  }, {
-    id: "pisello",
-    name: "Pisello",
-    description: "Dolce e delicato",
-    benefits: ["Proteine", "Vitamine del gruppo B", "Ferro"],
-    uses: ["Zuppe", "Risotti", "Contorni"],
-    category: "Legumi",
-    slug: "pisello"
-  }];
-  const productsToShow = hasDefaultProducts ? defaultProducts : displayProducts;
+  // Use featured products directly (loading guard ensures they're ready)
+  const displayProducts = featuredProducts;
+  const productsToShow = displayProducts;
 
-  if (loading) {
+  if (loading || Object.keys(sections).length === 0) {
     return <Layout><PageLoading /></Layout>;
   }
 
@@ -494,7 +478,7 @@ const Index = ({
               {productsToShow.map((product, index) => {
             const imageId = 'image_id' in product ? product.image_id as string | null : null;
             const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
-            const productImage = mediaInfo?.file_path || (hasDefaultProducts ? index === 1 ? varietiesImage : chefImage : chefImage);
+            const productImage = mediaInfo?.file_path || chefImage;
             const gridDesc = 'grid_description' in product ? (product as Product).grid_description : undefined;
             return <ProductCard 
               key={product.id} 
