@@ -112,7 +112,7 @@ const ChiSiamo = () => {
     { name: "Chi Siamo", url: "/chi-siamo" },
   ]);
 
-  if (loading) {
+  if (loading || Object.keys(sections).length === 0) {
     return <Layout><PageLoading /></Layout>;
   }
 
