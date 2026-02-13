@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Helmet } from "react-helmet";
 import { generateBreadcrumbSchema } from "@/lib/seo";
 import { isCtaButtonVisible } from "@/lib/cta-utils";
+import { PageLoading } from "@/components/ui/page-loading";
 
 interface Product {
   id: string;
@@ -146,6 +147,10 @@ const Microgreens = () => {
   const canonicalUrl = seoSection?.content?.canonical_url
     ? `${window.location.origin}${seoSection.content.canonical_url}`
     : currentUrl;
+
+  if (loading) {
+    return <Layout><PageLoading /></Layout>;
+  }
 
   return (
     <Layout>

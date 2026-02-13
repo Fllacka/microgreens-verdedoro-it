@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import { generateBreadcrumbSchema } from "@/lib/seo";
+import { PageLoading } from "@/components/ui/page-loading";
 
 import ArticleCard from "@/components/ArticleCard";
 interface BlogPost {
@@ -152,6 +153,10 @@ const Blog = () => {
   const filteredPosts = selectedCategory ? posts.filter(post => post.category === selectedCategory) : posts;
   const currentUrl = window.location.origin + "/blog";
   const canonicalUrl = seoSection?.content?.canonical_url ? `${window.location.origin}${seoSection.content.canonical_url}` : currentUrl;
+  if (loading) {
+    return <Layout><PageLoading /></Layout>;
+  }
+
   return <Layout>
       <Helmet>
         <title>{seoSection?.content?.meta_title || "Blog - Verde D'Oro"}</title>
