@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
-import { Leaf, Heart, Users, Award, ArrowRight, Shield, Sprout, Star } from "lucide-react";
+import { Leaf, Heart, Users, Award, ArrowRight, Shield, Sprout, Star, BadgeCheck } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import chefImage from "@/assets/chef-microgreens.jpg";
@@ -23,6 +23,7 @@ const iconMap: Record<string, any> = {
   Shield,
   Sprout,
   Star,
+  BadgeCheck,
 };
 
 const ChiSiamo = () => {
