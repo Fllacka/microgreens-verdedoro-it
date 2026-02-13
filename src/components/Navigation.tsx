@@ -257,18 +257,18 @@ const Navigation = () => {
                           {item.name}
                         </NavigationMenuTrigger>
                         <NavigationMenuContent>
-                          <ul className="grid w-[280px] gap-1 p-3 bg-background border border-border rounded-lg shadow-lg">
+                          <ul className="grid w-[260px] gap-0.5 p-2">
                             {dropdownItems.map((subItem) => (
                               <li key={subItem.url}>
                                 <NavigationMenuLink asChild>
                                   <Link
                                     to={subItem.url}
                                     className={cn(
-                                      "block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors",
-                                      "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                      "block select-none rounded-md px-3 py-2.5 text-sm leading-none no-underline outline-none transition-colors",
+                                      "hover:bg-secondary/80 hover:text-foreground focus:bg-secondary/80 focus:text-foreground",
                                       isActive(subItem.url) 
-                                        ? "bg-accent text-accent-foreground font-medium" 
-                                        : "text-foreground"
+                                        ? "bg-secondary/60 text-foreground font-medium border-l-2 border-oro-primary" 
+                                        : "text-muted-foreground"
                                     )}
                                   >
                                     {subItem.name}
