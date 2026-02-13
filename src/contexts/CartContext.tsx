@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 export interface CartItem {
   id: string;
   name: string;
+  slug: string;
   quantity: number;
   price?: number; // Price for this weight tier (optional for backward compatibility)
   image: string;
