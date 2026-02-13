@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { generateOrganizationSchema, generateWebSiteSchema, generateLocalBusinessSchema, combineSchemas } from "@/lib/seo";
+import { PageLoading } from "@/components/ui/page-loading";
 
 interface BlogPost {
   id: string;
@@ -353,6 +354,11 @@ const Index = ({
     slug: "pisello"
   }];
   const productsToShow = hasDefaultProducts ? defaultProducts : displayProducts;
+
+  if (loading) {
+    return <Layout><PageLoading /></Layout>;
+  }
+
   return <Layout>
       <Helmet>
         <title>{seoContent.meta_title}</title>

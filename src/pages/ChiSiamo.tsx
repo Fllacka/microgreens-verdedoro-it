@@ -8,6 +8,7 @@ import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import chefImage from "@/assets/chef-microgreens.jpg";
 import { generateBreadcrumbSchema } from "@/lib/seo";
+import { PageLoading } from "@/components/ui/page-loading";
 
 interface ChiSiamoSection {
   id: string;
@@ -110,6 +111,10 @@ const ChiSiamo = () => {
     { name: "Home", url: "/" },
     { name: "Chi Siamo", url: "/chi-siamo" },
   ]);
+
+  if (loading) {
+    return <Layout><PageLoading /></Layout>;
+  }
 
   return (
     <Layout>
