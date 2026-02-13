@@ -1,18 +1,30 @@
 
 
-## Aggiornamento testo template messaggio
+## Ridurre il blur dell'header
 
-Sostituire il testo del template auto-generato nel form contatti.
+Mantenere la trasparenza attuale dell'header ma ridurre l'intensità del backdrop-blur per un effetto più leggero.
 
 ### Modifica
 
-**File: `src/pages/Contatti.tsx` (riga 77)**
+**File: `src/components/Navigation.tsx` (riga ~192-195)**
 
-Cambiare la stringa del template da:
-> "Vorrei richiedere un preventivo per i seguenti prodotti:"
+Aggiornare le classi del `<nav>`:
 
-a:
-> "Vorrei ordinare e avviare la coltivazione delle seguenti varietà di microgreens:"
+- **Stato scrolled**: cambiare `backdrop-blur-md` in `backdrop-blur-sm`
+- **Stato iniziale (top)**: cambiare `backdrop-blur` in `backdrop-blur-sm` e rimuovere la regola `supports-[backdrop-filter]:bg-background/60` che abbassa ulteriormente l'opacità al 60%
 
-Una sola riga da modificare, nessun impatto su altre funzionalità.
+Il risultato sarà un header che mantiene la sua trasparenza naturale (`bg-background/95` e `bg-background/98`) con un blur più sottile, senza quella regola che lo rende quasi trasparente sui browser moderni.
 
+### Dettaglio tecnico
+
+```text
+Prima:
+  scrolled  → "bg-background/98 backdrop-blur-md"
+  top       → "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+
+Dopo:
+  scrolled  → "bg-background/98 backdrop-blur-sm"
+  top       → "bg-background/95 backdrop-blur-sm"
+```
+
+Una sola riga da modificare, nessun impatto funzionale.
