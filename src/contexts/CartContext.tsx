@@ -55,8 +55,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Trigger badge animation
     setLastAddedTimestamp(Date.now());
     
-    // Open cart drawer to confirm the addition
-    openCart();
   };
 
   const removeItem = (id: string) => {
