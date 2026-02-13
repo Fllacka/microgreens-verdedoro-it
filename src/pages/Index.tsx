@@ -532,7 +532,7 @@ const Index = ({
         description: "Scegli le varietà e attiviamo la semina dedicata a te."
       }, {
         number: 2,
-        icon: Sprout,
+        icon: SeedingHandIcon,
         title: "Semina",
         description: "Coltiviamo in ambiente controllato per qualità perfetta."
       }, {
