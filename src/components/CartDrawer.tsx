@@ -59,22 +59,28 @@ export function CartDrawer() {
               <div className="space-y-4 py-4">
                 {items.map(item => (
                   <div key={item.id} className="flex gap-3 p-2 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                    <img src={item.image} alt={item.name} className="w-14 h-14 rounded object-cover" />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-display font-semibold text-xs truncate mb-0.5">
-                        {item.name}
-                      </h4>
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">
-                          {item.quantity}g
-                        </p>
-                        {item.price !== undefined && item.price > 0 && (
-                          <p className="text-xs font-semibold text-verde-primary">
-                            {formatPrice(item.price)}
+                    <Link
+                      to={`/microgreens/${item.slug}`}
+                      onClick={closeCart}
+                      className="flex gap-3 flex-1 min-w-0"
+                    >
+                      <img src={item.image} alt={item.name} className="w-14 h-14 rounded object-cover" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-display font-semibold text-xs truncate mb-0.5">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            {item.quantity}g
                           </p>
-                        )}
+                          {item.price !== undefined && item.price > 0 && (
+                            <p className="text-xs font-semibold text-verde-primary">
+                              {formatPrice(item.price)}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                     <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeItem(item.id)}>
                       <X className="h-3.5 w-3.5" />
                     </Button>

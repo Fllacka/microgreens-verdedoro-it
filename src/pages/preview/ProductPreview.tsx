@@ -216,6 +216,7 @@ const ProductPreview = () => {
     addItem({
       id: `${product.slug}-${quantity}`, // Unique ID per weight
       name: product.name,
+      slug: product.slug,
       quantity,
       price: currentPrice,
       image: product.media?.file_path || "/placeholder.svg",
