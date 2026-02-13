@@ -203,8 +203,8 @@ const Navigation = () => {
       className={cn(
         "sticky top-0 z-50 w-full border-b transition-all duration-300",
         isScrolled 
-          ? "border-border/60 bg-background/98 backdrop-blur-sm shadow-sm py-3" 
-          : "border-border/40 bg-background/95 backdrop-blur-sm py-5"
+          ? "border-border/60 bg-background shadow-sm py-3" 
+          : "border-border/40 bg-background py-5"
       )}
     >
       <div className="container-width">
