@@ -55,19 +55,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     // Trigger badge animation
     setLastAddedTimestamp(Date.now());
     
-    // Show toast notification instead of opening drawer
-    toast({
-      title: "Aggiunto al carrello",
-      description: `${newItem.name} (${newItem.quantity}g)`,
-      action: (
-        <button 
-          onClick={openCart}
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          Vedi carrello
-        </button>
-      ),
-    });
+    // Open cart drawer to confirm the addition
+    openCart();
   };
 
   const removeItem = (id: string) => {
