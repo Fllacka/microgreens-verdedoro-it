@@ -42,6 +42,7 @@ const ICON_OPTIONS = [
   { value: "Shield", label: "Scudo" },
   { value: "Sprout", label: "Germoglio" },
   { value: "Star", label: "Stella" },
+  { value: "BadgeCheck", label: "Qualità Verificata" },
 ];
 
 const ChiSiamoAdmin = () => {
