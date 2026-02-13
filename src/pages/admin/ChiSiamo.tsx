@@ -43,6 +43,9 @@ const ICON_OPTIONS = [
   { value: "Sprout", label: "Germoglio" },
   { value: "Star", label: "Stella" },
   { value: "BadgeCheck", label: "Qualità Verificata" },
+  { value: "Bike", label: "Bicicletta" },
+  { value: "Lightbulb", label: "Lampadina" },
+  { value: "Droplet", label: "Goccia" },
 ];
 
 const ChiSiamoAdmin = () => {
