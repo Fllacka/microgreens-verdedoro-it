@@ -14,7 +14,7 @@ import { Phone, Mail, MapPin, MessageSquare, Clock, CheckCircle, Truck, Shopping
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('it-IT', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'EUR'
   }).format(price);
 };
 import { Helmet } from "react-helmet";
@@ -48,10 +48,10 @@ const Contatti = () => {
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const { data, error } = await supabase
-          .from("contatti_sections")
-          .select("*")
-          .order("sort_order");
+        const { data, error } = await supabase.
+        from("contatti_sections").
+        select("*").
+        order("sort_order");
 
         if (error) throw error;
 
@@ -73,9 +73,9 @@ const Contatti = () => {
   // Auto-populate message with cart items
   useEffect(() => {
     if (cartItems.length > 0) {
-      const productsText = cartItems.map(item => `- ${item.name}: ${item.quantity}g`).join('\n');
+      const productsText = cartItems.map((item) => `- ${item.name}: ${item.quantity}g`).join('\n');
       const autoMessage = `Vorrei richiedere un preventivo per i seguenti prodotti:\n\n${productsText}\n\n`;
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         messaggio: autoMessage
       }));
@@ -95,7 +95,7 @@ const Contatti = () => {
           telefono: formData.telefono,
           indirizzo: formData.indirizzo,
           messaggio: formData.messaggio,
-          prodotti: cartItems.map(item => ({ name: item.name, quantity: item.quantity, price: item.price }))
+          prodotti: cartItems.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price }))
         }
       });
 
@@ -133,8 +133,8 @@ const Contatti = () => {
         <div className="flex items-center justify-center h-64">
           <p>Caricamento...</p>
         </div>
-      </Layout>
-    );
+      </Layout>);
+
   }
 
   const seoSection = sections["seo"];
@@ -145,14 +145,14 @@ const Contatti = () => {
   const whatsappCtaSection = sections["whatsapp_cta"];
 
   const currentUrl = window.location.origin + "/contatti";
-  const canonicalUrl = seoSection?.content?.canonical_url
-    ? `${window.location.origin}${seoSection.content.canonical_url}`
-    : currentUrl;
+  const canonicalUrl = seoSection?.content?.canonical_url ?
+  `${window.location.origin}${seoSection.content.canonical_url}` :
+  currentUrl;
 
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: "Home", url: "/" },
-    { name: "Contatti", url: "/contatti" },
-  ]);
+  { name: "Home", url: "/" },
+  { name: "Contatti", url: "/contatti" }]
+  );
   const contactInfoItems = [];
   if (contactInfoSection?.content?.phone_visible) {
     contactInfoItems.push({
@@ -193,24 +193,24 @@ const Contatti = () => {
         <title>{seoSection?.content?.meta_title || "Contatti - Verde D'Oro"}</title>
         <meta
           name="description"
-          content={seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."}
-        />
+          content={seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."} />
+
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        {seoSection?.content?.og_title && (
-          <meta property="og:title" content={seoSection.content.og_title} />
-        )}
-        {seoSection?.content?.og_description && (
-          <meta property="og:description" content={seoSection.content.og_description} />
-        )}
+        {seoSection?.content?.og_title &&
+        <meta property="og:title" content={seoSection.content.og_title} />
+        }
+        {seoSection?.content?.og_description &&
+        <meta property="og:description" content={seoSection.content.og_description} />
+        }
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
         </script>
       </Helmet>
 
       {/* Hero Section */}
-      {heroSection?.is_visible !== false && (
-        <section className="section-padding bg-gradient-subtle">
+      {heroSection?.is_visible !== false &&
+      <section className="section-padding bg-gradient-subtle">
           <div className="container-width text-center">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
               {heroSection?.content?.title || "Contattaci"}
@@ -220,14 +220,14 @@ const Contatti = () => {
             </p>
           </div>
         </section>
-      )}
+      }
 
       <section className="section-padding bg-background">
         <div className="container-width">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Contact Form */}
-            {formSection?.is_visible !== false && (
-              <div className="lg:col-span-2">
+            {formSection?.is_visible !== false &&
+            <div className="lg:col-span-2">
                 <Card className="border-border/50">
                   <CardHeader>
                     <CardTitle className="font-display text-2xl text-primary flex items-center">
@@ -240,15 +240,15 @@ const Contatti = () => {
                   </CardHeader>
                   <CardContent>
                     {/* Cart Summary */}
-                    {cartItems.length > 0 && (
-                      <div className="mb-8 p-4 bg-secondary rounded-lg">
+                    {cartItems.length > 0 &&
+                  <div className="mb-8 p-4 bg-secondary rounded-lg">
                         <h3 className="font-display font-semibold text-primary mb-4 flex items-center">
                           <ShoppingCart className="mr-2 h-5 w-5" />
                           Prodotti Selezionati
                         </h3>
                         <div className="space-y-3">
-                          {cartItems.map((item, index) => (
-                            <div key={index} className="flex justify-between items-center">
+                          {cartItems.map((item, index) =>
+                      <div key={index} className="flex justify-between items-center">
                               <div className="flex items-center gap-2">
                                 <span className="font-body font-medium">{item.name}</span>
                                 <span className="text-muted-foreground text-sm">
@@ -256,46 +256,46 @@ const Contatti = () => {
                                 </span>
                               </div>
                               <div className="flex items-center gap-3">
-                                {item.price !== undefined && item.price > 0 && (
-                                  <span className="font-semibold text-verde-primary">
+                                {item.price !== undefined && item.price > 0 &&
+                          <span className="font-semibold text-verde-primary">
                                     {formatPrice(item.price)}
                                   </span>
-                                )}
+                          }
                                 <button
-                                  type="button"
-                                  onClick={() => removeItem(item.id)}
-                                  className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
-                                  aria-label={`Rimuovi ${item.name}`}
-                                >
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="p-1 rounded-full hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                            aria-label={`Rimuovi ${item.name}`}>
+
                                   <X className="h-4 w-4" />
                                 </button>
                               </div>
                             </div>
-                          ))}
-                          {cartItems.some(item => item.price !== undefined && item.price > 0) && (
-                            <>
+                      )}
+                          {cartItems.some((item) => item.price !== undefined && item.price > 0) &&
+                      <>
                               <div className="border-t pt-3 mt-3 flex justify-between items-center">
-                                <span className="font-semibold">Totale stimato</span>
+                                <span className="font-semibold">Totale</span>
                                 <span className="text-lg font-bold text-verde-primary">
                                   {formatPrice(cartItems.reduce((sum, item) => sum + (item.price || 0), 0))}
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Info className="h-3 w-3" />
-                                Paghi comodamente alla consegna
+                                Il prezzo finale sarà confermato nel preventivo
                               </p>
                             </>
-                          )}
-                          {!cartItems.some(item => item.price !== undefined && item.price > 0) && (
-                            <div className="border-t pt-3 mt-3">
+                      }
+                          {!cartItems.some((item) => item.price !== undefined && item.price > 0) &&
+                      <div className="border-t pt-3 mt-3">
                               <p className="text-sm text-muted-foreground">
                                 Riceverai un preventivo dettagliato via email
                               </p>
                             </div>
-                          )}
+                      }
                         </div>
                       </div>
-                    )}
+                  }
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -304,26 +304,26 @@ const Contatti = () => {
                             Nome *
                           </Label>
                           <Input
-                            id="nome"
-                            placeholder="Il tuo nome"
-                            required
-                            className="mt-2"
-                            value={formData.nome}
-                            onChange={e => setFormData({ ...formData, nome: e.target.value })}
-                          />
+                          id="nome"
+                          placeholder="Il tuo nome"
+                          required
+                          className="mt-2"
+                          value={formData.nome}
+                          onChange={(e) => setFormData({ ...formData, nome: e.target.value })} />
+
                         </div>
                         <div>
                           <Label htmlFor="cognome" className="font-body font-medium">
                             Cognome *
                           </Label>
                           <Input
-                            id="cognome"
-                            placeholder="Il tuo cognome"
-                            required
-                            className="mt-2"
-                            value={formData.cognome}
-                            onChange={e => setFormData({ ...formData, cognome: e.target.value })}
-                          />
+                          id="cognome"
+                          placeholder="Il tuo cognome"
+                          required
+                          className="mt-2"
+                          value={formData.cognome}
+                          onChange={(e) => setFormData({ ...formData, cognome: e.target.value })} />
+
                         </div>
                       </div>
 
@@ -333,27 +333,27 @@ const Contatti = () => {
                             Email *
                           </Label>
                           <Input
-                            id="email"
-                            type="email"
-                            placeholder="nome@email.com"
-                            required
-                            className="mt-2"
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                          />
+                          id="email"
+                          type="email"
+                          placeholder="nome@email.com"
+                          required
+                          className="mt-2"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+
                         </div>
                         <div>
                           <Label htmlFor="telefono" className="font-body font-medium">
                             Telefono
                           </Label>
                           <Input
-                            id="telefono"
-                            type="tel"
-                            placeholder="+39 000 000 0000"
-                            className="mt-2"
-                            value={formData.telefono}
-                            onChange={e => setFormData({ ...formData, telefono: e.target.value })}
-                          />
+                          id="telefono"
+                          type="tel"
+                          placeholder="+39 000 000 0000"
+                          className="mt-2"
+                          value={formData.telefono}
+                          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })} />
+
                         </div>
                       </div>
 
@@ -362,13 +362,13 @@ const Contatti = () => {
                           Indirizzo *
                         </Label>
                         <Input
-                          id="indirizzo"
-                          placeholder="Via, numero civico, città"
-                          required
-                          className="mt-2"
-                          value={formData.indirizzo}
-                          onChange={e => setFormData({ ...formData, indirizzo: e.target.value })}
-                        />
+                        id="indirizzo"
+                        placeholder="Via, numero civico, città"
+                        required
+                        className="mt-2"
+                        value={formData.indirizzo}
+                        onChange={(e) => setFormData({ ...formData, indirizzo: e.target.value })} />
+
                       </div>
 
                       <div>
@@ -376,14 +376,14 @@ const Contatti = () => {
                           Messaggio *
                         </Label>
                         <Textarea
-                          id="messaggio"
-                          placeholder="Descrivici le tue esigenze: quantità, frequenza di consegna, varietà preferite..."
-                          rows={6}
-                          required
-                          className="mt-2"
-                          value={formData.messaggio}
-                          onChange={e => setFormData({ ...formData, messaggio: e.target.value })}
-                        />
+                        id="messaggio"
+                        placeholder="Descrivici le tue esigenze: quantità, frequenza di consegna, varietà preferite..."
+                        rows={6}
+                        required
+                        className="mt-2"
+                        value={formData.messaggio}
+                        onChange={(e) => setFormData({ ...formData, messaggio: e.target.value })} />
+
                       </div>
 
                       <Button type="submit" variant="oro" size="lg" className="w-full" disabled={isLoading}>
@@ -394,20 +394,20 @@ const Contatti = () => {
                   </CardContent>
                 </Card>
               </div>
-            )}
+            }
 
             {/* Contact Information */}
             <div className="space-y-6">
-              {contactInfoSection?.is_visible !== false && contactInfoItems.length > 0 && (
-                <Card className="border-border/50">
+              {contactInfoSection?.is_visible !== false && contactInfoItems.length > 0 &&
+              <Card className="border-border/50">
                   <CardHeader>
                     <CardTitle className="font-display text-xl text-primary">
                       {contactInfoSection?.content?.title || "Informazioni di Contatto"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {contactInfoItems.map((info, index) => (
-                      <div key={index} className="flex items-start space-x-4">
+                    {contactInfoItems.map((info, index) =>
+                  <div key={index} className="flex items-start space-x-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
                           <info.icon className="h-5 w-5 text-primary-foreground" />
                         </div>
@@ -423,13 +423,13 @@ const Contatti = () => {
                           </p>
                         </div>
                       </div>
-                    ))}
+                  )}
                   </CardContent>
                 </Card>
-              )}
+              }
 
-              {deliverySection?.is_visible !== false && (
-                <Card className="border-border/50 bg-gradient-subtle">
+              {deliverySection?.is_visible !== false &&
+              <Card className="border-border/50 bg-gradient-subtle">
                   <CardHeader>
                     <CardTitle className="font-display text-xl text-primary flex items-center">
                       <Truck className="mr-2 h-5 w-5" />
@@ -438,37 +438,37 @@ const Contatti = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {deliverySection?.content?.item1_visible && (
-                        <div className="flex items-center space-x-3">
+                      {deliverySection?.content?.item1_visible &&
+                    <div className="flex items-center space-x-3">
                           <Clock className="h-4 w-4 text-oro-primary" />
                           <span className="text-sm font-body">
                             {deliverySection.content.item1_text || "Consegna in 24-48h in Emilia-Romagna"}
                           </span>
                         </div>
-                      )}
-                      {deliverySection?.content?.item2_visible && (
-                        <div className="flex items-center space-x-3">
+                    }
+                      {deliverySection?.content?.item2_visible &&
+                    <div className="flex items-center space-x-3">
                           <CheckCircle className="h-4 w-4 text-verde-primary" />
                           <span className="text-sm font-body">
                             {deliverySection.content.item2_text || "Spedizione gratuita per ordini superiori a €50"}
                           </span>
                         </div>
-                      )}
-                      {deliverySection?.content?.item3_visible && (
-                        <div className="flex items-center space-x-3">
+                    }
+                      {deliverySection?.content?.item3_visible &&
+                    <div className="flex items-center space-x-3">
                           <CheckCircle className="h-4 w-4 text-verde-primary" />
                           <span className="text-sm font-body">
                             {deliverySection.content.item3_text || "Packaging sostenibile e refrigerato"}
                           </span>
                         </div>
-                      )}
+                    }
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              }
 
-              {whatsappCtaSection?.is_visible !== false && (
-                <Card className="border-border/50 bg-oro-primary text-accent-foreground">
+              {whatsappCtaSection?.is_visible !== false &&
+              <Card className="border-border/50 bg-oro-primary text-accent-foreground">
                   <CardContent className="p-6">
                     <h3 className="font-display text-lg font-semibold mb-3">
                       {whatsappCtaSection?.content?.title || "Hai fretta?"}
@@ -477,10 +477,10 @@ const Contatti = () => {
                       {whatsappCtaSection?.content?.description || "Contattaci direttamente su WhatsApp per una risposta immediata."}
                     </p>
                     <Button
-                      variant="outline"
-                      className="w-full border-accent-foreground text-accent-foreground hover:bg-accent-foreground hover:text-oro-primary"
-                      asChild
-                    >
+                    variant="outline"
+                    className="w-full border-accent-foreground text-accent-foreground hover:bg-accent-foreground hover:text-oro-primary"
+                    asChild>
+
                       <a href={whatsappCtaSection?.content?.whatsapp_link || "https://wa.me/39333000000?text=Ciao! Vorrei informazioni sui vostri microgreens"}>
                         <MessageSquare className="mr-2 h-4 w-4" />
                         {whatsappCtaSection?.content?.button_text || "Scrivici su WhatsApp"}
@@ -488,13 +488,13 @@ const Contatti = () => {
                     </Button>
                   </CardContent>
                 </Card>
-              )}
+              }
             </div>
           </div>
         </div>
       </section>
-    </Layout>
-  );
+    </Layout>);
+
 };
 
 export default Contatti;
