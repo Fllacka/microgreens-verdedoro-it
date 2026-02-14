@@ -1,66 +1,68 @@
 
 
-## Optimize Render-Blocking CSS for PageSpeed
+## Fix: LCP Hero Image Preload Not Working
 
 ### Problem
-PageSpeed Insights reports a 15.8 KiB CSS file (`index-*.css`) blocking rendering for ~480ms, impacting FCP and LCP.
+You already have a Vite plugin (`vite-plugin-hero-preload.ts`) designed to inject a `<link rel="preload">` for the hero image during build, but it silently fails every time due to two bugs:
 
-### Context
-- Vite is the bundler, Tailwind CSS is used for styling
-- Tailwind already purges unused classes in production builds (configured via `content` in `tailwind.config.ts`)
-- CSS is already minified by Vite's production build
-- The 15.8 KiB size is actually quite small -- the main issue is that it's render-blocking, not its size
+1. **Environment variables not accessible**: The script uses `process.env.VITE_SUPABASE_URL`, but Vite does NOT populate `process.env` -- it uses `import.meta.env` for client code and requires explicit loading for build scripts.
 
-### Solution: Inline Critical CSS with Critters
+2. **URL mismatch**: Even if the env vars worked, the plugin transforms the URL to a `/render/image/` path with WebP parameters, but the actual `<img>` tag on the homepage uses the raw `file_path` (`/storage/v1/object/public/...`). A preload is ignored by the browser if the URL doesn't match exactly.
 
-Use the `@playform/critters` Vite plugin (successor to Google's `critters`) to automatically:
-1. Extract critical above-the-fold CSS
-2. Inline it directly into the HTML `<style>` tag
-3. Lazy-load the remaining CSS asynchronously
+### Solution
 
-This eliminates the render-blocking request entirely without manual CSS extraction.
+**File: `scripts/fetch-hero-url.ts`** -- Fix environment variable loading
 
-### Implementation
-
-**1. Install dependency**
-- Add `@playform/critters` (the maintained fork of Google's critters, works without a headless browser)
-
-**2. Update `vite.config.ts`**
-- Import and add the critters plugin to the Vite plugins array
-- Configure it for production builds only
+Replace `process.env` with Vite's `loadEnv` or read from `.env` manually using Node's `dotenv`-style parsing. Since this runs during the Vite build (which is a Node process), we can use `import('dotenv')` or simply read the `.env` file directly with `fs`.
 
 ```typescript
-import critters from "@playform/critters";
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
-export default defineConfig(({ mode }) => ({
-  // ...existing config
-  plugins: [
-    react(),
-    mode === "development" && componentTagger(),
-    mode === "production" && heroPreloadPlugin(),
-    mode === "production" && critters({
-      // Inline critical CSS, lazy-load the rest
-      preload: "swap",
-      // Don't remove the original CSS file (it gets lazy-loaded)
-      pruneSource: false,
-    }),
-  ].filter(Boolean),
-}));
+// Parse .env file manually (runs during build, not in browser)
+function loadEnvVars() {
+  try {
+    const envFile = readFileSync(resolve(process.cwd(), '.env'), 'utf-8');
+    const vars: Record<string, string> = {};
+    for (const line of envFile.split('\n')) {
+      const match = line.match(/^(\w+)=["']?(.+?)["']?$/);
+      if (match) vars[match[1]] = match[2];
+    }
+    return vars;
+  } catch { return {}; }
+}
+
+const env = loadEnvVars();
+const SUPABASE_URL = env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
 ```
 
-**3. Fix build error in edge function**
-The typecheck error in `send-quote-request/index.ts` is unrelated but needs fixing. The Resend import uses `npm:resend@2.0.0` which Deno can't resolve during typecheck. This is a pre-existing issue and won't be changed as part of this task (edge functions deploy separately).
+**File: `scripts/fetch-hero-url.ts`** -- Remove URL transformation
+
+The `getOptimizedHeroUrl` function should return the raw URL as-is (matching what the `<img>` tag actually uses), not a transformed render URL.
+
+```typescript
+export function getOptimizedHeroUrl(url: string): string {
+  // Return the URL as-is to match the <img src> on the page
+  return url;
+}
+```
+
+**File: `vite-plugin-hero-preload.ts`** -- Update preload tag
+
+Remove `type="image/webp"` since we're preloading the original image (which may be JPEG or PNG, not WebP).
+
+```html
+<link rel="preload" as="image" href="..." fetchpriority="high">
+```
 
 ### What This Achieves
-- Critical CSS (above-the-fold styles) gets inlined into `<style>` in the HTML
-- The full CSS file loads asynchronously (non-blocking)
-- Users see styled content immediately instead of a blank screen
-- Estimated 160ms savings per PageSpeed report
-- No manual CSS extraction needed -- fully automated at build time
+- The build will successfully fetch the hero image URL from the database
+- The preload tag will be injected into the HTML `<head>` with the exact URL the page uses
+- The browser discovers the hero image immediately when parsing `<head>`, before any JS runs
+- This eliminates the "La richiesta e rilevabile nel documento iniziale" warning from PageSpeed
 
-### Technical Notes
-- Critters works by analyzing the HTML output and determining which CSS rules are needed for the initial viewport
-- It does NOT require a headless browser (unlike other critical CSS tools), making it fast and reliable
-- The remaining CSS loads via `<link rel="stylesheet" media="print" onload="this.media='all'">` pattern (same technique already used for Google Fonts)
-- At 15.8 KiB total CSS, the inlined portion will be very small (likely 3-5 KiB), well within acceptable inline limits
+### Files Changed
+1. `scripts/fetch-hero-url.ts` -- Fix env var loading + remove URL transformation
+2. `vite-plugin-hero-preload.ts` -- Remove WebP type from preload tag
 
