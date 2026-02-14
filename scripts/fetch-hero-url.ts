@@ -3,22 +3,29 @@
  * Used by the Vite plugin to inject preload tags during build
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { createClient } from '@supabase/supabase-js';
 
-// These are loaded from environment variables during build
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Parse .env file manually (runs during build, not in browser)
+function loadEnvVars(): Record<string, string> {
+  try {
+    const envFile = readFileSync(resolve(process.cwd(), '.env'), 'utf-8');
+    const vars: Record<string, string> = {};
+    for (const line of envFile.split('\n')) {
+      const match = line.match(/^(\w+)=["']?(.+?)["']?$/);
+      if (match) vars[match[1]] = match[2];
+    }
+    return vars;
+  } catch { return {}; }
+}
+
+const env = loadEnvVars();
+const SUPABASE_URL = env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 interface HeroContent {
   background_image_id?: string;
-}
-
-interface HomepageSection {
-  content: HeroContent;
-}
-
-interface Media {
-  file_path: string;
 }
 
 /**
@@ -74,28 +81,8 @@ export async function getHeroImageUrl(): Promise<string | null> {
 }
 
 /**
- * Transforms a Supabase storage URL to use image transformations
+ * Returns the URL as-is to match the <img src> on the page
  */
 export function getOptimizedHeroUrl(url: string): string {
-  if (!url || !SUPABASE_URL) return url;
-  
-  // Check if it's a Supabase storage URL
-  if (!url.startsWith(SUPABASE_URL) || !url.includes('/storage/v1/object/')) {
-    return url;
-  }
-
-  // Extract storage path
-  const match = url.match(/\/storage\/v1\/object\/(?:public|sign)\/(.+)/);
-  if (!match) return url;
-
-  const storagePath = match[1];
-  
-  // Build render URL with hero size optimization (1920px wide, WebP, quality 85)
-  const params = new URLSearchParams({
-    width: '1920',
-    quality: '85',
-    format: 'webp',
-  });
-
-  return `${SUPABASE_URL}/storage/v1/render/image/public/${storagePath}?${params}`;
+  return url;
 }
