@@ -5,8 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { CartDrawer } from "@/components/CartDrawer";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { PageLoading } from "@/components/ui/page-loading";
 
@@ -24,40 +22,14 @@ const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const Contatti = lazy(() => import("./pages/Contatti"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Admin pages - lazy loaded (rarely accessed)
-const AdminLogin = lazy(() => import("./pages/admin/Login"));
-const AdminResetPassword = lazy(() => import("./pages/admin/ResetPassword"));
-const AdminEmailConfirmation = lazy(() => import("./pages/admin/EmailConfirmation"));
-const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
-const AdminProducts = lazy(() => import("./pages/admin/Products"));
-const AdminProductEdit = lazy(() => import("./pages/admin/ProductEdit"));
-const AdminBlog = lazy(() => import("./pages/admin/Blog"));
-const AdminBlogEdit = lazy(() => import("./pages/admin/BlogEdit"));
-const AdminRedirects = lazy(() => import("./pages/admin/Redirects"));
-const AdminUsers = lazy(() => import("./pages/admin/Users"));
-const AdminPages = lazy(() => import("./pages/admin/Pages"));
-const AdminPageEdit = lazy(() => import("./pages/admin/PageEdit"));
-const AdminMedia = lazy(() => import("./pages/admin/Media"));
-const AdminSettings = lazy(() => import("./pages/admin/Settings"));
-const AdminHomepage = lazy(() => import("./pages/admin/Homepage"));
-const AdminChiSiamo = lazy(() => import("./pages/admin/ChiSiamo"));
-const AdminMicrogreensPage = lazy(() => import("./pages/admin/Microgreens"));
-const AdminMicrogreensCustom = lazy(() => import("./pages/admin/MicrogreensCustom"));
-const AdminContatti = lazy(() => import("./pages/admin/Contatti"));
-const AdminBlogOverview = lazy(() => import("./pages/admin/BlogOverview"));
-const AdminCosaSonoMicrogreens = lazy(() => import("./pages/admin/CosaSonoMicrogreens"));
+// Lazy-loaded CartDrawer - defers Sheet/ScrollArea/Separator UI imports
+const CartDrawer = lazy(() => import("./components/CartDrawer").then(m => ({ default: m.CartDrawer })));
 
-// Preview pages - lazy loaded
-const ProductPreview = lazy(() => import("./pages/preview/ProductPreview"));
-const BlogPreview = lazy(() => import("./pages/preview/BlogPreview"));
-const PagePreview = lazy(() => import("./pages/preview/PagePreview"));
-const HomepagePreview = lazy(() => import("./pages/preview/HomepagePreview"));
-const ChiSiamoPreview = lazy(() => import("./pages/preview/ChiSiamoPreview"));
-const MicrogreensPreview = lazy(() => import("./pages/preview/MicrogreensPreview"));
-const MicrogreensCustomPreview = lazy(() => import("./pages/preview/MicrogreensCustomPreview"));
-const ContattiPreview = lazy(() => import("./pages/preview/ContattiPreview"));
-const CosaSonoMicrogreensPreview = lazy(() => import("./pages/preview/CosaSonoMicrogreensPreview"));
-const BlogOverviewPreview = lazy(() => import("./pages/preview/BlogOverviewPreview"));
+// Admin routes wrapper - lazy loaded, includes AuthProvider
+const AdminRoutesWrapper = lazy(() => import("./components/AdminRoutesWrapper"));
+
+// Preview routes wrapper - lazy loaded, includes AuthProvider
+const PreviewRoutesWrapper = lazy(() => import("./components/PreviewRoutesWrapper"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,11 +40,23 @@ const queryClient = new QueryClient({
   },
 });
 
-// Root layout component that wraps all routes
-const RootLayout = () => (
+// Public layout - no AuthProvider needed
+const PublicLayout = () => (
   <>
     <ScrollToTop />
-    <CartDrawer />
+    <Suspense fallback={null}>
+      <CartDrawer />
+    </Suspense>
+    <Suspense fallback={<PageLoading />}>
+      <Outlet />
+    </Suspense>
+  </>
+);
+
+// Admin/Preview layout - no cart needed
+const AuthLayout = () => (
+  <>
+    <ScrollToTop />
     <Suspense fallback={<PageLoading />}>
       <Outlet />
     </Suspense>
@@ -82,7 +66,7 @@ const RootLayout = () => (
 // Create data router with routes configuration
 const router = createBrowserRouter([
   {
-    element: <RootLayout />,
+    element: <PublicLayout />,
     children: [
       { path: "/", element: <Index /> },
       { path: "/chi-siamo", element: <ChiSiamo /> },
@@ -93,58 +77,29 @@ const router = createBrowserRouter([
       { path: "/blog", element: <Blog /> },
       { path: "/blog/:slug", element: <BlogArticle /> },
       { path: "/contatti", element: <Contatti /> },
-      
-      // Admin Routes
-      { path: "/admin/login", element: <AdminLogin /> },
-      { path: "/admin/email-confirmation", element: <AdminEmailConfirmation /> },
-      { path: "/admin/reset-password", element: <AdminResetPassword /> },
-      { path: "/admin", element: <AdminDashboard /> },
-      { path: "/admin/homepage", element: <AdminHomepage /> },
-      { path: "/admin/chi-siamo", element: <AdminChiSiamo /> },
-      { path: "/admin/microgreens", element: <AdminMicrogreensPage /> },
-      { path: "/admin/microgreens-su-misura", element: <AdminMicrogreensCustom /> },
-      { path: "/admin/contatti", element: <AdminContatti /> },
-      { path: "/admin/blog-overview", element: <AdminBlogOverview /> },
-      { path: "/admin/cosa-sono-i-microgreens", element: <AdminCosaSonoMicrogreens /> },
-      { path: "/admin/products", element: <AdminProducts /> },
-      { path: "/admin/products/:id", element: <AdminProductEdit /> },
-      { path: "/admin/blog", element: <AdminBlog /> },
-      { path: "/admin/blog/:id", element: <AdminBlogEdit /> },
-      { path: "/admin/pages", element: <AdminPages /> },
-      { path: "/admin/pages/:id", element: <AdminPageEdit /> },
-      { path: "/admin/media", element: <AdminMedia /> },
-      { path: "/admin/users", element: <AdminUsers /> },
-      { path: "/admin/redirects", element: <AdminRedirects /> },
-      { path: "/admin/settings", element: <AdminSettings /> },
-      
-      // Preview Routes (authenticated)
-      { path: "/preview/homepage", element: <HomepagePreview /> },
-      { path: "/preview/chi-siamo", element: <ChiSiamoPreview /> },
-      { path: "/preview/microgreens", element: <MicrogreensPreview /> },
-      { path: "/preview/microgreens-su-misura", element: <MicrogreensCustomPreview /> },
-      { path: "/preview/contatti", element: <ContattiPreview /> },
-      { path: "/preview/blog-overview", element: <BlogOverviewPreview /> },
-      { path: "/preview/cosa-sono-i-microgreens", element: <CosaSonoMicrogreensPreview /> },
-      { path: "/preview/microgreens/:slug", element: <ProductPreview /> },
-      { path: "/preview/blog/:slug", element: <BlogPreview /> },
-      { path: "/preview/page/:slug", element: <PagePreview /> },
-      
-      // Catch-all route
-      { path: "*", element: <NotFound /> },
     ],
   },
+  {
+    element: <AuthLayout />,
+    children: [
+      // Admin Routes - AuthProvider loaded inside AdminRoutesWrapper
+      { path: "/admin/*", element: <AdminRoutesWrapper /> },
+      // Preview Routes - AuthProvider loaded inside PreviewRoutesWrapper
+      { path: "/preview/*", element: <PreviewRoutesWrapper /> },
+    ],
+  },
+  // Catch-all route
+  { path: "*", element: <NotFound /> },
 ]);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <RouterProvider router={router} />
-        </CartProvider>
-      </AuthProvider>
+      <CartProvider>
+        <Toaster />
+        <Sonner />
+        <RouterProvider router={router} />
+      </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
