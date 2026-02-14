@@ -355,8 +355,8 @@ const AdminMicrogreensCustom = () => {
                 <div>
                   <Label>Immagine di sfondo</Label>
                   <MediaSelector
-                    value={heroSection?.content?.image_url || ''}
-                    onChange={(url) => updateSectionContent('hero', 'image_url', url)}
+                    value={heroSection?.content?.image_id || null}
+                    onChange={(id) => updateSectionContent('hero', 'image_id', id)}
                   />
                 </div>
                 <div>
@@ -400,8 +400,8 @@ const AdminMicrogreensCustom = () => {
                 <div>
                   <Label>Immagine</Label>
                   <MediaSelector
-                    value={introSection?.content?.image_url || ''}
-                    onChange={(url) => updateSectionContent('intro', 'image_url', url)}
+                    value={introSection?.content?.image_id || null}
+                    onChange={(id) => updateSectionContent('intro', 'image_id', id)}
                   />
                 </div>
                 <div>

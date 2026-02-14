@@ -34,6 +34,8 @@ const MicrogreensCustomPreview = () => {
   const { user, userRole, loading: authLoading } = useAuth();
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
+  const [introImageUrl, setIntroImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || (userRole !== 'admin' && userRole !== 'editor'))) {
@@ -70,6 +72,34 @@ const MicrogreensCustomPreview = () => {
     }
   };
 
+  // Resolve media IDs to URLs
+  useEffect(() => {
+    const heroSection = sections.find(s => s.id === 'hero');
+    const introSection = sections.find(s => s.id === 'intro');
+    const imageIds = [
+      heroSection?.content?.image_id,
+      introSection?.content?.image_id,
+    ].filter((id): id is string => !!id);
+
+    if (imageIds.length === 0) {
+      setHeroImageUrl(null);
+      setIntroImageUrl(null);
+      return;
+    }
+
+    supabase
+      .from('media')
+      .select('id, file_path')
+      .in('id', imageIds)
+      .then(({ data }) => {
+        if (data) {
+          const map = Object.fromEntries(data.map(m => [m.id, m.file_path]));
+          setHeroImageUrl(heroSection?.content?.image_id ? map[heroSection.content.image_id] || null : null);
+          setIntroImageUrl(introSection?.content?.image_id ? map[introSection.content.image_id] || null : null);
+        }
+      });
+  }, [sections]);
+
   const getSection = (id: string) => sections.find(s => s.id === id);
 
   if (authLoading || loading) {
@@ -88,8 +118,8 @@ const MicrogreensCustomPreview = () => {
   const varietiesSection = getSection('varieties');
   const ctaSection = getSection('cta');
 
-  const heroImage = heroSection?.content.image_url || heroImageFallback;
-  const introImage = introSection?.content.image_url || chefImageFallback;
+  const heroImage = heroImageUrl || heroImageFallback;
+  const introImage = introImageUrl || chefImageFallback;
 
   return (
     <Layout>
