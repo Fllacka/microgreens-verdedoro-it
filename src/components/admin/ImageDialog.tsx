@@ -77,7 +77,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
     setProcessingId(mediaId);
     
     try {
-      const { data, error } = await supabase.functions.invoke('process-image', {
+      const { data, error } = await supabase.functions.invoke('generate-responsive-images', {
         body: { storagePath, mediaId },
       });
 
@@ -86,7 +86,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       if (data.success) {
         toast({
           title: "Successo",
-          description: "Immagine ottimizzata",
+          description: "Versioni responsive generate",
         });
         await fetchMedia();
         return data.optimizedUrls;

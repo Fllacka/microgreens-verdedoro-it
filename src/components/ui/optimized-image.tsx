@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { buildSrcSet, type ResponsiveUrls } from "@/lib/image-utils";
 
 interface OptimizedImageProps {
   src: string;
@@ -13,21 +14,15 @@ interface OptimizedImageProps {
   fallbackSrc?: string;
   onLoad?: () => void;
   onError?: () => void;
-  /** @deprecated No longer used */
-  optimizedUrls?: unknown;
-  /** @deprecated No longer used */
-  size?: string;
-  /** @deprecated No longer used */
-  context?: string;
-  /** @deprecated No longer used */
-  blurhash?: string | null;
-  /** @deprecated No longer used */
-  optimizedUrl?: string | null;
+  /** Responsive image URLs for srcset generation */
+  optimizedUrls?: ResponsiveUrls | null;
+  /** Layout-specific sizes hint for the browser */
+  sizes?: string;
 }
 
 /**
- * Simple Image Component
- * Just displays images with lazy loading - no optimization, no BlurHash
+ * Responsive Image Component
+ * Supports srcset/sizes for responsive image delivery
  */
 const OptimizedImage = ({
   src,
@@ -42,6 +37,8 @@ const OptimizedImage = ({
   fallbackSrc,
   onLoad,
   onError,
+  optimizedUrls,
+  sizes,
 }: OptimizedImageProps) => {
   const objectFitClass = {
     cover: "object-cover",
@@ -56,6 +53,9 @@ const OptimizedImage = ({
     }
     onError?.();
   };
+
+  const srcSet = buildSrcSet(optimizedUrls);
+  const defaultSizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 1200px";
 
   return (
     <div
@@ -75,6 +75,8 @@ const OptimizedImage = ({
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
         fetchPriority={priority ? "high" : "auto"}
+        srcSet={srcSet}
+        sizes={srcSet ? (sizes || defaultSizes) : undefined}
         onLoad={onLoad}
         onError={handleError}
       />
