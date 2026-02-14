@@ -243,7 +243,7 @@ const ProductDetail = () => {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-4 py-12 overflow-hidden">
         <div className="max-w-5xl mx-auto">
           {/* Breadcrumb Navigation */}
           <Breadcrumb className="mb-8">
@@ -272,7 +272,7 @@ const ProductDetail = () => {
 
           <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
             {/* Product Image */}
-            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square min-w-0">
               <OptimizedImage
                 src={product.media?.file_path || "/placeholder.svg"}
                 alt={product.image_alt || product.name}
@@ -284,7 +284,7 @@ const ProductDetail = () => {
             </div>
 
             {/* Product Info & Purchase - Sticky on Desktop */}
-            <div className="flex flex-col justify-start md:sticky md:top-24 md:self-start">
+            <div className="flex flex-col justify-start md:sticky md:top-24 md:self-start min-w-0">
               <div className="flex items-center gap-3 mb-4">
                 {product.category && (
                   <Badge variant="secondary" className="bg-verde-primary/10 text-verde-primary border-verde-primary/20">
