@@ -343,11 +343,11 @@ const ProductDetail = () => {
                   <Button 
                     variant="oro" 
                     size="lg" 
-                    className="w-full h-12 text-sm sm:text-base font-semibold mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300" 
+                    className="w-full h-auto min-h-[48px] text-sm sm:text-base font-semibold mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300 whitespace-normal" 
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="h-4 w-4 shrink-0" />
-                    <span className="truncate">
+                    <span>
                       Aggiungi al Carrello
                       {currentPrice !== undefined && currentPrice > 0 && ` - ${formatPrice(currentPrice)}`}
                     </span>
