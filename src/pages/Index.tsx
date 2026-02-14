@@ -4,15 +4,13 @@ import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import ArticleCard from "@/components/ArticleCard";
-import { Leaf, Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand, HandCoins } from "lucide-react";
+import { Heart, Truck, Shield, ArrowRight, Sprout, Package, UtensilsCrossed, Star, Sparkles, Flame, Sun, ChefHat, ShoppingBag, Scissors, Bike, Hand, HandCoins } from "lucide-react";
 import SeedingHandIcon from "@/components/icons/SeedingHandIcon";
 import heroImage from "@/assets/hero-microgreens.jpg";
 import varietiesImage from "@/assets/microgreens-varieties.jpg";
 import chefImage from "@/assets/chef-microgreens.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { it } from "date-fns/locale";
 import { generateOrganizationSchema, generateWebSiteSchema, generateLocalBusinessSchema, combineSchemas } from "@/lib/seo";
 import { PageLoading } from "@/components/ui/page-loading";
 
