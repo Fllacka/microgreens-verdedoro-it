@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Trash2, Copy, Check, Loader2 } from "lucide-react";
+import { Upload, Trash2, Copy, Check, Loader2, ImagePlus } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ interface MediaFile {
   created_at: string;
   width: number | null;
   height: number | null;
+  is_optimized: boolean | null;
 }
 
 export default function AdminMedia() {
@@ -43,6 +44,7 @@ export default function AdminMedia() {
   const [uploadProgress, setUploadProgress] = useState<string>("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [batchProcessing, setBatchProcessing] = useState(false);
   const { toast } = useToast();
 
   const fetchMedia = async () => {
@@ -107,7 +109,7 @@ export default function AdminMedia() {
           .getPublicUrl(filePath);
 
         // Save to database
-        const { error: dbError } = await supabase.from("media").insert([
+        const { data: mediaData, error: dbError } = await supabase.from("media").insert([
           {
             file_name: file.name,
             file_type: file.type,
@@ -116,9 +118,18 @@ export default function AdminMedia() {
             file_size: file.size,
             uploaded_by: user.id,
           },
-        ]);
+        ]).select().single();
 
         if (dbError) throw dbError;
+
+        // Generate responsive versions
+        if (mediaData && file.type.startsWith("image/")) {
+          supabase.functions.invoke('generate-responsive-images', {
+            body: { storagePath: filePath, mediaId: mediaData.id },
+          }).then(({ error }) => {
+            if (error) console.error('Responsive image generation failed:', error);
+          });
+        }
       }
 
       toast({
@@ -181,6 +192,34 @@ export default function AdminMedia() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleBatchProcess = async () => {
+    setBatchProcessing(true);
+    try {
+      const unprocessed = media.filter(f => !f.is_optimized && f.file_type.startsWith("image/"));
+      if (unprocessed.length === 0) {
+        toast({ title: "Info", description: "Tutte le immagini hanno già le versioni responsive" });
+        setBatchProcessing(false);
+        return;
+      }
+
+      for (let i = 0; i < unprocessed.length; i++) {
+        setUploadProgress(`Elaborando ${i + 1}/${unprocessed.length}: ${unprocessed[i].file_name}`);
+        const { error } = await supabase.functions.invoke('generate-responsive-images', {
+          body: { storagePath: unprocessed[i].storage_path, mediaId: unprocessed[i].id },
+        });
+        if (error) console.error(`Failed to process ${unprocessed[i].file_name}:`, error);
+      }
+
+      toast({ title: "Successo", description: `${unprocessed.length} immagini elaborate` });
+      fetchMedia();
+    } catch (error: any) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    } finally {
+      setBatchProcessing(false);
+      setUploadProgress("");
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -220,6 +259,18 @@ export default function AdminMedia() {
               disabled={uploading}
               className="hidden"
             />
+            <Button
+              variant="outline"
+              onClick={handleBatchProcess}
+              disabled={batchProcessing || uploading}
+            >
+              {batchProcessing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ImagePlus className="mr-2 h-4 w-4" />
+              )}
+              {batchProcessing ? "Elaborando..." : "Genera Responsive"}
+            </Button>
           </div>
         </div>
 

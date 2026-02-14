@@ -28,6 +28,7 @@ interface Product {
   popular: boolean;
   media?: {
     file_path: string;
+    optimized_urls?: Record<string, string> | null;
   };
 }
 
@@ -260,6 +261,7 @@ const Microgreens = () => {
                   popular={product.popular}
                   onCardClick={() => navigate(`/microgreens/${product.slug}`)}
                   priority={index < 3}
+                  optimizedUrls={product.media?.optimized_urls as any}
                 />
               ))}
             </div>
