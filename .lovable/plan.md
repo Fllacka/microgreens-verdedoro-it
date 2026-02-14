@@ -1,78 +1,37 @@
 
 
-## Eliminare il Flash di Contenuto Placeholder - Soluzione Definitiva
+## Fix Product Detail Mobile Overflow
 
-### Causa Radice Identificata
+### Problem
+On mobile, the product info section (title, description, purchase card) overflows the viewport width, causing text truncation and a horizontal scrollbar. The grid children don't constrain their width properly.
 
-Il loading guard funziona per il primo caricamento, ma ci sono due problemi residui:
+### Root Cause
+The grid column containing product info (`div.flex.flex-col`) lacks `min-w-0`, which is required for flex/grid children to shrink below their content's intrinsic width. Without it, long text pushes the container wider than the viewport.
 
-1. **Homepage - caricamento a due fasi**: `loading` diventa `false` dopo le sezioni, ma i prodotti in evidenza vengono caricati in un secondo `useEffect` separato. Durante questa finestra, vengono mostrati prodotti hardcoded che poi vengono sostituiti dai reali.
+### Solution
+Add `min-w-0` to both grid children (image and info columns) so they respect the grid's column boundaries and don't overflow.
 
-2. **Tutte le pagine - fallback `||` nel JSX**: espressioni come `{heroSection?.content?.title || "I Nostri Microgreens"}` mostrano il placeholder se la chiave non esiste ancora nel momento del render, anche se `loading` e `false`.
+### Technical Detail
 
-### Soluzione: Combinazione di Opzione A + fix del caricamento a due fasi
+**File: `src/pages/ProductDetail.tsx`**
 
-**Approccio**: Assicurarsi che TUTTI i dati necessari siano disponibili prima di mostrare il contenuto, e rimuovere i fallback visibili dall'utente.
-
-### File da modificare
-
-**1. `src/pages/Index.tsx`**
-
-- Spostare `fetchFeaturedProducts` DENTRO il `fetchData` iniziale, cosi che `loading` diventi `false` solo quando anche i prodotti in evidenza sono pronti
-- Rafforzare il guard: `if (loading || Object.keys(sections).length === 0)` per verificare che i dati CMS siano effettivamente presenti
-- Rimuovere i `defaultProducts` hardcoded (righe 331-355) e il relativo flag `hasDefaultProducts`, dato che non servono piu con il loading guard
-
-**2. `src/pages/Microgreens.tsx`**
-
-- Rafforzare il guard: `if (loading || Object.keys(sections).length === 0)` per coprire il caso in cui `loading` diventa `false` prima che `sections` sia popolato
-
-**3. `src/pages/ChiSiamo.tsx`**
-
-- Stesso rafforzamento del guard: `if (loading || Object.keys(sections).length === 0)`
-
-**4. `src/pages/Blog.tsx`**
-
-- Stesso rafforzamento del guard: `if (loading || Object.keys(sections).length === 0)`
-
-### Dettaglio tecnico
-
-**Index.tsx - Unificare il caricamento**:
-
-```text
-Prima:
-  useEffect 1: fetchSections() + fetchBlogPosts() → setLoading(false)
-  useEffect 2: quando sections.featured_products cambia → fetchFeaturedProducts()
-
-Dopo:
-  useEffect 1: fetchSections() → fetchFeaturedProducts() → fetchBlogPosts() → setLoading(false)
-  (tutto in sequenza dentro un unico flusso)
+1. **Line 275** - Image column: add `min-w-0`
+```
+Before: <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square">
+After:  <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-square min-w-0">
 ```
 
-Il flusso diventa:
-1. Fetch sezioni CMS
-2. Dalle sezioni, estrai gli slug dei prodotti in evidenza
-3. Fetch prodotti in evidenza
-4. Fetch blog posts
-5. Solo ora: `setLoading(false)`
-
-**Tutte le pagine - Guard rafforzato**:
-
-```tsx
-// Prima
-if (loading) {
-  return <Layout><PageLoading /></Layout>;
-}
-
-// Dopo
-if (loading || Object.keys(sections).length === 0) {
-  return <Layout><PageLoading /></Layout>;
-}
+2. **Line 287** - Info column: add `min-w-0`
+```
+Before: <div className="flex flex-col justify-start md:sticky md:top-24 md:self-start">
+After:  <div className="flex flex-col justify-start md:sticky md:top-24 md:self-start min-w-0">
 ```
 
-### Impatto
+3. **Line 246** - Section: add `overflow-hidden` as safety net
+```
+Before: <section className="container mx-auto px-4 py-12">
+After:  <section className="container mx-auto px-4 py-12 overflow-hidden">
+```
 
-- La Homepage non mostrera piu prodotti hardcoded che poi vengono sostituiti
-- Tutte le pagine verificano che i dati CMS siano effettivamente presenti prima del render
-- I fallback `||` nel JSX restano come sicurezza ma non saranno piu visibili all'utente perche i dati sono sempre pronti quando la pagina viene mostrata
-- Nessuna dipendenza aggiuntiva necessaria
+These three small class additions will prevent any content from exceeding the viewport width on mobile.
 
