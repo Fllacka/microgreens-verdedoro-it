@@ -343,12 +343,14 @@ const ProductDetail = () => {
                   <Button 
                     variant="oro" 
                     size="lg" 
-                    className="w-full h-12 text-base font-semibold mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300" 
+                    className="w-full h-12 text-sm sm:text-base font-semibold mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300" 
                     onClick={handleAddToCart}
                   >
-                    <ShoppingCart className="mr-2 h-5 w-5" />
-                    Aggiungi al Carrello
-                    {currentPrice !== undefined && currentPrice > 0 && ` - ${formatPrice(currentPrice)}`}
+                    <ShoppingCart className="h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      Aggiungi al Carrello
+                      {currentPrice !== undefined && currentPrice > 0 && ` - ${formatPrice(currentPrice)}`}
+                    </span>
                   </Button>
 
                   <p className="text-sm text-muted-foreground text-center mb-3">
