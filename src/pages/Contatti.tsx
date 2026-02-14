@@ -411,11 +411,11 @@ const Contatti = () => {
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
                           <info.icon className="h-5 w-5 text-primary-foreground" />
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <h3 className="font-body font-semibold text-primary">
                             {info.title}
                           </h3>
-                          <p className="font-body text-foreground">
+                          <p className="font-body text-foreground break-all">
                             {info.details}
                           </p>
                           <p className="text-sm text-muted-foreground">
