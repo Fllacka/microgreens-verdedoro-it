@@ -42,7 +42,6 @@ export function heroPreloadPlugin(): Plugin {
       as="image" 
       href="${optimizedUrl}" 
       fetchpriority="high"
-      type="image/webp"
     >`;
 
         // Inject before </head>
