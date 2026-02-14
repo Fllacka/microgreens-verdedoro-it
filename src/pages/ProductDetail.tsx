@@ -60,7 +60,6 @@ interface Product {
   price_tiers?: PriceTier[];
   media?: {
     file_path: string;
-    optimized_urls?: Record<string, string> | null;
     optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
     blurhash?: string | null;
     width?: number | null;
@@ -100,7 +99,6 @@ const ProductDetail = () => {
             *,
             media:media!products_image_id_fkey (
               file_path,
-              optimized_urls,
               optimized_versions,
               blurhash,
               width,
@@ -119,11 +117,10 @@ const ProductDetail = () => {
           // Fetch related products (exclude current product)
           const { data: relatedData, error: relatedError } = await supabase
             .from("products")
-              .select(`
+            .select(`
               *,
               media:media!products_image_id_fkey (
                 file_path,
-                optimized_urls,
                 optimized_versions,
                 blurhash,
                 width,
@@ -283,8 +280,6 @@ const ProductDetail = () => {
                 containerClassName="w-full h-full"
                 priority={true}
                 objectFit="cover"
-                optimizedUrls={product.media?.optimized_urls as any}
-                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
 
@@ -514,7 +509,6 @@ const ProductDetail = () => {
                     rating={relatedProduct.rating}
                     popular={relatedProduct.popular}
                     onCardClick={() => navigate(`/microgreens/${relatedProduct.slug}`)}
-                    optimizedUrls={relatedProduct.media?.optimized_urls as any}
                   />
                 ))}
               </div>

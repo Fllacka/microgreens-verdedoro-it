@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Heart, Zap, Shield } from "lucide-react";
-import { buildSrcSet, type ResponsiveUrls } from "@/lib/image-utils";
 
 interface ProductCardProps {
   name: string;
@@ -15,7 +14,6 @@ interface ProductCardProps {
   popular?: boolean;
   onCardClick?: () => void;
   priority?: boolean;
-  optimizedUrls?: ResponsiveUrls | null;
 }
 
 const ProductCard = ({
@@ -30,9 +28,7 @@ const ProductCard = ({
   popular,
   onCardClick,
   priority = false,
-  optimizedUrls,
 }: ProductCardProps) => {
-  const srcSet = buildSrcSet(optimizedUrls);
   return (
     <Card 
       className="product-card overflow-hidden border-border/50 relative cursor-pointer group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex flex-col"
@@ -45,8 +41,6 @@ const ProductCard = ({
           alt={`${name} - microgreen fresco`}
           className="w-full h-full object-cover"
           loading={priority ? "eager" : "lazy"}
-          srcSet={srcSet}
-          sizes={srcSet ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" : undefined}
         />
         
         {/* Gradient overlay for better text readability */}

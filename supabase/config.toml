@@ -6,6 +6,6 @@ verify_jwt = false
 [functions.sitemap]
 verify_jwt = false
 
-[functions.generate-responsive-images]
+[functions.process-image]
 verify_jwt = false
 

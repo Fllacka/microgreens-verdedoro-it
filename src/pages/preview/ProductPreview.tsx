@@ -322,7 +322,8 @@ const ProductPreview = () => {
                 containerClassName="w-full h-full"
                 priority={true}
                 objectFit="cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                size="large"
+                context="hero"
               />
             </div>
 

@@ -159,13 +159,6 @@ export const MediaSelector = ({
         onChange(mediaData.id, mediaData.file_path);
         setSelectedImage({ url: mediaData.file_path, name: mediaData.file_name });
         setOpen(false);
-
-        // Generate responsive versions in background
-        supabase.functions.invoke('generate-responsive-images', {
-          body: { storagePath: filePath, mediaId: mediaData.id },
-        }).then(({ error }) => {
-          if (error) console.error('Responsive image generation failed:', error);
-        });
       }
     } catch (error: any) {
       console.error('[MediaSelector] Upload error:', error);
