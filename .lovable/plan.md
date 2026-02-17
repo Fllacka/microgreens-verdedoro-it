@@ -1,14 +1,19 @@
 
 
-## Fix: Email Text Breaking Incorrectly in Contact Info
+## Fix: Contact Info Sidebar Email Still Wrapping
 
 ### Problem
 
-The email address "verdedoro.microgreens@gmail.com" in the contact info sidebar is using `break-all` CSS, which breaks the text at **any** character boundary. This causes the last "m" to be pushed to a new line even when there's enough space to fit more characters.
+The sidebar column occupies only 1/3 of the grid (`lg:grid-cols-3`). After subtracting the icon (40px) and spacing (16px), only ~300px remains for text. The email "verdedoro.microgreens@gmail.com" is too long to fit in that space at the default font size, so it still wraps the final "m" to a new line.
+
+Changing `break-all` to `break-words` did not help because the entire email address is treated as a single "word" by `break-words`, so it still breaks at the container edge.
 
 ### Solution
 
-Replace `break-all` with `break-words` (Tailwind class) on the contact info details text. This uses `overflow-wrap: break-word` instead of `word-break: break-all`, meaning it will only break mid-word when the entire word doesn't fit -- preserving natural text flow while still preventing horizontal overflow on very narrow screens.
+Two complementary changes:
+
+1. **Reduce the details text size to `text-sm`** -- this makes the email fit within the available width on most screen sizes without wrapping
+2. **Keep `break-words`** as a safety net for extremely narrow viewports
 
 ### Changes
 
@@ -16,20 +21,16 @@ Replace `break-all` with `break-words` (Tailwind class) on the contact info deta
 
 ```
 // BEFORE:
-<p className="font-body text-foreground break-all">
+<p className="font-body text-foreground break-words">
 
 // AFTER:
-<p className="font-body text-foreground break-words">
+<p className="font-body text-sm text-foreground break-words">
 ```
 
-**File: `src/pages/preview/ContattiPreview.tsx`**
+**File: `src/pages/preview/ContattiPreview.tsx`** (line 327)
 
-Apply the same fix to the preview version of the contact info rendering for consistency.
+Same change for the preview page.
 
 ### Why This Works
 
-- `break-all`: breaks at any character, even when unnecessary (current behavior causing the bug)
-- `break-words`: only breaks mid-word when the word is too long for its container (correct behavior)
-
-Both prevent overflow on mobile, but `break-words` preserves natural reading flow on wider screens.
-
+At `text-sm` (14px / 0.875rem), the email "verdedoro.microgreens@gmail.com" fits within ~280px, which is well within the available space in the sidebar. The `break-words` remains as a fallback for very small screens.
