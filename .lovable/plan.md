@@ -1,73 +1,35 @@
 
 
-## Fix: Images Not Showing on Microgreens su Misura Page
+## Fix: Email Text Breaking Incorrectly in Contact Info
 
-### Root Cause
+### Problem
 
-The `MediaSelector` component's `onChange` callback provides two parameters: `(imageId, imageUrl)`. However, the admin page for Microgreens su Misura only captures the first parameter (the media ID/UUID) and stores it in the `image_url` field. The frontend then tries to use this UUID as an image `src`, which obviously does not load.
-
-Database evidence from the intro section confirms this: `"image_url": "f50cfaed-c92f-4cfe-be3e-074b02e333c0"` -- a UUID, not a URL.
+The email address "verdedoro.microgreens@gmail.com" in the contact info sidebar is using `break-all` CSS, which breaks the text at **any** character boundary. This causes the last "m" to be pushed to a new line even when there's enough space to fit more characters.
 
 ### Solution
 
-Adopt the same pattern used by other CMS pages: store a proper `image_id` field and resolve it to a URL on the frontend by querying the media table.
+Replace `break-all` with `break-words` (Tailwind class) on the contact info details text. This uses `overflow-wrap: break-word` instead of `word-break: break-all`, meaning it will only break mid-word when the entire word doesn't fit -- preserving natural text flow while still preventing horizontal overflow on very narrow screens.
 
 ### Changes
 
-**1. Admin page (`src/pages/admin/MicrogreensCustom.tsx`)**
+**File: `src/pages/Contatti.tsx`** (line 418)
 
-Update the `MediaSelector` usage for both hero and intro sections to store a proper `image_id`:
+```
+// BEFORE:
+<p className="font-body text-foreground break-all">
 
-```typescript
-// Hero section - BEFORE:
-<MediaSelector
-  value={heroSection?.content?.image_url || ''}
-  onChange={(url) => updateSectionContent('hero', 'image_url', url)}
-/>
-
-// Hero section - AFTER:
-<MediaSelector
-  value={heroSection?.content?.image_id || null}
-  onChange={(id) => updateSectionContent('hero', 'image_id', id)}
-/>
-
-// Same fix for intro section: image_url -> image_id
+// AFTER:
+<p className="font-body text-foreground break-words">
 ```
 
-**2. Public page (`src/pages/MicrogreensCustom.tsx`)**
+**File: `src/pages/preview/ContattiPreview.tsx`**
 
-Add logic to resolve media IDs to URLs by fetching from the media table (same pattern as the homepage hero):
+Apply the same fix to the preview version of the contact info rendering for consistency.
 
-```typescript
-// Fetch image URLs from media IDs
-const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null);
-const [introImageUrl, setIntroImageUrl] = useState<string | null>(null);
+### Why This Works
 
-useEffect(() => {
-  const imageIds = [
-    heroSection?.content?.image_id,
-    introSection?.content?.image_id
-  ].filter(Boolean);
-  
-  if (imageIds.length > 0) {
-    supabase.from('media').select('id, file_path')
-      .in('id', imageIds)
-      .then(({ data }) => {
-        // Map IDs to URLs
-      });
-  }
-}, [sections]);
-```
+- `break-all`: breaks at any character, even when unnecessary (current behavior causing the bug)
+- `break-words`: only breaks mid-word when the word is too long for its container (correct behavior)
 
-Then use the resolved URLs (with static fallbacks) in the `<img>` tags.
-
-**3. Preview page (`src/pages/preview/MicrogreensCustomPreview.tsx`)**
-
-Apply the same media ID resolution logic as the public page, reading from draft content.
-
-### Files Changed
-
-1. `src/pages/admin/MicrogreensCustom.tsx` -- Fix MediaSelector onChange to store `image_id` instead of `image_url`
-2. `src/pages/MicrogreensCustom.tsx` -- Resolve media IDs to URLs before rendering
-3. `src/pages/preview/MicrogreensCustomPreview.tsx` -- Same resolution logic for preview
+Both prevent overflow on mobile, but `break-words` preserves natural reading flow on wider screens.
 
