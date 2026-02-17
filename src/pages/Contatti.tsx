@@ -415,7 +415,7 @@ const Contatti = () => {
                           <h3 className="font-body font-semibold text-primary">
                             {info.title}
                           </h3>
-                          <p className="font-body text-foreground break-words">
+                          <p className="font-body text-sm text-foreground break-words">
                             {info.details}
                           </p>
                           <p className="text-sm text-muted-foreground">
