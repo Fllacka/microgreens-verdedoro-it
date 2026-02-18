@@ -263,8 +263,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to business
     console.log("Sending email to business...");
     const businessEmail = await resend.emails.send({
-      from: "Verde d'Oro <onboarding@resend.dev>",
-      to: ["verdedoro.microgreens@gmail.com"],
+      from: "Verde d'Oro <noreply@microgreens.verdedoro.it>",
+      to: ["microgreens.verdedoro@gmail.com"],
       subject: `🌱 Nuova richiesta preventivo da ${nome} ${cognome}`,
       html: businessEmailHtml,
     });
@@ -275,7 +275,7 @@ const handler = async (req: Request): Promise<Response> => {
     try {
       console.log("Attempting to send confirmation to customer...");
       customerEmailResult = await resend.emails.send({
-        from: "Verde d'Oro <onboarding@resend.dev>",
+        from: "Verde d'Oro <noreply@microgreens.verdedoro.it>",
         to: [email],
         subject: "✓ Abbiamo ricevuto la tua richiesta - Verde d'Oro",
         html: customerEmailHtml,
