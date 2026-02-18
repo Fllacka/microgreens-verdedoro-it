@@ -25,7 +25,7 @@ const ORGANIZATION = {
   contactPoint: {
     "@type": "ContactPoint",
     contactType: "customer service",
-    email: "verdedoro.microgreens@gmail.com",
+    email: "microgreens.verdedoro@gmail.com",
   },
   sameAs: [
     // Add social media URLs when available
@@ -72,7 +72,7 @@ export function generateLocalBusinessSchema() {
     image: `${SITE_URL}/og-image.jpg`,
     url: SITE_URL,
     telephone: "", // Add when available
-    email: "verdedoro.microgreens@gmail.com",
+    email: "microgreens.verdedoro@gmail.com",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Reggio Emilia",

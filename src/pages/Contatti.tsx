@@ -166,7 +166,7 @@ const Contatti = () => {
     contactInfoItems.push({
       icon: Mail,
       title: contactInfoSection.content.email_title || "Email",
-      details: contactInfoSection.content.email_details || "verdedoro.microgreens@gmail.com",
+      details: contactInfoSection.content.email_details || "microgreens.verdedoro@gmail.com",
       description: contactInfoSection.content.email_description || "Risposta entro 24h"
     });
   }
