@@ -32,7 +32,7 @@ interface Section {
 
 const Contatti = () => {
   const { toast } = useToast();
-  const { items: cartItems, removeItem } = useCart();
+  const { items: cartItems, removeItem, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [sections, setSections] = useState<Record<string, Section>>({});
   const [pageLoading, setPageLoading] = useState(true);
@@ -106,7 +106,7 @@ const Contatti = () => {
         description: "Ti abbiamo inviato una conferma via email. Ti risponderemo entro 24 ore."
       });
 
-      // Reset form
+      // Reset form and clear cart
       setFormData({
         nome: "",
         cognome: "",
@@ -115,6 +115,7 @@ const Contatti = () => {
         indirizzo: "",
         messaggio: ""
       });
+      clearCart();
     } catch (error: any) {
       console.error("Error sending request:", error);
       toast({
