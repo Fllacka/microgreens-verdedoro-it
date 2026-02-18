@@ -264,7 +264,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Sending email to business...");
     const businessEmail = await resend.emails.send({
       from: "Verde d'Oro <onboarding@resend.dev>",
-      to: ["microgreens.verdedoro@gmail.com"],
+      to: ["verdedoro.microgreens@gmail.com"],
       subject: `🌱 Nuova richiesta preventivo da ${nome} ${cognome}`,
       html: businessEmailHtml,
     });
