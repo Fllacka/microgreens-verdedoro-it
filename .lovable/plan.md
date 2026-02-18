@@ -1,36 +1,49 @@
 
 
-## Fix: Contact Info Sidebar Email Still Wrapping
+## Aggiornamento Email e Miglioramento Template
 
-### Problem
+### Cosa faremo
 
-The sidebar column occupies only 1/3 of the grid (`lg:grid-cols-3`). After subtracting the icon (40px) and spacing (16px), only ~300px remains for text. The email "verdedoro.microgreens@gmail.com" is too long to fit in that space at the default font size, so it still wraps the final "m" to a new line.
+1. **Aggiornare l'indirizzo email destinatario** nella funzione di invio da `verdedoro.microgreens@gmail.com` a `microgreens.verdedoro@gmail.com`
 
-Changing `break-all` to `break-words` did not help because the entire email address is treated as a single "word" by `break-words`, so it still breaks at the container edge.
+2. **Aggiornare il link WhatsApp** nella pagina Contatti: il link attuale punta a un numero di test (333 000 0000), lo aggiorneremo al numero reale +39 320 263 8648
 
-### Solution
+3. **Riprogettare le email** con un design piu pulito e moderno per entrambe:
 
-Two complementary changes:
+   **Email al produttore (business):**
+   - Design piu pulito e minimal, meno gradienti pesanti
+   - Header con logo testuale Verde d'Oro piu elegante
+   - Tabella prodotti piu leggibile con spacing migliore
+   - Card dati cliente piu chiara
+   - Pulsante "Rispondi al Cliente" piu evidente
 
-1. **Reduce the details text size to `text-sm`** -- this makes the email fit within the available width on most screen sizes without wrapping
-2. **Keep `break-words`** as a safety net for extremely narrow viewports
+   **Email al cliente (conferma):**
+   - Design caldo e rassicurante
+   - Riepilogo ordine piu chiaro e ordinato
+   - Timeline "cosa succede ora" piu visiva
+   - Link WhatsApp aggiornato al numero reale
+   - Footer con indirizzo aggiornato
 
-### Changes
+### Dettagli Tecnici
 
-**File: `src/pages/Contatti.tsx`** (line 418)
+**File modificati:**
 
-```
-// BEFORE:
-<p className="font-body text-foreground break-words">
+1. `supabase/functions/send-quote-request/index.ts`
+   - Cambiare email destinatario a `microgreens.verdedoro@gmail.com` (riga 285)
+   - Ridisegnare il template HTML business: colori piu soft, tipografia piu pulita, meno gradienti inline, tabella prodotti con bordi sottili e spaziatura migliorata
+   - Ridisegnare il template HTML cliente: layout piu arioso, riepilogo ordine con design card, timeline con icone numeriche, CTA WhatsApp con numero reale (+39 320 263 8648)
+   - Aggiornare l'indirizzo nel footer email (se hai un indirizzo reale da inserire al posto di "Via delle Microgreens, 42")
 
-// AFTER:
-<p className="font-body text-sm text-foreground break-words">
-```
+2. `src/pages/Contatti.tsx`
+   - Aggiornare il fallback email da `verdedoro.microgreens@gmail.com` a `microgreens.verdedoro@gmail.com` (riga 169)
 
-**File: `src/pages/preview/ContattiPreview.tsx`** (line 327)
+3. `src/pages/preview/ContattiPreview.tsx`
+   - Stesso aggiornamento del fallback email per coerenza nella preview
 
-Same change for the preview page.
+### Principi di Design per le Email
 
-### Why This Works
-
-At `text-sm` (14px / 0.875rem), the email "verdedoro.microgreens@gmail.com" fits within ~280px, which is well within the available space in the sidebar. The `break-words` remains as a fallback for very small screens.
+- Palette: verde scuro (#2d5016) come accento, fondo bianco, grigio chiaro per le sezioni
+- Tipografia: font-stack system (Segoe UI, Arial) per massima compatibilita
+- Spaziatura: padding generoso (24-40px) per leggibilita su mobile
+- Tabella prodotti: bordi sottili, header colorato ma non troppo saturo, righe alternate
+- Bottoni: angoli arrotondati, ombra leggera, colore dorato per le CTA principali
