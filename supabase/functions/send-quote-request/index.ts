@@ -153,74 +153,111 @@ const buildBusinessEmail = (data: QuoteRequestData, productsHtml: string) => {
 const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
   const { nome, messaggio } = data;
   const year = new Date().getFullYear();
+  const logoUrl = 'https://xkwmkgdsfydhbjpytrbb.supabase.co/storage/v1/object/public/email-assets/logo.webp';
+
+  // SVG icons for the steps (inline as data URIs for email compatibility)
+  const iconConfirm = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+  const iconSeedling = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>`;
+  const iconTruck = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>`;
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2ee;">
+<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f5f0e8;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
 
-  <!-- Header -->
-  <tr><td style="background:#2d5016;padding:40px;text-align:center;">
-    <h1 style="color:#fff;margin:0;font-size:24px;font-weight:700;letter-spacing:0.5px;">Verde d'Oro</h1>
-    <p style="color:#d4af37;margin:8px 0 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Microgreens Premium</p>
+  <!-- Header with Logo -->
+  <tr><td style="background:linear-gradient(135deg, #356A35, #4A8B4A);padding:40px;text-align:center;">
+    <img src="${logoUrl}" alt="Verde d'Oro" width="180" style="display:block;margin:0 auto 8px;" />
   </td></tr>
 
-  <!-- Success -->
-  <tr><td style="background:#4a7c23;padding:14px 40px;text-align:center;">
-    <p style="color:#fff;margin:0;font-weight:600;font-size:16px;">✓ Richiesta Ricevuta con Successo!</p>
+  <!-- Success Banner -->
+  <tr><td style="background:#D4AF37;padding:14px 40px;text-align:center;">
+    <p style="color:#ffffff;margin:0;font-weight:600;font-size:16px;">✓ Richiesta Ricevuta con Successo!</p>
   </td></tr>
 
   <!-- Body -->
   <tr><td style="padding:36px 40px;">
 
-    <h2 style="color:#2d5016;margin:0 0 16px;font-size:20px;">Ciao ${nome}!</h2>
-    <p style="color:#555;line-height:1.7;font-size:15px;margin:0 0 24px;">
-      Grazie per aver scelto <strong style="color:#2d5016;">Verde d'Oro</strong>! Abbiamo ricevuto la tua richiesta e il nostro team la sta già esaminando.
+    <p style="color:#000;line-height:1.7;font-size:15px;margin:0 0 8px;">
+      Ciao <strong>${nome}</strong>,
+    </p>
+    <p style="color:#333;line-height:1.7;font-size:15px;margin:0 0 8px;">
+      Grazie per aver scelto <strong style="color:#356A35;">Verde D'Oro</strong>!
+    </p>
+    <p style="color:#333;line-height:1.7;font-size:15px;margin:0 0 28px;">
+      Abbiamo ricevuto la tua richiesta e il nostro team la sta esaminando. Ti contatteremo al più presto via email o telefono per aggiornarti.
     </p>
 
-    <!-- Timeline -->
-    <table style="width:100%;background:#fafbf9;border-radius:8px;border:1px solid #e5e7e3;margin-bottom:28px;" cellpadding="0" cellspacing="0">
-      <tr><td style="padding:24px;">
-        <h3 style="color:#2d5016;margin:0 0 16px;font-size:15px;font-weight:600;">Cosa succede ora?</h3>
-        <table style="width:100%;">
-          <tr>
-            <td style="width:32px;vertical-align:top;padding:4px 0;">
-              <div style="width:24px;height:24px;border-radius:50%;background:#d4af37;color:#fff;font-size:12px;font-weight:700;text-align:center;line-height:24px;">1</div>
-            </td>
-            <td style="padding:4px 0 12px 12px;color:#555;font-size:14px;line-height:1.5;">Il nostro team analizzerà la tua richiesta</td>
-          </tr>
-          <tr>
-            <td style="width:32px;vertical-align:top;padding:4px 0;">
-              <div style="width:24px;height:24px;border-radius:50%;background:#d4af37;color:#fff;font-size:12px;font-weight:700;text-align:center;line-height:24px;">2</div>
-            </td>
-            <td style="padding:4px 0 12px 12px;color:#555;font-size:14px;line-height:1.5;">Riceverai un preventivo personalizzato <strong>entro 24 ore</strong></td>
-          </tr>
-          <tr>
-            <td style="width:32px;vertical-align:top;padding:4px 0;">
-              <div style="width:24px;height:24px;border-radius:50%;background:#d4af37;color:#fff;font-size:12px;font-weight:700;text-align:center;line-height:24px;">3</div>
-            </td>
-            <td style="padding:4px 0 0 12px;color:#555;font-size:14px;line-height:1.5;">Ti contatteremo all'email o telefono che hai fornito</td>
-          </tr>
-        </table>
-      </td></tr>
+    <!-- Hai ordinato dei microgreens? -->
+    <h2 style="color:#356A35;margin:0 0 6px;font-size:18px;font-weight:700;">🌱 Hai ordinato dei microgreens?</h2>
+    <p style="color:#333;font-size:15px;margin:0 0 20px;">Ecco come funziona:</p>
+
+    <!-- 3 Steps -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:28px;" cellpadding="0" cellspacing="0">
+      <!-- Step 1: Conferma -->
+      <tr>
+        <td style="width:56px;vertical-align:top;padding:0 0 20px 0;">
+          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #356A35, #4A8B4A);text-align:center;line-height:48px;">
+            <img src="data:image/svg+xml,${encodeURIComponent(iconConfirm)}" width="24" height="24" style="vertical-align:middle;" alt="Conferma" />
+          </div>
+        </td>
+        <td style="vertical-align:top;padding:4px 0 20px 12px;">
+          <p style="margin:0 0 4px;color:#356A35;font-weight:700;font-size:15px;">Conferma</p>
+          <p style="margin:0;color:#555;font-size:14px;line-height:1.5;">Verifichiamo la disponibilità e ti contattiamo per confermare l'ordine</p>
+        </td>
+      </tr>
+      <!-- Step 2: Coltivazione -->
+      <tr>
+        <td style="width:56px;vertical-align:top;padding:0 0 20px 0;">
+          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #4A8B4A, #356A35);text-align:center;line-height:48px;">
+            <img src="data:image/svg+xml,${encodeURIComponent(iconSeedling)}" width="24" height="24" style="vertical-align:middle;" alt="Coltivazione" />
+          </div>
+        </td>
+        <td style="vertical-align:top;padding:4px 0 20px 12px;">
+          <p style="margin:0 0 4px;color:#356A35;font-weight:700;font-size:15px;">Coltivazione</p>
+          <p style="margin:0;color:#555;font-size:14px;line-height:1.5;">Avviamo la semina dei microgreens e ti comunichiamo i tempi di coltivazione in base alle varietà scelte</p>
+        </td>
+      </tr>
+      <!-- Step 3: Consegna -->
+      <tr>
+        <td style="width:56px;vertical-align:top;padding:0 0 0 0;">
+          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;text-align:center;line-height:48px;">
+            <img src="data:image/svg+xml,${encodeURIComponent(iconTruck)}" width="24" height="24" style="vertical-align:middle;" alt="Consegna" />
+          </div>
+        </td>
+        <td style="vertical-align:top;padding:4px 0 0 12px;">
+          <p style="margin:0 0 4px;color:#356A35;font-weight:700;font-size:15px;">Consegna</p>
+          <p style="margin:0;color:#555;font-size:14px;line-height:1.5;">Ricevi il prodotto fresco poche ore dopo la raccolta</p>
+        </td>
+      </tr>
     </table>
 
+    <!-- Payment note -->
+    <div style="background:#f5f0e8;border-radius:8px;padding:16px 20px;border-left:4px solid #D4AF37;margin-bottom:28px;">
+      <p style="margin:0;color:#333;font-size:14px;line-height:1.5;">
+        💰 <strong>Il pagamento avviene comodamente alla consegna.</strong>
+      </p>
+    </div>
+
     <!-- Order Summary -->
-    <h3 style="color:#2d5016;margin:0 0 8px;font-size:15px;font-weight:600;">Riepilogo della tua richiesta</h3>
+    <h3 style="color:#356A35;margin:0 0 8px;font-size:15px;font-weight:600;">Riepilogo della tua richiesta</h3>
     ${productsHtml}
 
+    ${messaggio ? `
     <div style="background:#fafbf9;border-radius:8px;padding:16px 20px;border:1px solid #e5e7e3;margin-top:16px;">
       <p style="margin:0 0 6px;color:#888;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Il tuo messaggio</p>
       <p style="margin:0;color:#444;line-height:1.6;font-size:14px;white-space:pre-wrap;">${messaggio}</p>
     </div>
+    ` : ''}
 
     <!-- WhatsApp CTA -->
-    <div style="background:#2d5016;border-radius:8px;padding:24px;margin-top:28px;text-align:center;">
-      <p style="color:#fff;margin:0 0 12px;font-size:15px;">Hai domande urgenti?</p>
+    <div style="background:linear-gradient(135deg, #356A35, #4A8B4A);border-radius:8px;padding:24px;margin-top:28px;text-align:center;">
+      <p style="color:#fff;margin:0 0 6px;font-size:15px;">Hai domande nel frattempo?</p>
+      <p style="color:rgba(255,255,255,0.8);margin:0 0 16px;font-size:13px;">Scrivici su WhatsApp al +39 320 263 8648 — siamo sempre felici di aiutarti.</p>
       <a href="https://wa.me/393202638648"
-         style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;padding:12px 28px;border-radius:24px;font-weight:600;font-size:14px;">
+         style="display:inline-block;background:#D4AF37;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:24px;font-weight:600;font-size:14px;">
         💬 Scrivici su WhatsApp
       </a>
     </div>
@@ -228,8 +265,8 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
   </td></tr>
 
   <!-- Footer -->
-  <tr><td style="background:#fafbf9;padding:24px 40px;text-align:center;border-top:1px solid #e5e7e3;">
-    <p style="color:#2d5016;margin:0 0 4px;font-weight:600;font-size:13px;">Verde d'Oro — Microgreens Premium</p>
+  <tr><td style="background:#f5f0e8;padding:24px 40px;text-align:center;border-top:1px solid #e5e7e3;">
+    <p style="color:#356A35;margin:0 0 4px;font-weight:600;font-size:13px;">Verde d'Oro — Microgreens Premium</p>
     <p style="color:#999;margin:0;font-size:11px;">Reggio Emilia (RE)</p>
     <p style="color:#bbb;margin:8px 0 0;font-size:11px;">© ${year} Verde d'Oro. Tutti i diritti riservati.</p>
   </td></tr>
