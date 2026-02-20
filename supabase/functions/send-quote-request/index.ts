@@ -155,10 +155,6 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
   const year = new Date().getFullYear();
   const logoUrl = 'https://xkwmkgdsfydhbjpytrbb.supabase.co/storage/v1/object/public/email-assets/logo.webp';
 
-  // SVG icons for the steps (inline as data URIs for email compatibility)
-  const iconConfirm = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
-  const iconSeedling = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>`;
-  const iconTruck = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>`;
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
@@ -199,8 +195,11 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
       <!-- Step 1: Conferma -->
       <tr>
         <td style="width:56px;vertical-align:top;padding:0 0 20px 0;">
-          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #356A35, #4A8B4A);text-align:center;line-height:48px;">
-            <img src="data:image/svg+xml,${encodeURIComponent(iconConfirm)}" width="24" height="24" style="vertical-align:middle;" alt="Conferma" />
+          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #356A35, #4A8B4A);display:inline-block;text-align:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
           </div>
         </td>
         <td style="vertical-align:top;padding:4px 0 20px 12px;">
@@ -211,8 +210,13 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
       <!-- Step 2: Coltivazione -->
       <tr>
         <td style="width:56px;vertical-align:top;padding:0 0 20px 0;">
-          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #4A8B4A, #356A35);text-align:center;line-height:48px;">
-            <img src="data:image/svg+xml,${encodeURIComponent(iconSeedling)}" width="24" height="24" style="vertical-align:middle;" alt="Coltivazione" />
+          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #4A8B4A, #356A35);display:inline-block;text-align:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto;">
+              <path d="M7 20h10"/>
+              <path d="M10 20c5.5-2.5.8-6.4 3-10"/>
+              <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/>
+              <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>
+            </svg>
           </div>
         </td>
         <td style="vertical-align:top;padding:4px 0 20px 12px;">
@@ -223,8 +227,14 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
       <!-- Step 3: Consegna -->
       <tr>
         <td style="width:56px;vertical-align:top;padding:0 0 0 0;">
-          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;text-align:center;line-height:48px;">
-            <img src="data:image/svg+xml,${encodeURIComponent(iconTruck)}" width="24" height="24" style="vertical-align:middle;" alt="Consegna" />
+          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;display:inline-block;text-align:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto;">
+              <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+              <path d="M15 18H9"/>
+              <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
+              <circle cx="17" cy="18" r="2"/>
+              <circle cx="7" cy="18" r="2"/>
+            </svg>
           </div>
         </td>
         <td style="vertical-align:top;padding:4px 0 0 12px;">
@@ -314,7 +324,7 @@ const handler = async (req: Request): Promise<Response> => {
       customerEmailResult = await resend.emails.send({
         from: "Verde d'Oro <noreply@microgreens.verdedoro.it>",
         to: [email],
-        subject: "✓ Abbiamo ricevuto la tua richiesta - Verde d'Oro",
+        subject: "Conferma richiesta - Verde D'Oro Microgreens",
         html: customerEmailHtml,
       });
       console.log("Customer email sent:", customerEmailResult);
