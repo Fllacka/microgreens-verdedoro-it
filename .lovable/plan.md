@@ -1,41 +1,34 @@
 
-## Fix: Testo della Sezione WhatsApp
+
+## Aggiornamento Footer Email Cliente
 
 ### Problema
-
-Il blocco WhatsApp CTA (righe 266–273) usa:
-- `color:#fff` per il titolo "Hai domande nel frattempo?"
-- `color:rgba(255,255,255,0.8)` per il sottotesto
-
-Questi colori bianchi diventano invisibili quando client email come Gmail o Apple Mail in modalità chiara rimuovono il `background:linear-gradient(...)`.
+Il footer attuale occupa troppo spazio verticale con tre righe separate (nome brand, citta, copyright) su sfondo crema, risultando ridondante dato che il brand e gia presente nell'header e nella sezione WhatsApp.
 
 ### Soluzione
-
-Sostituire il gradiente verde con uno **sfondo solido crema** (`#f5f0e8`) — lo stesso già usato nella nota sul pagamento e nel footer — e impostare i colori del testo uguali al resto dell'email:
-
-- Titolo: `color:#333` (uguale ai paragrafi del corpo)
-- Sottotesto: `color:#555` (uguale ai testi secondari degli step)
-
-Il pulsante "Scrivici su WhatsApp" mantiene il colore oro `#D4AF37` con testo bianco (il pulsante ha sempre uno sfondo proprio, quindi il testo bianco è sempre leggibile).
+Semplificare il footer riducendolo a una singola riga compatta con copyright e citta sulla stessa linea, mantenendo lo stesso sfondo crema (`#f5f0e8`) per coerenza visiva. Rimuovere la riga "Verde d'Oro — Microgreens Premium" che e ridondante.
 
 ### Modifica tecnica
 
-**File:** `supabase/functions/send-quote-request/index.ts` — riga 266–273
+**File:** `supabase/functions/send-quote-request/index.ts` — righe 256-262
 
+Da:
 ```html
-<!-- PRIMA -->
-<div style="background:linear-gradient(135deg, #356A35, #4A8B4A);border-radius:8px;padding:24px;margin-top:28px;text-align:center;">
-  <p style="color:#fff;...">Hai domande nel frattempo?</p>
-  <p style="color:rgba(255,255,255,0.8);...">Scrivici su WhatsApp...</p>
-
-<!-- DOPO -->
-<div style="background:#f5f0e8;border-radius:8px;border:2px solid #356A35;padding:24px;margin-top:28px;text-align:center;">
-  <p style="color:#333;...">Hai domande nel frattempo?</p>
-  <p style="color:#555;...">Scrivici su WhatsApp...</p>
+<tr><td style="background:#f5f0e8;padding:24px 40px;text-align:center;border-top:1px solid #e5e7e3;">
+  <p style="color:#356A35;margin:0 0 4px;font-weight:600;font-size:13px;">Verde d'Oro — Microgreens Premium</p>
+  <p style="color:#999;margin:0;font-size:11px;">Reggio Emilia (RE)</p>
+  <p style="color:#bbb;margin:8px 0 0;font-size:11px;">© 2026 Verde d'Oro. Tutti i diritti riservati.</p>
+</td></tr>
 ```
 
-### Passi di implementazione
+A:
+```html
+<tr><td style="background:#f5f0e8;padding:16px 40px;text-align:center;border-top:1px solid #e5e7e3;">
+  <p style="color:#999;margin:0;font-size:11px;">© 2026 Verde d'Oro · Reggio Emilia (RE)</p>
+</td></tr>
+```
 
-1. Aggiornare il blocco WhatsApp CTA in `buildCustomerEmail` con sfondo crema e testo scuro
+### Passi
+1. Aggiornare il blocco footer in `buildCustomerEmail`
 2. Ridistribuire la funzione edge
-3. Inviare un'email di test per verificare la leggibilità
+
