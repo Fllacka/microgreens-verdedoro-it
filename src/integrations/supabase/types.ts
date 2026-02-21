@@ -881,6 +881,7 @@ export type Database = {
           created_at: string
           draft_footer_settings: Json | null
           draft_header_settings: Json | null
+          favicon_id: string | null
           footer_settings: Json | null
           has_draft_footer_changes: boolean | null
           has_draft_header_changes: boolean | null
@@ -893,6 +894,7 @@ export type Database = {
           created_at?: string
           draft_footer_settings?: Json | null
           draft_header_settings?: Json | null
+          favicon_id?: string | null
           footer_settings?: Json | null
           has_draft_footer_changes?: boolean | null
           has_draft_header_changes?: boolean | null
@@ -905,6 +907,7 @@ export type Database = {
           created_at?: string
           draft_footer_settings?: Json | null
           draft_header_settings?: Json | null
+          favicon_id?: string | null
           footer_settings?: Json | null
           has_draft_footer_changes?: boolean | null
           has_draft_header_changes?: boolean | null
@@ -914,6 +917,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "site_settings_favicon_id_fkey"
+            columns: ["favicon_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "site_settings_logo_id_fkey"
             columns: ["logo_id"]

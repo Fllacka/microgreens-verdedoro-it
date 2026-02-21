@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Navigation from "./Navigation";
 import Footer from "./Footer";
+import DynamicFavicon from "./DynamicFavicon";
 
 interface LayoutProps {
   children: ReactNode;
@@ -16,6 +17,7 @@ const Layout = ({ children }: LayoutProps) => {
       >
         Vai al contenuto principale
       </a>
+      <DynamicFavicon />
       <Navigation />
       <main id="main-content" className="flex-1">
         {children}
