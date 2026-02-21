@@ -209,6 +209,8 @@ const socialPlatformOptions = [
 const Settings = () => {
   const [logoId, setLogoId] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [faviconId, setFaviconId] = useState<string | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
   const [headerSettings, setHeaderSettings] = useState<HeaderSettings>(defaultHeaderSettings);
   const [footerSettings, setFooterSettings] = useState<FooterSettings>(defaultFooterSettings);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,7 +227,7 @@ const Settings = () => {
   );
 
   // Centralized change tracking with justSaved protection
-  const { hasChanges, markSaved, setReady } = useChangeTracking([logoId, logoUrl, headerSettings, footerSettings]);
+  const { hasChanges, markSaved, setReady } = useChangeTracking([logoId, logoUrl, faviconId, faviconUrl, headerSettings, footerSettings]);
 
   // Unsaved changes warning
   const { isBlocked, proceed, reset } = useUnsavedChangesWarning({
@@ -242,6 +244,7 @@ const Settings = () => {
         .from("site_settings")
         .select(`
           logo_id,
+          favicon_id,
           header_settings,
           footer_settings,
           draft_header_settings,
@@ -259,8 +262,22 @@ const Settings = () => {
 
       if (data) {
         setLogoId(data.logo_id);
-        if (data.media && typeof data.media === 'object' && 'file_path' in data.media) {
-          setLogoUrl(data.media.file_path as string);
+        const logoMedia = (data as any).media as { file_path: string } | null;
+        if (logoMedia?.file_path) {
+          setLogoUrl(logoMedia.file_path);
+        }
+
+        // Fetch favicon media separately (two FKs to same table)
+        if (data.favicon_id) {
+          setFaviconId(data.favicon_id);
+          const { data: favMedia } = await supabase
+            .from("media")
+            .select("file_path")
+            .eq("id", data.favicon_id)
+            .single();
+          if (favMedia) {
+            setFaviconUrl(favMedia.file_path);
+          }
         }
         
         // Load from draft if available, otherwise from live
@@ -303,6 +320,11 @@ const Settings = () => {
     setLogoUrl(imageUrl);
   };
 
+  const handleFaviconChange = (imageId: string | null, imageUrl: string | null) => {
+    setFaviconId(imageId);
+    setFaviconUrl(imageUrl);
+  };
+
   // Save to draft columns only
   const handleSave = async () => {
     setIsSaving(true);
@@ -311,6 +333,7 @@ const Settings = () => {
         .from("site_settings")
         .update({ 
           logo_id: logoId,
+          favicon_id: faviconId,
           draft_header_settings: JSON.parse(JSON.stringify(headerSettings)),
           draft_footer_settings: JSON.parse(JSON.stringify(footerSettings)),
           has_draft_header_changes: true,
@@ -342,6 +365,7 @@ const Settings = () => {
           .from("site_settings")
           .update({ 
             logo_id: logoId,
+            favicon_id: faviconId,
             draft_header_settings: JSON.parse(JSON.stringify(headerSettings)),
             draft_footer_settings: JSON.parse(JSON.stringify(footerSettings)),
           })
@@ -634,6 +658,40 @@ const Settings = () => {
                   <MediaSelector
                     value={logoId}
                     onChange={handleLogoChange}
+                    showAltText={false}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Leaf className="h-5 w-5" />
+                  Favicon del Sito
+                </CardTitle>
+                <CardDescription>
+                  L'icona che appare nella tab del browser e nei risultati di ricerca
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Requisiti del favicon:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li><strong>Dimensioni consigliate:</strong> 32×32 px o 64×64 px</li>
+                      <li><strong>Formato:</strong> PNG con sfondo trasparente (consigliato), ICO, SVG o WebP</li>
+                      <li><strong>Nota:</strong> Verrà usato anche come icona per dispositivi iOS (apple-touch-icon)</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-2">
+                  <Label>Seleziona o Carica Favicon</Label>
+                  <MediaSelector
+                    value={faviconId}
+                    onChange={handleFaviconChange}
                     showAltText={false}
                   />
                 </div>

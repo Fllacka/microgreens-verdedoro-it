@@ -105,9 +105,9 @@ const Navigation = () => {
 
         if (error) throw error;
 
-        if (data?.media && typeof data.media === 'object' && 'file_path' in data.media) {
-          const mediaData = data.media as { file_path: string };
-          setLogoUrl(mediaData.file_path);
+        const mediaObj = (data as any)?.media as { file_path: string } | null;
+        if (mediaObj?.file_path) {
+          setLogoUrl(mediaObj.file_path);
         } else {
           setLogoUrl(null);
         }
