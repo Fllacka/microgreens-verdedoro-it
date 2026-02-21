@@ -1,56 +1,41 @@
 
-## Fix: Email Soggetto e Icone dei Passaggi
+## Fix: Testo della Sezione WhatsApp
 
-### Problemi identificati
+### Problema
 
-**1. Soggetto errato**
-Il soggetto attuale è `"✓ Abbiamo ricevuto la tua richiesta - Verde d'Oro"`.
-Da aggiornare a: `"Conferma richiesta - Verde D'Oro Microgreens"`.
+Il blocco WhatsApp CTA (righe 266–273) usa:
+- `color:#fff` per il titolo "Hai domande nel frattempo?"
+- `color:rgba(255,255,255,0.8)` per il sottotesto
 
-**2. Icone dei passaggi non visibili**
-Le icone (Conferma, Coltivazione, Consegna) vengono inserite come `<img src="data:image/svg+xml,...">`. Gmail e la maggior parte dei client email **bloccano i data URI** all'interno dei tag `<img>` per motivi di sicurezza. Ecco perché 2 icone su 3 risultano rotte, mentre la terza (Consegna) mostra solo il cerchio verde senza icona.
+Questi colori bianchi diventano invisibili quando client email come Gmail o Apple Mail in modalità chiara rimuovono il `background:linear-gradient(...)`.
 
-La soluzione corretta è **inserire l'SVG direttamente nell'HTML** del cerchio, senza passare per un tag `<img>`. L'SVG inline è pienamente supportato da tutti i principali client email.
+### Soluzione
 
----
+Sostituire il gradiente verde con uno **sfondo solido crema** (`#f5f0e8`) — lo stesso già usato nella nota sul pagamento e nel footer — e impostare i colori del testo uguali al resto dell'email:
 
-### Modifiche da apportare
+- Titolo: `color:#333` (uguale ai paragrafi del corpo)
+- Sottotesto: `color:#555` (uguale ai testi secondari degli step)
 
-**File:** `supabase/functions/send-quote-request/index.ts`
+Il pulsante "Scrivici su WhatsApp" mantiene il colore oro `#D4AF37` con testo bianco (il pulsante ha sempre uno sfondo proprio, quindi il testo bianco è sempre leggibile).
 
-#### 1. Soggetto email cliente (riga 317)
-```
-DA:  "✓ Abbiamo ricevuto la tua richiesta - Verde d'Oro"
-A:   "Conferma richiesta - Verde D'Oro Microgreens"
-```
+### Modifica tecnica
 
-#### 2. Icone passaggi — da `<img data:uri>` a SVG inline
+**File:** `supabase/functions/send-quote-request/index.ts` — riga 266–273
 
-Sostituire il pattern attuale:
 ```html
-<div style="width:48px;height:48px;border-radius:50%;background:...;text-align:center;line-height:48px;">
-  <img src="data:image/svg+xml,..." width="24" height="24" style="vertical-align:middle;" />
-</div>
+<!-- PRIMA -->
+<div style="background:linear-gradient(135deg, #356A35, #4A8B4A);border-radius:8px;padding:24px;margin-top:28px;text-align:center;">
+  <p style="color:#fff;...">Hai domande nel frattempo?</p>
+  <p style="color:rgba(255,255,255,0.8);...">Scrivici su WhatsApp...</p>
+
+<!-- DOPO -->
+<div style="background:#f5f0e8;border-radius:8px;border:2px solid #356A35;padding:24px;margin-top:28px;text-align:center;">
+  <p style="color:#333;...">Hai domande nel frattempo?</p>
+  <p style="color:#555;...">Scrivici su WhatsApp...</p>
 ```
 
-Con SVG direttamente inlineato dentro il div:
-```html
-<div style="width:48px;height:48px;border-radius:50%;background:...;display:inline-block;text-align:center;">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-       fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-       style="margin-top:12px;">
-    <!-- percorsi SVG -->
-  </svg>
-</div>
-```
+### Passi di implementazione
 
-Questo metodo non richiede encoding e funziona in tutti i client email.
-
----
-
-### Sequenza di implementazione
-
-1. Aggiornare il soggetto dell'email cliente nella funzione `handler`
-2. Sostituire le tre sezioni step nella funzione `buildCustomerEmail` con SVG inline
-3. Ridistribuire la funzione edge
-4. Inviare un'email di test per verificare che tutte e tre le icone siano visibili
+1. Aggiornare il blocco WhatsApp CTA in `buildCustomerEmail` con sfondo crema e testo scuro
+2. Ridistribuire la funzione edge
+3. Inviare un'email di test per verificare la leggibilità
