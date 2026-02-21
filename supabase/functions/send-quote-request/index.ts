@@ -195,12 +195,7 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
       <!-- Step 1: Conferma -->
       <tr>
         <td style="width:56px;vertical-align:top;padding:0 0 20px 0;">
-          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #356A35, #4A8B4A);display:inline-block;text-align:center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto;">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-          </div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;display:inline-block;text-align:center;line-height:48px;font-size:22px;">✅</div>
         </td>
         <td style="vertical-align:top;padding:4px 0 20px 12px;">
           <p style="margin:0 0 4px;color:#356A35;font-weight:700;font-size:15px;">Conferma</p>
@@ -210,14 +205,7 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
       <!-- Step 2: Coltivazione -->
       <tr>
         <td style="width:56px;vertical-align:top;padding:0 0 20px 0;">
-          <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg, #4A8B4A, #356A35);display:inline-block;text-align:center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto;">
-              <path d="M7 20h10"/>
-              <path d="M10 20c5.5-2.5.8-6.4 3-10"/>
-              <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/>
-              <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>
-            </svg>
-          </div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;display:inline-block;text-align:center;line-height:48px;font-size:22px;">🌱</div>
         </td>
         <td style="vertical-align:top;padding:4px 0 20px 12px;">
           <p style="margin:0 0 4px;color:#356A35;font-weight:700;font-size:15px;">Coltivazione</p>
@@ -227,15 +215,7 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
       <!-- Step 3: Consegna -->
       <tr>
         <td style="width:56px;vertical-align:top;padding:0 0 0 0;">
-          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;display:inline-block;text-align:center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top:12px;display:block;margin-left:auto;margin-right:auto;">
-              <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
-              <path d="M15 18H9"/>
-              <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
-              <circle cx="17" cy="18" r="2"/>
-              <circle cx="7" cy="18" r="2"/>
-            </svg>
-          </div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#356A35;display:inline-block;text-align:center;line-height:48px;font-size:22px;">📦</div>
         </td>
         <td style="vertical-align:top;padding:4px 0 0 12px;">
           <p style="margin:0 0 4px;color:#356A35;font-weight:700;font-size:15px;">Consegna</p>
@@ -263,9 +243,9 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
     ` : ''}
 
     <!-- WhatsApp CTA -->
-    <div style="background:linear-gradient(135deg, #356A35, #4A8B4A);border-radius:8px;padding:24px;margin-top:28px;text-align:center;">
-      <p style="color:#fff;margin:0 0 6px;font-size:15px;">Hai domande nel frattempo?</p>
-      <p style="color:rgba(255,255,255,0.8);margin:0 0 16px;font-size:13px;">Scrivici su WhatsApp al +39 320 263 8648 — siamo sempre felici di aiutarti.</p>
+    <div style="background:#f5f0e8;border-radius:8px;border:2px solid #356A35;padding:24px;margin-top:28px;text-align:center;">
+      <p style="color:#333;margin:0 0 6px;font-size:15px;font-weight:700;">Hai domande nel frattempo?</p>
+      <p style="color:#555;margin:0 0 16px;font-size:13px;">Scrivici su WhatsApp al +39 320 263 8648 — siamo sempre felici di aiutarti.</p>
       <a href="https://wa.me/393202638648"
          style="display:inline-block;background:#D4AF37;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:24px;font-weight:600;font-size:14px;">
         💬 Scrivici su WhatsApp
