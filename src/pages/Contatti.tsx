@@ -161,7 +161,7 @@ const Contatti = () => {
       icon: Phone,
       title: contactInfoSection.content.phone_title || "Telefono",
       details: contactInfoSection.content.phone_details || "+39 0522 000 000",
-      description: contactInfoSection.content.phone_description || "Lun-Ven 9:00-18:00",
+      description: contactInfoSection.content.phone_description || "Lun-Ven 9:00-21:00",
       href: `tel:${phoneNumber}`
     });
   }
