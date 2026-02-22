@@ -180,11 +180,13 @@ const Contatti = () => {
     });
   }
   if (contactInfoSection?.content?.whatsapp_visible) {
+    const whatsappNumber = (contactInfoSection.content.whatsapp_details || "+39 333 000 0000").replace(/\s+/g, '');
     contactInfoItems.push({
       icon: MessageSquare,
       title: contactInfoSection.content.whatsapp_title || "WhatsApp",
       details: contactInfoSection.content.whatsapp_details || "+39 333 000 0000",
-      description: contactInfoSection.content.whatsapp_description || "Chat diretta"
+      description: contactInfoSection.content.whatsapp_description || "Chat diretta",
+      href: `https://wa.me/${whatsappNumber.replace('+', '')}`
     });
   }
 
@@ -407,24 +409,28 @@ const Contatti = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {contactInfoItems.map((info, index) =>
-                  <div key={index} className="flex items-start space-x-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
-                          <info.icon className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-body font-semibold text-primary">
-                            {info.title}
-                          </h3>
-                          <p className="font-body text-sm text-foreground break-words">
-                            {info.details}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {info.description}
-                          </p>
-                        </div>
-                      </div>
-                  )}
+                    {contactInfoItems.map((info, index) => {
+                      const Wrapper = info.href ? 'a' : 'div';
+                      const wrapperProps = info.href ? { href: info.href, target: "_blank", rel: "noopener noreferrer" } : {};
+                      return (
+                        <Wrapper key={index} {...wrapperProps} className={`flex items-start space-x-4${info.href ? ' cursor-pointer hover:opacity-80 transition-opacity' : ''}`}>
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-verde">
+                            <info.icon className="h-5 w-5 text-primary-foreground" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-body font-semibold text-primary">
+                              {info.title}
+                            </h3>
+                            <p className="font-body text-sm text-foreground break-words">
+                              {info.details}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {info.description}
+                            </p>
+                          </div>
+                        </Wrapper>
+                      );
+                    })}
                   </CardContent>
                 </Card>
               }
