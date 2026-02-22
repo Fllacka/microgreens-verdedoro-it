@@ -37,7 +37,8 @@ import {
   Info,
   Palette,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  Menu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,8 +51,12 @@ const SIDEBAR_STATE_KEY = "admin-sidebar-collapsed";
 const AdminSidebar = () => {
   const { user, userRole, signOut } = useAuth();
   const location = useLocation();
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  const handleMobileNav = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   const isPagesRoute = [
     "/admin/homepage",
@@ -135,7 +140,7 @@ const AdminSidebar = () => {
               return (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                    <Link to={item.url}>
+                    <Link to={item.url} onClick={handleMobileNav}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -153,7 +158,7 @@ const AdminSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Pagine" isActive={isPagesRoute}>
-                  <Link to="/admin/homepage">
+                  <Link to="/admin/homepage" onClick={handleMobileNav}>
                     <Files className="h-4 w-4" />
                     <span>Pagine</span>
                   </Link>
@@ -179,7 +184,7 @@ const AdminSidebar = () => {
                       return (
                         <SidebarMenuItem key={item.url}>
                           <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                            <Link to={item.url}>
+                            <Link to={item.url} onClick={handleMobileNav}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
                             </Link>
@@ -201,7 +206,7 @@ const AdminSidebar = () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Impostazioni" isActive={isSettingsRoute}>
-                  <Link to="/admin/media">
+                  <Link to="/admin/media" onClick={handleMobileNav}>
                     <Settings className="h-4 w-4" />
                     <span>Impostazioni</span>
                   </Link>
@@ -225,7 +230,7 @@ const AdminSidebar = () => {
                     {filteredSettingsItems.map((item) => (
                       <SidebarMenuItem key={item.url}>
                         <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                          <Link to={item.url}>
+                          <Link to={item.url} onClick={handleMobileNav}>
                             <item.icon className="h-4 w-4" />
                             <span>{item.title}</span>
                           </Link>
@@ -243,7 +248,7 @@ const AdminSidebar = () => {
       <SidebarFooter className="border-t p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={signOut} tooltip="Esci">
+          <SidebarMenuButton onClick={() => { signOut(); handleMobileNav(); }} tooltip="Esci">
               <LogOut className="h-4 w-4" />
               <span>Esci</span>
             </SidebarMenuButton>
@@ -255,7 +260,7 @@ const AdminSidebar = () => {
 };
 
 const AdminHeader = () => {
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, isMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const location = useLocation();
 
@@ -289,7 +294,7 @@ const AdminHeader = () => {
         className="h-8 w-8 md:h-9 md:w-9 shrink-0"
         aria-label={isCollapsed ? "Espandi menu" : "Comprimi menu"}
       >
-        {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+        {isMobile ? <Menu className="h-5 w-5" /> : isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
       </Button>
       <span className="font-semibold text-sm truncate">{getPageTitle()}</span>
     </header>
