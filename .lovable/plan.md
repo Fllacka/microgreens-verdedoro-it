@@ -1,67 +1,65 @@
 
 
-## Favicon CMS — Campo nella sezione "Logo & Generali"
+## Rendere il CMS usabile da mobile
 
-### Cosa viene aggiunto
+### Problema
+Dalla screenshot si vede che su mobile la sidebar del CMS si sovrappone al contenuto della dashboard, rendendo l'interfaccia inutilizzabile. I menu della sidebar e il contenuto della pagina si mostrano contemporaneamente senza separazione.
 
-Un campo "Favicon" nella tab "Logo & Generali" delle Impostazioni, subito sotto il selettore del Logo. L'admin potra caricare un'immagine dalla Media Library e il favicon verra aggiornato dinamicamente sul sito senza modificare `index.html` manualmente.
+### Soluzioni
 
-### Come funziona
+#### 1. Auto-chiusura della sidebar su navigazione mobile
+Quando l'utente tocca un link nella sidebar su mobile, la Sheet deve chiudersi automaticamente. Attualmente la sidebar resta aperta dopo la navigazione, coprendo il contenuto.
 
-1. L'admin seleziona un'immagine dalla Media Library (ideale: PNG/ICO 32x32 o 64x64, oppure SVG)
-2. L'URL viene salvato nel database insieme alle altre impostazioni del sito
-3. Un componente React inietta dinamicamente il tag `<link rel="icon">` nell'`<head>` della pagina
-4. Ogni volta che il favicon cambia nel CMS, il sito lo aggiorna automaticamente
+- Aggiungere accesso a `setOpenMobile` e `isMobile` nel componente `AdminSidebar`
+- Wrappare ogni `Link` con un click handler che chiama `setOpenMobile(false)` quando `isMobile` e vero
+- Applicare anche al bottone "Esci"
 
-### Best practice implementate
+#### 2. Migliorare il bottone toggle nell'header mobile
+L'icona nell'header deve adattarsi al contesto mobile: su mobile mostrare sempre l'icona hamburger (menu) anziche PanelLeft/PanelLeftClose che ha senso solo per il collapse desktop.
 
-- Supporto per formati PNG, ICO, SVG e WebP
-- Tag `<link rel="icon">` con attributo `type` dinamico basato sull'estensione del file
-- Tag aggiuntivo `<link rel="apple-touch-icon">` per dispositivi iOS
-- Fallback al file `/favicon.ico` statico se nessun favicon e configurato nel CMS
-- Guida inline con requisiti consigliati (32x32 o 64x64 px, PNG con sfondo trasparente)
+#### 3. Tabelle responsive per Products/Blog
+Le tabelle admin (Prodotti, Blog) traboccano su schermi piccoli. Aggiungere `overflow-x-auto` al container della tabella e nascondere colonne secondarie (slug, category) su mobile.
+
+#### 4. Header della pagina Products responsive
+Il layout "titolo a sinistra, bottone a destra" (`flex justify-between`) puo rompersi su schermi stretti. Renderlo stack su mobile con `flex-col sm:flex-row gap-2`.
 
 ---
 
 ### Dettagli tecnici
 
-#### 1. Migrazione database
+#### File: `src/components/admin/AdminLayout.tsx`
 
-Aggiungere colonna `favicon_id` (UUID, nullable, FK verso `media`) alla tabella `site_settings`.
+**AdminSidebar** - Aggiungere auto-close su navigazione mobile:
+- Importare `useSidebar` per accedere a `setOpenMobile` e `isMobile`
+- Creare un handler `handleMobileNav` che chiama `setOpenMobile(false)` 
+- Applicarlo come `onClick` su tutti i `Link` e sul bottone "Esci"
 
-```sql
-ALTER TABLE public.site_settings
-  ADD COLUMN favicon_id UUID REFERENCES public.media(id) ON DELETE SET NULL;
+```typescript
+const { state, isMobile, setOpenMobile } = useSidebar();
+
+const handleMobileNav = () => {
+  if (isMobile) setOpenMobile(false);
+};
+
+// Su ogni Link:
+<Link to={item.url} onClick={handleMobileNav}>
 ```
 
-#### 2. Componente `DynamicFavicon`
+**AdminHeader** - Icona adattiva:
+- Su mobile, mostrare `Menu` (hamburger) invece di `PanelLeft`/`PanelLeftClose`
+- Usare `isMobile` dal contesto sidebar per decidere quale icona mostrare
 
-Nuovo componente `src/components/DynamicFavicon.tsx` che:
-- Fa una query a `site_settings` per ottenere `favicon_id` con join su `media.file_path`
-- Crea/aggiorna un tag `<link rel="icon">` nel `<head>` del documento
-- Aggiunge anche un tag `<link rel="apple-touch-icon">` per iOS
-- Determina automaticamente il `type` MIME dall'estensione del file (image/png, image/x-icon, image/svg+xml, etc.)
-- Fallback a `/favicon.ico` se nessun favicon e configurato
+#### File: `src/pages/admin/Products.tsx`
 
-#### 3. Aggiornamento Settings.tsx
+- Header sezione: `flex flex-col sm:flex-row gap-3` per impilare titolo e bottone su mobile
+- Container tabella: `overflow-x-auto` per scroll orizzontale
+- Colonne Slug e Category: nascondere con `hidden md:table-cell`
 
-Nella tab "Logo & Generali", aggiungere un secondo `MediaSelector` per il favicon sotto quello del logo, con:
-- Label "Favicon del Sito"
-- Guida con requisiti (32x32 o 64x64 px, PNG consigliato)
-- State `faviconId` / `faviconUrl`
-- Salvataggio nella colonna `favicon_id` di `site_settings` (insieme al `logo_id` nel `handleSave` e `handlePublish`)
+#### File: `src/pages/admin/Dashboard.tsx`
 
-#### 4. Aggiornamento Layout.tsx
-
-Importare e montare `<DynamicFavicon />` nel Layout principale, cosi il favicon e attivo su tutte le pagine del sito.
-
-#### 5. Aggiornamento query fetch in Settings.tsx
-
-Estendere la select query per includere `favicon_id` e il join sulla media corrispondente.
+- Ridurre dimensione titolo su mobile: `text-2xl md:text-3xl`
 
 ### Sequenza
-
-1. Migrazione DB (aggiunta colonna `favicon_id`)
-2. Creare componente `DynamicFavicon`
-3. Aggiornare `Settings.tsx` (UI + save/publish)
-4. Montare `DynamicFavicon` in `Layout.tsx`
+1. Aggiornare `AdminLayout.tsx` (sidebar auto-close + header icon)
+2. Aggiornare `Products.tsx` (tabella responsive)
+3. Aggiornare `Dashboard.tsx` (titolo responsive)
