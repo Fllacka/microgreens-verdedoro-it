@@ -72,9 +72,9 @@ const AdminProducts = () => {
   return (
     <AdminLayout>
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h1 className="text-3xl font-bold">Products</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Products</h1>
             <p className="text-muted-foreground">Manage your product catalog</p>
           </div>
           <Button onClick={() => navigate("/admin/products/new")}>
@@ -83,13 +83,13 @@ const AdminProducts = () => {
           </Button>
         </div>
 
-        <div className="border rounded-lg">
+        <div className="border rounded-lg overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead className="hidden md:table-cell">Slug</TableHead>
+                <TableHead className="hidden md:table-cell">Category</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -98,8 +98,8 @@ const AdminProducts = () => {
               {products.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.slug}</TableCell>
-                  <TableCell>{product.category}</TableCell>
+                  <TableCell className="hidden md:table-cell">{product.slug}</TableCell>
+                  <TableCell className="hidden md:table-cell">{product.category}</TableCell>
                   <TableCell>
                     <Badge variant={product.published ? "default" : "secondary"}>
                       {product.published ? "Published" : "Draft"}
