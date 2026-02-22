@@ -156,11 +156,13 @@ const Contatti = () => {
   );
   const contactInfoItems = [];
   if (contactInfoSection?.content?.phone_visible) {
+    const phoneNumber = (contactInfoSection.content.phone_details || "+39 0522 000 000").replace(/\s+/g, '');
     contactInfoItems.push({
       icon: Phone,
       title: contactInfoSection.content.phone_title || "Telefono",
       details: contactInfoSection.content.phone_details || "+39 0522 000 000",
-      description: contactInfoSection.content.phone_description || "Lun-Ven 9:00-18:00"
+      description: contactInfoSection.content.phone_description || "Lun-Ven 9:00-18:00",
+      href: `tel:${phoneNumber}`
     });
   }
   if (contactInfoSection?.content?.email_visible) {
@@ -168,7 +170,8 @@ const Contatti = () => {
       icon: Mail,
       title: contactInfoSection.content.email_title || "Email",
       details: contactInfoSection.content.email_details || "microgreens.verdedoro@gmail.com",
-      description: contactInfoSection.content.email_description || "Risposta entro 24h"
+      description: contactInfoSection.content.email_description || "Risposta entro 24h",
+      href: `mailto:${contactInfoSection.content.email_details || "microgreens.verdedoro@gmail.com"}`
     });
   }
   if (contactInfoSection?.content?.address_visible) {
