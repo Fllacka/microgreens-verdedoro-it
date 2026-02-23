@@ -8,6 +8,65 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Simple in-memory rate limiting (per-instance)
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+// HTML escaping to prevent injection in emails
+const escapeHtml = (str: string): string =>
+  str.replace(/[&<>"']/g, (m) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m] || m)
+  );
+
+// Basic validation
+function validateQuoteRequest(data: unknown): QuoteRequestData {
+  if (!data || typeof data !== 'object') throw new Error('Invalid request body');
+  const d = data as Record<string, unknown>;
+
+  const nome = typeof d.nome === 'string' ? d.nome.trim() : '';
+  const cognome = typeof d.cognome === 'string' ? d.cognome.trim() : '';
+  const email = typeof d.email === 'string' ? d.email.trim() : '';
+  const telefono = typeof d.telefono === 'string' ? d.telefono.trim() : undefined;
+  const indirizzo = typeof d.indirizzo === 'string' ? d.indirizzo.trim() : '';
+  const messaggio = typeof d.messaggio === 'string' ? d.messaggio.trim() : '';
+
+  if (!nome || nome.length > 100) throw new Error('Invalid nome');
+  if (!cognome || cognome.length > 100) throw new Error('Invalid cognome');
+  if (!email || email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('Invalid email');
+  if (telefono && telefono.length > 30) throw new Error('Invalid telefono');
+  if (!indirizzo || indirizzo.length > 500) throw new Error('Invalid indirizzo');
+  if (!messaggio || messaggio.length > 5000) throw new Error('Invalid messaggio');
+
+  if (!Array.isArray(d.prodotti)) throw new Error('Invalid prodotti');
+  if (d.prodotti.length > 50) throw new Error('Too many products');
+
+  const prodotti = (d.prodotti as unknown[]).map((p: unknown) => {
+    if (!p || typeof p !== 'object') throw new Error('Invalid product');
+    const prod = p as Record<string, unknown>;
+    const name = typeof prod.name === 'string' ? prod.name.trim() : '';
+    const quantity = typeof prod.quantity === 'number' ? prod.quantity : 0;
+    const price = typeof prod.price === 'number' ? prod.price : undefined;
+    if (!name || name.length > 200) throw new Error('Invalid product name');
+    if (quantity <= 0 || quantity > 100000) throw new Error('Invalid quantity');
+    if (price !== undefined && (price < 0 || price > 100000)) throw new Error('Invalid price');
+    return { name, quantity, price };
+  });
+
+  return { nome, cognome, email, telefono, indirizzo, messaggio, prodotti };
+}
+
 interface QuoteRequestData {
   nome: string;
   cognome: string;
@@ -50,7 +109,7 @@ const buildProductsTable = (
       <tbody>
         ${prodotti.map((p, i) => `
           <tr style="background:${i % 2 === 0 ? '#ffffff' : '#fafbf9'};">
-            <td style="padding:12px 16px;border-top:1px solid #eef0ec;color:#333;font-size:14px;">${p.name}</td>
+            <td style="padding:12px 16px;border-top:1px solid #eef0ec;color:#333;font-size:14px;">${escapeHtml(p.name)}</td>
             <td style="padding:12px 16px;text-align:right;border-top:1px solid #eef0ec;color:#555;font-weight:500;font-size:14px;">${p.quantity}g</td>
             ${hasAnyPrices ? `<td style="padding:12px 16px;text-align:right;border-top:1px solid #eef0ec;color:#2d5016;font-weight:600;font-size:14px;">${p.price ? formatPrice(p.price) : '–'}</td>` : ''}
           </tr>
@@ -101,19 +160,19 @@ const buildBusinessEmail = (data: QuoteRequestData, productsHtml: string) => {
         <table style="width:100%;">
           <tr>
             <td style="padding:6px 0;color:#888;font-size:13px;width:100px;">Nome</td>
-            <td style="padding:6px 0;color:#333;font-size:14px;font-weight:500;">${nome} ${cognome}</td>
+            <td style="padding:6px 0;color:#333;font-size:14px;font-weight:500;">${escapeHtml(nome)} ${escapeHtml(cognome)}</td>
           </tr>
           <tr>
             <td style="padding:6px 0;color:#888;font-size:13px;">Email</td>
-            <td style="padding:6px 0;"><a href="mailto:${email}" style="color:#2d5016;text-decoration:none;font-size:14px;">${email}</a></td>
+            <td style="padding:6px 0;"><a href="mailto:${escapeHtml(email)}" style="color:#2d5016;text-decoration:none;font-size:14px;">${escapeHtml(email)}</a></td>
           </tr>
           ${telefono ? `<tr>
             <td style="padding:6px 0;color:#888;font-size:13px;">Telefono</td>
-            <td style="padding:6px 0;"><a href="tel:${telefono}" style="color:#2d5016;text-decoration:none;font-size:14px;">${telefono}</a></td>
+            <td style="padding:6px 0;"><a href="tel:${escapeHtml(telefono)}" style="color:#2d5016;text-decoration:none;font-size:14px;">${escapeHtml(telefono)}</a></td>
           </tr>` : ''}
           <tr>
             <td style="padding:6px 0;color:#888;font-size:13px;">Indirizzo</td>
-            <td style="padding:6px 0;color:#333;font-size:14px;">${indirizzo}</td>
+            <td style="padding:6px 0;color:#333;font-size:14px;">${escapeHtml(indirizzo)}</td>
           </tr>
         </table>
       </td></tr>
@@ -126,12 +185,12 @@ const buildBusinessEmail = (data: QuoteRequestData, productsHtml: string) => {
     <!-- Message -->
     <h2 style="color:#2d5016;margin:28px 0 8px;font-size:15px;font-weight:600;">Messaggio</h2>
     <div style="background:#fafbf9;border-radius:8px;padding:16px 20px;border:1px solid #e5e7e3;">
-      <p style="margin:0;color:#444;line-height:1.6;font-size:14px;white-space:pre-wrap;">${messaggio}</p>
+      <p style="margin:0;color:#444;line-height:1.6;font-size:14px;white-space:pre-wrap;">${escapeHtml(messaggio)}</p>
     </div>
 
     <!-- CTA -->
     <div style="text-align:center;margin-top:32px;">
-      <a href="mailto:${email}?subject=Preventivo%20Verde%20d'Oro%20-%20${encodeURIComponent(nome)}%20${encodeURIComponent(cognome)}"
+      <a href="mailto:${escapeHtml(email)}?subject=Preventivo%20Verde%20d'Oro%20-%20${encodeURIComponent(nome)}%20${encodeURIComponent(cognome)}"
          style="display:inline-block;background:#d4af37;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:600;font-size:15px;">
         Rispondi al Cliente →
       </a>
@@ -177,7 +236,7 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
   <tr><td style="padding:36px 40px;">
 
     <p style="color:#000;line-height:1.7;font-size:15px;margin:0 0 8px;">
-      Ciao <strong>${nome}</strong>,
+      Ciao <strong>${escapeHtml(nome)}</strong>,
     </p>
     <p style="color:#333;line-height:1.7;font-size:15px;margin:0 0 8px;">
       Grazie per aver scelto <strong style="color:#356A35;">Verde D'Oro</strong>!
@@ -238,7 +297,7 @@ const buildCustomerEmail = (data: QuoteRequestData, productsHtml: string) => {
     ${messaggio ? `
     <div style="background:#fafbf9;border-radius:8px;padding:16px 20px;border:1px solid #e5e7e3;margin-top:16px;">
       <p style="margin:0 0 6px;color:#888;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Il tuo messaggio</p>
-      <p style="margin:0;color:#444;line-height:1.6;font-size:14px;white-space:pre-wrap;">${messaggio}</p>
+      <p style="margin:0;color:#444;line-height:1.6;font-size:14px;white-space:pre-wrap;">${escapeHtml(messaggio)}</p>
     </div>
     ` : ''}
 
@@ -271,8 +330,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const data: QuoteRequestData = await req.json();
-    console.log("Received quote request:", JSON.stringify(data));
+    // Rate limiting by IP
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                     req.headers.get('cf-connecting-ip') || 'unknown';
+    if (isRateLimited(clientIp)) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate and sanitize input
+    const rawData = await req.json();
+    const data = validateQuoteRequest(rawData);
+
+    console.log(`Quote request from ${data.email.split('@')[1]} with ${data.prodotti.length} products`);
 
     const { nome, cognome, email, prodotti } = data;
 
@@ -286,43 +358,37 @@ const handler = async (req: Request): Promise<Response> => {
     const customerEmailHtml = buildCustomerEmail(data, customerProductsHtml);
 
     // Send email to business
-    console.log("Sending email to business...");
     const businessEmail = await resend.emails.send({
       from: "Verde d'Oro <noreply@microgreens.verdedoro.it>",
       to: ["microgreens.verdedoro@gmail.com"],
-      subject: `🌱 Nuova richiesta preventivo da ${nome} ${cognome}`,
+      subject: `🌱 Nuova richiesta preventivo da ${escapeHtml(nome)} ${escapeHtml(cognome)}`,
       html: businessEmailHtml,
     });
-    console.log("Business email sent:", businessEmail);
 
     // Try to send confirmation email to customer
     let customerEmailResult = null;
     try {
-      console.log("Attempting to send confirmation to customer...");
       customerEmailResult = await resend.emails.send({
         from: "Verde d'Oro <noreply@microgreens.verdedoro.it>",
         to: [email],
         subject: "Conferma richiesta - Verde D'Oro Microgreens",
         html: customerEmailHtml,
       });
-      console.log("Customer email sent:", customerEmailResult);
     } catch (customerError: any) {
-      console.log("Customer email could not be sent (domain not verified):", customerError.message);
+      console.log("Customer email could not be sent:", customerError.message);
     }
 
     return new Response(
       JSON.stringify({
         success: true,
-        businessEmail,
-        customerEmail: customerEmailResult,
         note: customerEmailResult ? "Both emails sent" : "Business email sent. Customer email requires verified domain.",
       }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: any) {
-    console.error("Error in send-quote-request function:", error);
+    console.error("Error in send-quote-request:", error.message);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to process request." }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }

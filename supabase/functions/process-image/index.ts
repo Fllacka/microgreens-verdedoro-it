@@ -24,6 +24,52 @@ serve(async (req) => {
   }
 
   try {
+    // --- Authentication: require admin or editor role ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Verify the caller's identity using their JWT
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // Check that user has admin or editor role
+    const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: roleData } = await serviceClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .in('role', ['admin', 'editor'])
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: 'Forbidden: admin or editor role required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // --- End authentication ---
+
     const { storagePath, mediaId } = await req.json();
     
     if (!storagePath || !mediaId) {
@@ -32,10 +78,8 @@ serve(async (req) => {
 
     console.log(`Processing image: ${storagePath}, mediaId: ${mediaId}`);
 
-    // Initialize Supabase client with service role
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Use service role client for storage/db operations
+    const supabase = serviceClient;
 
     // Download original image
     const { data: fileData, error: downloadError } = await supabase.storage
@@ -58,12 +102,7 @@ serve(async (req) => {
     const arrayBuffer = await fileData.arrayBuffer();
     const originalBytes = new Uint8Array(arrayBuffer);
 
-    // Use a canvas-based approach for image processing
-    // We'll use the browser-compatible ImageBitmap API in Deno
     const blob = new Blob([originalBytes], { type: 'image/jpeg' });
-    
-    // For now, we'll create optimized versions by re-uploading with different paths
-    // In production, you'd use a proper image processing library
     
     const optimizedUrls: Record<string, string> = {};
     
@@ -73,13 +112,11 @@ serve(async (req) => {
       .getPublicUrl(storagePath);
     optimizedUrls.original = originalUrl.publicUrl;
 
-    // For each size, we'll create a copy (in a real implementation, you'd resize)
-    // The key insight is that we're setting up the infrastructure
+    // For each size, create a copy
     for (const [sizeName, dimensions] of Object.entries(IMAGE_SIZES)) {
       const sizedPath = `${prefix}optimized/${baseName}_${sizeName}.jpg`;
       const webpPath = `${prefix}optimized/${baseName}_${sizeName}.webp`;
 
-      // Upload the JPEG version (original for now - would be resized in production)
       const { error: uploadJpegError } = await supabase.storage
         .from('cms-media')
         .upload(sizedPath, originalBytes, {
@@ -97,7 +134,6 @@ serve(async (req) => {
         console.error(`Failed to upload ${sizeName}:`, uploadJpegError);
       }
 
-      // Upload WebP version (same as original for now)
       const { error: uploadWebpError } = await supabase.storage
         .from('cms-media')
         .upload(webpPath, originalBytes, {
@@ -130,7 +166,7 @@ serve(async (req) => {
       throw new Error(`Failed to update media record: ${updateError.message}`);
     }
 
-    console.log('Successfully processed image with URLs:', optimizedUrls);
+    console.log('Successfully processed image');
 
     return new Response(
       JSON.stringify({
