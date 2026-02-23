@@ -1,65 +1,52 @@
 
 
-## Rendere il CMS usabile da mobile
+## Fix: Sfondo solido per la sidebar mobile del CMS
 
 ### Problema
-Dalla screenshot si vede che su mobile la sidebar del CMS si sovrappone al contenuto della dashboard, rendendo l'interfaccia inutilizzabile. I menu della sidebar e il contenuto della pagina si mostrano contemporaneamente senza separazione.
+La sidebar mobile del CMS non ha uno sfondo solido perche le variabili CSS `--sidebar` (usate dal componente Shadcn Sidebar) non sono definite nel foglio di stile. Le classi come `bg-sidebar` e `text-sidebar-foreground` non producono alcun colore, lasciando la sidebar trasparente e il testo illeggibile sopra il contenuto della pagina.
 
-### Soluzioni
-
-#### 1. Auto-chiusura della sidebar su navigazione mobile
-Quando l'utente tocca un link nella sidebar su mobile, la Sheet deve chiudersi automaticamente. Attualmente la sidebar resta aperta dopo la navigazione, coprendo il contenuto.
-
-- Aggiungere accesso a `setOpenMobile` e `isMobile` nel componente `AdminSidebar`
-- Wrappare ogni `Link` con un click handler che chiama `setOpenMobile(false)` quando `isMobile` e vero
-- Applicare anche al bottone "Esci"
-
-#### 2. Migliorare il bottone toggle nell'header mobile
-L'icona nell'header deve adattarsi al contesto mobile: su mobile mostrare sempre l'icona hamburger (menu) anziche PanelLeft/PanelLeftClose che ha senso solo per il collapse desktop.
-
-#### 3. Tabelle responsive per Products/Blog
-Le tabelle admin (Prodotti, Blog) traboccano su schermi piccoli. Aggiungere `overflow-x-auto` al container della tabella e nascondere colonne secondarie (slug, category) su mobile.
-
-#### 4. Header della pagina Products responsive
-Il layout "titolo a sinistra, bottone a destra" (`flex justify-between`) puo rompersi su schermi stretti. Renderlo stack su mobile con `flex-col sm:flex-row gap-2`.
+### Soluzione
+Aggiungere le variabili CSS `--sidebar-*` necessarie nel file `src/index.css`, all'interno del blocco `:root` esistente. Questo dara alla sidebar uno sfondo bianco solido con testo scuro, bordi e accent coerenti con il tema del sito.
 
 ---
 
 ### Dettagli tecnici
 
-#### File: `src/components/admin/AdminLayout.tsx`
+#### File: `src/index.css`
 
-**AdminSidebar** - Aggiungere auto-close su navigazione mobile:
-- Importare `useSidebar` per accedere a `setOpenMobile` e `isMobile`
-- Creare un handler `handleMobileNav` che chiama `setOpenMobile(false)` 
-- Applicarlo come `onClick` su tutti i `Link` e sul bottone "Esci"
+Aggiungere le seguenti variabili CSS nel blocco `:root` (dopo le variabili esistenti come `--ring`):
 
-```typescript
-const { state, isMobile, setOpenMobile } = useSidebar();
-
-const handleMobileNav = () => {
-  if (isMobile) setOpenMobile(false);
-};
-
-// Su ogni Link:
-<Link to={item.url} onClick={handleMobileNav}>
+```css
+/* Sidebar */
+--sidebar-background: 0 0% 100%;
+--sidebar-foreground: 0 0% 0%;
+--sidebar-primary: 140 42% 23%;
+--sidebar-primary-foreground: 0 0% 98%;
+--sidebar-accent: 25 30% 93%;
+--sidebar-accent-foreground: 0 0% 0%;
+--sidebar-border: 25 20% 88%;
+--sidebar-ring: 140 42% 23%;
 ```
 
-**AdminHeader** - Icona adattiva:
-- Su mobile, mostrare `Menu` (hamburger) invece di `PanelLeft`/`PanelLeftClose`
-- Usare `isMobile` dal contesto sidebar per decidere quale icona mostrare
+Aggiungere anche le corrispondenti variabili nel blocco `.dark`.
 
-#### File: `src/pages/admin/Products.tsx`
+#### File: `tailwind.config.ts`
 
-- Header sezione: `flex flex-col sm:flex-row gap-3` per impilare titolo e bottone su mobile
-- Container tabella: `overflow-x-auto` per scroll orizzontale
-- Colonne Slug e Category: nascondere con `hidden md:table-cell`
+Aggiungere le mappature colore sidebar nella sezione `colors`:
 
-#### File: `src/pages/admin/Dashboard.tsx`
+```typescript
+sidebar: {
+  DEFAULT: "hsl(var(--sidebar-background))",
+  foreground: "hsl(var(--sidebar-foreground))",
+  primary: "hsl(var(--sidebar-primary))",
+  "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+  accent: "hsl(var(--sidebar-accent))",
+  "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+  border: "hsl(var(--sidebar-border))",
+  ring: "hsl(var(--sidebar-ring))",
+},
+```
 
-- Ridurre dimensione titolo su mobile: `text-2xl md:text-3xl`
+### Risultato
+La sidebar mobile avra uno sfondo bianco solido e opaco, con testo nero leggibile, e non mostrera piu il contenuto sottostante.
 
-### Sequenza
-1. Aggiornare `AdminLayout.tsx` (sidebar auto-close + header icon)
-2. Aggiornare `Products.tsx` (tabella responsive)
-3. Aggiornare `Dashboard.tsx` (titolo responsive)
