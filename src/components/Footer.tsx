@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Leaf, Phone, Mail, MapPin, Instagram, Facebook, Youtube, Linkedin, MessageCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
 
 
 // Custom SVG icons for platforms not in Lucide
@@ -133,6 +133,7 @@ const Footer = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
         const { data, error } = await supabase
           .from("site_settings")
           .select(`
