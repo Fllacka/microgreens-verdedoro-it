@@ -20,15 +20,8 @@ export default defineConfig(({ mode }) => ({
     mode === "production" && criticalCssPlugin(),
   ].filter(Boolean),
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'supabase-vendor': ['@supabase/supabase-js'],
-          'query-vendor': ['@tanstack/react-query'],
-        },
-      },
-    },
+    // Let Vite/Rollup handle code-splitting automatically via lazy routes
+    // This avoids loading unused vendor code on pages that don't need it
   },
   resolve: {
     alias: {
