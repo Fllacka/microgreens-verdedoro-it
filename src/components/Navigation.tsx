@@ -13,7 +13,7 @@ import {
 import { Menu, ShoppingBasket, Leaf } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
-import { supabase } from "@/integrations/supabase/client";
+
 
 
 // Marker for dropdown items in navigation
@@ -90,6 +90,7 @@ const Navigation = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
         const { data, error } = await supabase
           .from("site_settings")
           .select(`

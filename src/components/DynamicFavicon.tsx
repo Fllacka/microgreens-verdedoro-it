@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+
 
 const getMimeType = (url: string): string => {
   const ext = url.split(".").pop()?.toLowerCase();
@@ -20,6 +20,7 @@ const DynamicFavicon = () => {
   useEffect(() => {
     const fetchFavicon = async () => {
       try {
+        const { supabase } = await import("@/integrations/supabase/client");
         const { data, error } = await supabase
           .from("site_settings")
           .select("favicon_id, media!site_settings_favicon_id_fkey (file_path)")
