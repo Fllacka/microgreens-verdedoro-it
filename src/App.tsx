@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { PageLoading } from "@/components/ui/page-loading";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // All pages lazy loaded to minimize initial JS bundle and improve FCP
 const Index = lazy(() => import("./pages/Index"));
@@ -21,7 +22,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const CartDrawer = lazy(() => import("./components/CartDrawer").then(m => ({ default: m.CartDrawer })));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
-const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+
 
 // Admin/Preview wrappers
 const AdminRoutesWrapper = lazy(() => import("./components/AdminRoutesWrapper"));
