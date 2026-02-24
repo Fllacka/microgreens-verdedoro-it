@@ -1,19 +1,14 @@
 import { lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { PageLoading } from "@/components/ui/page-loading";
 
-// Critical pages - loaded immediately
-import Index from "./pages/Index";
-import Microgreens from "./pages/Microgreens";
-import ProductDetail from "./pages/ProductDetail";
-
-// Non-critical pages - lazy loaded
+// All pages lazy loaded to minimize initial JS bundle and improve FCP
+const Index = lazy(() => import("./pages/Index"));
+const Microgreens = lazy(() => import("./pages/Microgreens"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const ChiSiamo = lazy(() => import("./pages/ChiSiamo"));
 const CosaSonoMicrogreens = lazy(() => import("./pages/CosaSonoMicrogreens"));
 const MicrogreensCustom = lazy(() => import("./pages/MicrogreensCustom"));
@@ -22,13 +17,14 @@ const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const Contatti = lazy(() => import("./pages/Contatti"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Lazy-loaded CartDrawer - defers Sheet/ScrollArea/Separator UI imports
+// Lazy-loaded non-critical UI
 const CartDrawer = lazy(() => import("./components/CartDrawer").then(m => ({ default: m.CartDrawer })));
+const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
+const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 
-// Admin routes wrapper - lazy loaded, includes AuthProvider
+// Admin/Preview wrappers
 const AdminRoutesWrapper = lazy(() => import("./components/AdminRoutesWrapper"));
-
-// Preview routes wrapper - lazy loaded, includes AuthProvider
 const PreviewRoutesWrapper = lazy(() => import("./components/PreviewRoutesWrapper"));
 
 const queryClient = new QueryClient({
@@ -94,13 +90,17 @@ const router = createBrowserRouter([
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <RouterProvider router={router} />
-      </CartProvider>
-    </TooltipProvider>
+    <Suspense fallback={null}>
+      <TooltipProvider>
+        <CartProvider>
+          <Suspense fallback={null}>
+            <Toaster />
+            <Sonner />
+          </Suspense>
+          <RouterProvider router={router} />
+        </CartProvider>
+      </TooltipProvider>
+    </Suspense>
   </QueryClientProvider>
 );
 
