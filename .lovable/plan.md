@@ -1,52 +1,43 @@
 
 
-## Fix: Sfondo solido per la sidebar mobile del CMS
+## Analysis
 
-### Problema
-La sidebar mobile del CMS non ha uno sfondo solido perche le variabili CSS `--sidebar` (usate dal componente Shadcn Sidebar) non sono definite nel foglio di stile. Le classi come `bg-sidebar` e `text-sidebar-foreground` non producono alcun colore, lasciando la sidebar trasparente e il testo illeggibile sopra il contenuto della pagina.
+The canonical URL issue has two parts:
 
-### Soluzione
-Aggiungere le variabili CSS `--sidebar-*` necessarie nel file `src/index.css`, all'interno del blocco `:root` esistente. Questo dara alla sidebar uno sfondo bianco solido con testo scuro, bordi e accent coerenti con il tema del sito.
+1. **`index.html` has a hardcoded canonical**: `<link rel="canonical" href="https://verdedoro.it" />` — this applies to every page as a default before React Helmet overrides it. On pages where Helmet doesn't set a canonical (or sets it conditionally), this hardcoded one persists.
 
----
+2. **Homepage (`Index.tsx`)**: The canonical is only rendered when `seoContent.canonical_url` is truthy (line 349: `{seoContent.canonical_url && <link rel="canonical" ... />}`). When the CMS field is empty, no canonical is emitted by Helmet, so the hardcoded `index.html` one (`https://verdedoro.it`) remains — which is correct for the homepage but wrong for every other page.
 
-### Dettagli tecnici
+3. **Other pages** mostly handle it correctly (self-referencing when CMS field is empty), but `MicrogreensCustom.tsx` uses the raw CMS value without prepending the origin, and `CosaSonoMicrogreens.tsx` hardcodes `https://verdedoro.it` instead of using `window.location.origin`.
 
-#### File: `src/index.css`
+### Pages and their current canonical behavior:
 
-Aggiungere le seguenti variabili CSS nel blocco `:root` (dopo le variabili esistenti come `--ring`):
+| Page | Current behavior | Issue |
+|------|-----------------|-------|
+| `index.html` | Hardcoded `https://verdedoro.it` | Leaks to all pages where Helmet doesn't override |
+| `Index.tsx` | Only renders canonical if CMS field is filled | Missing self-referencing canonical → falls back to index.html's hardcoded one (ok for homepage, but fragile) |
+| `ChiSiamo.tsx` | Correct — self-references `/chi-siamo` when empty | None |
+| `Contatti.tsx` | Correct — self-references `/contatti` when empty | None |
+| `Microgreens.tsx` | Correct — self-references `/microgreens` when empty | None |
+| `Blog.tsx` | Correct — self-references `/blog` when empty | None |
+| `BlogArticle.tsx` | Correct — self-references `/blog/{slug}` when empty | None |
+| `ProductDetail.tsx` | Correct — self-references `/microgreens/{slug}` when empty | None |
+| `CosaSonoMicrogreens.tsx` | Hardcodes `https://verdedoro.it` as base | Should use `window.location.origin` |
+| `MicrogreensCustom.tsx` | Uses raw CMS value without prepending origin | Broken when CMS field is filled (path only, no domain) |
 
-```css
-/* Sidebar */
---sidebar-background: 0 0% 100%;
---sidebar-foreground: 0 0% 0%;
---sidebar-primary: 140 42% 23%;
---sidebar-primary-foreground: 0 0% 98%;
---sidebar-accent: 25 30% 93%;
---sidebar-accent-foreground: 0 0% 0%;
---sidebar-border: 25 20% 88%;
---sidebar-ring: 140 42% 23%;
-```
+## Plan
 
-Aggiungere anche le corrispondenti variabili nel blocco `.dark`.
+### 1. Remove hardcoded canonical from `index.html`
+Remove `<link rel="canonical" href="https://verdedoro.it" />` — every page should manage its own canonical via React Helmet.
 
-#### File: `tailwind.config.ts`
+### 2. Fix `Index.tsx` (homepage)
+Change from conditional rendering to always rendering a canonical. When CMS field is empty, self-reference with `window.location.origin + "/"`. When filled, prepend origin to the path.
 
-Aggiungere le mappature colore sidebar nella sezione `colors`:
+### 3. Fix `MicrogreensCustom.tsx`
+When CMS canonical field is filled, prepend `window.location.origin`. When empty, self-reference with `window.location.origin + "/microgreens-su-misura"`.
 
-```typescript
-sidebar: {
-  DEFAULT: "hsl(var(--sidebar-background))",
-  foreground: "hsl(var(--sidebar-foreground))",
-  primary: "hsl(var(--sidebar-primary))",
-  "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-  accent: "hsl(var(--sidebar-accent))",
-  "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-  border: "hsl(var(--sidebar-border))",
-  ring: "hsl(var(--sidebar-ring))",
-},
-```
+### 4. Fix `CosaSonoMicrogreens.tsx`
+Replace hardcoded `https://verdedoro.it` with `window.location.origin`.
 
-### Risultato
-La sidebar mobile avra uno sfondo bianco solido e opaco, con testo nero leggibile, e non mostrera piu il contenuto sottostante.
+All other pages already follow the correct pattern and need no changes.
 
