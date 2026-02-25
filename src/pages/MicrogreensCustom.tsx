@@ -128,10 +128,16 @@ const MicrogreensCustom = () => {
       <Helmet>
         <title>{seoSection?.content.meta_title || 'Microgreens su Misura | Verde d\'Oro'}</title>
         <meta name="description" content={seoSection?.content.meta_description || ''} />
-        {seoSection?.content.og_title && <meta property="og:title" content={seoSection.content.og_title} />}
-        {seoSection?.content.og_description && <meta property="og:description" content={seoSection.content.og_description} />}
-        {seoSection?.content.robots && <meta name="robots" content={seoSection.content.robots} />}
+        <meta name="robots" content={seoSection?.content.robots || 'index, follow'} />
         <link rel="canonical" href={seoSection?.content.canonical_url ? `${window.location.origin}${seoSection.content.canonical_url.startsWith('/') ? seoSection.content.canonical_url : '/' + seoSection.content.canonical_url}` : `${window.location.origin}/microgreens-su-misura`} />
+        <meta property="og:title" content={seoSection?.content.og_title || seoSection?.content.meta_title || 'Microgreens su Misura | Verde d\'Oro'} />
+        <meta property="og:description" content={seoSection?.content.og_description || seoSection?.content.meta_description || ''} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${window.location.origin}/microgreens-su-misura`} />
+        <meta property="og:locale" content="it_IT" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoSection?.content.og_title || seoSection?.content.meta_title || 'Microgreens su Misura | Verde d\'Oro'} />
+        <meta name="twitter:description" content={seoSection?.content.og_description || seoSection?.content.meta_description || ''} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>

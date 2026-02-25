@@ -350,9 +350,13 @@ const Index = ({
         <meta property="og:title" content={seoContent.og_title || seoContent.meta_title} />
         <meta property="og:description" content={seoContent.og_description || seoContent.meta_description} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://verdedoro.it/" />
+        <meta property="og:url" content={`${window.location.origin}/`} />
         <meta property="og:locale" content="it_IT" />
         {getOgImageUrl() && <meta property="og:image" content={getOgImageUrl()} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoContent.og_title || seoContent.meta_title} />
+        <meta name="twitter:description" content={seoContent.og_description || seoContent.meta_description} />
+        {getOgImageUrl() && <meta name="twitter:image" content={getOgImageUrl()} />}
         {/* Combined structured data for homepage */}
         <script type="application/ld+json">
           {JSON.stringify(combineSchemas(generateOrganizationSchema(), generateWebSiteSchema(), generateLocalBusinessSchema()))}

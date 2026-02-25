@@ -322,15 +322,14 @@ const CosaSonoMicrogreens = () => {
         <meta name="description" content={seoData.metaDescription} />
         <meta name="robots" content={seoData.robots} />
         <link rel="canonical" href={canonicalUrl} />
-        
-        {/* Open Graph */}
         <meta property="og:title" content={seoData.ogTitle || seoData.metaTitle} />
         <meta property="og:description" content={seoData.ogDescription || seoData.metaDescription} />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:type" content="article" />
         <meta property="og:locale" content="it_IT" />
-        
-        {/* Structured Data */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoData.ogTitle || seoData.metaTitle} />
+        <meta name="twitter:description" content={seoData.ogDescription || seoData.metaDescription} />
         <script type="application/ld+json">
           {JSON.stringify(combinedSchema)}
         </script>

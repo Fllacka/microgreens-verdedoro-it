@@ -163,10 +163,14 @@ const Blog = () => {
         <meta name="description" content={seoSection?.content?.meta_description || "Scopri il mondo dei microgreens: ricette, benefici nutrizionali, consigli per la conservazione e guide pratiche."} />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={seoSection?.content?.og_title || "Blog - Verde D'Oro"} />
-        <meta property="og:description" content={seoSection?.content?.og_description || "Scopri il mondo dei microgreens"} />
+        <meta property="og:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "Blog - Verde D'Oro"} />
+        <meta property="og:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Scopri il mondo dei microgreens"} />
         <meta property="og:type" content="blog" />
         <meta property="og:url" content={currentUrl} />
+        <meta property="og:locale" content="it_IT" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "Blog - Verde D'Oro"} />
+        <meta name="twitter:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Scopri il mondo dei microgreens"} />
         <script type="application/ld+json">
           {JSON.stringify(generateBreadcrumbSchema([{
           name: "Home",

@@ -197,18 +197,17 @@ const Contatti = () => {
     <Layout>
       <Helmet>
         <title>{seoSection?.content?.meta_title || "Contatti - Verde D'Oro"}</title>
-        <meta
-          name="description"
-          content={seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."} />
-
+        <meta name="description" content={seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."} />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        {seoSection?.content?.og_title &&
-        <meta property="og:title" content={seoSection.content.og_title} />
-        }
-        {seoSection?.content?.og_description &&
-        <meta property="og:description" content={seoSection.content.og_description} />
-        }
+        <meta property="og:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "Contatti - Verde D'Oro"} />
+        <meta property="og:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:locale" content="it_IT" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "Contatti - Verde D'Oro"} />
+        <meta name="twitter:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Contattaci per informazioni sui nostri microgreens biologici."} />
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
         </script>

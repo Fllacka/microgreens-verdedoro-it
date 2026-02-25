@@ -123,10 +123,14 @@ const ChiSiamo = () => {
         <meta name="description" content={seoContent.meta_description || "Scopri la storia di Verde D'Oro, azienda familiare di Reggio Emilia specializzata in microgreens biologici."} />
         <meta name="robots" content={seoContent.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        {seoContent.og_title && <meta property="og:title" content={seoContent.og_title} />}
-        {seoContent.og_description && <meta property="og:description" content={seoContent.og_description} />}
+        <meta property="og:title" content={seoContent.og_title || seoContent.meta_title || "Chi Siamo - Verde D'Oro Microgreens"} />
+        <meta property="og:description" content={seoContent.og_description || seoContent.meta_description || "Scopri la storia di Verde D'Oro."} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:locale" content="it_IT" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoContent.og_title || seoContent.meta_title || "Chi Siamo - Verde D'Oro Microgreens"} />
+        <meta name="twitter:description" content={seoContent.og_description || seoContent.meta_description || "Scopri la storia di Verde D'Oro."} />
         {seoContent.structured_data && (
           <script type="application/ld+json">{seoContent.structured_data}</script>
         )}
