@@ -55,6 +55,8 @@ interface Product {
   published: boolean;
   meta_title: string;
   meta_description: string;
+  og_title?: string;
+  og_description?: string;
   canonical_url?: string;
   faq_items?: FAQItem[];
   price_tiers?: PriceTier[];
@@ -232,11 +234,16 @@ const ProductDetail = () => {
         <title>{product.meta_title || `Microgreens di ${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="description" content={product.meta_description || product.description} />
         <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`} />
-        <meta property="og:title" content={product.meta_title || `Microgreens di ${product.name}`} />
-        <meta property="og:description" content={product.meta_description || product.description} />
+        <meta property="og:title" content={product.og_title || product.meta_title || `Microgreens di ${product.name}`} />
+        <meta property="og:description" content={product.og_description || product.meta_description || product.description} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={`${window.location.origin}/microgreens/${product.slug}`} />
+        <meta property="og:locale" content="it_IT" />
         {product.media?.file_path && <meta property="og:image" content={product.media.file_path} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={product.og_title || product.meta_title || `Microgreens di ${product.name}`} />
+        <meta name="twitter:description" content={product.og_description || product.meta_description || product.description} />
+        {product.media?.file_path && <meta name="twitter:image" content={product.media.file_path} />}
         <script type="application/ld+json">
           {JSON.stringify(combineSchemas(...allSchemas))}
         </script>

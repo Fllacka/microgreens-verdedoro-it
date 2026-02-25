@@ -156,16 +156,17 @@ const Microgreens = () => {
     <Layout>
       <Helmet>
         <title>{seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"}</title>
-        <meta
-          name="description"
-          content={seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici coltivati a Reggio Emilia. Basilico, ravanello rosso, pisello e molte altre varietà per la tua cucina gourmet."}
-        />
+        <meta name="description" content={seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici coltivati a Reggio Emilia."} />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={seoSection?.content?.og_title || "I Nostri Microgreens - Verde D'Oro"} />
-        <meta property="og:description" content={seoSection?.content?.og_description || "Scopri la nostra selezione di microgreens biologici"} />
+        <meta property="og:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"} />
+        <meta property="og:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici"} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={currentUrl} />
+        <meta property="og:locale" content="it_IT" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"} />
+        <meta name="twitter:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici"} />
         <script type="application/ld+json">
           {JSON.stringify(generateBreadcrumbSchema([
             { name: "Home", url: "/" },

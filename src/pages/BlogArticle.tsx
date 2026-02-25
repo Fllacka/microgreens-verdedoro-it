@@ -336,14 +336,19 @@ const BlogArticle = () => {
       <Helmet>
         <title>{post.meta_title || post.title}</title>
         <meta name="description" content={post.meta_description || post.excerpt} />
-        <meta property="og:title" content={post.og_title || post.title} />
-        <meta property="og:description" content={post.og_description || post.excerpt} />
+        <link rel="canonical" href={`${window.location.origin}${post.canonical_url || `/blog/${post.slug}`}`} />
+        <meta property="og:title" content={post.og_title || post.meta_title || post.title} />
+        <meta property="og:description" content={post.og_description || post.meta_description || post.excerpt} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${window.location.origin}/blog/${post.slug}`} />
+        <meta property="og:locale" content="it_IT" />
         <meta property="article:published_time" content={post.published_at} />
         {post.category && <meta property="article:section" content={post.category} />}
         {coverImageUrl && <meta property="og:image" content={coverImageUrl} />}
-        <link rel="canonical" href={`${window.location.origin}${post.canonical_url || `/blog/${post.slug}`}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post.og_title || post.meta_title || post.title} />
+        <meta name="twitter:description" content={post.og_description || post.meta_description || post.excerpt} />
+        {coverImageUrl && <meta name="twitter:image" content={coverImageUrl} />}
         <script type="application/ld+json">
           {JSON.stringify(allSchemas)}
         </script>
