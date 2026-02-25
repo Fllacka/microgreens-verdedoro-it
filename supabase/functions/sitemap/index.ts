@@ -6,7 +6,7 @@ const corsHeaders = {
   "Content-Type": "application/xml",
 };
 
-const SITE_URL = "https://verdedoro.it";
+const SITE_URL = "https://microgreens.verdedoro.it";
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -96,12 +96,12 @@ Deno.serve(async (req) => {
     if (products && products.length > 0) {
       sitemap += `\n  <!-- Product Pages -->`;
       for (const product of products) {
-        const lastmod = product.updated_at 
+        const lastmod = product.updated_at
           ? new Date(product.updated_at).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0];
         const priority = product.priority || 0.8;
         const changefreq = product.change_frequency || "weekly";
-        
+
         sitemap += `
   <url>
     <loc>${SITE_URL}/microgreens/${product.slug}</loc>
@@ -116,12 +116,12 @@ Deno.serve(async (req) => {
     if (blogPosts && blogPosts.length > 0) {
       sitemap += `\n  <!-- Blog Posts -->`;
       for (const post of blogPosts) {
-        const lastmod = post.updated_at 
+        const lastmod = post.updated_at
           ? new Date(post.updated_at).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0];
         const priority = post.priority || 0.7;
         const changefreq = post.change_frequency || "monthly";
-        
+
         sitemap += `
   <url>
     <loc>${SITE_URL}/blog/${post.slug}</loc>
@@ -136,12 +136,12 @@ Deno.serve(async (req) => {
     if (pages && pages.length > 0) {
       sitemap += `\n  <!-- Custom Pages -->`;
       for (const page of pages) {
-        const lastmod = page.updated_at 
+        const lastmod = page.updated_at
           ? new Date(page.updated_at).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0];
         const priority = page.priority || 0.6;
         const changefreq = page.change_frequency || "monthly";
-        
+
         sitemap += `
   <url>
     <loc>${SITE_URL}/${page.slug}</loc>
@@ -154,7 +154,9 @@ Deno.serve(async (req) => {
 
     sitemap += `\n</urlset>`;
 
-    console.log(`Sitemap generated with ${(products?.length || 0) + (blogPosts?.length || 0) + (pages?.length || 0) + 6} URLs`);
+    console.log(
+      `Sitemap generated with ${(products?.length || 0) + (blogPosts?.length || 0) + (pages?.length || 0) + 6} URLs`,
+    );
 
     return new Response(sitemap, {
       headers: corsHeaders,
@@ -171,7 +173,7 @@ Deno.serve(async (req) => {
     <priority>1.0</priority>
   </url>
 </urlset>`,
-      { headers: corsHeaders, status: 200 }
+      { headers: corsHeaders, status: 200 },
     );
   }
 });
