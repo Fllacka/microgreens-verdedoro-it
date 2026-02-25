@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { sanitizeRichTextHtml } from "@/lib/sanitize";
 
 interface ContentBlock {
   id: string;
@@ -22,11 +23,6 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     return null;
   }
 
-  const sanitizeRichTextHtml = (html: string) => {
-    if (!html) return "";
-    const withoutLiteral = html.replace(/\\00a0/g, "");
-    return withoutLiteral.replace(/<p>\s*(?:&nbsp;|\u00a0)\s*<\/p>/g, "<p></p>");
-  };
 
   const renderBlockTitle = (block: ContentBlock, centered = false) => {
     if (!block.title || !block.titleLevel) return null;
