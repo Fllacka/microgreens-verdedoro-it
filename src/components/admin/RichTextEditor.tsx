@@ -9,24 +9,12 @@ import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, 
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
 import { ResizableImage } from "./ResizableImage";
+import { sanitizeRichTextHtml } from "@/lib/sanitize";
 
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
 }
-
-const sanitizeRichTextHtml = (html: string) => {
-  if (!html) return "";
-
-  // Remove the literal sequence "\00a0" if it ever gets pasted/saved as text.
-  const withoutLiteral = html.replace(/\\00a0/g, "");
-
-  // Normalize paragraphs that only contain a non‑breaking space to an empty paragraph.
-  return withoutLiteral.replace(
-    /<p>\s*(?:&nbsp;|\u00a0)\s*<\/p>/g,
-    "<p></p>"
-  );
-};
 
 export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const [isLinkActive, setIsLinkActive] = useState(false);
