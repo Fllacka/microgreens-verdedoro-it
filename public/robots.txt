@@ -1,5 +1,5 @@
 # Verde D'Oro Microgreens - robots.txt
-# https://verdedoro.it
+# https://microgreens.verdedoro.it
 
 # Allow all crawlers
 User-agent: *
