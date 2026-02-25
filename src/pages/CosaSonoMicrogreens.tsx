@@ -259,7 +259,7 @@ const CosaSonoMicrogreens = () => {
     }
   };
 
-  const baseUrl = "https://verdedoro.it";
+  const baseUrl = window.location.origin;
   const canonicalUrl = seoData.canonicalUrl 
     ? `${baseUrl}${seoData.canonicalUrl.startsWith('/') ? seoData.canonicalUrl : '/' + seoData.canonicalUrl}`
     : `${baseUrl}/cosa-sono-i-microgreens`;

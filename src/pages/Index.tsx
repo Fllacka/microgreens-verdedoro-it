@@ -346,7 +346,7 @@ const Index = ({
         <title>{seoContent.meta_title}</title>
         <meta name="description" content={seoContent.meta_description} />
         <meta name="robots" content={seoContent.robots} />
-        {seoContent.canonical_url && <link rel="canonical" href={seoContent.canonical_url} />}
+        <link rel="canonical" href={seoContent.canonical_url ? `${window.location.origin}${seoContent.canonical_url.startsWith('/') ? seoContent.canonical_url : '/' + seoContent.canonical_url}` : `${window.location.origin}/`} />
         <meta property="og:title" content={seoContent.og_title || seoContent.meta_title} />
         <meta property="og:description" content={seoContent.og_description || seoContent.meta_description} />
         <meta property="og:type" content="website" />
