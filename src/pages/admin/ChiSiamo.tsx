@@ -239,8 +239,8 @@ const ChiSiamoAdmin = () => {
     ogDescription: seoContent.og_description || "",
     canonicalUrl: seoContent.canonical_url || "",
     robots: seoContent.robots || "index, follow",
-    changeFrequency: "monthly",
-    priority: "0.7",
+    changeFrequency: seoContent.change_frequency || "monthly",
+    priority: seoContent.priority || "0.7",
     structuredData: seoContent.structured_data || "",
   };
 
@@ -252,6 +252,8 @@ const ChiSiamoAdmin = () => {
       ogDescription: "og_description",
       canonicalUrl: "canonical_url",
       structuredData: "structured_data",
+      changeFrequency: "change_frequency",
+      priority: "priority",
     };
     updateSectionContent("seo", fieldMap[field] || field, value);
   };

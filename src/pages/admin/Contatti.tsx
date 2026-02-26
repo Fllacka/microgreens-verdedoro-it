@@ -707,8 +707,8 @@ const AdminContatti = () => {
                 ogDescription: seoSection?.content?.og_description || "",
                 canonicalUrl: seoSection?.content?.canonical_url || "",
                 robots: seoSection?.content?.robots || "index, follow",
-                changeFrequency: "monthly",
-                priority: "0.5",
+                changeFrequency: seoSection?.content?.change_frequency || "monthly",
+                priority: seoSection?.content?.priority || "0.5",
                 structuredData: seoSection?.content?.structured_data ? JSON.stringify(seoSection.content.structured_data) : "",
               }}
               onChange={(field, value) => {
@@ -719,6 +719,8 @@ const AdminContatti = () => {
                   ogDescription: "og_description",
                   canonicalUrl: "canonical_url",
                   structuredData: "structured_data",
+                  changeFrequency: "change_frequency",
+                  priority: "priority",
                 };
                 updateSectionContent("seo", fieldMap[field] || field, value);
               }}

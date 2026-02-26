@@ -619,6 +619,7 @@ const AdminMicrogreensCustom = () => {
                     ogDescription: 'og_description',
                     canonicalUrl: 'canonical_url',
                     changeFrequency: 'change_frequency',
+                    priority: 'priority',
                     structuredData: 'structured_data'
                   };
                   updateSectionContent('seo', fieldMap[field] || field, value);
