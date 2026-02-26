@@ -216,8 +216,8 @@ const AdminMicrogreens = () => {
     ogDescription: seoSection?.content?.og_description || "",
     canonicalUrl: seoSection?.content?.canonical_url || "",
     robots: seoSection?.content?.robots || "index, follow",
-    changeFrequency: "weekly",
-    priority: "0.8",
+    changeFrequency: seoSection?.content?.change_frequency || "weekly",
+    priority: seoSection?.content?.priority || "0.8",
     structuredData: seoSection?.content?.structured_data ? JSON.stringify(seoSection.content.structured_data, null, 2) : "",
   };
 
@@ -236,6 +236,8 @@ const AdminMicrogreens = () => {
         ogTitle: "og_title",
         ogDescription: "og_description",
         canonicalUrl: "canonical_url",
+        changeFrequency: "change_frequency",
+        priority: "priority",
       };
       updateSectionContent("seo", fieldMap[field] || field, value);
     }

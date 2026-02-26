@@ -289,8 +289,8 @@ const Homepage = () => {
     ogDescription: seoContent.og_description || "",
     canonicalUrl: seoContent.canonical_url || "",
     robots: seoContent.robots || "index, follow",
-    changeFrequency: "daily",
-    priority: "1.0",
+    changeFrequency: seoContent.change_frequency || "daily",
+    priority: seoContent.priority || "1.0",
     structuredData: seoContent.structured_data || "",
   };
 
@@ -302,6 +302,8 @@ const Homepage = () => {
       ogDescription: "og_description",
       canonicalUrl: "canonical_url",
       structuredData: "structured_data",
+      changeFrequency: "change_frequency",
+      priority: "priority",
     };
     updateSectionContent("seo", fieldMap[field] || field, value);
   };
