@@ -33,4 +33,4 @@ User-agent: LinkedInBot
 Allow: /
 
 # Sitemap location
-Sitemap: https://microgreens.verdedoro.it/sitemap
+Sitemap: https://xkwmkgdsfydhbjpytrbb.supabase.co/functions/v1/sitemap
