@@ -515,7 +515,7 @@ const ProductDetail = () => {
                     image={relatedProduct.media?.file_path || "/placeholder.svg"}
                     rating={relatedProduct.rating}
                     popular={relatedProduct.popular}
-                    onCardClick={() => navigate(`/microgreens/${relatedProduct.slug}`)}
+                    slug={relatedProduct.slug}
                   />
                 ))}
               </div>

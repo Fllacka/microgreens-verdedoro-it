@@ -491,7 +491,7 @@ const Index = ({
               benefits={product.benefits || []} 
               uses={product.uses || []} 
               image={productImage} 
-              onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+              slug={product.slug} 
               priority={index < 3}
             />;
           })}

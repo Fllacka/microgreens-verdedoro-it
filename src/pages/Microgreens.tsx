@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import { useCart } from "@/contexts/CartContext";
@@ -48,7 +47,7 @@ interface CategoryItem {
 }
 
 const Microgreens = () => {
-  const navigate = useNavigate();
+  
   const { addItem } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [sections, setSections] = useState<Record<string, Section>>({});
@@ -259,7 +258,7 @@ const Microgreens = () => {
                   image={product.media?.file_path || chefImage}
                   rating={product.rating}
                   popular={product.popular}
-                  onCardClick={() => navigate(`/microgreens/${product.slug}`)}
+                  slug={product.slug}
                   priority={index < 3}
                 />
               ))}

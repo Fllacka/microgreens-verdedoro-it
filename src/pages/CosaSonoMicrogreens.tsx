@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import OptimizedImage from "@/components/ui/optimized-image";
@@ -68,7 +68,7 @@ interface FAQContent {
 const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
 
 const CosaSonoMicrogreens = () => {
-  const navigate = useNavigate();
+  
   const [loading, setLoading] = useState(true);
   const [heroData, setHeroData] = useState<HeroContent>({
     title: "Cosa sono i Microgreens?",
@@ -651,7 +651,7 @@ const CosaSonoMicrogreens = () => {
                     benefits={product.benefits || []} 
                     uses={product.uses || []} 
                     image={productImage} 
-                    onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+                    slug={product.slug} 
                     priority={index < 3}
                   />
                 );

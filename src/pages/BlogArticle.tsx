@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Layout from "@/components/Layout";
 import { ContentBlockRenderer } from "@/components/ContentBlockRenderer";
@@ -65,7 +65,7 @@ const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_
 
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
+  
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -494,7 +494,7 @@ const BlogArticle = () => {
                       benefits={product.benefits || []} 
                       uses={product.uses || []} 
                       image={productImage} 
-                      onCardClick={() => navigate(`/microgreens/${product.slug}`)} 
+                      slug={product.slug} 
                       priority={index < 3}
                     />
                   );
