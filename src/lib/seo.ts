@@ -3,7 +3,7 @@
  * Generates structured data (JSON-LD) for various page types
  */
 
-const SITE_URL = "https://verdedoro.it";
+const SITE_URL = "https://microgreens.verdedoro.it";
 const ORGANIZATION = {
   "@type": "Organization",
   "@id": `${SITE_URL}/#organization`,
@@ -99,7 +99,7 @@ export function generateLocalBusinessSchema() {
  * Strip HTML tags from text (for structured data)
  */
 export function stripHtmlTags(html: string): string {
-  return html.replace(/<[^>]*>/g, '').trim();
+  return html.replace(/<[^>]*>/g, "").trim();
 }
 
 /**
@@ -117,11 +117,9 @@ export function generateProductSchema(product: {
 }) {
   // Format product name with "Microgreens di" prefix
   const productName = `Microgreens di ${product.name}`;
-  
+
   // Format category with hierarchy
-  const productCategory = product.category 
-    ? `Microgreens / ${product.category}`
-    : "Microgreens";
+  const productCategory = product.category ? `Microgreens / ${product.category}` : "Microgreens";
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -141,9 +139,9 @@ export function generateProductSchema(product: {
   };
 
   // Generate AggregateOffer when price tiers exist
-  const validTiers = (product.priceTiers || []).filter(t => t.price > 0);
+  const validTiers = (product.priceTiers || []).filter((t) => t.price > 0);
   if (validTiers.length > 0) {
-    const prices = validTiers.map(t => t.price);
+    const prices = validTiers.map((t) => t.price);
     schema.offers = {
       "@type": "AggregateOffer",
       priceCurrency: "EUR",
@@ -168,9 +166,7 @@ export function generateProductSchema(product: {
 
   // Ensure image is an ImageObject with absolute URL
   if (product.image) {
-    const imageUrl = product.image.startsWith('http') 
-      ? product.image 
-      : `${SITE_URL}${product.image}`;
+    const imageUrl = product.image.startsWith("http") ? product.image : `${SITE_URL}${product.image}`;
     schema.image = {
       "@type": "ImageObject",
       url: imageUrl,
@@ -193,9 +189,7 @@ export function generateProductSchema(product: {
 /**
  * Generate BreadcrumbList schema
  */
-export function generateBreadcrumbSchema(
-  items: Array<{ name: string; url: string }>
-) {
+export function generateBreadcrumbSchema(items: Array<{ name: string; url: string }>) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -267,9 +261,7 @@ export function generateArticleSchema(article: {
 /**
  * Generate FAQPage schema
  */
-export function generateFAQSchema(
-  faqs: Array<{ question: string; answer: string }>
-) {
+export function generateFAQSchema(faqs: Array<{ question: string; answer: string }>) {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
