@@ -17,7 +17,11 @@ import {
   LayoutTemplate,
   X,
 } from "lucide-react";
-
+export interface TableCell {
+  content: string;
+  isBold?: boolean;
+  isHighlighted?: boolean;
+}
 export interface ContentBlock {
   id: string;
   type: "heading" | "text" | "image" | "text-image" | "table";
@@ -281,10 +285,10 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
             Editor Tabella Nutrizionale
           </Label>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" size="xs" onClick={addRow} className="h-7 text-[10px]">
+            <Button type="button" variant="outline" size="sm" onClick={addRow} className="h-7 text-[10px]">
               <Plus className="h-3 w-3 mr-1" /> Riga
             </Button>
-            <Button type="button" variant="outline" size="xs" onClick={addColumn} className="h-7 text-[10px]">
+            <Button type="button" variant="outline" size="sm" onClick={addColumn} className="h-7 text-[10px]">
               <Plus className="h-3 w-3 mr-1" /> Col
             </Button>
           </div>
@@ -300,7 +304,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                     <Button
                       type="button"
                       variant="ghost"
-                      size="xs"
+                      size="sm"
                       onClick={() => removeColumn(i)}
                       className="h-4 w-4 p-0 text-destructive"
                     >
@@ -317,7 +321,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                     <Button
                       type="button"
                       variant="ghost"
-                      size="xs"
+                      size="sm"
                       onClick={() => removeRow(rowIndex)}
                       className="h-4 w-4 p-0 text-destructive"
                     >
