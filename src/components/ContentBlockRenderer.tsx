@@ -136,6 +136,58 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
     );
   };
 
+  const renderTableBlock = (block: ContentBlock) => {
+    const data = block.tableData;
+    if (!data || !data.rows || data.rows.length === 0) return null;
+
+    return (
+      <div key={block.id} className="w-full max-w-6xl mx-auto px-4 py-8 overflow-hidden">
+        {renderBlockTitle(block, true)}
+        <div className="relative overflow-x-auto rounded-xl border border-border shadow-sm">
+          <table className="w-full border-collapse bg-[#FDFBF7] text-left">
+            <thead>
+              <tr className="bg-[#1A3C34] text-white">
+                {data.rows[0].map((cell, i) => (
+                  <th
+                    key={i}
+                    className={cn(
+                      "p-4 text-sm font-bold border-b border-white/10 whitespace-nowrap",
+                      i === 0 && "sticky left-0 z-10 bg-[#1A3C34]",
+                    )}
+                  >
+                    {cell.content}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.rows.slice(1).map((row, rowIndex) => (
+                <tr key={rowIndex} className="border-b border-border last:border-0 hover:bg-black/5 transition-colors">
+                  {row.map((cell, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className={cn(
+                        "p-4 text-sm transition-all",
+                        colIndex === 0 && "sticky left-0 z-10 bg-[#FDFBF7] font-medium border-r",
+                        cell.isBold && "font-bold",
+                        cell.isHighlighted && "ring-2 ring-inset ring-amber-400/40 bg-amber-50/50",
+                      )}
+                    >
+                      {cell.content}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="md:hidden text-center text-[10px] text-muted-foreground mt-2 italic">
+          ← Scorri lateralmente per vedere tutti i dati →
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4 md:space-y-6">
       {blocks.map((block) => {
@@ -189,55 +241,4 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
       })}
     </div>
   );
-  const renderTableBlock = (block: ContentBlock) => {
-    const data = block.tableData;
-    if (!data || !data.rows || data.rows.length === 0) return null;
-
-    return (
-      <div key={block.id} className="w-full max-w-6xl mx-auto px-4 py-8 overflow-hidden">
-        {renderBlockTitle(block, true)}
-        <div className="relative overflow-x-auto rounded-xl border border-border shadow-sm">
-          <table className="w-full border-collapse bg-[#FDFBF7] text-left">
-            <thead>
-              <tr className="bg-[#1A3C34] text-white">
-                {data.rows[0].map((cell, i) => (
-                  <th
-                    key={i}
-                    className={cn(
-                      "p-4 text-sm font-bold border-b border-white/10 whitespace-nowrap",
-                      i === 0 && "sticky left-0 z-10 bg-[#1A3C34]",
-                    )}
-                  >
-                    {cell.content}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.rows.slice(1).map((row, rowIndex) => (
-                <tr key={rowIndex} className="border-b border-border last:border-0 hover:bg-black/5 transition-colors">
-                  {row.map((cell, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={cn(
-                        "p-4 text-sm transition-all",
-                        colIndex === 0 && "sticky left-0 z-10 bg-[#FDFBF7] font-medium border-r",
-                        cell.isBold && "font-bold",
-                        cell.isHighlighted && "ring-2 ring-inset ring-amber-400/40 bg-amber-50/50",
-                      )}
-                    >
-                      {cell.content}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="md:hidden text-center text-[10px] text-muted-foreground mt-2 italic">
-          ← Scorri lateralmente per vedere tutti i dati →
-        </p>
-      </div>
-    );
-  };
 };
