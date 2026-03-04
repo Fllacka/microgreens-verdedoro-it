@@ -319,7 +319,7 @@ const BlogArticle = () => {
   // Generate structured data
   const articleSchema = generateArticleSchema({
     title: post.title,
-    description: post.excerpt || post.meta_description || "",
+    description: stripHtmlTags(post.excerpt) || post.meta_description || "",
     slug: post.slug,
     publishedAt: post.published_at,
     updatedAt: (post as any).updated_at || post.published_at,
@@ -353,10 +353,13 @@ const BlogArticle = () => {
     <Layout>
       <Helmet>
         <title>{post.meta_title || post.title}</title>
-        <meta name="description" content={post.meta_description || post.excerpt} />
+        <meta name="description" content={post.meta_description || stripHtmlTags(post.excerpt)} />
         <link rel="canonical" href={`${window.location.origin}${post.canonical_url || `/blog/${post.slug}`}`} />
         <meta property="og:title" content={post.og_title || post.meta_title || post.title} />
-        <meta property="og:description" content={post.og_description || post.meta_description || post.excerpt} />
+        <meta
+          property="og:description"
+          content={post.og_description || post.meta_description || stripHtmlTags(post.excerpt)}
+        />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={`${window.location.origin}/blog/${post.slug}`} />
         <meta property="og:locale" content="it_IT" />
@@ -365,7 +368,10 @@ const BlogArticle = () => {
         {coverImageUrl && <meta property="og:image" content={coverImageUrl} />}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.og_title || post.meta_title || post.title} />
-        <meta name="twitter:description" content={post.og_description || post.meta_description || post.excerpt} />
+        <meta
+          name="twitter:description"
+          content={post.og_description || post.meta_description || stripHtmlTags(post.excerpt)}
+        />
         {coverImageUrl && <meta name="twitter:image" content={coverImageUrl} />}
         <script type="application/ld+json">{JSON.stringify(allSchemas)}</script>
       </Helmet>
@@ -430,7 +436,7 @@ const BlogArticle = () => {
               {/* Excerpt */}
               {post.excerpt && (
                 <p className="font-body text-xl md:text-2xl text-white/90 mb-8 leading-relaxed max-w-3xl mx-auto">
-                  {post.excerpt}
+                  {stripHtmlTags(post.excerpt)}
                 </p>
               )}
             </div>
