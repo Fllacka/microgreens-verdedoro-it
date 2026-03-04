@@ -5,7 +5,22 @@ import Link from "@tiptap/extension-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Heading4, Unlink, Trash2, AlignLeft, AlignCenter, AlignRight, Replace, Pilcrow } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Heading4,
+  Unlink,
+  Trash2,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Replace,
+  Pilcrow,
+} from "lucide-react";
 import { LinkDialog } from "./LinkDialog";
 import { ImageDialog } from "./ImageDialog";
 import { ResizableImage } from "./ResizableImage";
@@ -19,15 +34,21 @@ interface RichTextEditorProps {
 export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   const [isLinkActive, setIsLinkActive] = useState(false);
   const [isImageSelected, setIsImageSelected] = useState(false);
+  const [activeLinkUrl, setActiveLinkUrl] = useState("");
   const [imageSize, setImageSize] = useState({ width: "", height: "" });
   const [imageAlign, setImageAlign] = useState<string | null>(null);
   const [imageAlt, setImageAlt] = useState("");
 
   const updateToolbarState = useCallback((editor: any) => {
     setIsLinkActive(editor.isActive("link"));
+    if (editor.isActive("link")) {
+      setActiveLinkUrl(editor.getAttributes("link").href || "");
+    } else {
+      setActiveLinkUrl("");
+    }
     const isImage = editor.isActive("image");
     setIsImageSelected(isImage);
-    
+
     if (isImage) {
       const attrs = editor.getAttributes("image");
       setImageSize({
@@ -72,7 +93,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       transformPastedHTML: (html) => sanitizeRichTextHtml(html),
       handleClick: (view, pos, event) => {
         const target = event.target as HTMLElement;
-        if (target.tagName === 'A' || target.closest('a')) {
+        if (target.tagName === "A" || target.closest("a")) {
           event.preventDefault();
           event.stopPropagation();
           return true;
@@ -82,7 +103,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
       handleDOMEvents: {
         click: (view, event) => {
           const target = event.target as HTMLElement;
-          if (target.tagName === 'A' || target.closest('a')) {
+          if (target.tagName === "A" || target.closest("a")) {
             event.preventDefault();
             return true;
           }
@@ -128,10 +149,14 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
 
   const updateImageSize = (dimension: "width" | "height", value: string) => {
     const numValue = value ? parseInt(value, 10) : null;
-    setImageSize(prev => ({ ...prev, [dimension]: value }));
-    
+    setImageSize((prev) => ({ ...prev, [dimension]: value }));
+
     if (editor.isActive("image")) {
-      editor.chain().focus().updateAttributes("image", { [dimension]: numValue }).run();
+      editor
+        .chain()
+        .focus()
+        .updateAttributes("image", { [dimension]: numValue })
+        .run();
     }
   };
 
@@ -218,31 +243,21 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
         </Button>
         <LinkDialog
           isActive={isLinkActive}
+          currentUrl={activeLinkUrl}
           onSetLink={handleSetLink}
           onRemoveLink={handleRemoveLink}
         >
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className={isLinkActive ? "bg-muted" : ""}
-          >
+          <Button type="button" variant="ghost" size="sm" className={isLinkActive ? "bg-muted" : ""}>
             <LinkIcon className="h-4 w-4" />
           </Button>
         </LinkDialog>
         {isLinkActive && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleRemoveLink}
-            title="Rimuovi link"
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={handleRemoveLink} title="Rimuovi link">
             <Unlink className="h-4 w-4" />
           </Button>
         )}
       </div>
-      
+
       {isImageSelected && (
         <div className="flex items-center gap-2 md:gap-3 p-2 border-b bg-blue-50 dark:bg-blue-950/30 overflow-x-auto">
           <div className="flex items-center gap-2 shrink-0">
@@ -255,17 +270,19 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
               placeholder="Testo alternativo"
             />
           </div>
-          
+
           <ImageDialog onSelectImage={replaceImage}>
             <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs">
               <Replace className="h-3 w-3 mr-1" />
               Sostituisci
             </Button>
           </ImageDialog>
-          
+
           <div className="h-6 w-px bg-border shrink-0 hidden md:block" />
-          
-          <span className="text-xs md:text-sm font-medium text-muted-foreground whitespace-nowrap shrink-0 hidden md:inline">Dimensioni:</span>
+
+          <span className="text-xs md:text-sm font-medium text-muted-foreground whitespace-nowrap shrink-0 hidden md:inline">
+            Dimensioni:
+          </span>
           <div className="flex items-center gap-1 shrink-0">
             <Button
               type="button"
@@ -325,10 +342,12 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
               placeholder="auto"
             />
           </div>
-          
+
           <div className="h-6 w-px bg-border shrink-0 hidden md:block" />
-          
-          <span className="text-xs md:text-sm font-medium text-muted-foreground whitespace-nowrap shrink-0 hidden md:inline">Allineamento:</span>
+
+          <span className="text-xs md:text-sm font-medium text-muted-foreground whitespace-nowrap shrink-0 hidden md:inline">
+            Allineamento:
+          </span>
           <div className="flex items-center gap-1 shrink-0">
             <Button
               type="button"
@@ -358,7 +377,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
               <AlignRight className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <Button
             type="button"
             variant="ghost"
@@ -370,9 +389,9 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           </Button>
         </div>
       )}
-      
-      <EditorContent 
-        editor={editor} 
+
+      <EditorContent
+        editor={editor}
         className="prose prose-lg max-w-none p-3 md:p-4 min-h-[200px] md:min-h-[300px] focus:outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-primary [&_a]:underline [&_a]:pointer-events-auto [&_a]:cursor-text [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_.ProseMirror-selectednode]:outline [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-primary [&_.ProseMirror-selectednode]:outline-offset-2 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2"
       />
     </div>
