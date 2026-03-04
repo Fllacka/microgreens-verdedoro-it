@@ -1,4 +1,4 @@
-import { useState } from "react";
+HTimport { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Image as ImageIcon, Repla
 
 export interface ContentBlock {
   id: string;
-  type: "heading" | "text" | "image" | "text-image";
+  type: "heading" | "text" | "image" | "text-image | "table";
   level?: "h1" | "h2" | "h3";
   content?: string;
   url?: string;
@@ -35,6 +35,15 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
       ...(type === "text" && { content: "" }),
       ...(type === "image" && { url: "", alt: "" }),
       ...(type === "text-image" && { content: "", url: "", alt: "", imagePosition: "right", imageAspectRatio: "4/3" }),
+      ...(type === "table" && { 
+        tableData: { 
+          rows: [
+            [{ content: "Varietà", isBold: true }, { content: "Valore", isBold: true }], 
+            [{ content: "" }, { content: "" }]
+          ],
+          hasHeaderRow: true 
+        } 
+      })
     };
     onChange([...blocks, newBlock]);
   };
@@ -200,6 +209,111 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
         </div>
       </div>
     );
+  };const renderTableEditor = (block: ContentBlock, isMobile: boolean = false) => {
+    const data = block.tableData || { rows: [[{ content: "" }]], hasHeaderRow: true };
+    const rows = data.rows;
+
+    const updateTable = (newRows: TableCell[][]) => {
+      updateBlock(block.id, { tableData: { ...data, rows: newRows } });
+    };
+
+    const addRow = () => {
+      const colCount = rows[0]?.length || 1;
+      const newRow = Array(colCount).fill(null).map(() => ({ content: "" }));
+      updateTable([...rows, newRow]);
+    };
+
+    const addColumn = () => {
+      const newRows = rows.map(row => [...row, { content: "" }]);
+      updateTable(newRows);
+    };
+
+    const removeRow = (rowIndex: number) => {
+      if (rows.length <= 1) return;
+      updateTable(rows.filter((_, i) => i !== rowIndex));
+    };
+
+    const removeColumn = (colIndex: number) => {
+      if (rows[0].length <= 1) return;
+      const newRows = rows.map(row => row.filter((_, i) => i !== colIndex));
+      updateTable(newRows);
+    };
+
+    const toggleCellFormat = (rowIndex: number, colIndex: number, field: 'isBold' | 'isHighlighted') => {
+      const newRows = [...rows];
+      newRows[rowIndex][colIndex] = { 
+        ...newRows[rowIndex][colIndex], 
+        [field]: !newRows[rowIndex][colIndex][field] 
+      };
+      updateTable(newRows);
+    };
+
+    return (
+      <div className="space-y-4 border rounded-lg p-2 md:p-4 bg-muted/10">
+        <div className="flex justify-between items-center">
+          <Label className="text-xs font-bold text-verde-primary uppercase tracking-wider">Editor Tabella Nutrizionale</Label>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" size="xs" onClick={addRow} className="h-7 text-[10px]">
+              <Plus className="h-3 w-3 mr-1" /> Riga
+            </Button>
+            <Button type="button" variant="outline" size="xs" onClick={addColumn} className="h-7 text-[10px]">
+              <Plus className="h-3 w-3 mr-1" /> Col
+            </Button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto border rounded-md bg-white">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-muted/20">
+                <th className="w-8 border-b"></th>
+                {rows[0].map((_, i) => (
+                  <th key={i} className="p-1 border-b border-r text-[10px]">
+                    <Button type="button" variant="ghost" size="xs" onClick={() => removeColumn(i)} className="h-4 w-4 p-0 text-destructive">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className={rowIndex === 0 && data.hasHeaderRow ? "bg-verde-light/5" : ""}>
+                  <td className="p-1 border-r text-center">
+                    <Button type="button" variant="ghost" size="xs" onClick={() => removeRow(rowIndex)} className="h-4 w-4 p-0 text-destructive">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </td>
+                  {row.map((cell, colIndex) => (
+                    <td key={colIndex} className={`p-1 border-r border-b min-w-[120px] relative group ${cell.isHighlighted ? "ring-2 ring-inset ring-amber-400/50" : ""}`}>
+                      <Input
+                        value={cell.content}
+                        className={`h-8 text-xs border-none focus-visible:ring-1 ${cell.isBold ? "font-bold" : ""}`}
+                        onChange={(e) => {
+                          const newRows = [...rows];
+                          newRows[rowIndex][colIndex].content = e.target.value;
+                          updateTable(newRows);
+                        }}
+                      />
+                      <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm rounded px-1">
+                        <button 
+                          onClick={() => toggleCellFormat(rowIndex, colIndex, 'isBold')}
+                          className={`text-[10px] font-bold px-1 ${cell.isBold ? 'text-verde-primary' : 'text-muted-foreground'}`}
+                        >B</button>
+                        <button 
+                          onClick={() => toggleCellFormat(rowIndex, colIndex, 'isHighlighted')}
+                          className={`text-[10px] px-1 ${cell.isHighlighted ? 'text-amber-600' : 'text-muted-foreground'}`}
+                        >✨</button>
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -221,6 +335,10 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
         <Button type="button" variant="outline" size="sm" onClick={() => addBlock("text-image")} className="flex-1 min-w-[100px] sm:flex-none bg-verde-light/10 border-verde-primary/30 hover:bg-verde-light/20">
           <LayoutTemplate className="h-4 w-4 mr-1" />
           <span className="text-xs">Testo + Img</span>
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("table")} className="flex-1 min-w-[70px] sm:flex-none">
+          <Plus className="h-4 w-4 mr-1" />
+          <span className="text-xs">Tabella</span>
         </Button>
       </div>
 
@@ -369,6 +487,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                   )}
 
                   {block.type === "text-image" && renderTextImageBlock(block, false)}
+                  {block.type === "table" && renderTableEditor(block, false)}
                 </div>
 
                 <Button
@@ -460,6 +579,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                 )}
 
                 {block.type === "text-image" && renderTextImageBlock(block, true)}
+                {block.type === "table" && renderTableEditor(block, true)}
               </div>
             </CardContent>
           </Card>
