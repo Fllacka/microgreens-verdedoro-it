@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import {
   combineSchemas,
   stripHtmlTags 
 } from "@/lib/seo";
+import { generateSlug } from "@/lib/slug-utils";
 
 interface CategoryItem {
   id: string;
@@ -49,6 +50,7 @@ const AdminProductEdit = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isNew = id === "new";
+  const slugManuallyEdited = useRef(false);
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -521,7 +523,13 @@ const AdminProductEdit = () => {
                       <Input
                         id="name"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => {
+                          const newName = e.target.value;
+                          setFormData({ ...formData, name: newName });
+                          if (isNew && !slugManuallyEdited.current) {
+                            setSeoData(prev => ({ ...prev, slug: generateSlug(newName) }));
+                          }
+                        }}
                         required
                       />
                     </div>
@@ -945,7 +953,10 @@ const AdminProductEdit = () => {
           <TabsContent value="seo" className="space-y-6">
             <SEOFields
               values={seoData}
-              onChange={(field, value) => setSeoData({ ...seoData, [field]: value })}
+              onChange={(field, value) => {
+                if (field === "slug") slugManuallyEdited.current = true;
+                setSeoData({ ...seoData, [field]: value });
+              }}
               baseUrl="verdedoro.it/microgreens"
               onGenerateStructuredData={generateStructuredData}
               generateButtonLabel="Genera Dati Strutturati"

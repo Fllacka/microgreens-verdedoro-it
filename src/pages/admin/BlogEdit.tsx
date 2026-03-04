@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { generateSlug } from "@/lib/slug-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBlockEditor";
@@ -47,6 +47,7 @@ const AdminBlogEdit = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isNew = id === "new";
+  const slugManuallyEdited = useRef(false);
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -204,8 +205,30 @@ const AdminBlogEdit = () => {
     }
   };
 
+  // Validation helper
+  const validateRequiredFields = (): boolean => {
+    if (!formData.title.trim()) {
+      toast({
+        title: "Campi obbligatori mancanti",
+        description: "Inserisci un titolo prima di salvare.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!seoData.slug.trim()) {
+      toast({
+        title: "Campi obbligatori mancanti",
+        description: "Inserisci uno slug (tab SEO) prima di salvare.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
   // Save as draft only - does not publish
   const saveDraft = async () => {
+    if (!validateRequiredFields()) return;
     setSaving(true);
 
     try {
@@ -274,6 +297,7 @@ const AdminBlogEdit = () => {
 
   // Publish - copies draft to published fields
   const publishPost = async (publish: boolean, scheduledDate?: string) => {
+    if (!validateRequiredFields()) return;
     setSaving(true);
 
     try {
@@ -452,18 +476,23 @@ const AdminBlogEdit = () => {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) => {
+                          const newTitle = e.target.value;
+                          setFormData({ ...formData, title: newTitle });
+                          // Auto-generate slug from title for new posts (if slug not manually edited)
+                          if (isNew && !slugManuallyEdited.current) {
+                            setSeoData(prev => ({ ...prev, slug: generateSlug(newTitle) }));
+                          }
+                        }}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="excerpt">Estratto</Label>
-                      <Textarea
-                        id="excerpt"
-                        value={formData.excerpt}
-                        onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                        rows={3}
+                      <RichTextEditor
+                        content={formData.excerpt}
+                        onChange={(value) => setFormData({ ...formData, excerpt: value })}
                       />
                     </div>
 
@@ -654,7 +683,10 @@ const AdminBlogEdit = () => {
           <TabsContent value="seo" className="space-y-6">
             <SEOFields
               values={seoData}
-              onChange={(field, value) => setSeoData({ ...seoData, [field]: value })}
+              onChange={(field, value) => {
+                if (field === "slug") slugManuallyEdited.current = true;
+                setSeoData({ ...seoData, [field]: value });
+              }}
             />
           </TabsContent>
         </Tabs>
