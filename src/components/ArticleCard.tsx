@@ -34,18 +34,15 @@ const ArticleCard = ({
 }: ArticleCardProps) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("it-IT", { 
-      year: "numeric", 
-      month: "short", 
-      day: "numeric" 
+    return date.toLocaleDateString("it-IT", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const cardContent = (
-    <Card className={cn(
-      "overflow-hidden hover-lift border-border/50 bg-card flex flex-col h-full",
-      className
-    )}>
+    <Card className={cn("overflow-hidden hover-lift border-border/50 bg-card flex flex-col h-full", className)}>
       {/* Image - 16:9 aspect ratio */}
       <div className="relative aspect-video overflow-hidden bg-muted/30">
         {imageUrl ? (
@@ -78,27 +75,21 @@ const ArticleCard = ({
         </div>
 
         {/* Title */}
-        <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2">
-          {title}
-        </h3>
+        <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2">{title}</h3>
 
         {/* Excerpt */}
         {excerpt && (
           <p className="font-body text-muted-foreground text-sm mb-4 line-clamp-3 flex-1">
-            {excerpt}
+            {excerpt.replace(/<[^>]*>/g, "")}
           </p>
         )}
 
         {/* Footer: Date + Button */}
         <div className="flex items-center justify-between mt-auto">
-          <span className="text-xs text-muted-foreground">
-            {formatDate(publishedAt)}
-          </span>
+          <span className="text-xs text-muted-foreground">{formatDate(publishedAt)}</span>
           {showButton && (
             <Button variant="outline" size="sm" asChild>
-              <Link to={`/blog/${slug}`}>
-                {buttonText}
-              </Link>
+              <Link to={`/blog/${slug}`}>{buttonText}</Link>
             </Button>
           )}
         </div>
