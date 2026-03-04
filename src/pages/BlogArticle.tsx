@@ -10,18 +10,32 @@ import { ArrowLeft, Calendar, Clock, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { generateArticleSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
+import {
+  generateArticleSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  combineSchemas,
+  stripHtmlTags,
+} from "@/lib/seo";
 import ProductCard from "@/components/ProductCard";
 
 import ArticleCard from "@/components/ArticleCard";
 
 interface ContentBlock {
   id: string;
-  type: "heading" | "text" | "image";
+  type: "heading" | "text" | "image" | "table";
   level?: "h1" | "h2" | "h3";
   content?: string;
   url?: string;
   alt?: string;
+  tableData?: {
+    rows: {
+      content: string;
+      isBold?: boolean;
+      isHighlighted?: boolean;
+    }[][];
+    hasHeaderRow?: boolean;
+  };
 }
 
 interface FAQItem {
@@ -61,27 +75,31 @@ interface Product {
 }
 
 // Reusable prose styling constant
-const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
+const proseClasses =
+  "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
 
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
-  
+
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [relatedMediaMap, setRelatedMediaMap] = useState<Record<string, string>>({});
-  
+
   // Featured products state
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [featuredProductsContent, setFeaturedProductsContent] = useState({
     heading: "I microgreens più ricercati",
-    subtitle: "Scopri i microgreens più richiesti. Trova la varietà che fa per te adatta al tuo utilizzo in cucina per dare un tocco speciale ai tuoi piatti.",
+    subtitle:
+      "Scopri i microgreens più richiesti. Trova la varietà che fa per te adatta al tuo utilizzo in cucina per dare un tocco speciale ai tuoi piatti.",
     button_text: "Visualizza tutti i prodotti",
     button_link: "/microgreens",
     product_slugs: [] as string[],
   });
-  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>>({});
+  const [productMediaMap, setProductMediaMap] = useState<
+    Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>
+  >({});
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -89,7 +107,7 @@ const BlogArticle = () => {
 
       try {
         setLoading(true);
-        
+
         // Fetch the blog post by slug
         const { data: postData, error: postError } = await supabase
           .from("blog_posts")
@@ -131,37 +149,35 @@ const BlogArticle = () => {
           .limit(3);
 
         if (relatedError) throw relatedError;
-        const related = relatedData?.map(post => ({
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt || "",
-          category: post.category || "",
-          content_blocks: (post.content_blocks as unknown as ContentBlock[]) || [],
-          published_at: post.published_at || "",
-          featured_image_id: post.featured_image_id,
-          meta_title: post.meta_title,
-          meta_description: post.meta_description,
-          og_title: post.og_title,
-          og_description: post.og_description,
-          canonical_url: post.canonical_url,
-          faq_title: (post as any).faq_title,
-          faq_items: ((post as any).faq_items as FAQItem[]) || [],
-        })) as BlogPost[] || [];
+        const related =
+          (relatedData?.map((post) => ({
+            id: post.id,
+            title: post.title,
+            slug: post.slug,
+            excerpt: post.excerpt || "",
+            category: post.category || "",
+            content_blocks: (post.content_blocks as unknown as ContentBlock[]) || [],
+            published_at: post.published_at || "",
+            featured_image_id: post.featured_image_id,
+            meta_title: post.meta_title,
+            meta_description: post.meta_description,
+            og_title: post.og_title,
+            og_description: post.og_description,
+            canonical_url: post.canonical_url,
+            faq_title: (post as any).faq_title,
+            faq_items: ((post as any).faq_items as FAQItem[]) || [],
+          })) as BlogPost[]) || [];
         setRelatedPosts(related);
 
         // Fetch cover images for related posts
-        const relatedImageIds = related
-          .map(p => p.featured_image_id)
-          .filter((id): id is string => !!id);
+        const relatedImageIds = related.map((p) => p.featured_image_id).filter((id): id is string => !!id);
         if (relatedImageIds.length > 0) {
-          const { data: relatedMedia } = await supabase
-            .from("media")
-            .select("id, file_path")
-            .in("id", relatedImageIds);
+          const { data: relatedMedia } = await supabase.from("media").select("id, file_path").in("id", relatedImageIds);
           if (relatedMedia) {
             const map: Record<string, string> = {};
-            relatedMedia.forEach(m => { map[m.id] = m.file_path; });
+            relatedMedia.forEach((m) => {
+              map[m.id] = m.file_path;
+            });
             setRelatedMediaMap(map);
           }
         }
@@ -207,28 +223,26 @@ const BlogArticle = () => {
               .eq("published", true);
 
             if (productsError) throw productsError;
-            
+
             // Sort products by the order in product_slugs
             const sortedProducts = content.product_slugs
-              .map((slug: string) => products?.find(p => p.slug === slug))
+              .map((slug: string) => products?.find((p) => p.slug === slug))
               .filter(Boolean) as Product[];
-            
+
             setFeaturedProducts(sortedProducts);
 
             // Fetch media for products
-            const imageIds = sortedProducts
-              .map(p => p.image_id)
-              .filter((id): id is string => !!id);
-            
+            const imageIds = sortedProducts.map((p) => p.image_id).filter((id): id is string => !!id);
+
             if (imageIds.length > 0) {
               const { data: mediaData } = await supabase
                 .from("media")
                 .select("id, file_path, blurhash, width, height, optimized_versions")
                 .in("id", imageIds);
-              
+
               if (mediaData) {
                 const mediaMap: Record<string, any> = {};
-                mediaData.forEach(m => {
+                mediaData.forEach((m) => {
                   mediaMap[m.id] = {
                     file_path: m.file_path,
                     blurhash: m.blurhash,
@@ -293,13 +307,14 @@ const BlogArticle = () => {
   const faqItems = post.faq_items || [];
 
   // Calculate word count for structured data
-  const wordCount = post.content_blocks?.reduce((total, block) => {
-    if (block.content) {
-      const text = block.content.replace(/<[^>]*>/g, "");
-      return total + text.split(/\s+/).length;
-    }
-    return total;
-  }, 0) || 0;
+  const wordCount =
+    post.content_blocks?.reduce((total, block) => {
+      if (block.content) {
+        const text = block.content.replace(/<[^>]*>/g, "");
+        return total + text.split(/\s+/).length;
+      }
+      return total;
+    }, 0) || 0;
 
   // Generate structured data
   const articleSchema = generateArticleSchema({
@@ -320,14 +335,17 @@ const BlogArticle = () => {
   ]);
 
   // Generate FAQ schema if FAQs exist
-  const faqSchema = faqItems.length > 0 
-    ? generateFAQSchema(faqItems.map(faq => ({
-        question: faq.question,
-        answer: stripHtmlTags(faq.answer),
-      })))
-    : null;
+  const faqSchema =
+    faqItems.length > 0
+      ? generateFAQSchema(
+          faqItems.map((faq) => ({
+            question: faq.question,
+            answer: stripHtmlTags(faq.answer),
+          })),
+        )
+      : null;
 
-  const allSchemas = faqSchema 
+  const allSchemas = faqSchema
     ? combineSchemas(articleSchema, breadcrumbSchema, faqSchema)
     : combineSchemas(articleSchema, breadcrumbSchema);
 
@@ -349,28 +367,35 @@ const BlogArticle = () => {
         <meta name="twitter:title" content={post.og_title || post.meta_title || post.title} />
         <meta name="twitter:description" content={post.og_description || post.meta_description || post.excerpt} />
         {coverImageUrl && <meta name="twitter:image" content={coverImageUrl} />}
-        <script type="application/ld+json">
-          {JSON.stringify(allSchemas)}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(allSchemas)}</script>
       </Helmet>
 
       <article className="min-h-screen">
         {/* Hero Section */}
-        <section 
+        <section
           className="relative min-h-[60vh] flex items-center justify-center"
-          style={coverImageUrl ? { 
-            backgroundImage: `url(${coverImageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          } : {}}
+          style={
+            coverImageUrl
+              ? {
+                  backgroundImage: `url(${coverImageUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : {}
+          }
         >
-          <div className={`absolute inset-0 ${coverImageUrl ? 'bg-black/60' : 'bg-gradient-hero'}`}></div>
-          
+          <div className={`absolute inset-0 ${coverImageUrl ? "bg-black/60" : "bg-gradient-hero"}`}></div>
+
           <div className="relative z-10 container-width py-16">
             <div className="max-w-4xl mx-auto text-center text-white">
               {/* Breadcrumb */}
               <div className="mb-8">
-                <Button variant="outline" size="sm" asChild className="mb-4 bg-white/10 border-white/20 text-white hover:bg-white/20">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="mb-4 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
                   <Link to="/blog" className="inline-flex items-center">
                     <ArrowLeft className="mr-2 w-4 h-4" />
                     Torna al Blog
@@ -408,7 +433,6 @@ const BlogArticle = () => {
                   {post.excerpt}
                 </p>
               )}
-
             </div>
           </div>
         </section>
@@ -418,7 +442,6 @@ const BlogArticle = () => {
           <div className="container-width">
             <div className="max-w-3xl mx-auto">
               <ContentBlockRenderer blocks={post.content_blocks} />
-
             </div>
           </div>
         </section>
@@ -436,7 +459,7 @@ const BlogArticle = () => {
                     {post.faq_title || "Domande Frequenti"}
                   </h2>
                 </div>
-                
+
                 <Accordion type="single" collapsible className="space-y-4">
                   {faqItems.map((faq) => (
                     <AccordionItem
@@ -449,10 +472,7 @@ const BlogArticle = () => {
                       </AccordionTrigger>
                       <AccordionContent className="pb-6">
                         <div className="border-t border-verde-primary/10 pt-4">
-                          <div 
-                            className={proseClasses}
-                            dangerouslySetInnerHTML={{ __html: faq.answer }}
-                          />
+                          <div className={proseClasses} dangerouslySetInnerHTML={{ __html: faq.answer }} />
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -483,18 +503,18 @@ const BlogArticle = () => {
                   const productImage = mediaInfo?.file_path || "/placeholder.svg";
                   const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
                   const gridDesc = product.grid_description;
-                  
+
                   return (
-                    <ProductCard 
-                      key={product.id} 
-                      name={product.name} 
-                      category={product.category || ""} 
-                      description={product.description || ""} 
-                      gridDescription={gridDesc || undefined} 
-                      benefits={product.benefits || []} 
-                      uses={product.uses || []} 
-                      image={productImage} 
-                      slug={product.slug} 
+                    <ProductCard
+                      key={product.id}
+                      name={product.name}
+                      category={product.category || ""}
+                      description={product.description || ""}
+                      gridDescription={gridDesc || undefined}
+                      benefits={product.benefits || []}
+                      uses={product.uses || []}
+                      image={productImage}
+                      slug={product.slug}
                       priority={index < 3}
                     />
                   );
@@ -527,7 +547,11 @@ const BlogArticle = () => {
                       excerpt={relatedPost.excerpt}
                       category={relatedPost.category}
                       publishedAt={relatedPost.published_at}
-                      imageUrl={relatedPost.featured_image_id && relatedMediaMap[relatedPost.featured_image_id] ? relatedMediaMap[relatedPost.featured_image_id] : undefined}
+                      imageUrl={
+                        relatedPost.featured_image_id && relatedMediaMap[relatedPost.featured_image_id]
+                          ? relatedMediaMap[relatedPost.featured_image_id]
+                          : undefined
+                      }
                       buttonText="Leggi articolo"
                     />
                   ))}
