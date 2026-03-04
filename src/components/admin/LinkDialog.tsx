@@ -4,17 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link as LinkIcon, ExternalLink, FileText, X, Search, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface LinkDialogProps {
   isActive: boolean;
+  currentUrl?: string;
   onSetLink: (url: string, openInNewTab: boolean) => void;
   onRemoveLink: () => void;
   children: React.ReactNode;
@@ -35,7 +32,7 @@ const STATIC_PAGES: InternalPage[] = [
   { label: "Contatti", path: "/contatti", type: "static" },
 ];
 
-export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: LinkDialogProps) => {
+export const LinkDialog = ({ isActive, currentUrl, onSetLink, onRemoveLink, children }: LinkDialogProps) => {
   const [open, setOpen] = useState(false);
   const [linkType, setLinkType] = useState<"internal" | "external">("external");
   const [url, setUrl] = useState("");
@@ -50,6 +47,20 @@ export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: Link
       fetchInternalPages();
     }
   }, [open, linkType]);
+  useEffect(() => {
+    if (open && currentUrl) {
+      // If the link starts with http, it's external. Otherwise, it's internal.
+      if (currentUrl.startsWith("http")) {
+        setLinkType("external");
+        setUrl(currentUrl);
+      } else {
+        setLinkType("internal");
+        setInternalPath(currentUrl);
+      }
+    } else if (open && !currentUrl) {
+      resetForm();
+    }
+  }, [open, currentUrl]);
 
   const fetchInternalPages = async () => {
     setLoading(true);
@@ -100,9 +111,10 @@ export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: Link
     }
   };
 
-  const filteredPages = internalPages.filter((page) =>
-    page.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    page.path.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPages = internalPages.filter(
+    (page) =>
+      page.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      page.path.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const groupedPages = {
@@ -136,29 +148,37 @@ export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: Link
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case "static": return "Pagine Statiche";
-      case "page": return "Pagine CMS";
-      case "product": return "Prodotti";
-      case "blog": return "Articoli Blog";
-      default: return type;
+      case "static":
+        return "Pagine Statiche";
+      case "page":
+        return "Pagine CMS";
+      case "product":
+        return "Prodotti";
+      case "blog":
+        return "Articoli Blog";
+      default:
+        return type;
     }
   };
 
   const getTypeBadgeClass = (type: string) => {
     switch (type) {
-      case "static": return "bg-muted text-muted-foreground";
-      case "page": return "bg-blue-100 text-blue-700";
-      case "product": return "bg-green-100 text-green-700";
-      case "blog": return "bg-purple-100 text-purple-700";
-      default: return "bg-muted text-muted-foreground";
+      case "static":
+        return "bg-muted text-muted-foreground";
+      case "page":
+        return "bg-blue-100 text-blue-700";
+      case "product":
+        return "bg-green-100 text-green-700";
+      case "blog":
+        return "bg-purple-100 text-purple-700";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {children}
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-96" align="start">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -207,43 +227,44 @@ export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: Link
               ) : (
                 <ScrollArea className="h-48">
                   <div className="space-y-3">
-                    {Object.entries(groupedPages).map(([type, pages]) => 
-                      pages.length > 0 && (
-                        <div key={type}>
-                          <p className="text-xs font-medium text-muted-foreground mb-1 px-1">
-                            {getTypeLabel(type)}
-                          </p>
-                          <div className="space-y-0.5">
-                            {pages.map((page) => (
-                              <Button
-                                key={page.path}
-                                type="button"
-                                variant={internalPath === page.path ? "secondary" : "ghost"}
-                                size="sm"
-                                className="w-full justify-start text-xs h-8 px-2"
-                                onClick={() => setInternalPath(page.path)}
-                              >
-                                <span className="truncate flex-1 text-left">{page.label}</span>
-                                <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${getTypeBadgeClass(page.type)}`}>
-                                  {page.path}
-                                </span>
-                              </Button>
-                            ))}
+                    {Object.entries(groupedPages).map(
+                      ([type, pages]) =>
+                        pages.length > 0 && (
+                          <div key={type}>
+                            <p className="text-xs font-medium text-muted-foreground mb-1 px-1">{getTypeLabel(type)}</p>
+                            <div className="space-y-0.5">
+                              {pages.map((page) => (
+                                <Button
+                                  key={page.path}
+                                  type="button"
+                                  variant={internalPath === page.path ? "secondary" : "ghost"}
+                                  size="sm"
+                                  className="w-full justify-start text-xs h-8 px-2"
+                                  onClick={() => setInternalPath(page.path)}
+                                >
+                                  <span className="truncate flex-1 text-left">{page.label}</span>
+                                  <span
+                                    className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${getTypeBadgeClass(page.type)}`}
+                                  >
+                                    {page.path}
+                                  </span>
+                                </Button>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      )
+                        ),
                     )}
                     {filteredPages.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-4">
-                        Nessun risultato trovato
-                      </p>
+                      <p className="text-sm text-muted-foreground text-center py-4">Nessun risultato trovato</p>
                     )}
                   </div>
                 </ScrollArea>
               )}
 
               <div className="space-y-2 pt-2 border-t">
-                <Label htmlFor="custom-path" className="text-xs">Percorso personalizzato</Label>
+                <Label htmlFor="custom-path" className="text-xs">
+                  Percorso personalizzato
+                </Label>
                 <Input
                   id="custom-path"
                   placeholder="/percorso-pagina"
@@ -256,7 +277,9 @@ export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: Link
 
             <TabsContent value="external" className="space-y-3 mt-3">
               <div className="space-y-2">
-                <Label htmlFor="external-url" className="text-xs">URL</Label>
+                <Label htmlFor="external-url" className="text-xs">
+                  URL
+                </Label>
                 <Input
                   id="external-url"
                   placeholder="https://esempio.com"
@@ -266,12 +289,10 @@ export const LinkDialog = ({ isActive, onSetLink, onRemoveLink, children }: Link
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="new-tab" className="text-xs">Apri in nuova scheda</Label>
-                <Switch
-                  id="new-tab"
-                  checked={openInNewTab}
-                  onCheckedChange={setOpenInNewTab}
-                />
+                <Label htmlFor="new-tab" className="text-xs">
+                  Apri in nuova scheda
+                </Label>
+                <Switch id="new-tab" checked={openInNewTab} onCheckedChange={setOpenInNewTab} />
               </div>
             </TabsContent>
           </Tabs>
