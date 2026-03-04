@@ -1,4 +1,4 @@
-HTimport { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,21 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageDialog } from "./ImageDialog";
-import { Plus, Trash2, GripVertical, MoveUp, MoveDown, Image as ImageIcon, Replace, LayoutTemplate, X } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  MoveUp,
+  MoveDown,
+  Image as ImageIcon,
+  Replace,
+  LayoutTemplate,
+  X,
+} from "lucide-react";
 
 export interface ContentBlock {
   id: string;
-  type: "heading" | "text" | "image" | "text-image | "table";
+  type: "heading" | "text" | "image" | "text-image" | "table";
   level?: "h1" | "h2" | "h3";
   content?: string;
   url?: string;
@@ -19,6 +29,10 @@ export interface ContentBlock {
   imageAspectRatio?: "1/1" | "4/3" | "16/9" | "3/4";
   title?: string;
   titleLevel?: "h2" | "h3";
+  tableData?: {
+    rows: TableCell[][];
+    hasHeaderRow?: boolean;
+  };
 }
 
 interface ContentBlockEditorProps {
@@ -35,15 +49,18 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
       ...(type === "text" && { content: "" }),
       ...(type === "image" && { url: "", alt: "" }),
       ...(type === "text-image" && { content: "", url: "", alt: "", imagePosition: "right", imageAspectRatio: "4/3" }),
-      ...(type === "table" && { 
-        tableData: { 
+      ...(type === "table" && {
+        tableData: {
           rows: [
-            [{ content: "Varietà", isBold: true }, { content: "Valore", isBold: true }], 
-            [{ content: "" }, { content: "" }]
+            [
+              { content: "Varietà", isBold: true },
+              { content: "Valore", isBold: true },
+            ],
+            [{ content: "" }, { content: "" }],
           ],
-          hasHeaderRow: true 
-        } 
-      })
+          hasHeaderRow: true,
+        },
+      }),
     };
     onChange([...blocks, newBlock]);
   };
@@ -59,10 +76,10 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
   const moveBlock = (id: string, direction: "up" | "down") => {
     const index = blocks.findIndex((b) => b.id === id);
     if (index === -1) return;
-    
+
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= blocks.length) return;
-    
+
     const newBlocks = [...blocks];
     [newBlocks[index], newBlocks[newIndex]] = [newBlocks[newIndex], newBlocks[index]];
     onChange(newBlocks);
@@ -74,27 +91,32 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
 
   const getBlockTypeLabel = (type: ContentBlock["type"]) => {
     switch (type) {
-      case "heading": return "Titolo";
-      case "text": return "Testo";
-      case "image": return "Immagine";
-      case "text-image": return "Testo + Immagine";
-      default: return type;
+      case "heading":
+        return "Titolo";
+      case "text":
+        return "Testo";
+      case "image":
+        return "Immagine";
+      case "text-image":
+        return "Testo + Immagine";
+      default:
+        return type;
     }
   };
 
   const renderImageControls = (block: ContentBlock, isMobile: boolean = false) => {
     const sizeClasses = isMobile ? "w-16 h-16" : "w-20 h-20";
     const inputClasses = isMobile ? "h-8 text-xs" : "h-9";
-    
+
     if (block.url) {
       return (
         <div className="flex items-start gap-3">
           {/* Compact thumbnail */}
           <div className={`${sizeClasses} flex-shrink-0 relative group`}>
-            <img 
-              src={block.url} 
-              alt={block.alt || ""} 
-              className="w-full h-full object-cover rounded-lg border shadow-sm" 
+            <img
+              src={block.url}
+              alt={block.alt || ""}
+              className="w-full h-full object-cover rounded-lg border shadow-sm"
             />
             <Button
               type="button"
@@ -106,7 +128,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
               <X className="h-3 w-3" />
             </Button>
           </div>
-          
+
           {/* Alt text and replace inline */}
           <div className="flex-1 space-y-2">
             <Input
@@ -125,7 +147,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
         </div>
       );
     }
-    
+
     return (
       <div className="border-2 border-dashed rounded-lg p-4 text-center">
         <ImageIcon className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
@@ -143,12 +165,14 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     return (
       <div className="space-y-4">
         {/* Optional title */}
-        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3 items-end`}>
-          <div className={isMobile ? 'w-full' : 'w-24'}>
+        <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-3 items-end`}>
+          <div className={isMobile ? "w-full" : "w-24"}>
             <Label className="text-xs text-muted-foreground">Titolo (opz.)</Label>
             <Select
               value={block.titleLevel || "none"}
-              onValueChange={(value) => updateBlock(block.id, { titleLevel: value === "none" ? undefined : value as "h2" | "h3" })}
+              onValueChange={(value) =>
+                updateBlock(block.id, { titleLevel: value === "none" ? undefined : (value as "h2" | "h3") })
+              }
             >
               <SelectTrigger className="h-8">
                 <SelectValue placeholder="Nessuno" />
@@ -173,12 +197,14 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
         </div>
 
         {/* Position and aspect ratio selectors */}
-        <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-3`}>
-          <div className={isMobile ? 'w-full' : 'w-40'}>
+        <div className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-3`}>
+          <div className={isMobile ? "w-full" : "w-40"}>
             <Label className="text-xs text-muted-foreground">Posizione Immagine</Label>
             <Select
               value={block.imagePosition || "right"}
-              onValueChange={(value) => updateBlock(block.id, { imagePosition: value as ContentBlock["imagePosition"] })}
+              onValueChange={(value) =>
+                updateBlock(block.id, { imagePosition: value as ContentBlock["imagePosition"] })
+              }
             >
               <SelectTrigger className="h-8">
                 <SelectValue />
@@ -202,14 +228,12 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
         {/* Rich text content */}
         <div>
           <Label className="text-xs text-muted-foreground">Contenuto Testuale</Label>
-          <RichTextEditor
-            content={block.content || ""}
-            onChange={(content) => updateBlock(block.id, { content })}
-          />
+          <RichTextEditor content={block.content || ""} onChange={(content) => updateBlock(block.id, { content })} />
         </div>
       </div>
     );
-  };const renderTableEditor = (block: ContentBlock, isMobile: boolean = false) => {
+  };
+  const renderTableEditor = (block: ContentBlock, isMobile: boolean = false) => {
     const data = block.tableData || { rows: [[{ content: "" }]], hasHeaderRow: true };
     const rows = data.rows;
 
@@ -219,12 +243,14 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
 
     const addRow = () => {
       const colCount = rows[0]?.length || 1;
-      const newRow = Array(colCount).fill(null).map(() => ({ content: "" }));
+      const newRow = Array(colCount)
+        .fill(null)
+        .map(() => ({ content: "" }));
       updateTable([...rows, newRow]);
     };
 
     const addColumn = () => {
-      const newRows = rows.map(row => [...row, { content: "" }]);
+      const newRows = rows.map((row) => [...row, { content: "" }]);
       updateTable(newRows);
     };
 
@@ -235,15 +261,15 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
 
     const removeColumn = (colIndex: number) => {
       if (rows[0].length <= 1) return;
-      const newRows = rows.map(row => row.filter((_, i) => i !== colIndex));
+      const newRows = rows.map((row) => row.filter((_, i) => i !== colIndex));
       updateTable(newRows);
     };
 
-    const toggleCellFormat = (rowIndex: number, colIndex: number, field: 'isBold' | 'isHighlighted') => {
+    const toggleCellFormat = (rowIndex: number, colIndex: number, field: "isBold" | "isHighlighted") => {
       const newRows = [...rows];
-      newRows[rowIndex][colIndex] = { 
-        ...newRows[rowIndex][colIndex], 
-        [field]: !newRows[rowIndex][colIndex][field] 
+      newRows[rowIndex][colIndex] = {
+        ...newRows[rowIndex][colIndex],
+        [field]: !newRows[rowIndex][colIndex][field],
       };
       updateTable(newRows);
     };
@@ -251,7 +277,9 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     return (
       <div className="space-y-4 border rounded-lg p-2 md:p-4 bg-muted/10">
         <div className="flex justify-between items-center">
-          <Label className="text-xs font-bold text-verde-primary uppercase tracking-wider">Editor Tabella Nutrizionale</Label>
+          <Label className="text-xs font-bold text-verde-primary uppercase tracking-wider">
+            Editor Tabella Nutrizionale
+          </Label>
           <div className="flex gap-2">
             <Button type="button" variant="outline" size="xs" onClick={addRow} className="h-7 text-[10px]">
               <Plus className="h-3 w-3 mr-1" /> Riga
@@ -269,7 +297,13 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                 <th className="w-8 border-b"></th>
                 {rows[0].map((_, i) => (
                   <th key={i} className="p-1 border-b border-r text-[10px]">
-                    <Button type="button" variant="ghost" size="xs" onClick={() => removeColumn(i)} className="h-4 w-4 p-0 text-destructive">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      onClick={() => removeColumn(i)}
+                      className="h-4 w-4 p-0 text-destructive"
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </th>
@@ -280,12 +314,21 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
               {rows.map((row, rowIndex) => (
                 <tr key={rowIndex} className={rowIndex === 0 && data.hasHeaderRow ? "bg-verde-light/5" : ""}>
                   <td className="p-1 border-r text-center">
-                    <Button type="button" variant="ghost" size="xs" onClick={() => removeRow(rowIndex)} className="h-4 w-4 p-0 text-destructive">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      onClick={() => removeRow(rowIndex)}
+                      className="h-4 w-4 p-0 text-destructive"
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </td>
                   {row.map((cell, colIndex) => (
-                    <td key={colIndex} className={`p-1 border-r border-b min-w-[120px] relative group ${cell.isHighlighted ? "ring-2 ring-inset ring-amber-400/50" : ""}`}>
+                    <td
+                      key={colIndex}
+                      className={`p-1 border-r border-b min-w-[120px] relative group ${cell.isHighlighted ? "ring-2 ring-inset ring-amber-400/50" : ""}`}
+                    >
                       <Input
                         value={cell.content}
                         className={`h-8 text-xs border-none focus-visible:ring-1 ${cell.isBold ? "font-bold" : ""}`}
@@ -296,14 +339,18 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                         }}
                       />
                       <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm rounded px-1">
-                        <button 
-                          onClick={() => toggleCellFormat(rowIndex, colIndex, 'isBold')}
-                          className={`text-[10px] font-bold px-1 ${cell.isBold ? 'text-verde-primary' : 'text-muted-foreground'}`}
-                        >B</button>
-                        <button 
-                          onClick={() => toggleCellFormat(rowIndex, colIndex, 'isHighlighted')}
-                          className={`text-[10px] px-1 ${cell.isHighlighted ? 'text-amber-600' : 'text-muted-foreground'}`}
-                        >✨</button>
+                        <button
+                          onClick={() => toggleCellFormat(rowIndex, colIndex, "isBold")}
+                          className={`text-[10px] font-bold px-1 ${cell.isBold ? "text-verde-primary" : "text-muted-foreground"}`}
+                        >
+                          B
+                        </button>
+                        <button
+                          onClick={() => toggleCellFormat(rowIndex, colIndex, "isHighlighted")}
+                          className={`text-[10px] px-1 ${cell.isHighlighted ? "text-amber-600" : "text-muted-foreground"}`}
+                        >
+                          ✨
+                        </button>
                       </div>
                     </td>
                   ))}
@@ -320,23 +367,53 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     <div className="space-y-3 md:space-y-4">
       {/* Mobile-friendly add block buttons */}
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("heading")} className="flex-1 min-w-[70px] sm:flex-none">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addBlock("heading")}
+          className="flex-1 min-w-[70px] sm:flex-none"
+        >
           <Plus className="h-4 w-4 mr-1" />
           <span className="text-xs">Titolo</span>
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("text")} className="flex-1 min-w-[70px] sm:flex-none">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addBlock("text")}
+          className="flex-1 min-w-[70px] sm:flex-none"
+        >
           <Plus className="h-4 w-4 mr-1" />
           <span className="text-xs">Testo</span>
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("image")} className="flex-1 min-w-[70px] sm:flex-none">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addBlock("image")}
+          className="flex-1 min-w-[70px] sm:flex-none"
+        >
           <Plus className="h-4 w-4 mr-1" />
           <span className="text-xs">Immagine</span>
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("text-image")} className="flex-1 min-w-[100px] sm:flex-none bg-verde-light/10 border-verde-primary/30 hover:bg-verde-light/20">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addBlock("text-image")}
+          className="flex-1 min-w-[100px] sm:flex-none bg-verde-light/10 border-verde-primary/30 hover:bg-verde-light/20"
+        >
           <LayoutTemplate className="h-4 w-4 mr-1" />
           <span className="text-xs">Testo + Img</span>
         </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => addBlock("table")} className="flex-1 min-w-[70px] sm:flex-none">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addBlock("table")}
+          className="flex-1 min-w-[70px] sm:flex-none"
+        >
           <Plus className="h-4 w-4 mr-1" />
           <span className="text-xs">Tabella</span>
         </Button>
@@ -446,7 +523,11 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                           <Label className="text-xs text-muted-foreground">Titolo (opz.)</Label>
                           <Select
                             value={block.titleLevel || "none"}
-                            onValueChange={(value) => updateBlock(block.id, { titleLevel: value === "none" ? undefined : value as "h2" | "h3" })}
+                            onValueChange={(value) =>
+                              updateBlock(block.id, {
+                                titleLevel: value === "none" ? undefined : (value as "h2" | "h3"),
+                              })
+                            }
                           >
                             <SelectTrigger className="h-8">
                               <SelectValue placeholder="Nessuno" />
@@ -541,7 +622,9 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                       <div className="flex gap-2">
                         <Select
                           value={block.titleLevel || "none"}
-                          onValueChange={(value) => updateBlock(block.id, { titleLevel: value === "none" ? undefined : value as "h2" | "h3" })}
+                          onValueChange={(value) =>
+                            updateBlock(block.id, { titleLevel: value === "none" ? undefined : (value as "h2" | "h3") })
+                          }
                         >
                           <SelectTrigger className="h-8 w-20">
                             <SelectValue placeholder="No" />
@@ -572,11 +655,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
                   </div>
                 )}
 
-                {block.type === "image" && (
-                  <div className="space-y-3">
-                    {renderImageControls(block, true)}
-                  </div>
-                )}
+                {block.type === "image" && <div className="space-y-3">{renderImageControls(block, true)}</div>}
 
                 {block.type === "text-image" && renderTextImageBlock(block, true)}
                 {block.type === "table" && renderTableEditor(block, true)}
