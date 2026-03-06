@@ -77,6 +77,7 @@ interface Product {
 // Reusable prose styling constant
 const proseClasses =
   "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:!mb-[12px] [&_p]:min-h-[1em] [&_p:empty]:min-h-[0] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_h2]:text-2xl [&_h2]:font-bold md:[&_h2]:!mt-[24px] [&_h2]:!mb-[8px] [&_h3]:text-xl [&_h3]:font-bold md:[&_h3]:!mt-[20px] [&_h3]:!mb-[8px] [&_h4]:text-lg [&_h4]:font-semibold md:[&_h4]:!mt-[16px] [&_h4]:!mb-[4px] prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
+
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
 
