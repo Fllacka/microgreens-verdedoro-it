@@ -189,7 +189,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-2 md:space-y-3">
       {blocks.map((block) => {
         switch (block.type) {
           case "heading":
@@ -207,7 +207,7 @@ export const ContentBlockRenderer = ({ blocks }: ContentBlockRendererProps) => {
 
           case "text":
             return (
-              <div key={block.id} className="max-w-4xl mx-auto px-4 py-6 md:py-8">
+              <div key={block.id} className="max-w-4xl mx-auto px-4 py-2 md:py-3">
                 {renderBlockTitle(block, true)}
                 <div
                   className={cn("prose prose-lg max-w-none", proseClasses)}
