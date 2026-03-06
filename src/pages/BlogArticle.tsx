@@ -447,9 +447,7 @@ const BlogArticle = () => {
         <section className="py-16 md:py-24 bg-background">
           <div className="container-width">
             <div className="max-w-3xl mx-auto">
-              <div className={proseClasses}>
-                <ContentBlockRenderer blocks={post.content_blocks} />
-              </div>
+              <ContentBlockRenderer blocks={post.content_blocks} />
             </div>
           </div>
         </section>
