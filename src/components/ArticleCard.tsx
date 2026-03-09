@@ -97,15 +97,11 @@ const ArticleCard = ({
     </Card>
   );
 
- // Make the whole card clickable
   return (
     <Link to={`/blog/${slug}`} className="block h-full transition-transform hover:scale-[1.01] active:scale-[0.99]">
       {cardContent}
     </Link>
   );
-};
-
-  return cardContent;
 };
 
 export default ArticleCard;
