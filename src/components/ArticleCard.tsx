@@ -84,14 +84,9 @@ const ArticleCard = ({
           </p>
         )}
 
-        {/* Footer: Date + Button */}
-        <div className="flex items-center justify-between mt-auto">
-          <span className="text-xs text-muted-foreground">{formatDate(publishedAt)}</span>
-          {showButton && (
-            <Button variant="outline" size="sm" asChild>
-              <Link to={`/blog/${slug}`}>{buttonText}</Link>
-            </Button>
-          )}
+        {/* Footer: Date Only */}
+        <div className="flex items-center justify-start mt-auto">
+          <span className="text-xs text-muted-foreground italic">{formatDate(publishedAt)}</span>
         </div>
       </CardContent>
     </Card>
