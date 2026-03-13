@@ -22,7 +22,13 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import { generateProductSchema, generateBreadcrumbSchema, generateFAQSchema, combineSchemas, stripHtmlTags } from "@/lib/seo";
+import {
+  generateProductSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
+  combineSchemas,
+  stripHtmlTags,
+} from "@/lib/seo";
 
 interface FAQItem {
   id: string;
@@ -71,14 +77,15 @@ interface Product {
 
 // Format price in euros
 const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('it-IT', {
-    style: 'currency',
-    currency: 'EUR',
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
   }).format(price);
 };
 
 // Reusable prose styling constant
-const proseClasses = "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=center]]:float-none [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
+const proseClasses =
+  "prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_a]:text-verde-primary [&_a]:underline [&_a]:underline-offset-2 [&_a:hover]:text-verde-light [&_p]:my-4 [&_p]:min-h-[1.5em] [&_p:empty]:min-h-[1.5em] [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img[data-align=left]]:float-left [&_img[data-align=left]]:mr-4 [&_img[data-align=left]]:mb-2 [&_img[data-align=center]]:mx-auto [&_img[data-align=center]]:block [&_img[data-align=center]]:float-none [&_img[data-align=right]]:float-right [&_img[data-align=right]]:ml-4 [&_img[data-align=right]]:mb-2 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-5 [&_h3]:mb-2 [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:mt-4 [&_h4]:mb-2 prose-headings:font-display prose-headings:text-primary prose-p:text-muted-foreground prose-strong:text-primary";
 
 const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -97,7 +104,8 @@ const ProductDetail = () => {
         // Fetch current product
         const { data: productData, error: productError } = await supabase
           .from("products")
-          .select(`
+          .select(
+            `
             *,
             media:media!products_image_id_fkey (
               file_path,
@@ -106,7 +114,8 @@ const ProductDetail = () => {
               width,
               height
             )
-          `)
+          `,
+          )
           .eq("slug", slug)
           .eq("published", true)
           .maybeSingle();
@@ -119,7 +128,8 @@ const ProductDetail = () => {
           // Fetch related products (exclude current product)
           const { data: relatedData, error: relatedError } = await supabase
             .from("products")
-            .select(`
+            .select(
+              `
               *,
               media:media!products_image_id_fkey (
                 file_path,
@@ -128,7 +138,8 @@ const ProductDetail = () => {
                 width,
                 height
               )
-            `)
+            `,
+            )
             .eq("published", true)
             .neq("slug", slug)
             .limit(3);
@@ -173,14 +184,12 @@ const ProductDetail = () => {
   const defaultWeights = [100, 200, 300, 400, 500, 750, 1000];
   const priceTiers = product?.price_tiers || [];
   const hasPriceTiers = priceTiers.length > 0;
-  
+
   // If price tiers are configured, only show those weights; otherwise show all defaults
-  const availableWeights = hasPriceTiers 
-    ? priceTiers.map(t => t.weight).sort((a, b) => a - b)
-    : defaultWeights;
-  
+  const availableWeights = hasPriceTiers ? priceTiers.map((t) => t.weight).sort((a, b) => a - b) : defaultWeights;
+
   // Get price for current quantity
-  const currentPriceTier = priceTiers.find(t => t.weight === quantity);
+  const currentPriceTier = priceTiers.find((t) => t.weight === quantity);
   const currentPrice = currentPriceTier?.price;
 
   const handleAddToCart = () => {
@@ -214,39 +223,62 @@ const ProductDetail = () => {
   ]);
 
   // Generate FAQ schema if FAQs exist
-  const faqSchema = product.faq_items && product.faq_items.length > 0
-    ? generateFAQSchema(
-        product.faq_items.map(faq => ({
-          question: faq.question,
-          answer: stripHtmlTags(faq.answer),
-        }))
-      )
-    : null;
+  const faqSchema =
+    product.faq_items && product.faq_items.length > 0
+      ? generateFAQSchema(
+          product.faq_items.map((faq) => ({
+            question: faq.question,
+            answer: stripHtmlTags(faq.answer),
+          })),
+        )
+      : null;
 
   // Combine all schemas
-  const allSchemas = faqSchema 
-    ? [productSchema, breadcrumbSchema, faqSchema]
-    : [productSchema, breadcrumbSchema];
+  const allSchemas = faqSchema ? [productSchema, breadcrumbSchema, faqSchema] : [productSchema, breadcrumbSchema];
 
   return (
     <Layout>
       <Helmet>
         <title>{product.meta_title || `Microgreens di ${product.name} - Verde D'Oro Microgreens`}</title>
         <meta name="description" content={product.meta_description || product.description} />
-        <link rel="canonical" href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`} />
-        <meta property="og:title" content={product.og_title || product.meta_title || `Microgreens di ${product.name}`} />
-        <meta property="og:description" content={product.og_description || product.meta_description || product.description} />
+        <link
+          rel="canonical"
+          href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`}
+        />
+        <meta
+          property="og:title"
+          content={product.og_title || product.meta_title || `Microgreens di ${product.name}`}
+        />
+        <meta
+          property="og:description"
+          content={product.og_description || product.meta_description || product.description}
+        />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={`${window.location.origin}/microgreens/${product.slug}`} />
         <meta property="og:locale" content="it_IT" />
         {product.media?.file_path && <meta property="og:image" content={product.media.file_path} />}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={product.og_title || product.meta_title || `Microgreens di ${product.name}`} />
-        <meta name="twitter:description" content={product.og_description || product.meta_description || product.description} />
+        <meta
+          name="twitter:title"
+          content={product.og_title || product.meta_title || `Microgreens di ${product.name}`}
+        />
+        <meta
+          name="twitter:description"
+          content={product.og_description || product.meta_description || product.description}
+        />
         {product.media?.file_path && <meta name="twitter:image" content={product.media.file_path} />}
-        <script type="application/ld+json">
-          {JSON.stringify(combineSchemas(...allSchemas))}
-        </script>
+        <meta property="og:site_name" content="Verde D'Oro Microgreens" />
+        {hasPriceTiers && (
+          <>
+            <meta
+              property="product:price:amount"
+              content={currentPrice ? currentPrice.toString() : priceTiers[0].price.toString()}
+            />
+            <meta property="product:price:currency" content="EUR" />
+            <meta property="product:availability" content="in stock" />
+          </>
+        )}
+        <script type="application/ld+json">{JSON.stringify(combineSchemas(...allSchemas))}</script>
       </Helmet>
 
       {/* Hero Section */}
@@ -306,13 +338,9 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-                {product.name}
-              </h1>
+              <h1 className="font-display text-4xl md:text-5xl font-bold text-primary mb-4">{product.name}</h1>
 
-              <p className="font-body text-lg text-muted-foreground leading-relaxed mb-8">
-                {product.description}
-              </p>
+              <p className="font-body text-lg text-muted-foreground leading-relaxed mb-8">{product.description}</p>
 
               {/* Purchase Section */}
               <Card className="w-full border-2 border-verde-primary/20 bg-gradient-to-br from-background to-muted/30 shadow-lg">
@@ -322,35 +350,40 @@ const ProductDetail = () => {
                     <label htmlFor="quantity" className="font-display font-semibold text-primary text-sm mb-2 block">
                       Seleziona quantità
                     </label>
-                    
+
                     <Select value={quantity.toString()} onValueChange={(value) => setQuantity(parseInt(value))}>
-                      <SelectTrigger id="quantity" className="w-full h-12 text-base border-border/50 focus:border-verde-primary">
+                      <SelectTrigger
+                        id="quantity"
+                        className="w-full h-12 text-base border-border/50 focus:border-verde-primary"
+                      >
                         <SelectValue placeholder="Seleziona quantità" />
                       </SelectTrigger>
                       <SelectContent>
                         {availableWeights.map((weight) => {
-                          const tier = priceTiers.find(t => t.weight === weight);
-                          const priceLabel = tier?.price ? ` - ${formatPrice(tier.price)}` : '';
+                          const tier = priceTiers.find((t) => t.weight === weight);
+                          const priceLabel = tier?.price ? ` - ${formatPrice(tier.price)}` : "";
                           const weightLabel = weight >= 1000 ? `${weight / 1000} kg` : `${weight} gr`;
                           return (
                             <SelectItem key={weight} value={weight.toString()}>
-                              {weightLabel}{priceLabel}
+                              {weightLabel}
+                              {priceLabel}
                             </SelectItem>
                           );
                         })}
                       </SelectContent>
                     </Select>
-                    
+
                     <p className="text-xs text-muted-foreground mt-2">
-                      Ordine minimo: {availableWeights[0] >= 1000 ? `${availableWeights[0] / 1000} kg` : `${availableWeights[0]} gr`}
+                      Ordine minimo:{" "}
+                      {availableWeights[0] >= 1000 ? `${availableWeights[0] / 1000} kg` : `${availableWeights[0]} gr`}
                     </p>
                   </div>
 
                   {/* Add to Cart Button */}
-                  <Button 
-                    variant="oro" 
-                    size="lg" 
-                    className="w-full h-auto min-h-[48px] text-sm sm:text-base font-semibold mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300 whitespace-normal" 
+                  <Button
+                    variant="oro"
+                    size="lg"
+                    className="w-full h-auto min-h-[48px] text-sm sm:text-base font-semibold mb-4 shadow-oro hover:shadow-oro/50 transition-all duration-300 whitespace-normal"
                     onClick={handleAddToCart}
                   >
                     <ShoppingCart className="h-4 w-4 shrink-0" />
@@ -384,17 +417,16 @@ const ProductDetail = () => {
           <div className="max-w-5xl mx-auto">
             {/* Section Divider */}
             <div className="border-t border-border/30 mb-12" />
-            
+
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2.5 rounded-xl bg-verde-primary/10">
                 <FileText className="h-6 w-6 text-verde-primary" />
               </div>
-              <h2 className="font-display text-3xl font-bold text-primary">{product.content_title || "Panoramica del Prodotto"}</h2>
+              <h2 className="font-display text-3xl font-bold text-primary">
+                {product.content_title || "Panoramica del Prodotto"}
+              </h2>
             </div>
-            <div 
-              className={proseClasses}
-              dangerouslySetInnerHTML={{ __html: product.content }}
-            />
+            <div className={proseClasses} dangerouslySetInnerHTML={{ __html: product.content }} />
           </div>
         </section>
       )}
@@ -405,7 +437,7 @@ const ProductDetail = () => {
           <div className="max-w-5xl mx-auto">
             {/* Section Divider */}
             <div className="border-t border-border/30 mb-12" />
-            
+
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2.5 rounded-xl bg-verde-primary/10">
                 <Heart className="h-6 w-6 text-verde-primary" />
@@ -414,10 +446,7 @@ const ProductDetail = () => {
             </div>
             <Card className="border border-border/30 bg-gradient-to-br from-verde-primary/5 to-transparent">
               <CardContent className="p-8">
-                <div 
-                  className={proseClasses}
-                  dangerouslySetInnerHTML={{ __html: product.benefits_content }}
-                />
+                <div className={proseClasses} dangerouslySetInnerHTML={{ __html: product.benefits_content }} />
               </CardContent>
             </Card>
           </div>
@@ -430,7 +459,7 @@ const ProductDetail = () => {
           <div className="max-w-5xl mx-auto">
             {/* Section Divider */}
             <div className="border-t border-border/30 mb-12" />
-            
+
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2.5 rounded-xl bg-oro-primary/10">
                 <ChefHat className="h-6 w-6 text-oro-primary" />
@@ -439,10 +468,7 @@ const ProductDetail = () => {
             </div>
             <Card className="border border-border/30 bg-gradient-to-br from-oro-primary/5 to-transparent">
               <CardContent className="p-8">
-                <div 
-                  className={proseClasses}
-                  dangerouslySetInnerHTML={{ __html: product.uses_content }}
-                />
+                <div className={proseClasses} dangerouslySetInnerHTML={{ __html: product.uses_content }} />
               </CardContent>
             </Card>
           </div>
@@ -455,7 +481,7 @@ const ProductDetail = () => {
           <div className="max-w-5xl mx-auto">
             {/* Section Divider */}
             <div className="border-t border-border/30 mb-12" />
-            
+
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2.5 rounded-xl bg-verde-primary/10">
                 <HelpCircle className="h-6 w-6 text-verde-primary" />
@@ -464,8 +490,8 @@ const ProductDetail = () => {
             </div>
             <Accordion type="single" collapsible className="space-y-4">
               {product.faq_items.map((faq, index) => (
-                <AccordionItem 
-                  key={faq.id || index} 
+                <AccordionItem
+                  key={faq.id || index}
                   value={`faq-${index}`}
                   className="border-2 border-verde-primary/20 rounded-xl px-6 bg-gradient-to-br from-verde-primary/5 to-transparent shadow-sm hover:shadow-md hover:border-verde-primary/30 transition-all duration-300"
                 >
@@ -474,10 +500,7 @@ const ProductDetail = () => {
                   </AccordionTrigger>
                   <AccordionContent className="pb-6">
                     <div className="border-t border-verde-primary/10 pt-4">
-                      <div 
-                        className={proseClasses}
-                        dangerouslySetInnerHTML={{ __html: faq.answer }}
-                      />
+                      <div className={proseClasses} dangerouslySetInnerHTML={{ __html: faq.answer }} />
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -498,11 +521,11 @@ const ProductDetail = () => {
                 <Leaf className="h-6 w-6 text-verde-primary" />
                 <div className="h-px bg-verde-primary/30 flex-1 max-w-24" />
               </div>
-              
+
               <h2 className="font-display text-3xl font-bold text-center text-primary mb-12">
                 Scopri Altri Microgreens
               </h2>
-              
+
               <div className="grid md:grid-cols-3 gap-8">
                 {relatedProducts.map((relatedProduct) => (
                   <ProductCard
