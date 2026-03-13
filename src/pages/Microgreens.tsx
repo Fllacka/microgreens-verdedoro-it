@@ -47,7 +47,6 @@ interface CategoryItem {
 }
 
 const Microgreens = () => {
-  
   const { addItem } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [sections, setSections] = useState<Record<string, Section>>({});
@@ -62,7 +61,8 @@ const Microgreens = () => {
         const [productsRes, sectionsRes] = await Promise.all([
           supabase
             .from("products")
-            .select(`
+            .select(
+              `
               id,
               name,
               slug,
@@ -77,14 +77,12 @@ const Microgreens = () => {
                 file_path,
                 optimized_urls
               )
-            `)
+            `,
+            )
             .eq("published", true)
             .order("popular", { ascending: false })
             .order("name"),
-          supabase
-            .from("microgreens_sections")
-            .select("*")
-            .order("sort_order"),
+          supabase.from("microgreens_sections").select("*").order("sort_order"),
         ]);
 
         if (productsRes.error) throw productsRes.error;
@@ -103,8 +101,8 @@ const Microgreens = () => {
         if (categoriesContent?.items) {
           // Filter to only show categories that have published products AND have valid names
           const categoriesWithProducts = categoriesContent.items
-            .filter(cat => cat.name?.trim())
-            .filter(cat => productsRes.data?.some(product => product.category === cat.name));
+            .filter((cat) => cat.name?.trim())
+            .filter((cat) => productsRes.data?.some((product) => product.category === cat.name));
           setCategories(categoriesWithProducts);
         }
 
@@ -139,7 +137,7 @@ const Microgreens = () => {
 
   // Filter products by selected category
   const filteredProducts = selectedCategory
-    ? products.filter(product => product.category === selectedCategory)
+    ? products.filter((product) => product.category === selectedCategory)
     : products;
 
   const currentUrl = window.location.origin + "/microgreens";
@@ -148,29 +146,65 @@ const Microgreens = () => {
     : currentUrl;
 
   if (loading || Object.keys(sections).length === 0) {
-    return <Layout><PageLoading /></Layout>;
+    return (
+      <Layout>
+        <PageLoading />
+      </Layout>
+    );
   }
 
   return (
     <Layout>
       <Helmet>
         <title>{seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"}</title>
-        <meta name="description" content={seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici coltivati a Reggio Emilia."} />
+        <meta
+          name="description"
+          content={
+            seoSection?.content?.meta_description ||
+            "Scopri la nostra selezione di microgreens biologici coltivati a Reggio Emilia."
+          }
+        />
         <meta name="robots" content={seoSection?.content?.robots || "index, follow"} />
         <link rel="canonical" href={canonicalUrl} />
-        <meta property="og:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"} />
-        <meta property="og:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici"} />
+        <meta
+          property="og:title"
+          content={
+            seoSection?.content?.og_title || seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"
+          }
+        />
+        <meta
+          property="og:description"
+          content={
+            seoSection?.content?.og_description ||
+            seoSection?.content?.meta_description ||
+            "Scopri la nostra selezione di microgreens biologici"
+          }
+        />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={currentUrl} />
         <meta property="og:locale" content="it_IT" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={seoSection?.content?.og_title || seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"} />
-        <meta name="twitter:description" content={seoSection?.content?.og_description || seoSection?.content?.meta_description || "Scopri la nostra selezione di microgreens biologici"} />
+        <meta
+          name="twitter:title"
+          content={
+            seoSection?.content?.og_title || seoSection?.content?.meta_title || "I Nostri Microgreens - Verde D'Oro"
+          }
+        />
+        <meta
+          name="twitter:description"
+          content={
+            seoSection?.content?.og_description ||
+            seoSection?.content?.meta_description ||
+            "Scopri la nostra selezione di microgreens biologici"
+          }
+        />
         <script type="application/ld+json">
-          {JSON.stringify(generateBreadcrumbSchema([
-            { name: "Home", url: "/" },
-            { name: "Microgreens", url: "/microgreens" },
-          ]))}
+          {JSON.stringify(
+            generateBreadcrumbSchema([
+              { name: "Home", url: "/" },
+              { name: "Microgreens", url: "/microgreens" },
+            ]),
+          )}
         </script>
       </Helmet>
 
@@ -191,22 +225,21 @@ const Microgreens = () => {
             />
           )}
           {/* Overlay for background image */}
-          {heroImageUrl && (
-            <div className="absolute inset-0 bg-gradient-hero" />
-          )}
+          {heroImageUrl && <div className="absolute inset-0 bg-gradient-hero" />}
           {/* Gradient fallback when no image */}
-          {!heroImageUrl && (
-            <div className="absolute inset-0 bg-gradient-subtle" />
-          )}
-          
+          {!heroImageUrl && <div className="absolute inset-0 bg-gradient-subtle" />}
+
           <div className="container-width text-center relative z-10">
             <h1 className="font-display text-4xl md:text-6xl font-bold text-primary mb-6">
               {heroSection?.content?.title || "I Nostri Microgreens"}
             </h1>
-            <div 
+            <div
               className="font-body text-xl text-muted-foreground max-w-4xl mx-auto mb-8 prose prose-lg max-w-none [&_a]:text-primary [&_a]:underline"
-              dangerouslySetInnerHTML={{ __html: heroSection?.content?.subtitle ||
-                "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali." }}
+              dangerouslySetInnerHTML={{
+                __html:
+                  heroSection?.content?.subtitle ||
+                  "Scopri la nostra selezione di microgreens coltivati con passione nel cuore dell'Emilia-Romagna. Ogni varietà è scelta per il suo sapore unico e i suoi benefici nutrizionali eccezionali.",
+              }}
             />
 
             {/* Category filters in hero */}
@@ -274,35 +307,36 @@ const Microgreens = () => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mb-6">
               {ctaSection?.content?.title || "Non Trovi la Varietà che Cerchi?"}
             </h2>
-            <div 
+            <div
               className="font-body text-lg text-primary-foreground/90 max-w-3xl mx-auto mb-8 prose prose-lg prose-invert max-w-none [&_a]:text-oro-primary [&_a]:underline [&_p]:my-2"
-              dangerouslySetInnerHTML={{ 
-                __html: ctaSection?.content?.description || 
-                  "<p>La nostra selezione è in continua crescita, ma sappiamo che le tue esigenze possono essere uniche. Scopri le nostre coltivazioni personalizzate o contattaci direttamente per discutere le tue necessità.</p>" 
+              dangerouslySetInnerHTML={{
+                __html:
+                  ctaSection?.content?.description ||
+                  "<p>La nostra selezione è in continua crescita, ma sappiamo che le tue esigenze possono essere uniche. Scopri le nostre coltivazioni personalizzate o contattaci direttamente per discutere le tue necessità.</p>",
               }}
             />
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isCtaButtonVisible(
                 ctaSection?.content?.primary_button_visible,
                 ctaSection?.content?.primary_button_text,
-                ctaSection?.content?.primary_button_link
+                ctaSection?.content?.primary_button_link,
               ) && (
                 <Button
                   asChild
                   variant="oro"
                   size="lg"
-                  className="group"
+                  className="group h-auto py-4 px-8 text-xl md:text-2xl font-bold shadow-xl hover:scale-105 transition-all"
                 >
                   <Link to={ctaSection?.content?.primary_button_link || "/microgreens-su-misura"}>
                     {ctaSection?.content?.primary_button_text || "Esplora Microgreens su Misura"}
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
                   </Link>
                 </Button>
               )}
               {isCtaButtonVisible(
                 ctaSection?.content?.secondary_button_visible,
                 ctaSection?.content?.secondary_button_text,
-                ctaSection?.content?.secondary_button_link
+                ctaSection?.content?.secondary_button_link,
               ) && (
                 <Button
                   asChild
@@ -339,10 +373,13 @@ const Microgreens = () => {
                       <h3 className="font-semibold text-primary mb-2">
                         {infoSection?.content?.feature1_title || "Coltivazione Biologica"}
                       </h3>
-                      <div 
+                      <div
                         className="text-muted-foreground prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: infoSection?.content?.feature1_description ||
-                          "Utilizziamo esclusivamente semi biologici certificati e metodi di coltivazione naturali, senza pesticidi o fertilizzanti chimici." }}
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            infoSection?.content?.feature1_description ||
+                            "Utilizziamo esclusivamente semi biologici certificati e metodi di coltivazione naturali, senza pesticidi o fertilizzanti chimici.",
+                        }}
                       />
                     </div>
                   </div>
@@ -355,10 +392,13 @@ const Microgreens = () => {
                       <h3 className="font-semibold text-primary mb-2">
                         {infoSection?.content?.feature2_title || "Massima Freschezza"}
                       </h3>
-                      <div 
+                      <div
                         className="text-muted-foreground prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: infoSection?.content?.feature2_description ||
-                          "I nostri microgreens vengono raccolti al momento ottimale e consegnati entro 24 ore per garantire sapore e proprietà nutrizionali al massimo." }}
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            infoSection?.content?.feature2_description ||
+                            "I nostri microgreens vengono raccolti al momento ottimale e consegnati entro 24 ore per garantire sapore e proprietà nutrizionali al massimo.",
+                        }}
                       />
                     </div>
                   </div>
@@ -371,10 +411,13 @@ const Microgreens = () => {
                       <h3 className="font-semibold text-primary mb-2">
                         {infoSection?.content?.feature3_title || "Tradizione Italiana"}
                       </h3>
-                      <div 
+                      <div
                         className="text-muted-foreground prose prose-sm max-w-none [&_a]:text-primary [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: infoSection?.content?.feature3_description ||
-                          "Ogni varietà è selezionata per esaltare i sapori della cucina italiana, dalle erbe aromatiche ai microgreens più innovativi." }}
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            infoSection?.content?.feature3_description ||
+                            "Ogni varietà è selezionata per esaltare i sapori della cucina italiana, dalle erbe aromatiche ai microgreens più innovativi.",
+                        }}
                       />
                     </div>
                   </div>
