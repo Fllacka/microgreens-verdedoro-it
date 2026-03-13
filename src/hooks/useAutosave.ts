@@ -13,7 +13,7 @@ export function useAutosave<T>({ data, onSave, interval = 30000, enabled = true 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const previousDataRef = useRef<string>("");
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const hasChanges = useCallback(() => {
     const currentData = JSON.stringify(data);
