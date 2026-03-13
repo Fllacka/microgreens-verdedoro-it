@@ -147,20 +147,26 @@ export function generateProductSchema(product: {
       priceCurrency: "EUR",
       lowPrice: Math.min(...prices),
       highPrice: Math.max(...prices),
+      // Pinterest strongly prefers a distinct 'price' field even in aggregates
+      price: Math.min(...prices),
       offerCount: validTiers.length,
       availability: "https://schema.org/InStock",
       seller: {
         "@id": `${SITE_URL}/#organization`,
       },
+      url: `${SITE_URL}/microgreens/${product.slug}`, // Important for Pinterest
     };
   } else {
+    // FIX: Added the missing 'price' field for products without tiers
     schema.offers = {
       "@type": "Offer",
-      availability: "https://schema.org/InStock",
+      price: 0.0, // Fallback price; update this if you pass a single price prop later
       priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
       seller: {
         "@id": `${SITE_URL}/#organization`,
       },
+      url: `${SITE_URL}/microgreens/${product.slug}`, // Important for Pinterest
     };
   }
 
