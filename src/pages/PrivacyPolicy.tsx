@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "react-helmet";
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import {
