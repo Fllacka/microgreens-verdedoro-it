@@ -325,7 +325,7 @@ const Microgreens = () => {
                   asChild
                   variant="oro"
                   size="lg"
-                  className="group h-auto py-2 px-6 text-xl md:text-xl hover:scale-105 transition-all"
+                  className="group h-auto py-2 px-6 text-lg md:text-xl hover:scale-105 transition-all"
                 >
                   <Link to={ctaSection?.content?.primary_button_link || "/microgreens-su-misura"}>
                     {ctaSection?.content?.primary_button_text || "Esplora Microgreens su Misura"}
