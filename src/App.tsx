@@ -16,6 +16,8 @@ const MicrogreensCustom = lazy(() => import("./pages/MicrogreensCustom"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const Contatti = lazy(() => import("./pages/Contatti"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TerminiServizio = lazy(() => import("./pages/TerminiServizio"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lazy-loaded non-critical UI
@@ -74,6 +76,8 @@ const router = createBrowserRouter([
       { path: "/blog", element: <Blog /> },
       { path: "/blog/:slug", element: <BlogArticle /> },
       { path: "/contatti", element: <Contatti /> },
+      { path: "/privacy-policy", element: <PrivacyPolicy /> },
+      { path: "/termini-di-servizio", element: <TerminiServizio /> },
     ],
   },
   {
