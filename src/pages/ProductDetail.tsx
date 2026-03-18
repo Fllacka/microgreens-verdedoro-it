@@ -239,45 +239,51 @@ const ProductDetail = () => {
   return (
     <Layout>
       <Helmet>
-        <title>{product.meta_title || `Microgreens di ${product.name} - Verde D'Oro Microgreens`}</title>
+        {/* Standard SEO */}
+        <title>{product.meta_title || `Microgreens di ${product.name} - Verde D'Oro`}</title>
         <meta name="description" content={product.meta_description || product.description} />
         <link
           rel="canonical"
           href={`${window.location.origin}${product.canonical_url || `/microgreens/${product.slug}`}`}
         />
-        <meta
-          property="og:title"
-          content={product.og_title || product.meta_title || `Microgreens di ${product.name}`}
-        />
-        <meta
-          property="og:description"
-          content={product.og_description || product.meta_description || product.description}
-        />
+
+        {/* Open Graph / Facebook - Essential for sharing */}
+        <meta property="og:title" content={product.og_title || product.name} />
+        <meta property="og:description" content={product.og_description || product.description} />
         <meta property="og:type" content="product" />
-        <meta property="og:url" content={`${window.location.origin}/microgreens/${product.slug}`} />
-        <meta property="og:locale" content="it_IT" />
-        {product.media?.file_path && <meta property="og:image" content={product.media.file_path} />}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:title"
-          content={product.og_title || product.meta_title || `Microgreens di ${product.name}`}
-        />
-        <meta
-          name="twitter:description"
-          content={product.og_description || product.meta_description || product.description}
-        />
-        {product.media?.file_path && <meta name="twitter:image" content={product.media.file_path} />}
+        <meta property="og:url" content={window.location.href} />
         <meta property="og:site_name" content="Verde D'Oro Microgreens" />
+        <meta property="og:locale" content="it_IT" />
+
+        {/* Absolute Image Path is required for social previews */}
+        {product.media?.file_path && (
+          <>
+            <meta
+              property="og:image"
+              content={
+                product.media.file_path.startsWith("http")
+                  ? product.media.file_path
+                  : `${window.location.origin}${product.media.file_path}`
+              }
+            />
+            <meta property="og:image:alt" content={product.image_alt || `Foto di ${product.name}`} />
+          </>
+        )}
+
+        {/* E-commerce Specific SEO */}
         {hasPriceTiers && (
           <>
             <meta
               property="product:price:amount"
-              content={currentPrice ? currentPrice.toString() : priceTiers[0].price.toString()}
+              content={currentPrice?.toString() || priceTiers[0].price.toString()}
             />
             <meta property="product:price:currency" content="EUR" />
-            <meta property="product:availability" content="in stock" />
+            <meta property="product:condition" content="new" />
+            <meta property="product:availability" content="instock" />
           </>
         )}
+
+        {/* Structured Data */}
         <script type="application/ld+json">{JSON.stringify(combineSchemas(...allSchemas))}</script>
       </Helmet>
 
