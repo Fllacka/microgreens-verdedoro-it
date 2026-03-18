@@ -21,14 +21,14 @@ const TerminiServizio = lazy(() => import("./pages/TerminiServizio"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lazy-loaded non-critical UI
-const CartDrawer = lazy(() => import("./components/CartDrawer").then(m => ({ default: m.CartDrawer })));
-const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
-const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
-
+const CartDrawer = lazy(() => import("./components/CartDrawer").then((m) => ({ default: m.CartDrawer })));
+const Toaster = lazy(() => import("@/components/ui/toaster").then((m) => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@/components/ui/sonner").then((m) => ({ default: m.Toaster })));
 
 // Admin/Preview wrappers
 const AdminRoutesWrapper = lazy(() => import("./components/AdminRoutesWrapper"));
 const PreviewRoutesWrapper = lazy(() => import("./components/PreviewRoutesWrapper"));
+import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,19 +94,21 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <Suspense fallback={null}>
-      <TooltipProvider>
-        <CartProvider>
-          <Suspense fallback={null}>
-            <Toaster />
-            <Sonner />
-          </Suspense>
-          <RouterProvider router={router} />
-        </CartProvider>
-      </TooltipProvider>
-    </Suspense>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={null}>
+        <TooltipProvider>
+          <CartProvider>
+            <Suspense fallback={null}>
+              <Toaster />
+              <Sonner />
+            </Suspense>
+            <RouterProvider router={router} />
+          </CartProvider>
+        </TooltipProvider>
+      </Suspense>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
