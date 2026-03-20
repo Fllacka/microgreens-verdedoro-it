@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { ImageCropper } from "@/components/ImageCropper";
 
 interface OptimizedUrls {
   thumbnail?: string;
@@ -42,28 +43,9 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
   const [altText, setAltText] = useState("");
-  const [processingId, setProcessingId] = useState<string | null>(null);
   const { toast } = useToast();
-
-  const processImage = async (mediaId: string, storagePath: string) => {
-    setProcessingId(mediaId);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const res = await supabase.functions.invoke("process-image", {
-        body: { mediaId, storagePath },
-      });
-
-      if (res.error) {
-        console.error("Process image error:", res.error);
-      }
-    } catch (err: any) {
-      console.error("Process image error:", err);
-    } finally {
-      setProcessingId(null);
-    }
-  };
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -94,7 +76,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       setLoading(false);
     }
   };
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -107,6 +89,61 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       return;
     }
 
+    setOriginalFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!originalFile) return;
+    setUploading(true);
+    setImageToCrop(null);
+
+    try {
+      const fileExt = originalFile.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const storagePath = `uploads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, croppedBlob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
+
+      const { data: mediaData, error: dbError } = await supabase
+        .from("media")
+        .insert({
+          file_name: originalFile.name,
+          file_path: urlData.publicUrl,
+          file_type: originalFile.type,
+          file_size: croppedBlob.size,
+          storage_path: storagePath,
+          is_optimized: true,
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Successo",
+        description: "Immagine ritagliata e caricata.",
+      });
+
+      await fetchMedia();
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
@@ -214,11 +251,6 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
                           <Check className="h-8 w-8 text-primary" />
                         </div>
                       )}
-                      {processingId === file.id && (
-                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        </div>
-                      )}
                       {file.is_optimized && (
                         <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">
                           <Check className="h-3 w-3" />
@@ -273,6 +305,14 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
               <Button onClick={handleInsert}>Inserisci Immagine</Button>
             </div>
           </div>
+        )}
+        {imageToCrop && (
+          <ImageCropper
+            image={imageToCrop}
+            aspectRatio={16 / 9}
+            onCropComplete={handleCropComplete}
+            onCancel={() => setImageToCrop(null)}
+          />
         )}
       </DialogContent>
     </Dialog>
