@@ -109,8 +109,7 @@ const ProductPreview = () => {
           .select(`
             *,
             media:media!products_image_id_fkey (
-              file_path,
-              optimized_urls
+              file_path
             )
           `)
           .eq("slug", slug)
