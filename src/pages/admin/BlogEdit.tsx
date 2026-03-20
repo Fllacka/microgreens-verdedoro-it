@@ -89,7 +89,7 @@ const AdminBlogEdit = () => {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   // Centralized change tracking with justSaved protection
@@ -130,11 +130,7 @@ const AdminBlogEdit = () => {
 
   const fetchPost = async () => {
     try {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { data, error } = await supabase.from("blog_posts").select("*").eq("id", id).single();
 
       if (error) throw error;
 
@@ -156,7 +152,7 @@ const AdminBlogEdit = () => {
       // Load draft content blocks if they exist
       const draftBlocks = (data as any).draft_content_blocks;
       const publishedBlocks = data.content_blocks;
-      
+
       if (draftBlocks && Array.isArray(draftBlocks) && draftBlocks.length > 0) {
         setContentBlocks(draftBlocks as unknown as ContentBlock[]);
       } else if (publishedBlocks && Array.isArray(publishedBlocks) && publishedBlocks.length > 0) {
@@ -190,7 +186,10 @@ const AdminBlogEdit = () => {
         robots: (data as any).draft_robots ?? data.robots ?? "index, follow",
         changeFrequency: (data as any).draft_change_frequency ?? data.change_frequency ?? "monthly",
         priority: ((data as any).draft_priority ?? data.priority)?.toString() ?? "0.5",
-        structuredData: ((data as any).draft_structured_data ?? data.structured_data) ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2) : "",
+        structuredData:
+          ((data as any).draft_structured_data ?? data.structured_data)
+            ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2)
+            : "",
       });
     } catch (error) {
       console.error("Error fetching blog post:", error);
@@ -238,7 +237,7 @@ const AdminBlogEdit = () => {
         draft_excerpt: formData.excerpt,
         draft_content_blocks: contentBlocks as any,
         draft_category: formData.category,
-        draft_tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
+        draft_tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()) : [],
         draft_featured_image_id: formData.featuredImageId,
         draft_faq_title: faqTitle,
         draft_faq_items: faqItems as any,
@@ -308,9 +307,13 @@ const AdminBlogEdit = () => {
         excerpt: formData.excerpt,
         content_blocks: contentBlocks as any,
         category: formData.category,
-        tags: formData.tags ? formData.tags.split(",").map(t => t.trim()) : [],
+        tags: formData.tags ? formData.tags.split(",").map((t) => t.trim()) : [],
         published: publish,
-        published_at: scheduledDate ? new Date(scheduledDate).toISOString() : (formData.publishedAt ? new Date(formData.publishedAt).toISOString() : new Date().toISOString()),
+        published_at: scheduledDate
+          ? new Date(scheduledDate).toISOString()
+          : formData.publishedAt
+            ? new Date(formData.publishedAt).toISOString()
+            : new Date().toISOString(),
         featured_image_id: formData.featuredImageId,
         faq_title: faqTitle,
         faq_items: faqItems as any,
@@ -352,7 +355,7 @@ const AdminBlogEdit = () => {
         const { data, error } = await supabase.from("blog_posts").insert(postData).select().single();
         if (error) throw error;
         setCreatedId(data.id);
-        setFormData(prev => ({ ...prev, published: publish }));
+        setFormData((prev) => ({ ...prev, published: publish }));
         setHasDraftChanges(false);
         toast({
           title: "Successo",
@@ -362,7 +365,7 @@ const AdminBlogEdit = () => {
       } else {
         const { error } = await supabase.from("blog_posts").update(postData).eq("id", postId);
         if (error) throw error;
-        setFormData(prev => ({ ...prev, published: publish }));
+        setFormData((prev) => ({ ...prev, published: publish }));
         setHasDraftChanges(false);
         toast({
           title: "Successo",
@@ -403,13 +406,11 @@ const AdminBlogEdit = () => {
   };
 
   const removeFAQItem = (id: string) => {
-    setFaqItems(faqItems.filter(item => item.id !== id));
+    setFaqItems(faqItems.filter((item) => item.id !== id));
   };
 
   const updateFAQItem = (id: string, field: "question" | "answer", value: string) => {
-    setFaqItems(faqItems.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ));
+    setFaqItems(faqItems.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
   };
 
   const handleFAQDragEnd = (event: DragEndEvent) => {
@@ -481,7 +482,7 @@ const AdminBlogEdit = () => {
                           setFormData({ ...formData, title: newTitle });
                           // Auto-generate slug from title for new posts (if slug not manually edited)
                           if (isNew && !slugManuallyEdited.current) {
-                            setSeoData(prev => ({ ...prev, slug: generateSlug(newTitle) }));
+                            setSeoData((prev) => ({ ...prev, slug: generateSlug(newTitle) }));
                           }
                         }}
                         required
@@ -504,10 +505,12 @@ const AdminBlogEdit = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="category">Categoria</Label>
-                        {availableCategories.filter(c => c.name?.trim()).length > 0 ? (
+                        {availableCategories.filter((c) => c.name?.trim()).length > 0 ? (
                           <Select
                             value={formData.category || "none"}
-                            onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value })}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, category: value === "none" ? "" : value })
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Seleziona categoria" />
@@ -515,7 +518,7 @@ const AdminBlogEdit = () => {
                             <SelectContent>
                               <SelectItem value="none">Nessuna categoria</SelectItem>
                               {availableCategories
-                                .filter(cat => cat.name?.trim())
+                                .filter((cat) => cat.name?.trim())
                                 .map((cat) => (
                                   <SelectItem key={cat.id} value={cat.name}>
                                     {cat.name}
@@ -532,8 +535,8 @@ const AdminBlogEdit = () => {
                           />
                         )}
                         <p className="text-xs text-muted-foreground">
-                          {availableCategories.length === 0 
-                            ? "Aggiungi categorie dalla pagina Blog Overview nel CMS." 
+                          {availableCategories.length === 0
+                            ? "Aggiungi categorie dalla pagina Blog Overview nel CMS."
                             : "Opzionale - seleziona una categoria."}
                         </p>
                       </div>
@@ -562,6 +565,7 @@ const AdminBlogEdit = () => {
                       value={formData.featuredImageId}
                       onChange={(imageId) => setFormData({ ...formData, featuredImageId: imageId })}
                       showAltText={false}
+                      aspectRatio={16 / 9}
                     />
                     <p className="text-xs text-muted-foreground mt-2">
                       Questa immagine apparirà come copertina dell'articolo e nelle anteprime.
@@ -582,7 +586,9 @@ const AdminBlogEdit = () => {
                         value={formData.publishedAt}
                         onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
                       />
-                      <p className="text-xs text-muted-foreground">Opzionale. Lascia vuoto per nessuna data specifica.</p>
+                      <p className="text-xs text-muted-foreground">
+                        Opzionale. Lascia vuoto per nessuna data specifica.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -625,15 +631,8 @@ const AdminBlogEdit = () => {
                       <p className="text-sm">Clicca "Aggiungi FAQ" per iniziare</p>
                     </div>
                   ) : (
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={handleFAQDragEnd}
-                    >
-                      <SortableContext
-                        items={faqItems.map(item => item.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleFAQDragEnd}>
+                      <SortableContext items={faqItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
                         <div className="space-y-4">
                           {faqItems.map((faq, index) => (
                             <SortableItem key={faq.id} id={faq.id}>
@@ -702,11 +701,7 @@ const AdminBlogEdit = () => {
         hasDraftChanges={hasDraftChanges}
       />
 
-      <UnsavedChangesDialog
-        isOpen={isBlocked}
-        onConfirm={() => proceed?.()}
-        onCancel={() => reset?.()}
-      />
+      <UnsavedChangesDialog isOpen={isBlocked} onConfirm={() => proceed?.()} onCancel={() => reset?.()} />
     </AdminLayout>
   );
 };
