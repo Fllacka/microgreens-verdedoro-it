@@ -226,7 +226,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
         {/* Compact image section */}
         <div>
           <Label className="text-xs text-muted-foreground mb-2 block">Immagine</Label>
-          {renderImageControls(block, isMobile)}
+          {renderImageControls(block, isMobile, 3 / 4)}
         </div>
 
         {/* Rich text content */}
