@@ -80,7 +80,7 @@ const BlogPreview = () => {
     button_link: "/microgreens",
     product_slugs: [] as string[],
   });
-  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>>({});
+  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; width?: number; height?: number }>>({});
 
   useEffect(() => {
     if (authLoading) return;
