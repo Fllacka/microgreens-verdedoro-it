@@ -40,7 +40,6 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
   const [altText, setAltText] = useState("");
   const { toast } = useToast();
@@ -57,7 +56,9 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       const { data, error } = await supabase
         .from("media")
         .select("*")
-        .or("file_type.eq.image/jpeg,file_type.eq.image/png,file_type.eq.image/webp,file_type.eq.image/jpg,file_type.eq.image/gif")
+        .or(
+          "file_type.eq.image/jpeg,file_type.eq.image/png,file_type.eq.image/webp,file_type.eq.image/jpg,file_type.eq.image/gif",
+        )
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -72,35 +73,6 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       setLoading(false);
     }
   };
-
-  const processImage = async (mediaId: string, storagePath: string) => {
-    setProcessingId(mediaId);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('process-image', {
-        body: { storagePath, mediaId },
-      });
-
-      if (error) throw error;
-      
-      if (data.success) {
-        toast({
-          title: "Successo",
-          description: "Immagine ottimizzata",
-        });
-        await fetchMedia();
-        return data.optimizedUrls;
-      } else {
-        throw new Error(data.error || 'Processing failed');
-      }
-    } catch (error: any) {
-      console.error('Image processing error:', error);
-      return null;
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -120,30 +92,30 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const storagePath = `uploads/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("cms-media")
-        .upload(storagePath, file);
+      const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("cms-media")
-        .getPublicUrl(storagePath);
+      const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
 
-      const { data: mediaData, error: dbError } = await supabase.from("media").insert({
-        file_name: file.name,
-        file_path: urlData.publicUrl,
-        file_type: file.type,
-        file_size: file.size,
-        storage_path: storagePath,
-        is_optimized: false,
-      }).select().single();
+      const { data: mediaData, error: dbError } = await supabase
+        .from("media")
+        .insert({
+          file_name: file.name,
+          file_path: urlData.publicUrl,
+          file_type: file.type,
+          file_size: file.size,
+          storage_path: storagePath,
+          is_optimized: false,
+        })
+        .select()
+        .single();
 
       if (dbError) throw dbError;
 
       toast({
         title: "Successo",
-        description: "Immagine caricata. Ottimizzazione in corso...",
+        description: "Immagine caricata.",
       });
 
       // Process image
@@ -240,9 +212,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
           <TabsContent value="upload" className="mt-4">
             <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed rounded-lg">
               <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">
-                Trascina un'immagine o clicca per selezionare
-              </p>
+              <p className="text-muted-foreground mb-4">Trascina un'immagine o clicca per selezionare</p>
               <Input
                 type="file"
                 accept="image/*"
