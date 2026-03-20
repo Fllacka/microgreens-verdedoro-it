@@ -30,12 +30,13 @@ export const ImageCropper = ({ image, aspectRatio, onCropComplete, onCancel }: I
   const getCroppedImg = async () => {
     try {
       const img = new Image();
+      // --- FIX CORS: Questa riga permette al pulsante di funzionare ---
+      img.crossOrigin = "anonymous";
       img.src = image;
       await img.decode();
 
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-
       if (!ctx || !croppedAreaPixels) return;
 
       canvas.width = croppedAreaPixels.width;
@@ -67,15 +68,13 @@ export const ImageCropper = ({ image, aspectRatio, onCropComplete, onCancel }: I
 
   return (
     <Dialog open onOpenChange={() => onCancel()}>
-      <DialogContent className="sm:max-w-xl p-0 overflow-hidden">
-        {" "}
-        {/* Fix Padding */}
+      <DialogContent className="sm:max-w-xl p-0 overflow-hidden bg-white">
         <DialogHeader className="p-6 pb-0">
-          <DialogTitle>Ritaglia l'immagine per Verde D'Oro</DialogTitle>
+          <DialogTitle>Ritaglia per Verde D'Oro</DialogTitle>
         </DialogHeader>
-        {/* --- FIX CSS QUI --- */}
-        {/* Usiamo un'altezza fissa e 'relative' per react-easy-crop */}
-        <div className="relative w-full h-[450px] bg-muted">
+
+        {/* FIX MOVIMENTO: 'touch-none' e altezza corretta permettono il trascinamento */}
+        <div className="relative w-full h-[400px] mt-4 bg-muted touch-none">
           <Cropper
             image={image}
             crop={crop}
@@ -84,25 +83,18 @@ export const ImageCropper = ({ image, aspectRatio, onCropComplete, onCancel }: I
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropCompleteInternal}
-            // Aggiungiamo classi per assicurarci che sia cliccabile
-            classes={{
-              containerClassName: "cursor-move",
-              mediaClassName: "max-w-none",
-            }}
+            classes={{ containerClassName: "cursor-move" }}
           />
         </div>
-        {/* -------------------- */}
-        <div className="p-6 space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Zoom</label>
-            <Slider min={1} max={3} step={0.1} value={[zoom]} onValueChange={(value) => setZoom(value[0])} />
-          </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+        <div className="p-6 space-y-4">
+          <label className="text-sm font-medium">Zoom (usa la rotellina o lo slider)</label>
+          <Slider min={1} max={3} step={0.1} value={[zoom]} onValueChange={(v) => setZoom(v[0])} />
+          <DialogFooter>
             <Button variant="outline" onClick={onCancel}>
               Annulla
             </Button>
-            <Button onClick={getCroppedImg} className="bg-verde-primary hover:bg-verde-light">
+            <Button onClick={getCroppedImg} className="bg-verde-primary hover:bg-verde-light text-white">
               Conferma e Applica
             </Button>
           </DialogFooter>
