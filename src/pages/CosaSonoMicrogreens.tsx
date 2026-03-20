@@ -156,22 +156,18 @@ const CosaSonoMicrogreens = () => {
       if (imageIds.length > 0) {
         const { data: media } = await supabase
           .from("media")
-          .select("id, file_path, optimized_versions, blurhash, width, height")
+          .select("id, file_path, width, height")
           .in("id", imageIds);
         
         if (media) {
           const map: Record<string, {
             file_path: string;
-            optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-            blurhash?: string | null;
             width?: number | null;
             height?: number | null;
           }> = {};
           media.forEach(m => {
             map[m.id] = {
               file_path: m.file_path,
-              optimized_versions: m.optimized_versions as Record<string, { url: string; width: number; height: number }> | null,
-              blurhash: m.blurhash,
               width: m.width,
               height: m.height,
             };
