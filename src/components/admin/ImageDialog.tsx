@@ -76,7 +76,8 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       setLoading(false);
     }
   };
-const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -144,54 +145,6 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       setUploading(false);
     }
   };
-    setUploading(true);
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const storagePath = `uploads/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
-
-      const { data: mediaData, error: dbError } = await supabase
-        .from("media")
-        .insert({
-          file_name: file.name,
-          file_path: urlData.publicUrl,
-          file_type: file.type,
-          file_size: file.size,
-          storage_path: storagePath,
-          is_optimized: false,
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      toast({
-        title: "Successo",
-        description: "Immagine caricata.",
-      });
-
-      // Process image
-      if (mediaData) {
-        await processImage(mediaData.id, storagePath);
-      }
-
-      await fetchMedia();
-    } catch (error: any) {
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleSelect = (file: MediaFile) => {
     setSelectedImage(file);
@@ -241,11 +194,7 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
                       }`}
                       onClick={() => handleSelect(file)}
                     >
-                      <img
-                        src={file.optimized_urls?.thumbnail || file.file_path}
-                        alt={file.file_name}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={file.file_path} alt={file.file_name} className="w-full h-full object-cover" />
                       {selectedImage?.id === file.id && (
                         <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                           <Check className="h-8 w-8 text-primary" />
@@ -287,7 +236,7 @@ const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
           <div className="space-y-3 pt-4 border-t">
             <div className="flex items-center gap-4">
               <img
-                src={selectedImage.optimized_urls?.thumbnail || selectedImage.file_path}
+                src={selectedImage.file_path}
                 alt={selectedImage.file_name}
                 className="w-16 h-16 object-cover rounded"
               />
