@@ -401,7 +401,8 @@ const AdminMicrogreensCustom = () => {
                 </div>
                 <div>
                   <Label>Immagine</Label>
-                  <MediaSelector
+                   <MediaSelector
+                     aspectRatio={ASPECT_RATIOS.SECTION}
                     value={introSection?.content?.image_id || null}
                     onChange={(id) => updateSectionContent('intro', 'image_id', id)}
                   />

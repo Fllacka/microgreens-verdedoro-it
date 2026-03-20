@@ -337,6 +337,7 @@ const ChiSiamoAdmin = () => {
                   <div>
                     <Label>Immagine Hero</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.SECTION}
                       value={sections.hero.content.image_id}
                       onChange={(id) => updateSectionContent("hero", "image_id", id)}
                       altText={sections.hero.content.image_alt || ""}

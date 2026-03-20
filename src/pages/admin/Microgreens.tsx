@@ -603,6 +603,7 @@ const AdminMicrogreens = () => {
                   <div className="space-y-2">
                     <Label>Immagine sezione</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.SECTION}
                       value={infoSection?.content?.image_id || null}
                       onChange={(id) => updateSectionContent("info", "image_id", id)}
                       showAltText

@@ -531,6 +531,7 @@ const AdminCosaSonoMicrogreens = () => {
                 <div className="space-y-2">
                   <Label>Immagine di Sfondo (opzionale)</Label>
                   <MediaSelector
+                    aspectRatio={ASPECT_RATIOS.HERO}
                     value={heroData.imageId}
                     onChange={(imageId) => setHeroData({ ...heroData, imageId })}
                     showAltText={false}
