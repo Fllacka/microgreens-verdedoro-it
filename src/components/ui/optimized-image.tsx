@@ -13,16 +13,6 @@ interface OptimizedImageProps {
   fallbackSrc?: string;
   onLoad?: () => void;
   onError?: () => void;
-  /** @deprecated No longer used */
-  optimizedUrls?: unknown;
-  /** @deprecated No longer used */
-  size?: string;
-  /** @deprecated No longer used */
-  context?: string;
-  /** @deprecated No longer used */
-  blurhash?: string | null;
-  /** @deprecated No longer used */
-  optimizedUrl?: string | null;
 }
 
 /**

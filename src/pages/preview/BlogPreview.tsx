@@ -427,7 +427,7 @@ const BlogPreview = () => {
                   const imageId = product.image_id;
                   const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
                   const productImage = mediaInfo?.file_path || "/placeholder.svg";
-                  const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                  
                   const gridDesc = product.grid_description;
                   
                   return (
