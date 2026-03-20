@@ -34,9 +34,10 @@ interface MediaFile {
 interface ImageDialogProps {
   children: React.ReactNode;
   onSelectImage: (url: string, alt: string, optimizedUrls?: OptimizedUrls | null) => void;
+  aspectRatio?: number;
 }
 
-export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
+export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: ImageDialogProps) => {
   const [open, setOpen] = useState(false);
   const [media, setMedia] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -288,7 +289,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
         {imageToCrop && (
           <ImageCropper
             image={imageToCrop}
-            aspectRatio={16 / 9} // Ratio per il Blog
+            aspectRatio={aspectRatio} // <-- SOSTITUISCI 16/9 CON aspectRatio
             onCropComplete={handleCropComplete}
             onCancel={() => setImageToCrop(null)}
           />
