@@ -19,12 +19,12 @@ import { useChangeTracking } from "@/hooks/useChangeTracking";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Search, Package, Plus, Trash2, HelpCircle, GripVertical, Euro } from "lucide-react";
-import { 
-  generateProductSchema, 
-  generateBreadcrumbSchema, 
-  generateFAQSchema, 
+import {
+  generateProductSchema,
+  generateBreadcrumbSchema,
+  generateFAQSchema,
   combineSchemas,
-  stripHtmlTags 
+  stripHtmlTags,
 } from "@/lib/seo";
 import { generateSlug } from "@/lib/slug-utils";
 
@@ -125,7 +125,7 @@ const AdminProductEdit = () => {
 
       const items = (data?.content as { items?: CategoryItem[] })?.items || [];
       // Filter out empty category names
-      setAvailableCategories(items.filter(cat => cat.name?.trim()));
+      setAvailableCategories(items.filter((cat) => cat.name?.trim()));
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -133,11 +133,7 @@ const AdminProductEdit = () => {
 
   const fetchProduct = async () => {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
 
       if (error) throw error;
 
@@ -179,18 +175,17 @@ const AdminProductEdit = () => {
         robots: (data as any).draft_robots ?? data.robots ?? "index, follow",
         changeFrequency: (data as any).draft_change_frequency ?? data.change_frequency ?? "weekly",
         priority: ((data as any).draft_priority ?? data.priority)?.toString() ?? "0.5",
-        structuredData: ((data as any).draft_structured_data ?? data.structured_data) ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2) : "",
+        structuredData:
+          ((data as any).draft_structured_data ?? data.structured_data)
+            ? JSON.stringify((data as any).draft_structured_data ?? data.structured_data, null, 2)
+            : "",
       });
 
       // Fetch image URL if image_id exists
       const imageId = (data as any).draft_image_id ?? data.image_id;
       if (imageId) {
-        const { data: mediaData } = await supabase
-          .from("media")
-          .select("file_path")
-          .eq("id", imageId)
-          .single();
-        
+        const { data: mediaData } = await supabase.from("media").select("file_path").eq("id", imageId).single();
+
         if (mediaData) {
           setImageUrl(mediaData.file_path);
         }
@@ -223,8 +218,8 @@ const AdminProductEdit = () => {
         draft_category: formData.category,
         draft_price: formData.price ? parseFloat(formData.price) : null,
         draft_price_tiers: formData.price_tiers as unknown as any,
-        draft_benefits: formData.benefits ? formData.benefits.split(",").map(b => b.trim()) : [],
-        draft_uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
+        draft_benefits: formData.benefits ? formData.benefits.split(",").map((b) => b.trim()) : [],
+        draft_uses: formData.uses ? formData.uses.split(",").map((u) => u.trim()) : [],
         draft_benefits_content: formData.benefits_content,
         draft_benefits_title: formData.benefits_title,
         draft_uses_content: formData.uses_content,
@@ -299,10 +294,10 @@ const AdminProductEdit = () => {
           .select("id")
           .eq("id", formData.image_id)
           .maybeSingle();
-        
+
         if (!mediaExists) {
           // Image was deleted, clear the reference
-          setFormData(prev => ({ ...prev, image_id: null }));
+          setFormData((prev) => ({ ...prev, image_id: null }));
           setImageUrl(null);
           toast({
             title: "Attenzione",
@@ -325,8 +320,8 @@ const AdminProductEdit = () => {
         category: formData.category,
         price: formData.price ? parseFloat(formData.price) : null,
         price_tiers: formData.price_tiers as unknown as any,
-        benefits: formData.benefits ? formData.benefits.split(",").map(b => b.trim()) : [],
-        uses: formData.uses ? formData.uses.split(",").map(u => u.trim()) : [],
+        benefits: formData.benefits ? formData.benefits.split(",").map((b) => b.trim()) : [],
+        uses: formData.uses ? formData.uses.split(",").map((u) => u.trim()) : [],
         benefits_content: formData.benefits_content,
         benefits_title: formData.benefits_title,
         uses_content: formData.uses_content,
@@ -384,7 +379,7 @@ const AdminProductEdit = () => {
         const { data, error } = await supabase.from("products").insert(productData).select().single();
         if (error) throw error;
         setCreatedId(data.id);
-        setFormData(prev => ({ ...prev, published: publish }));
+        setFormData((prev) => ({ ...prev, published: publish }));
         setHasDraftChanges(false);
         toast({
           title: "Successo",
@@ -394,7 +389,7 @@ const AdminProductEdit = () => {
       } else {
         const { error } = await supabase.from("products").update(productData).eq("id", productId);
         if (error) throw error;
-        setFormData(prev => ({ ...prev, published: publish }));
+        setFormData((prev) => ({ ...prev, published: publish }));
         setHasDraftChanges(false);
         toast({
           title: "Successo",
@@ -456,13 +451,13 @@ const AdminProductEdit = () => {
 
     // Generate FAQ schema if there are FAQs
     if (formData.faq_items && formData.faq_items.length > 0) {
-      const validFaqs = formData.faq_items.filter(faq => faq.question && faq.answer);
+      const validFaqs = formData.faq_items.filter((faq) => faq.question && faq.answer);
       if (validFaqs.length > 0) {
         const faqSchema = generateFAQSchema(
-          validFaqs.map(faq => ({
+          validFaqs.map((faq) => ({
             question: faq.question,
             answer: stripHtmlTags(faq.answer),
-          }))
+          })),
         );
         schemas.push(faqSchema);
       }
@@ -470,7 +465,7 @@ const AdminProductEdit = () => {
 
     // Combine all schemas
     const combinedSchema = combineSchemas(...schemas);
-    
+
     return JSON.stringify(combinedSchema, null, 2);
   };
 
@@ -488,7 +483,13 @@ const AdminProductEdit = () => {
     <AdminLayout>
       <div className="space-y-6 md:space-y-8 pb-28 md:pb-24">
         <div className="flex items-center gap-3 md:gap-4">
-          <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/admin/products")} className="shrink-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/admin/products")}
+            className="shrink-0"
+          >
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="min-w-0">
@@ -527,7 +528,7 @@ const AdminProductEdit = () => {
                           const newName = e.target.value;
                           setFormData({ ...formData, name: newName });
                           if (isNew && !slugManuallyEdited.current) {
-                            setSeoData(prev => ({ ...prev, slug: generateSlug(newName) }));
+                            setSeoData((prev) => ({ ...prev, slug: generateSlug(newName) }));
                           }
                         }}
                         required
@@ -547,7 +548,9 @@ const AdminProductEdit = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <Label htmlFor="grid_description">Descrizione Product Grid</Label>
-                        <span className={`text-xs ${formData.grid_description.length > 120 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        <span
+                          className={`text-xs ${formData.grid_description.length > 120 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
                           {formData.grid_description.length}/120
                         </span>
                       </div>
@@ -560,7 +563,8 @@ const AdminProductEdit = () => {
                         placeholder="Descrizione breve per le card del product grid (max 120 caratteri)"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Questa descrizione appare nelle card dei prodotti. Consigliato: max 120 caratteri per evitare troncamenti.
+                        Questa descrizione appare nelle card dei prodotti. Consigliato: max 120 caratteri per evitare
+                        troncamenti.
                       </p>
                     </div>
 
@@ -582,27 +586,27 @@ const AdminProductEdit = () => {
                       />
                     </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="category">Categoria</Label>
-                        <Select
-                          value={formData.category || "none"}
-                          onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleziona categoria" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Nessuna categoria</SelectItem>
-                            {availableCategories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.name}>
-                                {cat.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Categoria</Label>
+                      <Select
+                        value={formData.category || "none"}
+                        onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Seleziona categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Nessuna categoria</SelectItem>
+                          {availableCategories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Price Tiers Card */}
                 <Card>
@@ -614,9 +618,10 @@ const AdminProductEdit = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Configura i prezzi per ogni quantità. Le quantità senza prezzo non saranno disponibili per l'acquisto.
+                      Configura i prezzi per ogni quantità. Le quantità senza prezzo non saranno disponibili per
+                      l'acquisto.
                     </p>
-                    
+
                     {/* Price Tiers Table */}
                     <div className="border rounded-lg overflow-hidden">
                       <table className="w-full">
@@ -688,7 +693,7 @@ const AdminProductEdit = () => {
                     {/* Quick Add Buttons */}
                     <div className="flex flex-wrap gap-2">
                       {[100, 200, 300, 400, 500, 750, 1000].map((weight) => {
-                        const exists = formData.price_tiers.some(t => t.weight === weight);
+                        const exists = formData.price_tiers.some((t) => t.weight === weight);
                         if (exists) return null;
                         return (
                           <Button
@@ -699,7 +704,9 @@ const AdminProductEdit = () => {
                             onClick={() => {
                               setFormData({
                                 ...formData,
-                                price_tiers: [...formData.price_tiers, { weight, price: 0 }].sort((a, b) => a.weight - b.weight)
+                                price_tiers: [...formData.price_tiers, { weight, price: 0 }].sort(
+                                  (a, b) => a.weight - b.weight,
+                                ),
                               });
                             }}
                           >
@@ -718,16 +725,18 @@ const AdminProductEdit = () => {
                         placeholder="Peso personalizzato (g)"
                         className="w-48"
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             const input = e.currentTarget;
                             const weight = parseInt(input.value);
-                            if (weight > 0 && !formData.price_tiers.some(t => t.weight === weight)) {
+                            if (weight > 0 && !formData.price_tiers.some((t) => t.weight === weight)) {
                               setFormData({
                                 ...formData,
-                                price_tiers: [...formData.price_tiers, { weight, price: 0 }].sort((a, b) => a.weight - b.weight)
+                                price_tiers: [...formData.price_tiers, { weight, price: 0 }].sort(
+                                  (a, b) => a.weight - b.weight,
+                                ),
                               });
-                              input.value = '';
+                              input.value = "";
                             }
                           }
                         }}
@@ -820,8 +829,8 @@ const AdminProductEdit = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {formData.faq_items.map((faq, index) => (
-                      <div 
-                        key={faq.id} 
+                      <div
+                        key={faq.id}
                         className="border rounded-lg p-4 space-y-3 bg-background"
                         draggable
                         onDragStart={(e) => {
@@ -925,6 +934,7 @@ const AdminProductEdit = () => {
                       }}
                       altText={formData.image_alt}
                       onAltTextChange={(altText) => setFormData({ ...formData, image_alt: altText })}
+                      aspectRatio={1}
                     />
                   </CardContent>
                 </Card>
@@ -975,11 +985,7 @@ const AdminProductEdit = () => {
         hasDraftChanges={hasDraftChanges}
       />
 
-      <UnsavedChangesDialog
-        isOpen={isBlocked}
-        onConfirm={() => proceed?.()}
-        onCancel={() => reset?.()}
-      />
+      <UnsavedChangesDialog isOpen={isBlocked} onConfirm={() => proceed?.()} onCancel={() => reset?.()} />
     </AdminLayout>
   );
 };
