@@ -108,7 +108,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     }
   };
 
-  const renderImageControls = (block: ContentBlock, isMobile: boolean = false) => {
+  const renderImageControls = (block: ContentBlock, isMobile: boolean = false, aspectRatio: number = 16 / 9) => {
     const sizeClasses = isMobile ? "w-16 h-16" : "w-20 h-20";
     const inputClasses = isMobile ? "h-8 text-xs" : "h-9";
 
@@ -141,7 +141,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
               placeholder="Alt: Descrizione per SEO"
               className={inputClasses}
             />
-            <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
+            <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)} aspectRatio={aspectRatio}>
               <Button type="button" variant="outline" size="sm" className="h-7 text-xs">
                 <Replace className="h-3 w-3 mr-1" />
                 Sostituisci
@@ -155,7 +155,7 @@ export const ContentBlockEditor = ({ blocks, onChange }: ContentBlockEditorProps
     return (
       <div className="border-2 border-dashed rounded-lg p-4 text-center">
         <ImageIcon className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-        <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)}>
+        <ImageDialog onSelectImage={(url, alt) => handleImageSelect(block.id, url, alt)} aspectRatio={aspectRatio}>
           <Button type="button" variant="outline" size="sm">
             <ImageIcon className="h-4 w-4 mr-1" />
             Seleziona
