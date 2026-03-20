@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/image-utils";
-import { ImageCropper } from "./ImageCropper";
+import { ImageCropper } from "@/components/ImageCropper";
 
 interface MediaFile {
   id: string;
