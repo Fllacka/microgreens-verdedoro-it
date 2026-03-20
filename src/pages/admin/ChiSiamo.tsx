@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Eye, EyeOff, Info, Search } from "lucide-react";

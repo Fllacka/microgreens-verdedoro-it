@@ -10,6 +10,7 @@ import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBloc
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";

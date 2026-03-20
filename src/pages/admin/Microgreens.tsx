@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info, Image, MousePointerClick } from "lucide-react";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";

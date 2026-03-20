@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";

@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { useToast } from "@/hooks/use-toast";
