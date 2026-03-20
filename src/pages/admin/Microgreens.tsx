@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Sprout, Search, Tag, Plus, X, GripVertical, FileText, Info, Image, MousePointerClick } from "lucide-react";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -308,6 +309,7 @@ const AdminMicrogreens = () => {
                       Se non viene impostata un'immagine, verrà utilizzato il gradiente predefinito.
                     </p>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.HERO}
                       value={heroSection?.content?.background_image_id || null}
                       onChange={(id) => updateSectionContent("hero", "background_image_id", id)}
                     />
@@ -601,6 +603,7 @@ const AdminMicrogreens = () => {
                   <div className="space-y-2">
                     <Label>Immagine sezione</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.SECTION}
                       value={infoSection?.content?.image_id || null}
                       onChange={(id) => updateSectionContent("info", "image_id", id)}
                       showAltText

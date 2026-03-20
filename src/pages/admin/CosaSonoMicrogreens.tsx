@@ -10,6 +10,7 @@ import { ContentBlockEditor, ContentBlock } from "@/components/admin/ContentBloc
 import { SEOFields } from "@/components/admin/SEOFields";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
@@ -530,6 +531,7 @@ const AdminCosaSonoMicrogreens = () => {
                 <div className="space-y-2">
                   <Label>Immagine di Sfondo (opzionale)</Label>
                   <MediaSelector
+                    aspectRatio={ASPECT_RATIOS.HERO}
                     value={heroData.imageId}
                     onChange={(imageId) => setHeroData({ ...heroData, imageId })}
                     showAltText={false}

@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
 import { useUnsavedChangesWarning } from "@/hooks/useUnsavedChangesWarning";
 import { useToast } from "@/hooks/use-toast";
@@ -373,6 +374,7 @@ const AdminBlogOverview = () => {
                       Se non viene impostata un'immagine, verrà utilizzato il gradiente predefinito.
                     </p>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.BLOG_HERO}
                       value={heroSection?.content?.background_image_id || null}
                       onChange={(id) => updateSectionContent("hero", "background_image_id", id)}
                     />

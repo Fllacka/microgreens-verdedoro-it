@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { SEOFields } from "@/components/admin/SEOFields";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { PublishActionBar } from "@/components/admin/PublishActionBar";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { UnsavedChangesDialog } from "@/components/admin/UnsavedChangesDialog";
@@ -354,7 +355,8 @@ const AdminMicrogreensCustom = () => {
                 </div>
                 <div>
                   <Label>Immagine di sfondo</Label>
-                  <MediaSelector
+                   <MediaSelector
+                     aspectRatio={ASPECT_RATIOS.HERO}
                     value={heroSection?.content?.image_id || null}
                     onChange={(id) => updateSectionContent('hero', 'image_id', id)}
                   />
@@ -399,7 +401,8 @@ const AdminMicrogreensCustom = () => {
                 </div>
                 <div>
                   <Label>Immagine</Label>
-                  <MediaSelector
+                   <MediaSelector
+                     aspectRatio={ASPECT_RATIOS.SECTION}
                     value={introSection?.content?.image_id || null}
                     onChange={(id) => updateSectionContent('intro', 'image_id', id)}
                   />

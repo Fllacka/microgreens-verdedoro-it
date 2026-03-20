@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { MediaSelector } from "@/components/admin/MediaSelector";
+import { ASPECT_RATIOS } from "@/lib/aspect-ratios";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Eye, EyeOff, Home, Search, Leaf, Heart, Truck, Shield, Sprout, Package, UtensilsCrossed, Star, ShoppingBag, Scissors, Bike, Sparkles, Flame, Sun, ChefHat, ArrowRight, Hand, HandCoins, type LucideIcon } from "lucide-react";
@@ -418,6 +419,7 @@ const Homepage = () => {
                   <div>
                     <Label>Immagine di Sfondo</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.HERO}
                       value={sections.hero.content.background_image_id}
                       onChange={(id, url) => {
                         updateSectionContent("hero", "background_image_id", id);
@@ -472,6 +474,7 @@ const Homepage = () => {
                   <div>
                     <Label>Immagine Sezione</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.SECTION}
                       value={sections.what_are_microgreens.content.image_id}
                       onChange={(id, url) => {
                         updateSectionContent("what_are_microgreens", "image_id", id);
@@ -838,6 +841,7 @@ const Homepage = () => {
                   <div>
                     <Label>Immagine Sezione</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.SECTION}
                       value={sections.custom_microgreens.content.image_id}
                       onChange={(id, url) => {
                         updateSectionContent("custom_microgreens", "image_id", id);
