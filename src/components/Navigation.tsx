@@ -97,8 +97,7 @@ const Navigation = () => {
             logo_id,
             header_settings,
             media:logo_id (
-              file_path,
-              optimized_urls
+              file_path
             )
           `)
           .eq("id", "default")

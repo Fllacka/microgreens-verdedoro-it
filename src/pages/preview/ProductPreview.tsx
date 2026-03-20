@@ -125,7 +125,7 @@ const ProductPreview = () => {
           if (data.draft_image_id) {
             const { data: mediaData } = await supabase
               .from("media")
-              .select("file_path, optimized_urls")
+              .select("file_path")
               .eq("id", data.draft_image_id)
               .maybeSingle();
             draftMedia = mediaData;

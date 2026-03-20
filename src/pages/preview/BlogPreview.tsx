@@ -198,18 +198,16 @@ const BlogPreview = () => {
             if (imageIds.length > 0) {
               const { data: mediaData } = await supabase
                 .from("media")
-                .select("id, file_path, blurhash, width, height, optimized_versions")
+                .select("id, file_path, width, height")
                 .in("id", imageIds);
               
               if (mediaData) {
-                const mediaMap: Record<string, any> = {};
+                const mediaMap: Record<string, { file_path: string; width?: number; height?: number }> = {};
                 mediaData.forEach(m => {
                   mediaMap[m.id] = {
                     file_path: m.file_path,
-                    blurhash: m.blurhash,
                     width: m.width,
                     height: m.height,
-                    optimized_versions: m.optimized_versions,
                   };
                 });
                 setProductMediaMap(mediaMap);
