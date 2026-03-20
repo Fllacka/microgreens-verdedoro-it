@@ -43,9 +43,11 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
   const [altText, setAltText] = useState("");
-  const { toast } = useToast();
+  // Stati per il ritaglio al momento della SELEZIONE
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
-  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [tempFileRef, setTempFileRef] = useState<{ name: string; type: string } | null>(null);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     if (open) {
@@ -77,39 +79,23 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Step 1: L'upload carica SOLO l'originale senza ritagliarlo
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Errore",
-        description: "Seleziona un file immagine valido",
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: "Seleziona un file immagine valido", variant: "destructive" });
       return;
     }
 
-    setOriginalFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImageToCrop(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleCropComplete = async (croppedBlob: Blob) => {
-    if (!originalFile) return;
     setUploading(true);
-    setImageToCrop(null);
-
     try {
-      const fileExt = originalFile.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
       const storagePath = `uploads/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, croppedBlob);
-
+      const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, file);
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
@@ -117,30 +103,22 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       const { data: mediaData, error: dbError } = await supabase
         .from("media")
         .insert({
-          file_name: originalFile.name,
+          file_name: file.name,
           file_path: urlData.publicUrl,
-          file_type: originalFile.type,
-          file_size: croppedBlob.size,
+          file_type: file.type,
+          file_size: file.size,
           storage_path: storagePath,
-          is_optimized: true,
+          is_optimized: false, // È l'originale non ritagliato
         })
         .select()
         .single();
 
       if (dbError) throw dbError;
 
-      toast({
-        title: "Successo",
-        description: "Immagine ritagliata e caricata.",
-      });
-
+      toast({ title: "Successo", description: "Immagine originale caricata nella libreria media." });
       await fetchMedia();
     } catch (error: any) {
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -151,12 +129,56 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
     setAltText(file.file_name.split(".")[0]);
   };
 
-  const handleInsert = () => {
+  // Step 2: Quando clicchi su "Inserisci", apri il ritaglio (ratio 16:9)
+  const handleInsertClick = () => {
     if (selectedImage) {
-      onSelectImage(selectedImage.file_path, altText, selectedImage.optimized_urls);
-      setOpen(false);
+      setTempFileRef({ name: selectedImage.file_name, type: selectedImage.file_type });
+      setImageToCrop(selectedImage.file_path);
+    }
+  };
+
+  // Step 3: Dopo il ritaglio, salviamo la versione finale e la inseriamo nel blog
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!selectedImage || !tempFileRef) return;
+    setUploading(true);
+    setImageToCrop(null); // Chiude il cropper
+
+    try {
+      const fileName = `cropped-${Date.now()}-${tempFileRef.name}`;
+      const storagePath = `uploads/${fileName}`;
+
+      // Carichiamo il ritaglio JPEG al 90%
+      const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, croppedBlob);
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
+
+      // Creiamo un record nel database per il ritaglio finale
+      const { data: mediaData, error: dbError } = await supabase
+        .from("media")
+        .insert({
+          file_name: `cropped-${tempFileRef.name}`,
+          file_path: urlData.publicUrl,
+          file_type: "image/jpeg",
+          file_size: croppedBlob.size,
+          storage_path: storagePath,
+          is_optimized: true, // Segnamo come ottimizzato/ritagliato
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      // Restituiamo l'URL del RITAGLIO finale all'editor del blog
+      onSelectImage(mediaData.file_path, altText, null);
+      setOpen(false); // Chiude il dialog media
       setSelectedImage(null);
       setAltText("");
+      toast({ title: "Applicato", description: "Immagine ritagliata inserita nel blog." });
+    } catch (error: any) {
+      toast({ title: "Errore", description: "Errore nell'applicazione del ritaglio finale.", variant: "destructive" });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -165,7 +187,7 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Inserisci Immagine</DialogTitle>
+          <DialogTitle>Inserisci Immagine (Blog)</DialogTitle>
         </DialogHeader>
         <Tabs defaultValue="library" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
@@ -189,19 +211,22 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
                       key={file.id}
                       className={`relative cursor-pointer group aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                         selectedImage?.id === file.id
-                          ? "border-primary ring-2 ring-primary/20"
+                          ? "border-verde-primary ring-2 ring-verde-primary/20"
                           : "border-transparent hover:border-muted-foreground/30"
                       }`}
                       onClick={() => handleSelect(file)}
                     >
                       <img src={file.file_path} alt={file.file_name} className="w-full h-full object-cover" />
                       {selectedImage?.id === file.id && (
-                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                          <Check className="h-8 w-8 text-primary" />
+                        <div className="absolute inset-0 bg-verde-primary/10 flex items-center justify-center">
+                          <Check className="h-8 w-8 text-verde-primary" />
                         </div>
                       )}
                       {file.is_optimized && (
-                        <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] px-1 py-0">
+                        <Badge
+                          variant="secondary"
+                          className="absolute top-1 right-1 text-[10px] px-1 py-0 bg-background/80"
+                        >
                           <Check className="h-3 w-3" />
                         </Badge>
                       )}
@@ -212,9 +237,9 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
             </ScrollArea>
           </TabsContent>
           <TabsContent value="upload" className="mt-4">
-            <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed rounded-lg">
+            <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg bg-muted/20">
               <Upload className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">Trascina un'immagine o clicca per selezionare</p>
+              <p className="text-sm text-muted-foreground mb-4">Trascina un'immagine o clicca per selezionare</p>
               <Input
                 type="file"
                 accept="image/*"
@@ -223,9 +248,9 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
                 className="max-w-xs"
               />
               {uploading && (
-                <div className="flex items-center gap-2 mt-4">
+                <div className="flex items-center gap-2 mt-4 text-sm text-verde-primary">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Caricamento in corso...</span>
+                  <span>Caricamento originale...</span>
                 </div>
               )}
             </div>
@@ -238,10 +263,10 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
               <img
                 src={selectedImage.file_path}
                 alt={selectedImage.file_name}
-                className="w-16 h-16 object-cover rounded"
+                className="w-16 h-16 object-cover rounded border"
               />
               <div className="flex-1 space-y-2">
-                <Label htmlFor="alt-text">Testo alternativo (Alt)</Label>
+                <Label htmlFor="alt-text">Testo alternativo (Alt) per SEO</Label>
                 <Input
                   id="alt-text"
                   value={altText}
@@ -251,14 +276,19 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button onClick={handleInsert}>Inserisci Immagine</Button>
+              <Button onClick={handleInsertClick} className="bg-verde-primary hover:bg-verde-light">
+                <GripVertical className="h-4 w-4 mr-2" />
+                Ritaglia e Inserisci nel Blog
+              </Button>
             </div>
           </div>
         )}
+
+        {/* Popup del ritagliatore al momento della selezione */}
         {imageToCrop && (
           <ImageCropper
             image={imageToCrop}
-            aspectRatio={16 / 9}
+            aspectRatio={16 / 9} // Ratio per il Blog
             onCropComplete={handleCropComplete}
             onCancel={() => setImageToCrop(null)}
           />
