@@ -101,8 +101,6 @@ const CosaSonoMicrogreens = () => {
   });
   const [productMediaMap, setProductMediaMap] = useState<Record<string, {
     file_path: string;
-    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-    blurhash?: string | null;
     width?: number | null;
     height?: number | null;
   }>>({});
