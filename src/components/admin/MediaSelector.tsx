@@ -306,7 +306,7 @@ export const MediaSelector = ({
       {imageToCrop && (
         <ImageCropper
           image={imageToCrop}
-          aspectRatio={aspectRatio || 1}
+          aspectRatio={16 / 9}
           onCropComplete={handleCropComplete}
           onCancel={() => setImageToCrop(null)}
         />
