@@ -107,8 +107,6 @@ const ProductDetail = () => {
             *,
             media:media!products_image_id_fkey (
               file_path,
-              optimized_versions,
-              blurhash,
               width,
               height
             )
