@@ -102,8 +102,6 @@ const CosaSonoMicrogreensPreview = () => {
   });
   const [productMediaMap, setProductMediaMap] = useState<Record<string, {
     file_path: string;
-    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-    blurhash?: string | null;
     width?: number | null;
     height?: number | null;
   }>>({});
@@ -157,22 +155,18 @@ const CosaSonoMicrogreensPreview = () => {
       if (imageIds.length > 0) {
         const { data: media } = await supabase
           .from("media")
-          .select("id, file_path, optimized_versions, blurhash, width, height")
+          .select("id, file_path, width, height")
           .in("id", imageIds);
         
         if (media) {
           const map: Record<string, {
             file_path: string;
-            optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-            blurhash?: string | null;
             width?: number | null;
             height?: number | null;
           }> = {};
           media.forEach(m => {
             map[m.id] = {
               file_path: m.file_path,
-              optimized_versions: m.optimized_versions as Record<string, { url: string; width: number; height: number }> | null,
-              blurhash: m.blurhash,
               width: m.width,
               height: m.height,
             };
@@ -414,7 +408,7 @@ const CosaSonoMicrogreensPreview = () => {
                 const imageId = product.image_id;
                 const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
                 const productImage = mediaInfo?.file_path || (index === 1 ? varietiesImage : chefImage);
-                const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                
                 const gridDesc = product.grid_description;
                 
                 return (

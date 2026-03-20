@@ -109,8 +109,7 @@ const ProductPreview = () => {
           .select(`
             *,
             media:media!products_image_id_fkey (
-              file_path,
-              optimized_urls
+              file_path
             )
           `)
           .eq("slug", slug)
@@ -126,7 +125,7 @@ const ProductPreview = () => {
           if (data.draft_image_id) {
             const { data: mediaData } = await supabase
               .from("media")
-              .select("file_path, optimized_urls")
+              .select("file_path")
               .eq("id", data.draft_image_id)
               .maybeSingle();
             draftMedia = mediaData;
@@ -322,8 +321,6 @@ const ProductPreview = () => {
                 containerClassName="w-full h-full"
                 priority={true}
                 objectFit="cover"
-                size="large"
-                context="hero"
               />
             </div>
 

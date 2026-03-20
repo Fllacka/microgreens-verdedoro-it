@@ -97,7 +97,7 @@ const BlogArticle = () => {
     product_slugs: [] as string[],
   });
   const [productMediaMap, setProductMediaMap] = useState<
-    Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>
+    Record<string, { file_path: string; width?: number; height?: number }>
   >({});
 
   useEffect(() => {
@@ -236,18 +236,16 @@ const BlogArticle = () => {
             if (imageIds.length > 0) {
               const { data: mediaData } = await supabase
                 .from("media")
-                .select("id, file_path, blurhash, width, height, optimized_versions")
+                .select("id, file_path, width, height")
                 .in("id", imageIds);
 
               if (mediaData) {
-                const mediaMap: Record<string, any> = {};
+                const mediaMap: Record<string, { file_path: string; width?: number; height?: number }> = {};
                 mediaData.forEach((m) => {
                   mediaMap[m.id] = {
                     file_path: m.file_path,
-                    blurhash: m.blurhash,
                     width: m.width,
                     height: m.height,
-                    optimized_versions: m.optimized_versions,
                   };
                 });
                 setProductMediaMap(mediaMap);
@@ -506,7 +504,7 @@ const BlogArticle = () => {
                   const imageId = product.image_id;
                   const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
                   const productImage = mediaInfo?.file_path || "/placeholder.svg";
-                  const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                  
                   const gridDesc = product.grid_description;
 
                   return (

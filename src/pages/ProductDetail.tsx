@@ -68,8 +68,6 @@ interface Product {
   price_tiers?: PriceTier[];
   media?: {
     file_path: string;
-    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-    blurhash?: string | null;
     width?: number | null;
     height?: number | null;
   };
@@ -109,8 +107,6 @@ const ProductDetail = () => {
             *,
             media:media!products_image_id_fkey (
               file_path,
-              optimized_versions,
-              blurhash,
               width,
               height
             )
@@ -133,8 +129,6 @@ const ProductDetail = () => {
               *,
               media:media!products_image_id_fkey (
                 file_path,
-                optimized_versions,
-                blurhash,
                 width,
                 height
               )

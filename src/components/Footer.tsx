@@ -140,8 +140,7 @@ const Footer = () => {
             logo_id,
             footer_settings,
             media:logo_id (
-              file_path,
-              optimized_urls
+              file_path
             )
           `)
           .eq("id", "default")

@@ -74,8 +74,7 @@ const Microgreens = () => {
               rating,
               popular,
               media:media!products_image_id_fkey (
-                file_path,
-                optimized_urls
+                file_path
               )
             `,
             )

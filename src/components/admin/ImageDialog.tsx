@@ -8,18 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Upload, Loader2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
 import { ImageCropper } from "@/components/ImageCropper";
-
-interface OptimizedUrls {
-  thumbnail?: string;
-  medium?: string;
-  large?: string;
-  original?: string;
-  webp_thumbnail?: string;
-  webp_medium?: string;
-  webp_large?: string;
-}
 
 interface MediaFile {
   id: string;
@@ -27,13 +16,11 @@ interface MediaFile {
   file_path: string;
   file_type: string;
   storage_path: string;
-  is_optimized: boolean;
-  optimized_urls: OptimizedUrls | null;
 }
 
 interface ImageDialogProps {
   children: React.ReactNode;
-  onSelectImage: (url: string, alt: string, optimizedUrls?: OptimizedUrls | null) => void;
+  onSelectImage: (url: string, alt: string) => void;
   aspectRatio?: number;
 }
 
@@ -44,7 +31,6 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
   const [altText, setAltText] = useState("");
-  // Stati per il ritaglio al momento della SELEZIONE
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
   const [tempFileRef, setTempFileRef] = useState<{ name: string; type: string } | null>(null);
 
@@ -61,7 +47,7 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
     try {
       const { data, error } = await supabase
         .from("media")
-        .select("*")
+        .select("id, file_name, file_path, file_type, storage_path")
         .or(
           "file_type.eq.image/jpeg,file_type.eq.image/png,file_type.eq.image/webp,file_type.eq.image/jpg,file_type.eq.image/gif",
         )
@@ -80,7 +66,6 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
     }
   };
 
-  // Step 1: L'upload carica SOLO l'originale senza ritagliarlo
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -101,7 +86,7 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
 
       const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
 
-      const { data: mediaData, error: dbError } = await supabase
+      const { error: dbError } = await supabase
         .from("media")
         .insert({
           file_name: file.name,
@@ -109,14 +94,13 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
           file_type: file.type,
           file_size: file.size,
           storage_path: storagePath,
-          is_optimized: false, // È l'originale non ritagliato
         })
         .select()
         .single();
 
       if (dbError) throw dbError;
 
-      toast({ title: "Successo", description: "Immagine originale caricata nella libreria media." });
+      toast({ title: "Successo", description: "Immagine caricata nella libreria media." });
       await fetchMedia();
     } catch (error: any) {
       toast({ title: "Errore", description: error.message, variant: "destructive" });
@@ -130,7 +114,6 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
     setAltText(file.file_name.split(".")[0]);
   };
 
-  // Step 2: Quando clicchi su "Inserisci", apri il ritaglio (ratio 16:9)
   const handleInsertClick = () => {
     if (selectedImage) {
       setTempFileRef({ name: selectedImage.file_name, type: selectedImage.file_type });
@@ -138,23 +121,20 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
     }
   };
 
-  // Step 3: Dopo il ritaglio, salviamo la versione finale e la inseriamo nel blog
   const handleCropComplete = async (croppedBlob: Blob) => {
     if (!selectedImage || !tempFileRef) return;
     setUploading(true);
-    setImageToCrop(null); // Chiude il cropper
+    setImageToCrop(null);
 
     try {
       const fileName = `cropped-${Date.now()}-${tempFileRef.name}`;
       const storagePath = `uploads/${fileName}`;
 
-      // Carichiamo il ritaglio JPEG al 90%
       const { error: uploadError } = await supabase.storage.from("cms-media").upload(storagePath, croppedBlob);
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("cms-media").getPublicUrl(storagePath);
 
-      // Creiamo un record nel database per il ritaglio finale
       const { data: mediaData, error: dbError } = await supabase
         .from("media")
         .insert({
@@ -163,16 +143,14 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
           file_type: "image/jpeg",
           file_size: croppedBlob.size,
           storage_path: storagePath,
-          is_optimized: true, // Segnamo come ottimizzato/ritagliato
         })
         .select()
         .single();
 
       if (dbError) throw dbError;
 
-      // Restituiamo l'URL del RITAGLIO finale all'editor del blog
-      onSelectImage(mediaData.file_path, altText, null);
-      setOpen(false); // Chiude il dialog media
+      onSelectImage(mediaData.file_path, altText);
+      setOpen(false);
       setSelectedImage(null);
       setAltText("");
       toast({ title: "Applicato", description: "Immagine ritagliata inserita nel blog." });
@@ -223,14 +201,6 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
                           <Check className="h-8 w-8 text-verde-primary" />
                         </div>
                       )}
-                      {file.is_optimized && (
-                        <Badge
-                          variant="secondary"
-                          className="absolute top-1 right-1 text-[10px] px-1 py-0 bg-background/80"
-                        >
-                          <Check className="h-3 w-3" />
-                        </Badge>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -251,7 +221,7 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
               {uploading && (
                 <div className="flex items-center gap-2 mt-4 text-sm text-verde-primary">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Caricamento originale...</span>
+                  <span>Caricamento...</span>
                 </div>
               )}
             </div>
@@ -285,11 +255,10 @@ export const ImageDialog = ({ children, onSelectImage, aspectRatio = 16 / 9 }: I
           </div>
         )}
 
-        {/* Popup del ritagliatore al momento della selezione */}
         {imageToCrop && (
           <ImageCropper
             image={imageToCrop}
-            aspectRatio={aspectRatio} // <-- SOSTITUISCI 16/9 CON aspectRatio
+            aspectRatio={aspectRatio}
             onCropComplete={handleCropComplete}
             onCancel={() => setImageToCrop(null)}
           />

@@ -80,7 +80,7 @@ const BlogPreview = () => {
     button_link: "/microgreens",
     product_slugs: [] as string[],
   });
-  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; blurhash?: string; width?: number; height?: number; optimized_versions?: any }>>({});
+  const [productMediaMap, setProductMediaMap] = useState<Record<string, { file_path: string; width?: number; height?: number }>>({});
 
   useEffect(() => {
     if (authLoading) return;
@@ -198,18 +198,16 @@ const BlogPreview = () => {
             if (imageIds.length > 0) {
               const { data: mediaData } = await supabase
                 .from("media")
-                .select("id, file_path, blurhash, width, height, optimized_versions")
+                .select("id, file_path, width, height")
                 .in("id", imageIds);
               
               if (mediaData) {
-                const mediaMap: Record<string, any> = {};
+                const mediaMap: Record<string, { file_path: string; width?: number; height?: number }> = {};
                 mediaData.forEach(m => {
                   mediaMap[m.id] = {
                     file_path: m.file_path,
-                    blurhash: m.blurhash,
                     width: m.width,
                     height: m.height,
-                    optimized_versions: m.optimized_versions,
                   };
                 });
                 setProductMediaMap(mediaMap);
@@ -429,7 +427,7 @@ const BlogPreview = () => {
                   const imageId = product.image_id;
                   const mediaInfo = imageId && productMediaMap[imageId] ? productMediaMap[imageId] : null;
                   const productImage = mediaInfo?.file_path || "/placeholder.svg";
-                  const optimizedUrl = mediaInfo?.optimized_versions?.productCard?.url;
+                  
                   const gridDesc = product.grid_description;
                   
                   return (
