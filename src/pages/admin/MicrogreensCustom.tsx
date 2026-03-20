@@ -355,7 +355,8 @@ const AdminMicrogreensCustom = () => {
                 </div>
                 <div>
                   <Label>Immagine di sfondo</Label>
-                  <MediaSelector
+                   <MediaSelector
+                     aspectRatio={ASPECT_RATIOS.HERO}
                     value={heroSection?.content?.image_id || null}
                     onChange={(id) => updateSectionContent('hero', 'image_id', id)}
                   />
