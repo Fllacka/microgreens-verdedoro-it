@@ -68,8 +68,6 @@ interface Product {
   price_tiers?: PriceTier[];
   media?: {
     file_path: string;
-    optimized_versions?: Record<string, { url: string; width: number; height: number }> | null;
-    blurhash?: string | null;
     width?: number | null;
     height?: number | null;
   };
