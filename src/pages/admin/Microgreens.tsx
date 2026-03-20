@@ -309,6 +309,7 @@ const AdminMicrogreens = () => {
                       Se non viene impostata un'immagine, verrà utilizzato il gradiente predefinito.
                     </p>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.HERO}
                       value={heroSection?.content?.background_image_id || null}
                       onChange={(id) => updateSectionContent("hero", "background_image_id", id)}
                     />
