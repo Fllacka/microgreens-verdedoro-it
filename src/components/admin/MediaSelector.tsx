@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/image-utils";
+import { ImageCropper } from "./ImageCropper";
 
 interface MediaFile {
   id: string;
@@ -30,11 +31,11 @@ interface MediaSelectorProps {
   showAltText?: boolean;
 }
 
-export const MediaSelector = ({ 
-  value, 
-  onChange, 
-  altText = "", 
-  onAltTextChange, 
+export const MediaSelector = ({
+  value,
+  onChange,
+  altText = "",
+  onAltTextChange,
   showAltText = true,
 }: MediaSelectorProps) => {
   const [open, setOpen] = useState(false);
@@ -42,6 +43,8 @@ export const MediaSelector = ({
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<{ url: string; name: string } | null>(null);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -54,11 +57,7 @@ export const MediaSelector = ({
   const fetchSelectedImage = async () => {
     if (!value) return;
     try {
-      const { data, error } = await supabase
-        .from("media")
-        .select("file_path, file_name")
-        .eq("id", value)
-        .single();
+      const { data, error } = await supabase.from("media").select("file_path, file_name").eq("id", value).single();
 
       if (error) throw error;
       if (data) {
@@ -102,46 +101,43 @@ export const MediaSelector = ({
     setSelectedImage(null);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Errore",
-        description: "Seleziona un file immagine valido",
-        variant: "destructive",
-      });
-      return;
-    }
+    setOriginalFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!originalFile) return;
     setUploading(true);
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `uploads/${fileName}`;
+    setImageToCrop(null);
 
-      // Upload file directly - no compression
-      const { error: uploadError } = await supabase.storage
-        .from("cms-media")
-        .upload(filePath, file, {
-          cacheControl: '31536000',
-        });
+    try {
+      const fileExt = originalFile.name.split(".").pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage.from("cms-media").upload(filePath, croppedBlob);
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("cms-media")
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("cms-media").getPublicUrl(filePath);
 
-      // Save to database
       const { data: mediaData, error: dbError } = await supabase
         .from("media")
         .insert({
-          file_name: file.name,
-          file_path: urlData.publicUrl,
-          file_type: file.type,
-          file_size: file.size,
+          file_name: originalFile.name,
+          file_path: publicUrl,
+          file_type: originalFile.type,
+          file_size: croppedBlob.size,
           storage_path: filePath,
         })
         .select()
@@ -149,32 +145,15 @@ export const MediaSelector = ({
 
       if (dbError) throw dbError;
 
-      toast({
-        title: "Successo",
-        description: "Immagine caricata",
-      });
-
-      // Auto-select the uploaded image
-      if (mediaData) {
-        onChange(mediaData.id, mediaData.file_path);
-        setSelectedImage({ url: mediaData.file_path, name: mediaData.file_name });
-        setOpen(false);
-      }
+      onChange(mediaData.id, mediaData.file_path);
+      setSelectedImage({ url: mediaData.file_path, name: mediaData.file_name });
+      toast({ title: "Successo", description: "Immagine ritagliata e caricata." });
     } catch (error: any) {
-      console.error('[MediaSelector] Upload error:', error);
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
     }
   };
-
   const renderMediaGrid = () => (
     <>
       {loading ? (
@@ -191,19 +170,15 @@ export const MediaSelector = ({
               className="relative cursor-pointer group aspect-square rounded-lg overflow-hidden border hover:border-primary transition-colors"
               onClick={() => handleSelect(file)}
             >
-              <img
-                src={file.file_path}
-                alt={file.file_name}
-                className="w-full h-full object-cover"
-              />
-              
+              <img src={file.file_path} alt={file.file_name} className="w-full h-full object-cover" />
+
               {/* Selection indicator */}
               {value === file.id && (
                 <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
                   <Check className="h-8 w-8 text-primary" />
                 </div>
               )}
-              
+
               {/* Dimensions badge */}
               {file.width && file.height && (
                 <div className="absolute bottom-1 left-1">
@@ -223,9 +198,7 @@ export const MediaSelector = ({
     <div className="flex flex-col items-center justify-center py-12 space-y-4">
       <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
         <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-        <p className="text-sm text-muted-foreground mb-4">
-          Clicca per selezionare un'immagine o trascinala qui
-        </p>
+        <p className="text-sm text-muted-foreground mb-4">Clicca per selezionare un'immagine o trascinala qui</p>
         <input
           ref={fileInputRef}
           type="file"
@@ -234,11 +207,7 @@ export const MediaSelector = ({
           className="hidden"
           id="media-upload"
         />
-        <Button
-          variant="outline"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-        >
+        <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
           {uploading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -260,13 +229,9 @@ export const MediaSelector = ({
       {selectedImage ? (
         <div className="space-y-4">
           <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border">
-            <img
-              src={selectedImage.url}
-              alt={altText || selectedImage.name}
-              className="w-full h-full object-cover"
-            />
+            <img src={selectedImage.url} alt={altText || selectedImage.name} className="w-full h-full object-cover" />
           </div>
-          
+
           {showAltText && onAltTextChange && (
             <div className="space-y-2 max-w-md">
               <Label htmlFor="image-alt">Testo alternativo (Alt Text)</Label>
@@ -281,7 +246,7 @@ export const MediaSelector = ({
               </p>
             </div>
           )}
-          
+
           <div className="flex gap-2">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
@@ -300,13 +265,9 @@ export const MediaSelector = ({
                     <TabsTrigger value="upload">Carica Nuova</TabsTrigger>
                   </TabsList>
                   <TabsContent value="library">
-                    <ScrollArea className="h-[55vh]">
-                      {renderMediaGrid()}
-                    </ScrollArea>
+                    <ScrollArea className="h-[55vh]">{renderMediaGrid()}</ScrollArea>
                   </TabsContent>
-                  <TabsContent value="upload">
-                    {renderUploadTab()}
-                  </TabsContent>
+                  <TabsContent value="upload">{renderUploadTab()}</TabsContent>
                 </Tabs>
               </DialogContent>
             </Dialog>
@@ -335,16 +296,20 @@ export const MediaSelector = ({
                 <TabsTrigger value="upload">Carica Nuova</TabsTrigger>
               </TabsList>
               <TabsContent value="library">
-                <ScrollArea className="h-[55vh]">
-                  {renderMediaGrid()}
-                </ScrollArea>
+                <ScrollArea className="h-[55vh]">{renderMediaGrid()}</ScrollArea>
               </TabsContent>
-              <TabsContent value="upload">
-                {renderUploadTab()}
-              </TabsContent>
+              <TabsContent value="upload">{renderUploadTab()}</TabsContent>
             </Tabs>
           </DialogContent>
         </Dialog>
+      )}
+      {imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          aspectRatio={aspectRatio || 1}
+          onCropComplete={handleCropComplete}
+          onCancel={() => setImageToCrop(null)}
+        />
       )}
     </div>
   );
