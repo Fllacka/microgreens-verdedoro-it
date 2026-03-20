@@ -362,7 +362,6 @@ export type Database = {
       media: {
         Row: {
           alt_text: string | null
-          blurhash: string | null
           created_at: string | null
           file_name: string
           file_path: string
@@ -371,9 +370,6 @@ export type Database = {
           height: number | null
           id: string
           is_hero: boolean | null
-          is_optimized: boolean | null
-          optimized_urls: Json | null
-          optimized_versions: Json | null
           storage_path: string
           updated_at: string | null
           uploaded_by: string | null
@@ -381,7 +377,6 @@ export type Database = {
         }
         Insert: {
           alt_text?: string | null
-          blurhash?: string | null
           created_at?: string | null
           file_name: string
           file_path: string
@@ -390,9 +385,6 @@ export type Database = {
           height?: number | null
           id?: string
           is_hero?: boolean | null
-          is_optimized?: boolean | null
-          optimized_urls?: Json | null
-          optimized_versions?: Json | null
           storage_path: string
           updated_at?: string | null
           uploaded_by?: string | null
@@ -400,7 +392,6 @@ export type Database = {
         }
         Update: {
           alt_text?: string | null
-          blurhash?: string | null
           created_at?: string | null
           file_name?: string
           file_path?: string
@@ -409,9 +400,6 @@ export type Database = {
           height?: number | null
           id?: string
           is_hero?: boolean | null
-          is_optimized?: boolean | null
-          optimized_urls?: Json | null
-          optimized_versions?: Json | null
           storage_path?: string
           updated_at?: string | null
           uploaded_by?: string | null
