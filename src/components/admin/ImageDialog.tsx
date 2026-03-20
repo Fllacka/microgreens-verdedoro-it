@@ -42,7 +42,28 @@ export const ImageDialog = ({ children, onSelectImage }: ImageDialogProps) => {
   const [uploading, setUploading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
   const [altText, setAltText] = useState("");
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const processImage = async (mediaId: string, storagePath: string) => {
+    setProcessingId(mediaId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await supabase.functions.invoke("process-image", {
+        body: { mediaId, storagePath },
+      });
+
+      if (res.error) {
+        console.error("Process image error:", res.error);
+      }
+    } catch (err: any) {
+      console.error("Process image error:", err);
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   useEffect(() => {
     if (open) {
