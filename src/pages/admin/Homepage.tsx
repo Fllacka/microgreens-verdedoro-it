@@ -419,6 +419,7 @@ const Homepage = () => {
                   <div>
                     <Label>Immagine di Sfondo</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.HERO}
                       value={sections.hero.content.background_image_id}
                       onChange={(id, url) => {
                         updateSectionContent("hero", "background_image_id", id);
