@@ -474,6 +474,7 @@ const Homepage = () => {
                   <div>
                     <Label>Immagine Sezione</Label>
                     <MediaSelector
+                      aspectRatio={ASPECT_RATIOS.SECTION}
                       value={sections.what_are_microgreens.content.image_id}
                       onChange={(id, url) => {
                         updateSectionContent("what_are_microgreens", "image_id", id);
