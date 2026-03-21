@@ -148,10 +148,6 @@
     background: var(--gradient-hero);
   }
 
-  .bg-gradient-hero-transparent {
-    background: var(--gradient-hero-transparent);
-  }
-
   .bg-gradient-subtle {
     background: var(--gradient-subtle);
   }
